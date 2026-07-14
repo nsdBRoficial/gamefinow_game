@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Ubuntu", ui-sans-serif, system-ui, sans-serif;
+  --font-pixel: "Press Start 2P", "Silkscreen", monospace;
+  --font-mono: "Silkscreen", monospace;
+}
+
+/* Classic Tibia retro font shadow */
+.tibia-shadow-text {
+  text-shadow: 2px 2px 0px #000;
+}
+
+.tibia-shadow-text-white {
+  text-shadow: 1.5px 1.5px 0px #fff;
+}
+
+/* Custom Webkit scrollbar for a classic Tibia fantasy feel */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: #3a3734;
+  border-left: 2px solid #1a1917;
+  border-top: 2px solid #1a1917;
+}
+::-webkit-scrollbar-thumb {
+  background: #8e7a52;
+  border: 2px solid #1a1917;
+  box-shadow: inset -2px -2px 0px rgba(0,0,0,0.4), inset 2px 2px 0px rgba(255,255,255,0.15);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #aa9468;
+}
+
+/* Smooth active translations for pixel buttons */
+.tibia-btn-active:active {
+  transform: translateY(2px);
+  box-shadow: none !important;
+}
+
