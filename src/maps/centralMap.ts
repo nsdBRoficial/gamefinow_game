@@ -92,10 +92,6 @@ export function generateCentralMap(): number[][] {
   grid[GRID_ROWS - 2][29] = TileType.PORTAL_SOUTH;
   grid[GRID_ROWS - 2][30] = TileType.PORTAL_SOUTH;
 
-  // New portals at sqm 59,29 and 59,30 leading to the East Biome
-  grid[59][29] = TileType.PORTAL_EAST;
-  grid[59][30] = TileType.PORTAL_EAST;
-
   return grid;
 }
 
