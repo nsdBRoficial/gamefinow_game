@@ -7,7 +7,8 @@ import React, { useState, useEffect } from "react";
 import { GameCanvas } from "./components/GameCanvas";
 import { GameOverlay } from "./components/GameOverlay";
 import { FloatingWindows } from "./components/FloatingWindows";
-import { GameState, Player, NPC, Transaction, QuestId, Quest } from "./types";
+import { LoginScreen } from "./components/LoginScreen";
+import { GameState, Player, NPC, Transaction, QuestId, Quest, WalletState } from "./types";
 import { INITIAL_QUESTS, INITIAL_NPCS } from "./gameData";
 import { 
   Rocket, 
@@ -23,56 +24,197 @@ import {
   ArrowLeft,
   ArrowDown,
   ArrowRight,
-  Compass
+  Compass,
+  Eye,
+  EyeOff
 } from "lucide-react";
 
 export default function App() {
-  const [gameState, setGameState] = useState<GameState>({
-    wallet: {
-      hasWallet: false,
-      publicKey: "",
-      secretKey: "",
-      xlmBalance: 0,
-      usdcBalance: 0,
-      soroBalance: 0,
-      isLocked: false,
-      lockedAmount: 0,
-    },
-    quests: INITIAL_QUESTS,
-    transactions: [],
-    activeDialog: null,
-    activeModal: null,
-    currentLedger: 6184293, // A high starting sequence number
+  const [gameState, setGameState] = useState<GameState>(() => {
+    try {
+      const saved = localStorage.getItem("stellar_island_game_state_v1");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.quests && parsed.wallet) {
+          // Reset dialogue/modal popups on refresh to ensure a clean UI load
+          // and ensure saved wallet is backwards-compatible with new fields
+          return {
+            ...parsed,
+            wallet: {
+              name: "",
+              email: "",
+              usdwBalance: 0,
+              brwBalance: 0,
+              vaultXlm: 0,
+              vaultUsdw: 0,
+              vaultBrw: 0,
+              poolXlmUsdw: 0,
+              poolUsdwBrw: 0,
+              ...parsed.wallet,
+            },
+            activeDialog: null,
+            activeModal: null,
+          };
+        }
+      }
+    } catch (err) {
+      console.warn("Could not load gameState from localStorage", err);
+    }
+    return {
+      wallet: {
+        hasWallet: false,
+        publicKey: "",
+        secretKey: "",
+        xlmBalance: 0,
+        usdcBalance: 0,
+        soroBalance: 0,
+        isLocked: false,
+        lockedAmount: 0,
+        name: "",
+        email: "",
+        usdwBalance: 0,
+        brwBalance: 0,
+        vaultXlm: 0,
+        vaultUsdw: 0,
+        vaultBrw: 0,
+        poolXlmUsdw: 0,
+        poolUsdwBrw: 0,
+      },
+      quests: INITIAL_QUESTS,
+      transactions: [],
+      activeDialog: null,
+      activeModal: null,
+      currentLedger: 6184293,
+    };
   });
 
-  const [playerPos, setPlayerPos] = useState<Player>({
-    x: 30,
-    y: 31,
-    targetX: 30,
-    targetY: 31,
-    dir: "down",
-    isMoving: false,
-    frame: 0,
-    headColor: "#fcd34d",
-    torsoColor: "#ef4444",
-    legsColor: "#2563eb",
-    shoesColor: "#1e293b",
-    headType: "square",
-    torsoType: "plain",
-    shoesType: "sneakers",
-    skinColor: "#ffdbac",
-    faceType: "smile",
-    accessoryType: "backpack",
-    name: "Viajante",
+  const [playerPos, setPlayerPos] = useState<Player>(() => {
+    try {
+      const saved = localStorage.getItem("stellar_island_player_pos_v1");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed.x === "number") {
+          return {
+            ...parsed,
+            targetX: parsed.x,
+            targetY: parsed.y,
+            isMoving: false,
+            frame: 0,
+          };
+        }
+      }
+    } catch (err) {
+      console.warn("Could not load playerPos from localStorage", err);
+    }
+    return {
+      x: 30,
+      y: 31,
+      targetX: 30,
+      targetY: 31,
+      dir: "down",
+      isMoving: false,
+      frame: 0,
+      headColor: "#fcd34d",
+      torsoColor: "#ef4444",
+      legsColor: "#2563eb",
+      shoesColor: "#1e293b",
+      headType: "square",
+      torsoType: "plain",
+      shoesType: "sneakers",
+      skinColor: "#ffdbac",
+      faceType: "smile",
+      accessoryType: "backpack",
+      name: "Anonymo",
+    };
   });
+
+  // Sync gameState and playerPos changes to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameState));
+    } catch (err) {
+      console.warn("Could not save gameState to localStorage", err);
+    }
+  }, [gameState]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("stellar_island_player_pos_v1", JSON.stringify(playerPos));
+    } catch (err) {
+      console.warn("Could not save playerPos to localStorage", err);
+    }
+  }, [playerPos]);
 
   const [npcs] = useState<NPC[]>(INITIAL_NPCS);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   
   // Handle active retro floating window overlays: "customizer" | "backpack" | "ledger" | "guide" | null
   const [activeWindow, setActiveWindow] = useState<"customizer" | "backpack" | "ledger" | "guide" | null>(null);
   const [showPassport, setShowPassport] = useState(false);
   const [passportTab, setPassportTab] = useState<"attributes" | "credentials">("attributes");
+  const [passportSecVisible, setPassportSecVisible] = useState(false);
+
+  const handleResetAndNewCharacter = () => {
+    try {
+      localStorage.removeItem("stellar_island_game_state_v1");
+      localStorage.removeItem("stellar_island_player_pos_v1");
+    } catch (e) {
+      console.warn("Could not clean localStorage", e);
+    }
+    
+    // Reset player position to center
+    setPlayerPos({
+      x: 30,
+      y: 31,
+      targetX: 30,
+      targetY: 31,
+      dir: "down",
+      isMoving: false,
+      frame: 0,
+      headColor: "#fcd34d",
+      torsoColor: "#ef4444",
+      legsColor: "#2563eb",
+      shoesColor: "#1e293b",
+      headType: "square",
+      torsoType: "plain",
+      shoesType: "sneakers",
+      skinColor: "#ffdbac",
+      faceType: "smile",
+      accessoryType: "backpack",
+      name: "Anonymo",
+    });
+
+    // Reset game state
+    setGameState({
+      wallet: {
+        hasWallet: false,
+        publicKey: "",
+        secretKey: "",
+        xlmBalance: 0,
+        usdcBalance: 0,
+        soroBalance: 0,
+        isLocked: false,
+        lockedAmount: 0,
+        name: "",
+        email: "",
+        usdwBalance: 0,
+        brwBalance: 0,
+        vaultXlm: 0,
+        vaultUsdw: 0,
+        vaultBrw: 0,
+        poolXlmUsdw: 0,
+        poolUsdwBrw: 0,
+      },
+      quests: INITIAL_QUESTS,
+      transactions: [],
+      activeDialog: null,
+      activeModal: null,
+      currentLedger: 6184293,
+    });
+    
+    setIsLoggedIn(false);
+  };
 
   const handleTeleportToCenter = () => {
     playSynthSound("unlock");
@@ -88,7 +230,7 @@ export default function App() {
   };
 
   // Is the player near any smart terminal?
-  const [isNearTerminal, setIsNearTerminal] = useState<"wallet" | "onramp" | "soroban" | "hold" | null>(null);
+  const [isNearTerminal, setIsNearTerminal] = useState<"wallet" | "onramp" | "soroban" | "hold" | "atf" | null>(null);
 
   // Simulate periodic Stellar Ledger sequence increments (Consensus in 5 seconds)
   useEffect(() => {
@@ -236,17 +378,35 @@ export default function App() {
     }
   };
 
-  const handleWalletCreated = (pubKey: string, secKey: string) => {
+  const handleUpdateWallet = (updatedWalletFields: Partial<WalletState>, newTx?: Transaction) => {
+    setGameState((prev) => {
+      const nextWallet = {
+        ...prev.wallet,
+        ...updatedWalletFields,
+      };
+      return {
+        ...prev,
+        wallet: nextWallet,
+        transactions: newTx ? [newTx, ...prev.transactions] : prev.transactions,
+      };
+    });
+  };
+
+  const handleWalletCreated = (pubKey: string, secKey: string, name: string, email: string, pin: string) => {
     playSynthSound("success");
+    setPlayerPos((prev) => ({
+      ...prev,
+      name: name,
+    }));
     setGameState((prev) => {
       const newTx: Transaction = {
         id: generateTxHash(),
         type: "CREATE_ACCOUNT",
         timestamp: new Date().toLocaleTimeString(),
-        amount: "0",
+        amount: "100",
         asset: "XLM",
         fee: "0.00001",
-        memo: "Forja de Conta Estelar",
+        memo: `WalletNow Onboarding (${email})`,
         ledgerSequence: prev.currentLedger,
       };
 
@@ -261,7 +421,14 @@ export default function App() {
           hasWallet: true,
           publicKey: pubKey,
           secretKey: secKey,
-          xlmBalance: 0,
+          name: name,
+          email: email,
+          pin: pin,
+          xlmBalance: 100, // 100 XLM from WalletNow Testnet Kit
+          usdwBalance: 50,  // 50 USDW
+          brwBalance: 250,  // 250 BRW
+          usdcBalance: 0,
+          soroBalance: 0,
         },
         quests: updatedQuests,
         transactions: [newTx, ...prev.transactions],
@@ -299,18 +466,23 @@ export default function App() {
     });
   };
 
-  const handleSwapSuccess = (xlmSpent: number, usdcGained: number, soroGained: number) => {
+  const handleSwapSuccess = (fromAsset: "XLM" | "USDW" | "BRW", toAsset: "XLM" | "USDW" | "BRW", amountFrom: number, amountTo: number) => {
     playSynthSound("success");
     setGameState((prev) => {
-      const isUsdc = usdcGained > 0;
+      const fromField = fromAsset === "XLM" ? "xlmBalance" : fromAsset === "USDW" ? "usdwBalance" : "brwBalance";
+      const toField = toAsset === "XLM" ? "xlmBalance" : toAsset === "USDW" ? "usdwBalance" : "brwBalance";
+
+      const currentFrom = prev.wallet[fromField] || 0;
+      const currentTo = prev.wallet[toField] || 0;
+
       const newTx: Transaction = {
         id: generateTxHash(),
         type: "SWAP_SOROBAN",
         timestamp: new Date().toLocaleTimeString(),
-        amount: isUsdc ? usdcGained.toString() : soroGained.toString(),
-        asset: isUsdc ? "USDC" : "SORO",
+        amount: amountTo.toString(),
+        asset: toAsset,
         fee: "0.00009",
-        memo: `Swap Soroban Smart Contract`,
+        memo: `Swap Soroban AMM: ${amountFrom} ${fromAsset} → ${amountTo} ${toAsset}`,
         ledgerSequence: prev.currentLedger,
       };
 
@@ -322,9 +494,8 @@ export default function App() {
         ...prev,
         wallet: {
           ...prev.wallet,
-          xlmBalance: prev.wallet.xlmBalance - xlmSpent,
-          usdcBalance: prev.wallet.usdcBalance + usdcGained,
-          soroBalance: prev.wallet.soroBalance + soroGained,
+          [fromField]: Math.max(0, currentFrom - amountFrom),
+          [toField]: currentTo + amountTo,
         },
         quests: updatedQuests,
         transactions: [newTx, ...prev.transactions],
@@ -332,20 +503,9 @@ export default function App() {
     });
   };
 
-  const handleHoldSuccess = (xlmLocked: number, durationMonths: number) => {
+  const handleHoldSuccess = (asset: "XLM" | "USDW" | "BRW", amount: number, updatedFields: Partial<WalletState>, tx: Transaction) => {
     playSynthSound("success");
     setGameState((prev) => {
-      const newTx: Transaction = {
-        id: generateTxHash(),
-        type: "LOCK_HOLD",
-        timestamp: new Date().toLocaleTimeString(),
-        amount: xlmLocked.toString(),
-        asset: "XLM",
-        fee: "0.00005",
-        memo: `Escrow Lock ${durationMonths} Meses`,
-        ledgerSequence: prev.currentLedger,
-      };
-
       const updatedQuests = { ...prev.quests };
       updatedQuests.hold.status = "completed";
 
@@ -353,12 +513,12 @@ export default function App() {
         ...prev,
         wallet: {
           ...prev.wallet,
-          xlmBalance: prev.wallet.xlmBalance - xlmLocked,
+          ...updatedFields,
           isLocked: true,
-          lockedAmount: xlmLocked,
+          lockedAmount: (prev.wallet.lockedAmount || 0) + (asset === "XLM" ? amount : 0),
         },
         quests: updatedQuests,
-        transactions: [newTx, ...prev.transactions],
+        transactions: [tx, ...prev.transactions],
       };
     });
   };
@@ -414,12 +574,24 @@ export default function App() {
   const currentActiveQuest = activeQuestsArray.find(q => q.status === "active") || activeQuestsArray[activeQuestsArray.length - 1];
   const isCompletedAll = gameState.quests.hold.status === "completed";
 
+  const getFormattedName = () => {
+    let base = playerPos.name || "Anonymo";
+    if (gameState.quests.wallet.status === "completed" && gameState.wallet.publicKey) {
+      const last4 = gameState.wallet.publicKey.slice(-4);
+      base += ` [${last4}]`;
+    }
+    if (gameState.quests.hold.status === "completed") {
+      base = `⭐ ${base}`;
+    }
+    return base;
+  };
+
   // Helper to determine region of a coordinate
   const getRegionName = (x: number, y: number): string => {
     const roundedX = Math.round(x);
     const roundedY = Math.round(y);
     if (roundedX >= 48 && roundedX <= 59 && roundedY >= 10 && roundedY <= 50) {
-      return "Templo de Thais (Forja de Chaves)";
+      return "Templo Stellar (Forja de Chaves)";
     }
     if (roundedX >= 1 && roundedX <= 12 && roundedY >= 10 && roundedY <= 50) {
       return "Plataforma de Trocas Soroban";
@@ -431,7 +603,7 @@ export default function App() {
       return "Câmara de Custódia de Ouro";
     }
     if (roundedX >= 18 && roundedX <= 42 && roundedY >= 18 && roundedY <= 42) {
-      return "Praça Central de Thais";
+      return "Praça Central Stellar";
     }
     if (((roundedY === 29 || roundedY === 30) && roundedX >= 13 && roundedX <= 47) ||
         ((roundedX === 29 || roundedX === 30) && roundedY >= 13 && roundedY <= 47)) {
@@ -455,6 +627,28 @@ export default function App() {
   const attrAgi = 11 + completedCount * 2;
   const attrRes = 10 + completedCount * 4;
   const attrFaith = gameState.wallet.hasWallet ? 20 + completedCount * 12 : 0;
+
+  const isMovementBlocked = !!gameState.activeModal || !!gameState.activeDialog || !!activeWindow || showPassport;
+
+  if (!isLoggedIn) {
+    return (
+      <LoginScreen
+        existingWallet={gameState.wallet}
+        existingPlayerName={playerPos.name}
+        onLogin={(name) => {
+          setPlayerPos((prev) => ({ ...prev, name }));
+          playSynthSound("success");
+          setIsLoggedIn(true);
+        }}
+        onPasskeyLogin={() => {
+          playSynthSound("success");
+          setIsLoggedIn(true);
+        }}
+        onResetCharacter={handleResetAndNewCharacter}
+        playSynthSound={playSynthSound}
+      />
+    );
+  }
 
   return (
     <div className="w-screen h-screen bg-[#0c0d0e] flex flex-col selection:bg-[#ffc600] selection:text-black font-sans relative overflow-hidden select-none">
@@ -558,23 +752,23 @@ export default function App() {
               {/* XLM Balance */}
               <span 
                 className="bg-[#ffe494] border-2 border-black px-2 py-1 md:px-2 md:py-1 rounded-lg flex items-center gap-1 font-black text-amber-950 text-[11.5px] md:text-[12px] shadow-[1.5px_1.5px_0px_#000]"
-                title="Crystal Shards (XLM) - Usado para pagar taxas de transação."
+                title="Crystal Shards (XLM) - Usado para taxas de transação."
               >
                 🪙 <span className="font-mono text-[11.5px] md:text-[12.5px]">{gameState.wallet.xlmBalance}</span> <span className="text-[9.5px] font-sans font-black opacity-85">XLM</span>
               </span>
-              {/* USDC Balance */}
-              <span 
-                className="bg-[#fccadc] border-2 border-black px-2 py-1 md:px-2 md:py-1 rounded-lg flex items-center gap-1 font-black text-pink-950 text-[11.5px] md:text-[12px] shadow-[1.5px_1.5px_0px_#000]"
-                title="Platinum Coins (USDC) - Moeda de valor estável."
-              >
-                💎 <span className="font-mono text-[11.5px] md:text-[12.5px]">{gameState.wallet.usdcBalance}</span> <span className="text-[9.5px] font-sans font-black opacity-85">USDC</span>
-              </span>
-              {/* SORO Balance */}
+              {/* USDW Balance */}
               <span 
                 className="bg-[#c2f0fc] border-2 border-black px-2 py-1 md:px-2 md:py-1 rounded-lg flex items-center gap-1 font-black text-cyan-950 text-[11.5px] md:text-[12px] shadow-[1.5px_1.5px_0px_#000]"
-                title="Soroban Swap Tokens (SORO) - Conquistados resolvendo o quebra-cabeça de swaps."
+                title="Stellar Anchored Dollar (USDW) - Moeda de valor estável USD."
               >
-                ♦ <span className="font-mono text-[11.5px] md:text-[12.5px]">{gameState.wallet.soroBalance}</span> <span className="text-[9.5px] font-sans font-black opacity-85">SORO</span>
+                💵 <span className="font-mono text-[11.5px] md:text-[12.5px]">{gameState.wallet.usdwBalance}</span> <span className="text-[9.5px] font-sans font-black opacity-85">USDW</span>
+              </span>
+              {/* BRW Balance */}
+              <span 
+                className="bg-[#c2fcc9] border-2 border-black px-2 py-1 md:px-2 md:py-1 rounded-lg flex items-center gap-1 font-black text-emerald-950 text-[11.5px] md:text-[12px] shadow-[1.5px_1.5px_0px_#000]"
+                title="Stellar Anchored Real (BRW) - Moeda pareada ao Real Brasileiro."
+              >
+                🇧🇷 <span className="font-mono text-[11.5px] md:text-[12.5px]">{gameState.wallet.brwBalance}</span> <span className="text-[9.5px] font-sans font-black opacity-85">BRW</span>
               </span>
             </div>
             
@@ -629,6 +823,21 @@ export default function App() {
             <span className="text-xl md:text-lg">🛡️</span>
           </button>
 
+          {/* New Character / Reset Sandbox button */}
+          <button
+            onClick={() => {
+              playSynthSound("unlock");
+              handleResetAndNewCharacter();
+            }}
+            className="w-11 h-11 md:w-9 md:h-9 bg-red-600 hover:bg-red-500 border-2 border-black rounded-lg flex items-center justify-center shadow-[2px_2.5px_0px_#000] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer transition group relative"
+            title="Novo Personagem (Resetar Tudo)"
+          >
+            <span className="text-xl md:text-lg">✨</span>
+            <span className="absolute left-13 bg-black text-white text-[8px] uppercase tracking-wider px-2 py-1 rounded border border-white/20 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 font-mono">
+              Novo Personagem (Resetar Tudo)
+            </span>
+          </button>
+
         </div>
 
         {/* 3. RIGHT SIDEBARHUD - MINIMAP COMPASS & TAB CONTROLS */}
@@ -648,7 +857,7 @@ export default function App() {
               <div className="absolute w-1.5 h-1.5 md:w-1 md:h-1 rounded-full bg-cyan-400" />
             </div>
             
-            {/* Coordinates tag (matching Tibia image layout) */}
+            {/* Coordinates tag (matching HUD layout) */}
             <div className="absolute -bottom-2 bg-black/95 border-2 border-[#8b5a2b] px-1.5 py-0.5 rounded text-[8.5px] md:text-[7.5px] text-amber-200 font-mono font-black tracking-tight shadow-[1px_1.5px_0px_#000] whitespace-nowrap">
               X:{Math.round(playerPos.x)} Y:{Math.round(playerPos.y)}
             </div>
@@ -716,13 +925,19 @@ export default function App() {
         </div>
 
         {/* 4. CHRONICLES ACTIVE QUEST FLOATING CARD OVERLAY */}
-        <div className="absolute top-26 md:top-20 left-1/2 -translate-x-1/2 z-10 bg-[#fbf5eb]/95 border-2 border-black rounded-lg p-2.5 max-w-[240px] md:max-w-[210px] shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] text-[10px] md:text-[9px] leading-snug font-mono select-none pointer-events-none text-left">
-          <div className="flex items-center gap-1">
+        <div className="absolute top-26 md:top-20 left-[62px] md:left-[54px] z-10 bg-[#fbf5eb]/95 border-2 border-black rounded-lg p-2.5 w-[260px] sm:w-[380px] md:w-[480px] shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] text-[10px] md:text-[9.5px] leading-snug font-mono select-none pointer-events-none text-left">
+          <div className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 bg-[#ffbf00] rounded-full animate-ping" />
             <span className="text-[8px] md:text-[7.5px] text-amber-800 font-extrabold uppercase tracking-wider">Missão Ativa</span>
           </div>
-          <span className="text-black font-black block leading-tight text-[11px] md:text-[10px] uppercase mt-0.5">{currentActiveQuest?.title}</span>
-          <span className="text-slate-600 text-[9.5px] md:text-[8.5px] block mt-0.5 leading-snug">{currentActiveQuest?.description}</span>
+          <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2 mt-0.5">
+            <span className="text-black font-black block leading-tight text-[11.5px] md:text-[10.5px] uppercase shrink-0">
+              {currentActiveQuest?.title}
+            </span>
+            <span className="text-slate-600 text-[10px] md:text-[9px] block leading-snug sm:border-l sm:border-black/15 sm:pl-2">
+              {currentActiveQuest?.description}
+            </span>
+          </div>
         </div>
 
         {/* 5. TRAVELER LENDÁRIO CELEBRATION RIBBON */}
@@ -744,6 +959,7 @@ export default function App() {
               setIsNearTerminal(type);
               playSynthSound("beep");
             }}
+            isMovementBlocked={isMovementBlocked}
           />
         </div>
 
@@ -751,24 +967,24 @@ export default function App() {
         {gameState.activeDialog && (
           <div 
             onClick={handleAdvanceDialog}
-            className="absolute bottom-4 left-4 right-4 bg-white text-black border-[3px] border-black rounded-[14px] shadow-[3px_3.5px_0px_rgba(0,0,0,1)] p-3 flex items-start gap-3 cursor-pointer select-none z-30 animate-in slide-in-from-bottom duration-150"
+            className="absolute bottom-6 left-6 right-6 md:bottom-8 md:left-8 md:right-8 bg-[#faf9f5] text-black border-[3.5px] border-black rounded-[16px] shadow-[4px_5px_0px_rgba(0,0,0,1)] p-5 md:p-6 flex items-start gap-4 md:gap-5 cursor-pointer select-none z-30 animate-in slide-in-from-bottom duration-150"
           >
-            <div className="w-11 h-11 bg-[#ece9df] border-2 border-black rounded-lg flex items-center justify-center text-2xl shrink-0 shadow-[1px_1px_0px_rgba(0,0,0,1)]">
+            <div className="w-14 h-14 md:w-16 md:h-16 bg-[#ece9df] border-3 border-black rounded-xl flex items-center justify-center text-3xl md:text-4xl shrink-0 shadow-[1.5px_1.5px_0px_rgba(0,0,0,1)]">
               {gameState.activeDialog.npcId === "guide" ? "🤵" :
                gameState.activeDialog.npcId === "keymaster" ? "💎" :
                gameState.activeDialog.npcId === "portmaster" ? "👑" :
                gameState.activeDialog.npcId === "scholar" ? "🔮" : "🧙‍♂️"}
             </div>
-            <div className="flex-1 space-y-0.5 text-left">
-              <div className="bg-[#ffbf00] border-2 border-black rounded-md px-1.5 py-0.5 font-bold text-[8.5px] uppercase font-mono tracking-wider text-black inline-block shadow-[1px_1px_0px_rgba(0,0,0,1)]">
+            <div className="flex-1 space-y-1.5 text-left">
+              <div className="bg-[#ffbf00] border-2 border-black rounded-md px-2 py-0.5 font-black text-[10px] md:text-xs uppercase font-mono tracking-wider text-black inline-block shadow-[1px_1px_0px_rgba(0,0,0,1)]">
                 {gameState.activeDialog.npcName}
               </div>
-              <p className="text-xs font-semibold leading-normal text-black/90">
+              <p className="text-sm sm:text-base md:text-lg font-bold leading-relaxed text-slate-900">
                 "{gameState.activeDialog.text[gameState.activeDialog.currentStep]}"
               </p>
-              <div className="flex justify-between items-center pt-1.5 text-[8px] text-slate-500 font-mono border-t border-dashed border-black/15">
+              <div className="flex justify-between items-center pt-2 text-[9px] md:text-xs text-slate-600 font-mono border-t border-dashed border-black/20">
                 <span>Pressione [ESPAÇO / ENTER] ou toque para avançar.</span>
-                <span className="bg-[#ece9df] px-1 py-0.5 rounded border border-black/10 text-black font-bold">
+                <span className="bg-[#ece9df] px-1.5 py-0.5 rounded border border-black/15 text-black font-bold">
                   {gameState.activeDialog.currentStep + 1} / {gameState.activeDialog.text.length}
                 </span>
               </div>
@@ -940,8 +1156,18 @@ export default function App() {
                       
                       {/* Name and class info */}
                       <div className="space-y-0.5 flex-1 min-w-0">
-                        <span className="text-[10px] font-black uppercase text-slate-800 tracking-tight leading-none block">
-                          {playerPos.name}
+                        <span className={`text-[10px] font-black uppercase tracking-tight leading-none block ${
+                          gameState.quests.hold.status === "completed"
+                            ? "text-amber-600 drop-shadow-[0_0_2px_rgba(217,119,6,0.3)]"
+                            : gameState.quests.soroban.status === "completed"
+                            ? "text-purple-600 drop-shadow-[0_0_2px_rgba(147,51,234,0.3)]"
+                            : gameState.quests.onramp.status === "completed"
+                            ? "text-green-600 drop-shadow-[0_0_2px_rgba(22,163,74,0.3)]"
+                            : gameState.quests.wallet.status === "completed"
+                            ? "text-cyan-600 drop-shadow-[0_0_2px_rgba(8,145,178,0.3)]"
+                            : "text-slate-800"
+                        }`}>
+                          {getFormattedName()}
                         </span>
                         <span className="text-[8.5px] font-bold text-amber-800 leading-none block uppercase">
                           Lvl {completedCount + 1} | {playerTitle}
@@ -1023,9 +1249,22 @@ export default function App() {
                       <div>
                         <span className="text-[8px] text-slate-500 block uppercase font-bold">Chave Privada Secreta (Seed)</span>
                         <div className="flex gap-1.5 mt-1">
-                          <span className="text-[8.5px] bg-red-50 text-red-900 border border-red-200 px-2 py-1.5 rounded flex-1 select-all break-all overflow-hidden font-bold leading-tight">
-                            {gameState.wallet.secretKey}
+                          <span className="text-[8.5px] bg-red-50 text-red-900 border border-red-200 px-2 py-1.5 rounded flex-1 select-all break-all overflow-hidden font-bold leading-tight flex items-center min-w-0">
+                            <span className="truncate flex-1">
+                              {passportSecVisible ? gameState.wallet.secretKey : "S" + "•".repeat(55)}
+                            </span>
                           </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPassportSecVisible(!passportSecVisible);
+                              playSynthSound("beep");
+                            }}
+                            className="bg-white hover:bg-[#fbf5eb] border-2 border-black rounded px-1.5 flex items-center justify-center cursor-pointer shadow-[1.5px_1.5px_0_#000] active:translate-y-0.5 active:shadow-none"
+                            title={passportSecVisible ? "Ocultar Chave" : "Mostrar Chave"}
+                          >
+                            {passportSecVisible ? <EyeOff className="h-3 w-3 text-slate-600" /> : <Eye className="h-3 w-3 text-slate-600" />}
+                          </button>
                           <button
                             onClick={() => {
                               navigator.clipboard.writeText(gameState.wallet.secretKey);
@@ -1039,8 +1278,25 @@ export default function App() {
                         </div>
                       </div>
                     )}
+
+                    {gameState.wallet.hasWallet && (
+                      <div className="grid grid-cols-2 gap-2 border-t border-black/10 pt-2 mt-2 bg-white/40 p-2 rounded">
+                        <div>
+                          <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Nome do Perfil</span>
+                          <span className="text-[9.5px] text-slate-900 font-extrabold leading-tight block mt-0.5">{gameState.wallet.name || "Sem Nome"}</span>
+                        </div>
+                        <div>
+                          <span className="text-[7.5px] text-slate-500 block uppercase font-bold">E-mail SDK</span>
+                          <span className="text-[9.5px] text-slate-900 font-extrabold leading-tight block mt-0.5 truncate" title={gameState.wallet.email}>{gameState.wallet.email || "Sem E-mail"}</span>
+                        </div>
+                        <div className="col-span-2 mt-1">
+                          <span className="text-[7.5px] text-slate-500 block uppercase font-bold">Senha PIN</span>
+                          <span className="text-[10.5px] font-mono font-extrabold text-orange-800 tracking-wider leading-none block mt-0.5">🔑 {gameState.wallet.pin || "------"}</span>
+                        </div>
+                      </div>
+                    )}
                     
-                    <div className="bg-[#ebd9c0]/50 p-2 rounded border border-black/10 text-[8px] text-[#543b2a] leading-relaxed font-semibold">
+                    <div className="bg-[#ebd9c0]/50 p-2 rounded border border-black/10 text-[8px] text-[#543b2a] leading-relaxed font-semibold mt-2">
                       ⚠️ Essa carteira é gerada e mantida localmente para fins educacionais de simulação da rede Stellar. Nunca deposite dinheiro real neste par de chaves de testes.
                     </div>
                   </div>
@@ -1061,11 +1317,13 @@ export default function App() {
         onOnRampSuccess={handleOnRampSuccess}
         onSwapSuccess={handleSwapSuccess}
         onHoldSuccess={handleHoldSuccess}
+        onUpdateWallet={handleUpdateWallet}
+        playerName={getFormattedName()}
       />
 
       {/* SUBTLE IMMERSIVE CREDITS TEXT IN OUTER SPACE */}
       <div className="absolute bottom-1 md:bottom-2 text-[8px] sm:text-[9.5px] text-white/35 font-mono pointer-events-none select-none tracking-wider text-center">
-        Stellar Tibia Onboarding Island • GameFiNow Engine v2.5 • Ledger: <span className="text-[#5db81d] font-bold">#28,492 (ACTIVE)</span>
+        Stellar Onboarding Island • GameFiNow Engine v2.5 • Ledger: <span className="text-[#5db81d] font-bold">#28,492 (ACTIVE)</span>
       </div>
 
     </div>

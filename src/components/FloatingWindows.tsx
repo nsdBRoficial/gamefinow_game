@@ -140,33 +140,75 @@ export const FloatingWindows: React.FC<FloatingWindowsProps> = ({
                 ) : (
                   <div className="text-center py-6 text-slate-500 space-y-1 select-none">
                     <p className="text-[#c33309] font-black animate-pulse uppercase">Nenhuma identidade forjada ainda!</p>
-                    <p className="text-[10px]">Fale com o Sacerdote Frank no Templo de Thais para criar sua carteira.</p>
+                    <p className="text-[10px]">Fale com Frank [NPC] no Templo Stellar para criar sua carteira.</p>
                   </div>
                 )}
               </div>
 
               {/* Balances detailed list */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="bg-white border-2 border-black p-3 rounded-lg flex items-center justify-between shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
-                  <div className="space-y-0.5">
-                    <span className="text-[9px] text-slate-500 font-bold block uppercase">Moedas de Cristal (XLM)</span>
-                    <span className="text-base font-black text-[#5db81d] font-mono">{wallet.xlmBalance} XLM</span>
+              <div className="space-y-3">
+                <span className="text-[10px] text-slate-500 font-extrabold uppercase font-mono block">Saldos Disponíveis (WalletNow)</span>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="bg-white border-2 border-black p-3 rounded-lg flex items-center justify-between shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
+                    <div className="space-y-0.5">
+                      <span className="text-[9px] text-slate-500 font-bold block uppercase">Moedas de Cristal (XLM)</span>
+                      <span className="text-sm font-black text-[#d97706] font-mono">{wallet.xlmBalance} XLM</span>
+                    </div>
+                    <div className="w-8 h-8 bg-[#ffc600] text-black border-2 border-black rounded-full flex items-center justify-center font-black font-mono text-xs shadow-[1.5px_1.5px_0_#000]">🌟</div>
                   </div>
-                  <div className="w-8 h-8 bg-[#ffc600] text-black border-2 border-black rounded-full flex items-center justify-center font-black font-mono text-xs shadow-[1px_1.5px_0_#000]">C</div>
+                  <div className="bg-white border-2 border-black p-3 rounded-lg flex items-center justify-between shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
+                    <div className="space-y-0.5">
+                      <span className="text-[9px] text-slate-500 font-bold block uppercase">Estável Dólar (USDW)</span>
+                      <span className="text-sm font-black text-[#10b981] font-mono">{wallet.usdwBalance || 0} USDW</span>
+                    </div>
+                    <div className="w-8 h-8 bg-[#10b981] text-white border-2 border-black rounded flex items-center justify-center font-black font-mono text-xs shadow-[1.5px_1.5px_0_#000]">💵</div>
+                  </div>
+                  <div className="bg-white border-2 border-black p-3 rounded-lg flex items-center justify-between shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
+                    <div className="space-y-0.5">
+                      <span className="text-[9px] text-slate-500 font-bold block uppercase">Estável Real (BRW)</span>
+                      <span className="text-sm font-black text-[#6366f1] font-mono">{wallet.brwBalance || 0} BRW</span>
+                    </div>
+                    <div className="w-8 h-8 bg-[#6366f1] text-white border-2 border-black rounded flex items-center justify-center font-black font-mono text-xs shadow-[1.5px_1.5px_0_#000]">🇧🇷</div>
+                  </div>
                 </div>
-                <div className="bg-white border-2 border-black p-3 rounded-lg flex items-center justify-between shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
-                  <div className="space-y-0.5">
-                    <span className="text-[9px] text-slate-500 font-bold block uppercase">Moedas de Platina (USDC)</span>
-                    <span className="text-base font-black text-[#e83e8c] font-mono">{wallet.usdcBalance} USDC</span>
+
+                {/* Vault & LP Balances */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="bg-slate-100 border-2 border-dashed border-slate-400 p-3 rounded-lg space-y-1.5 shadow-[1.5px_1.5px_0px_rgba(0,0,0,0.05)]">
+                    <span className="text-[8.5px] text-slate-500 font-black uppercase font-mono block">🏦 COFRES DE RENDIMENTO (VAULTS)</span>
+                    <div className="text-[11px] font-mono space-y-1 text-slate-700">
+                      <div className="flex justify-between">
+                        <span>Cofre XLM:</span>
+                        <span className="font-bold">{wallet.vaultXlm || 0} XLM</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Cofre USDW:</span>
+                        <span className="font-bold">{wallet.vaultUsdw || 0} USDW</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Cofre BRW:</span>
+                        <span className="font-bold">{wallet.vaultBrw || 0} BRW</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="w-8 h-8 bg-[#e83e8c] text-white border-2 border-black rounded flex items-center justify-center font-black font-mono text-xs shadow-[1px_1.5px_0_#000]">D</div>
-                </div>
-                <div className="bg-white border-2 border-black p-3 rounded-lg flex items-center justify-between shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
-                  <div className="space-y-0.5">
-                    <span className="text-[9px] text-slate-500 font-bold block uppercase">Runas de Batalha (SORO)</span>
-                    <span className="text-base font-black text-[#00a8e1] font-mono">{wallet.soroBalance} SORO</span>
+
+                  <div className="bg-slate-100 border-2 border-dashed border-slate-400 p-3 rounded-lg space-y-1.5 shadow-[1.5px_1.5px_0px_rgba(0,0,0,0.05)]">
+                    <span className="text-[8.5px] text-slate-500 font-black uppercase font-mono block">💧 COTAS DE LIQUIDEZ (AMM LP)</span>
+                    <div className="text-[11px] font-mono space-y-1 text-slate-700">
+                      <div className="flex justify-between">
+                        <span>Piscina XLM - USDW:</span>
+                        <span className="font-bold text-violet-600">{wallet.poolXlmUsdw || 0} LP</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Piscina USDW - BRW:</span>
+                        <span className="font-bold text-violet-600">{wallet.poolUsdwBrw || 0} LP</span>
+                      </div>
+                      <div className="flex justify-between text-[10px] text-slate-400 pt-0.5 border-t border-slate-200">
+                        <span>Recompensa de Taxas:</span>
+                        <span className="font-bold text-emerald-500">Acumulando...</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="w-8 h-8 bg-[#00a8e1] text-white border-2 border-black rotate-45 flex items-center justify-center font-black font-mono text-xs shadow-[1px_1.5px_0_#000]"><span className="-rotate-45">♦</span></div>
                 </div>
               </div>
 
@@ -305,7 +347,7 @@ export const FloatingWindows: React.FC<FloatingWindowsProps> = ({
               </div>
 
               <div className="border-t border-black/10 pt-3 text-center text-[10px] text-slate-500">
-                <span>Stellar Tibia Temple • Todos os dados simulados localmente para fins de capacitação de guerreiros.</span>
+                <span>Stellar Temple • Todos os dados simulados localmente para fins de capacitação de guerreiros.</span>
               </div>
             </div>
           )}

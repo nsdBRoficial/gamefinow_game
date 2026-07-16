@@ -5,10 +5,10 @@
 
 export interface Transaction {
   id: string; // Transaction Hash (mocked)
-  type: "CREATE_ACCOUNT" | "ON_RAMP_PIX" | "ON_RAMP_CARD" | "SWAP_SOROBAN" | "LOCK_HOLD";
+  type: string;
   timestamp: string;
   amount: string;
-  asset: "XLM" | "USDC" | "SORO";
+  asset: string;
   fee: string; // Stellar fee is extremely low (e.g., 0.00001 XLM)
   memo: string;
   ledgerSequence: number;
@@ -23,6 +23,17 @@ export interface WalletState {
   soroBalance: number;
   isLocked: boolean;
   lockedAmount: number;
+  // WalletNow SDK additions
+  name?: string;
+  email?: string;
+  pin?: string;
+  usdwBalance?: number; // WalletNow USDW Token (Stablecoin USD)
+  brwBalance?: number;  // WalletNow BRW Token (Stablecoin BRL)
+  vaultXlm?: number;    // WalletNow XLM Yield Vault
+  vaultUsdw?: number;   // WalletNow USDW Yield Vault
+  vaultBrw?: number;    // WalletNow BRW Yield Vault
+  poolXlmUsdw?: number; // WalletNow Liquidity Pool (XLM-USDW)
+  poolUsdwBrw?: number; // WalletNow Liquidity Pool (USDW-BRW)
 }
 
 export type QuestId = "wallet" | "onramp" | "soroban" | "hold";
@@ -83,6 +94,6 @@ export interface GameState {
     currentStep: number;
     npcId: string;
   } | null;
-  activeModal: "wallet" | "onramp" | "soroban" | "hold" | null;
+  activeModal: "wallet" | "onramp" | "soroban" | "hold" | "atf" | null;
   currentLedger: number;
 }

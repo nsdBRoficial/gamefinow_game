@@ -14,7 +14,8 @@ interface GameCanvasProps {
   setPlayerPos: React.Dispatch<React.SetStateAction<Player>>;
   npcs: NPC[];
   onTalkToNPC: (npc: NPC) => void;
-  onNearTerminal: (terminalType: "wallet" | "onramp" | "soroban" | "hold" | null) => void;
+  onNearTerminal: (terminalType: "wallet" | "onramp" | "soroban" | "hold" | "atf" | null) => void;
+  isMovementBlocked?: boolean;
 }
 
 export const GameCanvas: React.FC<GameCanvasProps> = ({
@@ -24,6 +25,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   npcs,
   onTalkToNPC,
   onNearTerminal,
+  isMovementBlocked = false,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -54,16 +56,16 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   const getCoordinateRegion = (x: number, y: number): "center" | "east" | "west" | "north" | "south" => {
     const roundedX = Math.round(x);
     const roundedY = Math.round(y);
-    if (roundedX >= 48 && roundedX <= 59 && roundedY >= 10 && roundedY <= 50) {
+    if (roundedX >= 48 && roundedX <= 59 && roundedY >= 2 && roundedY <= 57) {
       return "east";
     }
-    if (roundedX >= 1 && roundedX <= 12 && roundedY >= 10 && roundedY <= 50) {
+    if (roundedX >= 1 && roundedX <= 12 && roundedY >= 2 && roundedY <= 57) {
       return "west";
     }
-    if (roundedX >= 10 && roundedX <= 50 && roundedY >= 1 && roundedY <= 12) {
+    if (roundedX >= 13 && roundedX <= 47 && roundedY >= 1 && roundedY <= 12) {
       return "north";
     }
-    if (roundedX >= 10 && roundedX <= 50 && roundedY >= 48 && roundedY <= 59) {
+    if (roundedX >= 13 && roundedX <= 47 && roundedY >= 48 && roundedY <= 59) {
       return "south";
     }
     return "center";
@@ -71,10 +73,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
   // Helper to determine region of a tile coordinate
   const getTileRegion = (c: number, r: number): "center" | "east" | "west" | "north" | "south" | "none" => {
-    if (c >= 48 && c <= 59 && r >= 10 && r <= 50) return "east";
-    if (c >= 1 && c <= 12 && r >= 10 && r <= 50) return "west";
-    if (c >= 10 && c <= 50 && r >= 1 && r <= 12) return "north";
-    if (c >= 10 && c <= 50 && r >= 48 && r <= 59) return "south";
+    if (c >= 48 && c <= 59 && r >= 2 && r <= 57) return "east";
+    if (c >= 1 && c <= 12 && r >= 2 && r <= 57) return "west";
+    if (c >= 13 && c <= 47 && r >= 1 && r <= 12) return "north";
+    if (c >= 13 && c <= 47 && r >= 48 && r <= 59) return "south";
     
     // Bridges and central plaza are center
     if (c >= 18 && c <= 42 && r >= 18 && r <= 42) return "center";
@@ -98,6 +100,120 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     { id: "slime4", name: "Blob", x: 36, y: 34, targetX: 36, targetY: 34, isMoving: false, frame: 0, color: "#ef4444", level: 3, hp: 100, maxHp: 100, bounceOffset: 0, dir: "right" },
     { id: "slime5", name: "Blob", x: 28, y: 25, targetX: 28, targetY: 25, isMoving: false, frame: 0, color: "#f97316", level: 1, hp: 100, maxHp: 100, bounceOffset: 0, dir: "left" },
     { id: "slime6", name: "Blob", x: 32, y: 35, targetX: 32, targetY: 35, isMoving: false, frame: 0, color: "#b45309", level: 2, hp: 100, maxHp: 100, bounceOffset: 0, dir: "right" },
+  ]);
+
+  // MMO Other Players walking around the 60x60 map in real time!
+  const otherPlayersRef = useRef<any[]>([
+    {
+      id: "mmo1",
+      name: "StellarGiga",
+      x: 28,
+      y: 28,
+      targetX: 28,
+      targetY: 28,
+      dir: "down",
+      isMoving: false,
+      frame: 0,
+      headColor: "#ec4899",
+      torsoColor: "#1e293b",
+      legsColor: "#10b981",
+      shoesColor: "#1e293b",
+      headType: "beanie",
+      torsoType: "striped",
+      skinColor: "#f1c27d",
+      faceType: "cool",
+      accessoryType: "sword",
+      bubbleText: "Terminei a Tarefa 1! Conectei ao terminal!",
+      bubbleTimer: 5000,
+    },
+    {
+      id: "mmo2",
+      name: "SorobanWizard",
+      x: 7,
+      y: 28,
+      targetX: 7,
+      targetY: 28,
+      dir: "left",
+      isMoving: false,
+      frame: 0,
+      headColor: "#8b5cf6",
+      torsoColor: "#8b5cf6",
+      legsColor: "#1e293b",
+      shoesColor: "#f8fafc",
+      headType: "beanie",
+      torsoType: "suit",
+      skinColor: "#ffdbac",
+      faceType: "glasses",
+      accessoryType: "cape",
+      bubbleText: "O Soroban permite criar Smart Contracts incríveis!",
+      bubbleTimer: 4000,
+    },
+    {
+      id: "mmo3",
+      name: "LuminaXLM",
+      x: 52,
+      y: 29,
+      targetX: 52,
+      targetY: 29,
+      dir: "right",
+      isMoving: false,
+      frame: 0,
+      headColor: "#38bdf8",
+      torsoColor: "#10b981",
+      legsColor: "#ec4899",
+      shoesColor: "#1e293b",
+      headType: "helmet",
+      torsoType: "hoodie",
+      skinColor: "#ffdbac",
+      faceType: "smile",
+      accessoryType: "backpack",
+      bubbleText: "Forjei minhas chaves Stellar com sucesso!",
+      bubbleTimer: 6000,
+    },
+    {
+      id: "mmo4",
+      name: "CrypticHero",
+      x: 29,
+      y: 9,
+      targetX: 29,
+      targetY: 9,
+      dir: "up",
+      isMoving: false,
+      frame: 0,
+      headColor: "#f97316",
+      torsoColor: "#ef4444",
+      legsColor: "#2563eb",
+      shoesColor: "#1e293b",
+      headType: "horns",
+      torsoType: "plain",
+      skinColor: "#ffdbac",
+      faceType: "eyepatch",
+      accessoryType: "cape",
+      bubbleText: "Fazendo Pix On-Ramp para abastecer XLM!",
+      bubbleTimer: 4500,
+    },
+    {
+      id: "mmo5",
+      name: "StellarGoldHolder",
+      x: 32,
+      y: 52,
+      targetX: 32,
+      targetY: 52,
+      dir: "down",
+      isMoving: false,
+      frame: 0,
+      headColor: "#fcd34d",
+      torsoColor: "#f97316",
+      legsColor: "#1e293b",
+      shoesColor: "#1e293b",
+      headType: "horns",
+      torsoType: "hoodie",
+      skinColor: "#e0ac69",
+      faceType: "smile",
+      accessoryType: "backpack",
+      bubbleText: "Vou guardar minhas moedas no Escrow!",
+      bubbleTimer: 7000,
+    }
   ]);
 
   // Magic portal fullscreen flash trigger ref
@@ -125,6 +241,16 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   // Keyboard Event Listeners for Movement and Interaction
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const isTyping = document.activeElement && (
+        document.activeElement.tagName === "INPUT" || 
+        document.activeElement.tagName === "TEXTAREA" ||
+        document.activeElement.getAttribute("contenteditable") === "true"
+      );
+
+      if (isMovementBlocked || isTyping) {
+        return;
+      }
+
       const key = e.key.toLowerCase();
       if (
         ["w", "s", "a", "d", "arrowup", "arrowdown", "arrowleft", "arrowright", " ", "enter"].includes(key)
@@ -150,10 +276,21 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [playerPos, npcs, gameState]);
+  }, [playerPos, npcs, gameState, isMovementBlocked]);
+
+  useEffect(() => {
+    if (isMovementBlocked) {
+      keysPressed.current = {};
+    }
+  }, [isMovementBlocked]);
 
   // Helper to trigger interaction with nearby NPC or terminal
   const triggerInteraction = () => {
+    // Prevent starting or restarting NPC dialogue if a dialogue is currently active
+    if (latestGameState.current.activeDialog) {
+      return;
+    }
+
     const { targetX, targetY, dir } = latestPlayerPos.current;
     
     let checkX = targetX;
@@ -181,6 +318,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   // Helper to check and notify proximity to terminals
   const checkTerminalProximity = (x: number, y: number) => {
     const state = latestGameState.current;
+    const completedCount = (Object.values(state.quests) as Quest[]).filter(q => q.status === "completed").length;
+
+    if (Math.abs(x - 26) <= 2 && Math.abs(y - 26) <= 2) {
+      onNearTerminal("atf");
+      return;
+    }
     if (Math.abs(x - 54) <= 2 && Math.abs(y - 30) <= 2) {
       onNearTerminal("wallet");
       return;
@@ -223,6 +366,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
       // Update passive bouncing slimes
       updateCreatures(delta);
+
+      // Update MMO other players
+      updateOtherPlayers(delta);
 
       updatePlayer(delta);
       drawGame();
@@ -293,6 +439,102 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
               c.frame = 0;
             }
           }
+        }
+      }
+    });
+  };
+
+  // Update MMO other players walking around the map
+  const updateOtherPlayers = (delta: number) => {
+    const players = otherPlayersRef.current;
+    const speed = 0.15 * (delta / 16.66); // Slightly slower than main player for elegance
+
+    players.forEach((p) => {
+      // 1. Process movement
+      if (p.isMoving) {
+        let newX = p.x;
+        let newY = p.y;
+
+        if (p.x < p.targetX) {
+          newX = Math.min(p.targetX, p.x + speed);
+        } else if (p.x > p.targetX) {
+          newX = Math.max(p.targetX, p.x - speed);
+        }
+
+        if (p.y < p.targetY) {
+          newY = Math.min(p.targetY, p.y + speed);
+        } else if (p.y > p.targetY) {
+          newY = Math.max(p.targetY, p.y - speed);
+        }
+
+        p.x = newX;
+        p.y = newY;
+        p.frame = (p.frame + 0.15) % 4;
+
+        if (newX === p.targetX && newY === p.targetY) {
+          p.isMoving = false;
+        }
+      } else {
+        // Occasionally initiate random movement (e.g., 0.8% chance per frame if not moving)
+        if (Math.random() < 0.008) {
+          const dirs = [
+            { dx: 0, dy: -1, d: "up" },
+            { dx: 0, dy: 1, d: "down" },
+            { dx: -1, dy: 0, d: "left" },
+            { dx: 1, dy: 0, d: "right" }
+          ];
+          const randomDir = dirs[Math.floor(Math.random() * dirs.length)];
+          const nextX = p.x + randomDir.dx;
+          const nextY = p.y + randomDir.dy;
+
+          // Stay within a bounds limit of their home region to keep them clustered
+          let regionOk = false;
+          const region = getCoordinateRegion(nextX, nextY);
+          if (p.id === "mmo1" && region === "center") regionOk = true;
+          else if (p.id === "mmo2" && region === "west") regionOk = true;
+          else if (p.id === "mmo3" && region === "east") regionOk = true;
+          else if (p.id === "mmo4" && region === "north") regionOk = true;
+          else if (p.id === "mmo5" && region === "south") regionOk = true;
+
+          if (
+            regionOk &&
+            nextX >= 0 && nextX < GRID_COLS &&
+            nextY >= 0 && nextY < GRID_ROWS &&
+            !isCollidable(mapGrid[nextY][nextX])
+          ) {
+            p.targetX = nextX;
+            p.targetY = nextY;
+            p.dir = randomDir.d;
+            p.isMoving = true;
+          }
+        }
+      }
+
+      // 2. Chat bubbles handling
+      if (p.bubbleText) {
+        p.bubbleTimer -= delta;
+        if (p.bubbleTimer <= 0) {
+          p.bubbleText = undefined;
+        }
+      } else {
+        // 0.2% chance per frame to shout something funny/useful
+        if (Math.random() < 0.002) {
+          const PHRASES = [
+            "Partiu fazer Pix On-Ramp!",
+            "Adorei o visual das costas do herói!",
+            "Este terminal ATF DEFI é massa demais!",
+            "Conectando ao terminal Stellar...",
+            "Consenso em 5 segundos!",
+            "A taxa de rede da Stellar é quase zero!",
+            "Olha meu elmo de guerreiro!",
+            "Que massa, o jogo carrega instantaneamente!",
+            "Stellar é muito rápida e barata de verdade!",
+            "Este MMO está fantástico!",
+            "A Chave Secreta nunca deve ser compartilhada!",
+            "Olá! Alguém quer fazer trade de moedas?"
+          ];
+          p.bubbleText = PHRASES[Math.floor(Math.random() * PHRASES.length)];
+          p.bubbleTimer = 4000 + Math.random() * 3000;
         }
       }
     });
@@ -397,6 +639,15 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           frame: newFrame,
         };
       } else {
+        const isTyping = document.activeElement && (
+          document.activeElement.tagName === "INPUT" || 
+          document.activeElement.tagName === "TEXTAREA" ||
+          document.activeElement.getAttribute("contenteditable") === "true"
+        );
+        if (isMovementBlocked || isTyping) {
+          return prev;
+        }
+
         let nextTargetX = targetX;
         let nextTargetY = targetY;
         let nextDir = dir;
@@ -606,7 +857,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           accessoryType: "cape", // Celestial cape
           hairColor: "#f8fafc", // White hair
         };
-      case "keymaster": // Pixel, o Ferreiro de Raros
+      case "keymaster": // Kael, o Ferreiro de Raros
         return {
           skinColor: "#ffdbac",
           headColor: "#ea580c",
@@ -717,7 +968,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       }
     };
 
-    // Back accessories (Cape or Backpack) if not facing up
+    // Back accessories (Cape or Backpack) if not facing up (drawn behind)
     if (direction !== "up") {
       if (char.accessoryType === "cape") {
         drawPixelRect(cx + 6, cy + 13 + walkBob, 20, 11, char.headColor);
@@ -747,18 +998,42 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     drawPixelRect(cx + 8, torsoY, 16, 10, char.torsoColor || "#ef4444");
 
     // Torso texture details
-    if (char.torsoType === "striped") {
-      ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
-      ctx.fillRect(cx + 9, torsoY + 2, 14, 2);
-      ctx.fillRect(cx + 9, torsoY + 6, 14, 2);
-    } else if (char.torsoType === "suit") {
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(cx + 15, torsoY, 2, 3);
-      ctx.fillStyle = "#ea580c";
-      ctx.fillRect(cx + 15, torsoY + 3, 2, 4);
-    } else if (char.torsoType === "hoodie") {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
-      ctx.fillRect(cx + 11, torsoY + 5, 10, 4);
+    if (direction === "up") {
+      // Back of the torso details
+      if (char.torsoType === "striped") {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+        ctx.fillRect(cx + 9, torsoY + 2, 14, 2);
+        ctx.fillRect(cx + 9, torsoY + 6, 14, 2);
+      } else if (char.torsoType === "hoodie") {
+        // Render a cool hood on the back of the hoodie
+        drawPixelRect(cx + 10, torsoY + 1, 12, 6, "rgba(0, 0, 0, 0.2)");
+      }
+      // Back accessories drawn ON TOP of the torso because we are looking at their back
+      if (char.accessoryType === "cape") {
+        drawPixelRect(cx + 6, torsoY + 1, 20, 10, char.headColor);
+      } else if (char.accessoryType === "backpack") {
+        // Draw the backpack
+        drawPixelRect(cx + 8, torsoY + 1, 16, 9, "#78350f");
+        // Draw backpack straps over shoulders
+        ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
+        ctx.fillRect(cx + 10, torsoY, 2, 2);
+        ctx.fillRect(cx + 20, torsoY, 2, 2);
+      }
+    } else {
+      // Front details
+      if (char.torsoType === "striped") {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+        ctx.fillRect(cx + 9, torsoY + 2, 14, 2);
+        ctx.fillRect(cx + 9, torsoY + 6, 14, 2);
+      } else if (char.torsoType === "suit") {
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(cx + 15, torsoY, 2, 3);
+        ctx.fillStyle = "#ea580c";
+        ctx.fillRect(cx + 15, torsoY + 3, 2, 4);
+      } else if (char.torsoType === "hoodie") {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+        ctx.fillRect(cx + 11, torsoY + 5, 10, 4);
+      }
     }
 
     // Right Arm (Weapon holding / Regular)
@@ -781,11 +1056,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
     // 4. Head & Face
     const headY = cy + 2 + walkBob;
-    drawPixelRect(cx + 8, headY, 16, 11, char.skinColor || "#ffdbac");
+    const hairCol = char.hairColor || char.headColor || "#78350f";
+    const headFill = (direction === "up" && char.headType !== "helmet") ? hairCol : (char.skinColor || "#ffdbac");
+    drawPixelRect(cx + 8, headY, 16, 11, headFill);
 
     // Hats and Hair
     if (char.headType === "square") {
-      const hairCol = char.hairColor || char.headColor || "#78350f";
       drawPixelRect(cx + 7, headY - 3, 18, 4, hairCol); // Hair top
       drawPixelRect(cx + 7, headY + 1, 3, 6, hairCol);   // Left side
       drawPixelRect(cx + 22, headY + 1, 3, 6, hairCol);  // Right side
@@ -813,10 +1089,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     } else if (char.headType === "helmet") {
       const helmCol = char.headColor || "#64748b";
       drawPixelRect(cx + 7, headY - 3, 18, 14, helmCol);
-      drawPixelRect(cx + 10, headY + 3, 12, 3, "#38bdf8", "#0f172a"); // Visor glow
+      if (direction !== "up") {
+        drawPixelRect(cx + 10, headY + 3, 12, 3, "#38bdf8", "#0f172a"); // Visor glow
+      }
       drawPixelRect(cx + 14, headY - 6, 4, 3, "#dc2626"); // Plume
     } else if (char.headType === "horns") {
-      const hairCol = char.hairColor || "#78350f";
       drawPixelRect(cx + 7, headY - 2, 18, 3, hairCol);
       if (char.skinColor === "#ffdbac" && char.hairColor === "#f59e0b") {
         // Pointed Elven Ears!
@@ -1138,7 +1415,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     }
 
     // 3. Render Special Terminals
-    if (currentRegion === "east") {
+    if (currentRegion === "center") {
+      drawInteractiveTerminal(ctx, 26, 26, "ATF DEFI", "#f43f5e");
+    } else if (currentRegion === "east") {
       drawInteractiveTerminal(ctx, 54, 30, "FORJA CHAVE", "#22d3ee");
     } else if (currentRegion === "north") {
       drawInteractiveTerminal(ctx, 30, 6, "ON RAMP PORT", "#34d399");
@@ -1399,23 +1678,106 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         ctx.fillText(indicator, worldX + 16, worldY - 13.5);
       }
 
-      // Display NPC name tags beautifully with proper head clearance
+      // Display NPC name tags beautifully with proper head clearance and auto-sized background
       const npcNameY = worldY - 19;
-      const npcNameW = 52;
-      const npcNameH = 9;
-      ctx.fillStyle = "rgba(15, 23, 42, 0.75)";
-      ctx.fillRect(worldX + 16 - npcNameW / 2, npcNameY, npcNameW, npcNameH);
-      ctx.strokeStyle = "rgba(255,255,255,0.15)";
-      ctx.strokeRect(worldX + 16 - npcNameW / 2, npcNameY, npcNameW, npcNameH);
+      ctx.font = "bold 9px 'JetBrains Mono', 'Ubuntu', sans-serif";
+      const textWidth = ctx.measureText(npc.name).width;
+      const npcNameW = textWidth + 8;
+      const npcNameH = 13;
+      ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+      ctx.fillRect(worldX + 16 - npcNameW / 2, npcNameY - 2, npcNameW, npcNameH);
+      ctx.strokeStyle = "rgba(255,255,255,0.25)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(worldX + 16 - npcNameW / 2, npcNameY - 2, npcNameW, npcNameH);
 
-      ctx.font = "bold 6.5px monospace";
       ctx.fillStyle = "#ffffff";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(npc.name, worldX + 16, npcNameY + npcNameH / 2 + 0.5);
+      ctx.fillText(npc.name, worldX + 16, npcNameY + npcNameH / 2 - 2 + 0.5);
     });
 
-    // 7. Render Player using the pixel character engine
+    // 6.5. Render MMO Other Players on the map
+    otherPlayersRef.current.forEach((p) => {
+      // Only draw if they are in the current active region to maintain perfect multi-region immersion!
+      if (getCoordinateRegion(p.x, p.y) !== currentRegion) {
+        return;
+      }
+
+      const screenX = p.x * TILE_SIZE;
+      const screenY = p.y * TILE_SIZE;
+
+      drawPixelCharacter(
+        ctx,
+        screenX,
+        screenY,
+        p,
+        p.isMoving,
+        p.frame,
+        p.dir,
+        false
+      );
+
+      // Other Player name tag over their head
+      const pNameY = screenY - 19;
+      ctx.font = "bold 9px 'JetBrains Mono', 'Ubuntu', sans-serif";
+      const textWidth = ctx.measureText(p.name).width;
+      const pNameW = textWidth + 8;
+      const pNameH = 13;
+      ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+      ctx.fillRect(screenX + 16 - pNameW / 2, pNameY - 2, pNameW, pNameH);
+      ctx.strokeStyle = "rgba(255, 198, 0, 0.4)"; // Subtle orange/gold border for online MMO players
+      ctx.lineWidth = 1;
+      ctx.strokeRect(screenX + 16 - pNameW / 2, pNameY - 2, pNameW, pNameH);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(p.name, screenX + 16, pNameY + pNameH / 2 - 2 + 0.5);
+
+      // Draw their speech bubble if active
+      if (p.bubbleText) {
+        const bubbleY = screenY - 24;
+        ctx.font = "bold 9px 'JetBrains Mono', monospace";
+        const bTextWidth = ctx.measureText(p.bubbleText).width;
+        const bW = bTextWidth + 12;
+        const bH = 16;
+        const bx = screenX + 16 - bW / 2;
+        const by = bubbleY - bH - 4;
+
+        // Draw bubble background with soft shadow
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.roundRect(bx, by, bW, bH, 4);
+        ctx.fill();
+        ctx.strokeStyle = "#0f172a";
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        // Triangle pointer pointing down
+        ctx.beginPath();
+        ctx.moveTo(screenX + 16 - 4, by + bH);
+        ctx.lineTo(screenX + 16, by + bH + 4);
+        ctx.lineTo(screenX + 16 + 4, by + bH);
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(screenX + 16 - 4, by + bH);
+        ctx.lineTo(screenX + 16, by + bH + 4);
+        ctx.lineTo(screenX + 16 + 4, by + bH);
+        ctx.strokeStyle = "#0f172a";
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        // Draw text
+        ctx.fillStyle = "#0f172a";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(p.bubbleText, screenX + 16, by + bH / 2 + 0.5);
+      }
+    });
+
+    // 7. Render Player using the character engine
     const playerScreenX = playerPosVal.x * TILE_SIZE;
     const playerScreenY = playerPosVal.y * TILE_SIZE;
     const isLegend = (Object.values(gameStateVal.quests) as Quest[]).every(q => q.status === "completed");
@@ -1431,21 +1793,136 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       isLegend
     );
 
-    // Display Player name tag in yellow over their head (Tibia style) with proper head clearance
+    // Display Player name tag over their head with proper head clearance, dynamic formatting and neon effects
     const playerNameY = playerScreenY - 19;
-    const playerNameW = 52;
-    const playerNameH = 9;
-    ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
-    ctx.fillRect(playerScreenX + 16 - playerNameW / 2, playerNameY, playerNameW, playerNameH);
-    ctx.strokeStyle = "rgba(255, 198, 0, 0.6)"; // High contrast yellow border
-    ctx.lineWidth = 0.5;
-    ctx.strokeRect(playerScreenX + 16 - playerNameW / 2, playerNameY, playerNameW, playerNameH);
+    ctx.font = "bold 9px 'JetBrains Mono', 'Ubuntu', sans-serif";
+    
+    // Determine completed quest states
+    const hasWallet = gameStateVal.quests.wallet.status === "completed";
+    const hasOnramp = gameStateVal.quests.onramp.status === "completed";
+    const hasSoroban = gameStateVal.quests.soroban.status === "completed";
+    const hasHold = gameStateVal.quests.hold.status === "completed";
 
-    ctx.font = "bold 6.5px monospace";
-    ctx.fillStyle = "#ffc600"; // Vibrant yellow
-    ctx.textAlign = "center";
+    let prefix = "";
+    if (hasHold) {
+      prefix = "⭐ ";
+    }
+    let namePart = playerPosVal.name || "Viajante";
+    let suffix = "";
+    if (hasWallet && gameStateVal.wallet.publicKey) {
+      const last4 = gameStateVal.wallet.publicKey.slice(-4);
+      suffix = ` [${last4}]`;
+    }
+
+    const part1 = prefix + namePart;
+    const part2 = suffix;
+
+    const part1Width = ctx.measureText(part1).width;
+    const part2Width = ctx.measureText(part2).width;
+    const totalWidth = part1Width + part2Width;
+    const playerNameW = totalWidth + 8;
+    const playerNameH = 13;
+
+    // Draw background
+    ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+    ctx.fillRect(playerScreenX + 16 - playerNameW / 2, playerNameY - 2, playerNameW, playerNameH);
+
+    // Determine highest style tier for border and glow
+    let borderStyle = "rgba(255, 198, 0, 0.75)";
+    let shadowColor = "";
+    let shadowBlurVal = 0;
+    let hasBorderNeon = false;
+
+    if (hasHold) {
+      borderStyle = "#fbbf24";
+      shadowColor = "#f59e0b";
+      shadowBlurVal = 6;
+      hasBorderNeon = true;
+    } else if (hasSoroban) {
+      borderStyle = "#e879f9";
+      shadowColor = "#d946ef";
+      shadowBlurVal = 6;
+      hasBorderNeon = true;
+    } else if (hasOnramp) {
+      borderStyle = "#39ff14";
+      shadowColor = "#10b981";
+      shadowBlurVal = 6;
+      hasBorderNeon = true;
+    }
+
+    // Apply global shadow for border drawing
+    if (hasBorderNeon && shadowBlurVal > 0 && shadowColor) {
+      ctx.shadowColor = shadowColor;
+      ctx.shadowBlur = shadowBlurVal;
+    }
+    ctx.strokeStyle = borderStyle;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(playerScreenX + 16 - playerNameW / 2, playerNameY - 2, playerNameW, playerNameH);
+    ctx.shadowBlur = 0; // Turn off immediately for next drawing
+
+    // Draw text parts
+    const startX = playerScreenX + 16 - totalWidth / 2;
+    const drawY = playerNameY + playerNameH / 2 - 2 + 0.5;
+
     ctx.textBaseline = "middle";
-    ctx.fillText(playerPosVal.name || "Viajante", playerScreenX + 16, playerNameY + playerNameH / 2 + 0.5);
+    ctx.textAlign = "left";
+
+    // Draw Part 1 (Prefix + Name)
+    let p1Color = "#ffc600";
+    let p1ShadowColor = "";
+    let p1ShadowBlur = 0;
+
+    if (hasHold) {
+      p1Color = "#fbbf24";
+      p1ShadowColor = "#f59e0b";
+      p1ShadowBlur = 6;
+    } else if (hasSoroban) {
+      p1Color = "#e879f9";
+      p1ShadowColor = "#d946ef";
+      p1ShadowBlur = 6;
+    } else if (hasOnramp) {
+      p1Color = "#39ff14";
+      p1ShadowColor = "#10b981";
+      p1ShadowBlur = 6;
+    }
+
+    if (p1ShadowBlur > 0 && p1ShadowColor) {
+      ctx.shadowColor = p1ShadowColor;
+      ctx.shadowBlur = p1ShadowBlur;
+    } else {
+      ctx.shadowBlur = 0;
+    }
+    ctx.fillStyle = p1Color;
+    ctx.fillText(part1, startX, drawY);
+    ctx.shadowBlur = 0;
+
+    // Draw Part 2 (Wallet last4 Suffix)
+    if (part2) {
+      let p2Color = "#ffc600"; // yellow default same as name when first created
+      let p2ShadowColor = "";
+      let p2ShadowBlur = 0;
+
+      if (hasHold) {
+        p2Color = "#fbbf24";
+        p2ShadowColor = "#f59e0b";
+        p2ShadowBlur = 6;
+      } else if (hasSoroban) {
+        // "ao oeste os 4 digitos agora ficam neon"
+        p2Color = "#e879f9";
+        p2ShadowColor = "#d946ef";
+        p2ShadowBlur = 6;
+      }
+
+      if (p2ShadowBlur > 0 && p2ShadowColor) {
+        ctx.shadowColor = p2ShadowColor;
+        ctx.shadowBlur = p2ShadowBlur;
+      } else {
+        ctx.shadowBlur = 0;
+      }
+      ctx.fillStyle = p2Color;
+      ctx.fillText(part2, startX + part1Width, drawY);
+      ctx.shadowBlur = 0;
+    }
 
     ctx.restore();
 
@@ -1455,7 +1932,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       ctx.fillRect(0, 0, dims.width, dims.height);
       
       ctx.fillStyle = "#ffffff";
-      ctx.font = "black 14px 'Silkscreen', 'Press Start 2P', monospace";
+      ctx.font = "bold 14px 'JetBrains Mono', monospace";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText("✦ PORTAL DO TEMPLO ATIVADO ✦", dims.width / 2, dims.height / 2);

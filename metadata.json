@@ -1,6 +1,6 @@
 {
   "name": "GameFiNow: The Onboarding Archipelago",
-  "description": "An interactive 2D top-down RPG onboarding users to Stellar (XLM) via gamified missions in a nostalgic classic Tibia medieval pixel fantasy temple style.",
+  "description": "An interactive 2D top-down RPG onboarding users to Stellar (XLM) via gamified missions in a nostalgic classic medieval fantasy temple style.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

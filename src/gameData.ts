@@ -91,23 +91,47 @@ export const MAP_DECORATIONS: GameDecoration[] = [
   { x: 37, y: 29, type: "barrel" },
   { x: 37, y: 31, type: "box" },
 
-  // NEW Scenic decorations for the massive expanded islands
-  { x: 12, y: 4, type: "tree" },
-  { x: 48, y: 4, type: "tree" },
+  // North Island (Anchor Port) beautiful decorative elements
   { x: 15, y: 8, type: "lamp" },
   { x: 45, y: 8, type: "lamp" },
-  { x: 12, y: 56, type: "tree" },
-  { x: 48, y: 56, type: "tree" },
+  { x: 6, y: 3, type: "barrel" },
+  { x: 7, y: 3, type: "box" },
+  { x: 53, y: 3, type: "barrel" },
+  { x: 54, y: 3, type: "box" },
+  { x: 20, y: 9, type: "bench" },
+  { x: 40, y: 9, type: "bench" },
+  { x: 14, y: 11, type: "lamp" },
+  { x: 16, y: 11, type: "lamp" },
+  { x: 44, y: 11, type: "lamp" },
+  { x: 46, y: 11, type: "lamp" },
+
+  // South Island (Holder Sanctuary) mystical items
   { x: 15, y: 52, type: "lamp" },
   { x: 45, y: 52, type: "lamp" },
-  { x: 4, y: 12, type: "tree" },
-  { x: 4, y: 48, type: "tree" },
-  { x: 8, y: 15, type: "lamp" },
-  { x: 8, y: 45, type: "lamp" },
-  { x: 56, y: 12, type: "tree" },
-  { x: 56, y: 48, type: "tree" },
-  { x: 52, y: 15, type: "lamp" },
-  { x: 52, y: 45, type: "lamp" },
+  { x: 25, y: 56, type: "statue" },
+  { x: 35, y: 56, type: "statue" },
+  { x: 18, y: 47, type: "flower_pot" },
+  { x: 42, y: 47, type: "flower_pot" },
+  { x: 28, y: 50, type: "lamp" },
+  { x: 32, y: 50, type: "lamp" },
+
+  // West Island (Soroban Bazaar) market crates & stalls
+  { x: 4, y: 18, type: "box" },
+  { x: 5, y: 18, type: "barrel" },
+  { x: 4, y: 32, type: "box" },
+  { x: 4, y: 40, type: "barrel" },
+  { x: 11, y: 16, type: "lamp" },
+  { x: 11, y: 43, type: "lamp" },
+  { x: 10, y: 26, type: "bench" },
+  { x: 10, y: 34, type: "bench" },
+
+  // East Island (Wallet Forge) knight fortress ornaments
+  { x: 56, y: 18, type: "barrel" },
+  { x: 56, y: 41, type: "box" },
+  { x: 49, y: 24, type: "lamp" },
+  { x: 49, y: 36, type: "lamp" },
+  { x: 53, y: 20, type: "statue" },
+  { x: 53, y: 40, type: "statue" },
 ];
 
 // Generate the procedural map grid with hedges, portals, and pathways
@@ -119,11 +143,16 @@ export function generateMap(): number[][] {
     for (let c = 0; c < GRID_COLS; c++) {
       let tile = TileType.WATER;
 
-      // 1. Center Island (Spawn Town Square): cols 18..42, rows 18..42 (expanded!)
+      // 1. Center Island (Spawn Town Square & Gardens): cols 18..42, rows 18..42
       if (c >= 18 && c <= 42 && r >= 18 && r <= 42) {
-        // Outer Hedge Border
+        // Outer Shore / Garden Border
         if (c === 18 || c === 42 || r === 18 || r === 42) {
-          tile = TileType.HEDGE;
+          if ((r >= 28 && r <= 31) || (c >= 28 && c <= 31)) {
+            tile = TileType.STONE_PATH;
+          } else {
+            // Alternating gorgeous hedges and sand beaches
+            tile = (c + r) % 2 === 0 ? TileType.HEDGE : TileType.SAND;
+          }
         } else {
           tile = TileType.GRASS;
         }
@@ -132,53 +161,139 @@ export function generateMap(): number[][] {
         if ((c >= 27 && c <= 33) || (r >= 27 && r <= 33)) {
           tile = TileType.STONE_PATH;
         }
+
+        // Corner flower-hedges in central park
+        if ((c === 20 || c === 40) && (r === 20 || r === 40)) {
+          tile = TileType.HEDGE;
+        }
       }
       
-      // 2. North Island (Anchor Port): cols 10..50, rows 1..12 (expanded!)
-      else if (c >= 10 && c <= 50 && r >= 1 && r <= 12) {
-        if (r === 12) {
-          tile = TileType.HEDGE;
-        } else {
-          tile = TileType.FLOOR_DARK;
-        }
-        if (c === 10 || c === 50 || r === 1) {
+      // 2. North Island (Anchor Port - Massive Coastal Docks): cols 2..57, rows 1..12
+      else if (c >= 2 && c <= 57 && r >= 1 && r <= 12) {
+        tile = TileType.FLOOR_DARK;
+
+        // Fortress walls on top & sides
+        if (r === 1 || c === 2 || c === 57) {
           tile = TileType.WALL;
+        }
+
+        // Grand cobblestone paths
+        if (r >= 10 && r <= 12 && c >= 10 && c <= 50) {
+          tile = TileType.STONE_PATH;
+        }
+
+        // Piers/Docks extending south (Bridge-type tiles)
+        if (r >= 11 && r <= 12 && (c === 15 || c === 20 || c === 40 || c === 45)) {
+          tile = TileType.BRIDGE;
+        }
+
+        // Decorative sand patches representing a sandy shoreline gap
+        if (r === 12 && !(c === 15 || c === 20 || c === 40 || c === 45 || (c >= 27 && c <= 33))) {
+          tile = TileType.SAND;
+        }
+
+        // Courtyard flower garden
+        if (r >= 3 && r <= 6 && ((c >= 6 && c <= 12) || (c >= 48 && c <= 54))) {
+          tile = (c === 6 || c === 12 || c === 48 || c === 54 || r === 3 || r === 6) ? TileType.HEDGE : TileType.GRASS;
         }
       }
 
-      // 3. South Island (Holder Sanctuary): cols 10..50, rows 48..59 (expanded!)
-      else if (c >= 10 && c <= 50 && r >= 48 && r <= 59) {
-        if (r === 48) {
-          tile = TileType.HEDGE;
-        } else {
-          tile = TileType.TEMPLE_FLOOR;
-        }
-        if (c === 10 || c === 50 || r === 59) {
+      // 3. South Island (Holder Sanctuary - Ancient Temple Hall): cols 2..57, rows 48..59
+      else if (c >= 2 && c <= 57 && r >= 48 && r <= 59) {
+        tile = TileType.TEMPLE_FLOOR;
+
+        // Giant ancient walls
+        if (r === 59 || c === 2 || c === 57) {
           tile = TileType.WALL;
+        }
+
+        // Inner sacred pool of water surrounded by sand
+        if (r >= 52 && r <= 56 && c >= 6 && c <= 14) {
+          if (r === 52 || r === 56 || c === 6 || c === 14) {
+            tile = TileType.SAND;
+          } else {
+            tile = TileType.WATER;
+          }
+        }
+
+        // Ancient sanctuary pillar partitions
+        if ((r === 51 && ((c >= 18 && c <= 25) || (c >= 35 && c <= 42))) || (c === 22 && r >= 52 && r <= 56) || (c === 38 && r >= 52 && r <= 56)) {
+          tile = TileType.WALL;
+        }
+
+        // Shrubbery inside corridors
+        if (r >= 49 && r <= 50 && ((c >= 4 && c <= 8) || (c >= 51 && c <= 55))) {
+          tile = TileType.HEDGE;
         }
       }
 
-      // 4. West Island (Soroban Smart Swap): cols 1..12, rows 10..50 (expanded!)
-      else if (c >= 1 && c <= 12 && r >= 10 && r <= 50) {
-        if (c === 12) {
-          tile = TileType.HEDGE;
-        } else {
-          tile = TileType.FLOOR_DARK;
-        }
-        if (c === 1 || r === 10 || r === 50) {
+      // 4. West Island (Soroban Swap - Grand Floating Bazaar): cols 1..12, rows 2..57
+      else if (c >= 1 && c <= 12 && r >= 2 && r <= 57) {
+        tile = TileType.FLOOR_DARK;
+
+        // West boundary walls
+        if (c === 1 || r === 2 || r === 57) {
           tile = TileType.WALL;
+        }
+
+        // Desert beaches on the west shore
+        if (c >= 2 && c <= 3 && r >= 4 && r <= 55) {
+          // Leave room for bazaar passages
+          if (r % 8 !== 0) {
+            tile = TileType.SAND;
+          }
+        }
+
+        // Market pathways
+        if (c === 10 || c === 11) {
+          tile = TileType.STONE_PATH;
+        }
+
+        // Ornamental water canals crossed by wooden bridges
+        if ((r === 18 || r === 38) && c >= 4 && c <= 11) {
+          if (c === 10 || c === 11) {
+            tile = TileType.BRIDGE;
+          } else {
+            tile = TileType.WATER;
+          }
+        }
+
+        // Hedges around bazaar tables
+        if (r >= 26 && r <= 30 && c >= 5 && c <= 7) {
+          tile = TileType.HEDGE;
         }
       }
 
-      // 5. East Island (Wallet Forge): cols 48..59, rows 10..50 (expanded!)
-      else if (c >= 48 && c <= 59 && r >= 10 && r <= 50) {
-        if (c === 48) {
-          tile = TileType.HEDGE;
-        } else {
-          tile = TileType.TEMPLE_FLOOR;
-        }
-        if (c === 59 || r === 10 || r === 50) {
+      // 5. East Island (Wallet Forge - Fortress of Cryptographic Fire): cols 48..59, rows 2..57
+      else if (c >= 48 && c <= 59 && r >= 2 && r <= 57) {
+        tile = TileType.TEMPLE_FLOOR;
+
+        // East boundary walls
+        if (c === 59 || r === 2 || r === 57) {
           tile = TileType.WALL;
+        }
+
+        // Forging corridor pathing
+        if (c === 49 || c === 50) {
+          tile = TileType.STONE_PATH;
+        }
+
+        // Castle battlements partitions
+        if ((r === 18 && c >= 50 && c <= 57) || (r === 41 && c >= 50 && c <= 57)) {
+          tile = TileType.WALL;
+        }
+
+        // Courtyard garden grass patches
+        if (r >= 22 && r <= 25 && c >= 52 && c <= 56) {
+          tile = TileType.GRASS;
+        }
+        if (r >= 33 && r <= 36 && c >= 52 && c <= 56) {
+          tile = TileType.GRASS;
+        }
+
+        // Cooling water pool
+        if (r >= 28 && r <= 30 && c >= 53 && c <= 56) {
+          tile = TileType.WATER;
         }
       }
 
@@ -240,9 +355,9 @@ export function generateMap(): number[][] {
 export const INITIAL_QUESTS: Record<string, Quest> = {
   wallet: {
     id: "wallet",
-    title: "1. Registro no Templo de Thais",
+    title: "1. Registro no Templo Stellar",
     description: "Crie a sua própria conta segura na rede Stellar gerando seu par de chaves públicas e privadas.",
-    instructions: "Entre no Portal Leste (Ciano) na recepção para ir à Forja do Destino e fale com Pixel, o Ferreiro de Itens Raros.",
+    instructions: "Entre no Portal Leste (Ciano) na recepção para ir à Forja do Destino e fale com Kael [NPC], o Ferreiro de Itens Raros.",
     reward: "Chave Pública (Endereço G...) + Chave Secreta (Seed Secreta)",
     status: "active",
   },
@@ -250,7 +365,7 @@ export const INITIAL_QUESTS: Record<string, Quest> = {
     id: "onramp",
     title: "2. Adquirir Moedas do Templo (On-Ramp)",
     description: "Compre seus primeiros Lumens (XLM) convertendo ouro fictício no balcão de câmbio do templo.",
-    instructions: "Entre no Portal Norte (Verde) para ir ao Porto de Câmbio e fale com o Capitão HC.",
+    instructions: "Entre no Portal Norte (Verde) para ir ao Porto de Câmbio e fale com o Capitão HC [NPC].",
     reward: "150 XLM de moedas para gastar no continente",
     status: "locked",
   },
@@ -258,7 +373,7 @@ export const INITIAL_QUESTS: Record<string, Quest> = {
     id: "soroban",
     title: "3. Negociar Raros Soroban (Smart Contracts)",
     description: "Use contratos inteligentes Soroban para trocar seus XLM por USDC (Ouro Estável) ou Runas de Batalha SORO.",
-    instructions: "Entre no Portal Oeste (Roxo) para ir ao Mercado do Templo e fale com a Alquimista.",
+    instructions: "Entre no Portal Oeste (Roxo) para ir ao Mercado do Templo e fale com a Alquimista [NPC].",
     reward: "Runas de Batalha SORO + USDC de Platina",
     status: "locked",
   },
@@ -266,7 +381,7 @@ export const INITIAL_QUESTS: Record<string, Quest> = {
     id: "hold",
     title: "4. Cofre do VIP Legend Holder",
     description: "Mostre seu compromisso de longo prazo travando suas moedas em um cofre inteligente para se tornar um Guardião Lendário.",
-    instructions: "Entre no Portal Sul (Dourado) para ir à Câmara Secreta e fale com Bobba, o Ancião.",
+    instructions: "Entre no Portal Sul (Dourado) para ir à Câmara Secreta e fale com Bobba [NPC], o Ancião.",
     reward: "Título de Guardião Lendário VIP Stellar Holder 🌟",
     status: "locked",
   },
@@ -276,23 +391,23 @@ export const INITIAL_QUESTS: Record<string, Quest> = {
 export const INITIAL_NPCS: NPC[] = [
   {
     id: "guide",
-    name: "Frank, o Mestre do Templo",
+    name: "Frank [NPC]",
     x: 27,
     y: 28,
     dir: "down",
     dialogs: [
       "Olá, jovem herói! Bem-vindo ao saguão principal do Templo Stellar!",
-      "Eu sou Frank, o Mestre do Templo. Meu trabalho é garantir que você não seja derrotado por trolls e aprenda tudo sobre a rede Stellar!",
+      "Eu sou Frank [NPC], o Mestre do Templo. Meu trabalho é garantir que você não seja derrotado por trolls e aprenda tudo sobre a rede Stellar!",
       "Para começar a sua jornada e poder negociar Runas Raras, você precisa de uma conta/carteira Stellar para guardar seus ativos de batalha.",
-      "Siga para o Leste (direita) cruzando a ponte e fale com Pixel, o Ferreiro de Raros, para forjar suas chaves mágicas!"
+      "Siga para o Leste (direita) cruzando a ponte e fale com Kael [NPC], o Ferreiro de Raros, para forjar suas chaves mágicas!"
     ],
     activeQuestDialogs: [
-      "Ainda sem uma conta? Vá para o Leste e fale com o Pixel para forjar seu par de chaves criptográficas!"
+      "Ainda sem uma conta? Vá para o Leste e fale com o Kael [NPC] para forjar seu par de chaves criptográficas!"
     ],
     completedDialogs: [
       "Sensacional! Você já registrou sua carteira Stellar. Veja seu endereço seguro no HUD na barra superior!",
       "Sua próxima missão é adquirir suas primeiras moedas XLM. O corredor ao Norte foi liberado!",
-      "Entre no Portal Norte e fale com o lendário Capitão HC na guarita de câmbio para realizar seu primeiro On-Ramp!"
+      "Entre no Portal Norte e fale com o lendário Capitão HC [NPC] na guarita de câmbio para realizar seu primeiro On-Ramp!"
     ],
     color: "#0c3150",
     accentColor: "#f0b000",
@@ -300,12 +415,12 @@ export const INITIAL_NPCS: NPC[] = [
   },
   {
     id: "keymaster",
-    name: "Pixel, o Ferreiro de Raros",
+    name: "Kael [NPC]",
     x: 52,
     y: 30,
     dir: "left",
     dialogs: [
-      "Saudações de batalha! Eu sou o Pixel, o maior ferreiro de Magic Plate Armors e Elmos Raros deste templo.",
+      "Saudações de batalha! Eu sou o Kael [NPC], o maior ferreiro de Magic Plate Armors e Elmos Raros deste templo.",
       "Na Stellar, você não faz login com e-mail e senha tradicionais. Você cria sua conta através de Criptografia Assimétrica de herói!",
       "A Chave Pública (começa com 'G') é o seu endereço ou ID do Templo. Todos no continente podem ver para te enviar moedas.",
       "A Chave Secreta (começa com 'S') é a chave do seu baú pessoal de tesouros. Se algum orc conseguir ela, levará todos os seus raros! Nunca revele ela a ninguém!",
@@ -316,7 +431,7 @@ export const INITIAL_NPCS: NPC[] = [
     ],
     completedDialogs: [
       "Sua conta foi criada e registrada com sucesso no Ledger da rede Stellar!",
-      "Agora que possui uma identidade, você está pronto para pegar moedas de catálogo. Siga para o Norte e fale com o Capitão HC!"
+      "Agora que possui uma identidade, você está pronto para pegar moedas de catálogo. Siga para o Norte e fale com o Capitão HC [NPC]!"
     ],
     questTrigger: "wallet",
     color: "#ea580c",
@@ -325,12 +440,12 @@ export const INITIAL_NPCS: NPC[] = [
   },
   {
     id: "portmaster",
-    name: "Capitão HC (Herói do Continente)",
+    name: "Capitão HC [NPC]",
     x: 30,
     y: 8,
     dir: "down",
     dialogs: [
-      "Ahoy, aventureiro! Eu sou o Capitão HC, encarregado das rotas navais e das pontes financeiras do continente.",
+      "Ahoy, aventureiro! Eu sou o Capitão HC [NPC], encarregado das rotas navais e das pontes financeiras do continente.",
       "Na rede Stellar, chamamos as rampas de depósito e saque de 'Anchors' (Âncoras). Elas convertem ouro fictício em moedas digitais de verdade (XLM).",
       "Sem uma âncora, as moedas do mundo real não conseguiriam entrar na blockchain!",
       "Aproxime-se do Altar de Câmbio ao meu lado para fazer um depósito de ouro simulado e ganhar suas primeiras Crystal Coins!"
@@ -350,7 +465,7 @@ export const INITIAL_NPCS: NPC[] = [
   },
   {
     id: "scholar",
-    name: "Alquimista de Soroban",
+    name: "Alquimista [NPC]",
     x: 8,
     y: 30,
     dir: "right",
@@ -367,7 +482,7 @@ export const INITIAL_NPCS: NPC[] = [
     completedDialogs: [
       "Magnífico! A troca foi liquidada em menos de 2 segundos com taxas de centésimos de centavo!",
       "Seu inventário agora possui USDC e tokens SORO. Você é um mestre da negociação no catálogo!",
-      "O último teste te aguarda no Sul. Vá até a Câmara de Hold e fale com Bobba, o Ancião!"
+      "O último teste te aguarda no Sul. Vá até a Câmara de Hold e fale com Bobba [NPC], o Ancião!"
     ],
     questTrigger: "soroban",
     color: "#7c3aed",
@@ -376,7 +491,7 @@ export const INITIAL_NPCS: NPC[] = [
   },
   {
     id: "sage",
-    name: "Bobba, o Sábio do Deserto",
+    name: "Bobba [NPC]",
     x: 30,
     y: 52,
     dir: "up",

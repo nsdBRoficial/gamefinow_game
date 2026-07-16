@@ -50,12 +50,12 @@ export const CharacterCustomizer: React.FC<CharacterCustomizerProps> = ({
       <div className="flex items-center gap-2 border-b border-slate-800 pb-2.5">
         <Palette className="h-4.5 w-4.5 text-cyan-400" />
         <h3 className="text-xs font-black tracking-widest text-cyan-400 uppercase">
-          Customização Pixel Art (Tibia Style)
+          Customização do Personagem (Estilo Retrô)
         </h3>
       </div>
 
       <p className="text-[11px] text-slate-400 leading-relaxed">
-        Monte o estilo do seu herói pixelado quadrado! Escolha a cabeça, olhos, tronco, pernas e sapatos. As alterações aparecem no mapa na hora.
+        Monte o estilo do seu herói quadrado! Escolha a cabeça, olhos, tronco, pernas e sapatos. As alterações aparecem no mapa na hora.
       </p>
 
       {/* Nome do Personagem */}
@@ -73,7 +73,7 @@ export const CharacterCustomizer: React.FC<CharacterCustomizerProps> = ({
           />
           <button
             onClick={() => {
-              const names = ["Astro", "Stellar", "Giga", "TibiaLover", "FrankJr", "NodeRunner", "Lendario", "Sol", "Lua", "Gamer"];
+              const names = ["Astro", "Stellar", "Giga", "StellarLover", "FrankJr", "NodeRunner", "Lendario", "Sol", "Lua", "Gamer"];
               const randomName = names[Math.floor(Math.random() * names.length)] + Math.floor(Math.random() * 99);
               updateCustomization("name", randomName);
             }}
@@ -311,7 +311,7 @@ export const CharacterCustomizer: React.FC<CharacterCustomizerProps> = ({
 
       <div className="text-[10px] text-slate-500 text-center border-t border-slate-850 pt-2 flex items-center justify-center gap-1">
         <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
-        <span>Seu visual Tibia Pixel Art está salvo e ativo! Use WASD ou Teclas de Direção para explorar o mapa 60x60.</span>
+        <span>Seu visual de herói está salvo e ativo! Use WASD ou Teclas de Direção para explorar o mapa 60x60.</span>
       </div>
     </div>
   );
