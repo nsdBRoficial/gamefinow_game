@@ -5,7 +5,8 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { GameState, Player, NPC, Quest } from "../types";
-import { generateMap, TILE_SIZE, TileType, isCollidable, isBridgeBlocked, GRID_COLS, GRID_ROWS, MAP_DECORATIONS, GameDecoration, GameCreature } from "../gameData";
+import { TILE_SIZE, TileType, isCollidable, GRID_COLS, GRID_ROWS, GameDecoration, GameCreature } from "../gameData";
+import { getMapGrid, getMapDecorations, isGateBlocked, MapId } from "../maps";
 import { Compass, MapPin, Sparkles } from "lucide-react";
 
 interface GameCanvasProps {
@@ -29,7 +30,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [mapGrid] = useState<number[][]>(() => generateMap());
+  const mapGrid = getMapGrid((playerPos.mapId || "center") as MapId);
   const [dimensions, setDimensions] = useState({ width: 680, height: 480 });
   const latestPlayerPos = useRef(playerPos);
   const latestGameState = useRef(gameState);
@@ -312,39 +313,44 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       return;
     }
 
-    checkTerminalProximity(targetX, targetY);
+    checkTerminalProximity(targetX, targetY, playerPos.mapId || "center");
   };
 
   // Helper to check and notify proximity to terminals
-  const checkTerminalProximity = (x: number, y: number) => {
+  const checkTerminalProximity = (x: number, y: number, currentMapId: string) => {
     const state = latestGameState.current;
-    const completedCount = (Object.values(state.quests) as Quest[]).filter(q => q.status === "completed").length;
 
-    if (Math.abs(x - 26) <= 2 && Math.abs(y - 26) <= 2) {
-      onNearTerminal("atf");
-      return;
-    }
-    if (Math.abs(x - 54) <= 2 && Math.abs(y - 30) <= 2) {
-      onNearTerminal("wallet");
-      return;
-    }
-    if (Math.abs(x - 30) <= 2 && Math.abs(y - 6) <= 2) {
-      if (state.quests.wallet.status === "completed") {
-        onNearTerminal("onramp");
+    if (currentMapId === "center") {
+      if (Math.abs(x - 33) <= 2 && Math.abs(y - 28) <= 2) {
+        onNearTerminal("atf");
+        return;
       }
-      return;
-    }
-    if (Math.abs(x - 6) <= 2 && Math.abs(y - 30) <= 2) {
-      if (state.quests.onramp.status === "completed") {
-        onNearTerminal("soroban");
+    } else if (currentMapId === "east") {
+      if (Math.abs(x - 30) <= 2 && Math.abs(y - 30) <= 2) {
+        onNearTerminal("wallet");
+        return;
       }
-      return;
-    }
-    if (Math.abs(x - 30) <= 2 && Math.abs(y - 54) <= 2) {
-      if (state.quests.soroban.status === "completed") {
-        onNearTerminal("hold");
+    } else if (currentMapId === "north") {
+      if (Math.abs(x - 30) <= 2 && Math.abs(y - 30) <= 2) {
+        if (state.quests.wallet.status === "completed") {
+          onNearTerminal("onramp");
+        }
+        return;
       }
-      return;
+    } else if (currentMapId === "west") {
+      if (Math.abs(x - 30) <= 2 && Math.abs(y - 30) <= 2) {
+        if (state.quests.onramp.status === "completed") {
+          onNearTerminal("soroban");
+        }
+        return;
+      }
+    } else if (currentMapId === "south") {
+      if (Math.abs(x - 30) <= 2 && Math.abs(y - 30) <= 2) {
+        if (state.quests.soroban.status === "completed") {
+          onNearTerminal("hold");
+        }
+        return;
+      }
     }
 
     onNearTerminal(null);
@@ -487,14 +493,14 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           const nextX = p.x + randomDir.dx;
           const nextY = p.y + randomDir.dy;
 
-          // Stay within a bounds limit of their home region to keep them clustered
+          // Stay within safe bounds of their map
           let regionOk = false;
-          const region = getCoordinateRegion(nextX, nextY);
-          if (p.id === "mmo1" && region === "center") regionOk = true;
-          else if (p.id === "mmo2" && region === "west") regionOk = true;
-          else if (p.id === "mmo3" && region === "east") regionOk = true;
-          else if (p.id === "mmo4" && region === "north") regionOk = true;
-          else if (p.id === "mmo5" && region === "south") regionOk = true;
+          const activeMap = playerPos.mapId || "center";
+          if (p.id === "mmo1" && activeMap === "center") regionOk = true;
+          else if (p.id === "mmo2" && activeMap === "west") regionOk = true;
+          else if (p.id === "mmo3" && activeMap === "east") regionOk = true;
+          else if (p.id === "mmo4" && activeMap === "north") regionOk = true;
+          else if (p.id === "mmo5" && activeMap === "south") regionOk = true;
 
           if (
             regionOk &&
@@ -522,7 +528,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           const PHRASES = [
             "Partiu fazer Pix On-Ramp!",
             "Adorei o visual das costas do herói!",
-            "Este terminal ATF DEFI é massa demais!",
+            "Este terminal ATM DEFI é massa demais!",
             "Conectando ao terminal Stellar...",
             "Consenso em 5 segundos!",
             "A taxa de rede da Stellar é quase zero!",
@@ -574,43 +580,49 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           let finalX = targetX;
           let finalY = targetY;
           let triggeredTeleport = false;
+          let nextMapId: "center" | "east" | "west" | "north" | "south" = prev.mapId || "center";
 
           if (tile === TileType.PORTAL_EAST) {
-            finalX = 49;
+            nextMapId = "east";
+            finalX = 29;
             finalY = 30;
             triggeredTeleport = true;
           } else if (tile === TileType.PORTAL_WEST) {
-            finalX = 11;
+            nextMapId = "west";
+            finalX = 56;
             finalY = 30;
             triggeredTeleport = true;
           } else if (tile === TileType.PORTAL_NORTH) {
+            nextMapId = "north";
             finalX = 30;
-            finalY = 11;
+            finalY = 56;
             triggeredTeleport = true;
           } else if (tile === TileType.PORTAL_SOUTH) {
+            nextMapId = "south";
             finalX = 30;
-            finalY = 49;
+            finalY = 3;
             triggeredTeleport = true;
           } else if (tile === TileType.PORTAL_CENTER) {
+            nextMapId = "center";
             triggeredTeleport = true;
-            if (targetX > 45) {
-              finalX = 41;
+            if (prev.mapId === "east") {
+              finalX = 56;
               finalY = 30;
-            } else if (targetX < 15) {
-              finalX = 19;
+            } else if (prev.mapId === "west") {
+              finalX = 3;
               finalY = 30;
-            } else if (targetY < 15) {
+            } else if (prev.mapId === "north") {
               finalX = 30;
-              finalY = 19;
-            } else if (targetY > 45) {
+              finalY = 3;
+            } else if (prev.mapId === "south") {
               finalX = 30;
-              finalY = 41;
+              finalY = 56;
             }
           }
 
           if (triggeredTeleport) {
             teleportFlashRef.current = 1.0;
-            checkTerminalProximity(finalX, finalY);
+            checkTerminalProximity(finalX, finalY, nextMapId);
             return {
               ...prev,
               x: finalX,
@@ -619,10 +631,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
               targetY: finalY,
               isMoving: false,
               frame: 0,
+              mapId: nextMapId,
             };
           }
 
-          checkTerminalProximity(targetX, targetY);
+          checkTerminalProximity(targetX, targetY, prev.mapId || "center");
           return {
             ...prev,
             x: targetX,
@@ -686,7 +699,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             return { ...prev, dir: nextDir };
           }
 
-          const bridgeBlock = isBridgeBlocked(nextTargetX, nextTargetY, latestGameState.current.quests);
+          const bridgeBlock = isGateBlocked(playerPos.mapId || "center", nextTargetX, nextTargetY, latestGameState.current.quests);
           if (bridgeBlock.blocked) {
             return { ...prev, dir: nextDir };
           }
@@ -1192,7 +1205,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     if (!ctx) return;
 
     const playerPosVal = latestPlayerPos.current;
-    const currentRegion = getCoordinateRegion(playerPosVal.x, playerPosVal.y);
+    const currentRegion = playerPosVal.mapId || "center";
     const dims = latestDimensions.current;
     const calculatedWaveOffset = Math.floor(performance.now() / 250) % 16;
 
@@ -1237,44 +1250,82 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           continue;
         }
 
-        if (getTileRegion(c, r) !== currentRegion) {
-          continue;
-        }
-
         switch (tile) {
           case TileType.WATER:
-            ctx.fillStyle = "#0f1c30"; 
-            ctx.fillRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
-            
-            ctx.fillStyle = "#1e2d42";
-            const rippleX = (c * 17 + r * 13 + calculatedWaveOffset) % TILE_SIZE;
-            ctx.fillRect(worldX + rippleX, worldY + ((r * 7) % TILE_SIZE), 6, 1.5);
-            ctx.fillStyle = "#152438";
-            ctx.fillRect(worldX + (TILE_SIZE - rippleX), worldY + ((c * 11) % TILE_SIZE), 4, 1);
+            if (currentRegion === "east") {
+              // Molten volcanic lava
+              ctx.fillStyle = "#7c2d12"; 
+              ctx.fillRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
+              
+              ctx.fillStyle = "#ea580c";
+              const rippleX = (c * 17 + r * 13 + calculatedWaveOffset) % TILE_SIZE;
+              ctx.fillRect(worldX + rippleX, worldY + ((r * 7) % TILE_SIZE), 6, 2);
+              ctx.fillStyle = "#f97316";
+              ctx.fillRect(worldX + (TILE_SIZE - rippleX), worldY + ((c * 11) % TILE_SIZE), 4, 1.5);
+            } else if (currentRegion === "west") {
+              // Neon purple cooling fluid/glowing data stream
+              ctx.fillStyle = "#1e1b4b"; 
+              ctx.fillRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
+              
+              ctx.strokeStyle = "rgba(167, 139, 250, 0.25)";
+              ctx.lineWidth = 1;
+              const flowOffset = Math.floor(performance.now() / 150) % TILE_SIZE;
+              ctx.beginPath();
+              ctx.moveTo(worldX, worldY + (r % 2 === 0 ? 10 : 22));
+              ctx.lineTo(worldX + TILE_SIZE, worldY + (r % 2 === 0 ? 10 : 22));
+              ctx.stroke();
+
+              ctx.fillStyle = "#c084fc"; // Violet glowing bits
+              ctx.fillRect(worldX + ((c * 13 + flowOffset) % TILE_SIZE), worldY + (r % 2 === 0 ? 9 : 21), 4, 2);
+            } else {
+              // Standard water
+              ctx.fillStyle = "#0f1c30"; 
+              ctx.fillRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
+              
+              ctx.fillStyle = "#1e2d42";
+              const rippleX = (c * 17 + r * 13 + calculatedWaveOffset) % TILE_SIZE;
+              ctx.fillRect(worldX + rippleX, worldY + ((r * 7) % TILE_SIZE), 6, 1.5);
+              ctx.fillStyle = "#152438";
+              ctx.fillRect(worldX + (TILE_SIZE - rippleX), worldY + ((c * 11) % TILE_SIZE), 4, 1);
+            }
             break;
 
           case TileType.GRASS:
-            ctx.fillStyle = "#166534"; 
-            ctx.fillRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
-            
-            // Detailed grass tufts (like reference)
-            ctx.fillStyle = "#14532d";
-            const grassShift = (c * 13 + r * 17) % 12;
-            ctx.fillRect(worldX + 4 + grassShift, worldY + 8, 1.5, 4);
-            ctx.fillRect(worldX + 5 + grassShift, worldY + 10, 1.5, 2);
-            ctx.fillRect(worldX + 18 - grassShift, worldY + 20, 1.5, 4);
-            
-            // Red and gold pixel flowers
-            if ((c * 7 + r * 13) % 19 === 0) {
-              ctx.fillStyle = "#facc15";
-              ctx.fillRect(worldX + 12, worldY + 12, 2, 2);
-              ctx.fillStyle = "#ef4444";
-              ctx.fillRect(worldX + 10, worldY + 12, 2, 2);
-              ctx.fillRect(worldX + 14, worldY + 12, 2, 2);
-            } else if ((c * 3 + r * 19) % 23 === 0) {
-              ctx.fillStyle = "#fef08a";
-              ctx.fillRect(worldX + 8, worldY + 16, 2, 2);
-              ctx.fillRect(worldX + 12, worldY + 18, 1.5, 1.5);
+            if (currentRegion === "west") {
+              // Motherboard circuits green
+              ctx.fillStyle = "#022c22"; 
+              ctx.fillRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
+              ctx.strokeStyle = "#10b981"; 
+              ctx.lineWidth = 1;
+              ctx.strokeRect(worldX + 2, worldY + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+              if ((c * 7 + r * 13) % 9 === 0) {
+                ctx.fillStyle = "#fb923c"; // Transistors
+                ctx.fillRect(worldX + 14, worldY + 14, 3, 3);
+              }
+            } else {
+              // Standard grass
+              ctx.fillStyle = "#166534"; 
+              ctx.fillRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
+              
+              // Detailed grass tufts (like reference)
+              ctx.fillStyle = "#14532d";
+              const grassShift = (c * 13 + r * 17) % 12;
+              ctx.fillRect(worldX + 4 + grassShift, worldY + 8, 1.5, 4);
+              ctx.fillRect(worldX + 5 + grassShift, worldY + 10, 1.5, 2);
+              ctx.fillRect(worldX + 18 - grassShift, worldY + 20, 1.5, 4);
+              
+              // Red and gold pixel flowers
+              if ((c * 7 + r * 13) % 19 === 0) {
+                ctx.fillStyle = "#facc15";
+                ctx.fillRect(worldX + 12, worldY + 12, 2, 2);
+                ctx.fillStyle = "#ef4444";
+                ctx.fillRect(worldX + 10, worldY + 12, 2, 2);
+                ctx.fillRect(worldX + 14, worldY + 12, 2, 2);
+              } else if ((c * 3 + r * 19) % 23 === 0) {
+                ctx.fillStyle = "#fef08a";
+                ctx.fillRect(worldX + 8, worldY + 16, 2, 2);
+                ctx.fillRect(worldX + 12, worldY + 18, 1.5, 1.5);
+              }
             }
             break;
 
@@ -1302,66 +1353,146 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             break;
 
           case TileType.STONE_PATH:
-            // Soft slate-200 base with elegant dark joint lines
-            ctx.fillStyle = "#e2e8f0";
-            ctx.fillRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
-            
-            ctx.fillStyle = "#94a3b8";
-            ctx.fillRect(worldX, worldY, TILE_SIZE, 1.5);
-            ctx.fillRect(worldX, worldY, 1.5, TILE_SIZE);
-            ctx.fillRect(worldX + TILE_SIZE / 2, worldY, 1.5, TILE_SIZE);
-            ctx.fillRect(worldX, worldY + TILE_SIZE / 2, TILE_SIZE, 1.5);
-            
-            ctx.fillStyle = "#cbd5e1";
-            ctx.fillRect(worldX + 2, worldY + 2, TILE_SIZE / 2 - 4, TILE_SIZE / 2 - 4);
-            ctx.fillRect(worldX + TILE_SIZE / 2 + 2, worldY + 2, TILE_SIZE / 2 - 4, TILE_SIZE / 2 - 4);
-            ctx.fillRect(worldX + 2, worldY + TILE_SIZE / 2 + 2, TILE_SIZE / 2 - 4, TILE_SIZE / 2 - 4);
-            ctx.fillRect(worldX + TILE_SIZE / 2 + 2, worldY + TILE_SIZE / 2 + 2, TILE_SIZE / 2 - 4, TILE_SIZE / 2 - 4);
+            if (currentRegion === "west") {
+              // Carbon fiber cyber track
+              ctx.fillStyle = "#18181b"; 
+              ctx.fillRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
+              ctx.strokeStyle = "#f59e0b"; 
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.moveTo(worldX + TILE_SIZE / 2, worldY);
+              ctx.lineTo(worldX + TILE_SIZE / 2, worldY + TILE_SIZE);
+              ctx.stroke();
+              if ((c + r) % 4 === 0) {
+                ctx.fillStyle = "#f59e0b";
+                ctx.fillRect(worldX + TILE_SIZE / 2 - 2, worldY + TILE_SIZE / 2 - 2, 4, 4);
+              }
+            } else {
+              // Soft slate-200 base with elegant dark joint lines
+              ctx.fillStyle = "#e2e8f0";
+              ctx.fillRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
+              
+              ctx.fillStyle = "#94a3b8";
+              ctx.fillRect(worldX, worldY, TILE_SIZE, 1.5);
+              ctx.fillRect(worldX, worldY, 1.5, TILE_SIZE);
+              ctx.fillRect(worldX + TILE_SIZE / 2, worldY, 1.5, TILE_SIZE);
+              ctx.fillRect(worldX, worldY + TILE_SIZE / 2, TILE_SIZE, 1.5);
+              
+              ctx.fillStyle = "#cbd5e1";
+              ctx.fillRect(worldX + 2, worldY + 2, TILE_SIZE / 2 - 4, TILE_SIZE / 2 - 4);
+              ctx.fillRect(worldX + TILE_SIZE / 2 + 2, worldY + 2, TILE_SIZE / 2 - 4, TILE_SIZE / 2 - 4);
+              ctx.fillRect(worldX + 2, worldY + TILE_SIZE / 2 + 2, TILE_SIZE / 2 - 4, TILE_SIZE / 2 - 4);
+              ctx.fillRect(worldX + TILE_SIZE / 2 + 2, worldY + TILE_SIZE / 2 + 2, TILE_SIZE / 2 - 4, TILE_SIZE / 2 - 4);
+            }
             break;
 
           case TileType.BRIDGE:
-            ctx.fillStyle = "#7c2d12"; 
-            ctx.fillRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
-            ctx.fillStyle = "#451a03";
-            ctx.fillRect(worldX, worldY + 4, TILE_SIZE, 1.5);
-            ctx.fillRect(worldX, worldY + 12, TILE_SIZE, 1.5);
-            ctx.fillRect(worldX, worldY + 20, TILE_SIZE, 1.5);
-            ctx.fillRect(worldX, worldY + 28, TILE_SIZE, 1.5);
-            ctx.fillStyle = "#94a3b8";
-            ctx.fillRect(worldX + 2, worldY + 6, 1.5, 1.5);
-            ctx.fillRect(worldX + TILE_SIZE - 3.5, worldY + 6, 1.5, 1.5);
+            if (currentRegion === "west") {
+              // Cyber holographic platform bridge
+              ctx.fillStyle = "rgba(6, 182, 212, 0.2)"; 
+              ctx.fillRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
+              ctx.strokeStyle = "#06b6d4"; 
+              ctx.lineWidth = 1.5;
+              ctx.strokeRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
+              
+              // Animated holographic scanline
+              ctx.fillStyle = "rgba(6, 182, 212, 0.4)";
+              const scanY = Math.floor(performance.now() / 15) % TILE_SIZE;
+              ctx.fillRect(worldX, worldY + scanY, TILE_SIZE, 1.5);
+            } else {
+              ctx.fillStyle = "#7c2d12"; 
+              ctx.fillRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
+              ctx.fillStyle = "#451a03";
+              ctx.fillRect(worldX, worldY + 4, TILE_SIZE, 1.5);
+              ctx.fillRect(worldX, worldY + 12, TILE_SIZE, 1.5);
+              ctx.fillRect(worldX, worldY + 20, TILE_SIZE, 1.5);
+              ctx.fillRect(worldX, worldY + 28, TILE_SIZE, 1.5);
+              ctx.fillStyle = "#94a3b8";
+              ctx.fillRect(worldX + 2, worldY + 6, 1.5, 1.5);
+              ctx.fillRect(worldX + TILE_SIZE - 3.5, worldY + 6, 1.5, 1.5);
+            }
             break;
 
           case TileType.FLOOR_DARK:
-            ctx.fillStyle = "#0f172a"; 
-            ctx.fillRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
-            ctx.strokeStyle = "#1e293b";
-            ctx.lineWidth = 1;
-            ctx.strokeRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
-            if ((c + r) % 5 === 0) {
-              ctx.fillStyle = "#1e293b";
-              ctx.fillRect(worldX + 10, worldY + 10, 12, 12);
+            if (currentRegion === "west") {
+              // Cyber grid floor
+              ctx.fillStyle = "#090d16"; 
+              ctx.fillRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
+              ctx.strokeStyle = "rgba(167, 139, 250, 0.15)";
+              ctx.lineWidth = 1;
+              ctx.strokeRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
+              if ((c * 7 + r * 13) % 17 === 0) {
+                ctx.fillStyle = "rgba(167, 139, 250, 0.4)";
+                ctx.fillRect(worldX + 15, worldY + 15, 2, 2);
+              }
+            } else {
+              ctx.fillStyle = "#0f172a"; 
+              ctx.fillRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
+              ctx.strokeStyle = "#1e293b";
+              ctx.lineWidth = 1;
+              ctx.strokeRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
+              if ((c + r) % 5 === 0) {
+                ctx.fillStyle = "#1e293b";
+                ctx.fillRect(worldX + 10, worldY + 10, 12, 12);
+              }
             }
             break;
 
           case TileType.TEMPLE_FLOOR:
-            ctx.fillStyle = "#020617"; 
-            ctx.fillRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
-            ctx.strokeStyle = "#ca8a04";
-            ctx.lineWidth = 1;
-            ctx.strokeRect(worldX + 3, worldY + 3, TILE_SIZE - 6, TILE_SIZE - 6);
+            if (currentRegion === "south") {
+              // Mossy forest floor / garden soil for South Sanctuary
+              ctx.fillStyle = "#14532d"; 
+              ctx.fillRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
+              ctx.fillStyle = "#166534";
+              if ((c * 5 + r * 11) % 7 === 0) {
+                ctx.fillRect(worldX + 8, worldY + 8, 3, 2);
+              }
+            } else if (currentRegion === "east") {
+              // Volcanic obsidian cavern floor for East Forge
+              ctx.fillStyle = "#1c1917"; 
+              ctx.fillRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
+              ctx.strokeStyle = "#7c2d12"; 
+              ctx.lineWidth = 1;
+              ctx.strokeRect(worldX + 3, worldY + 3, TILE_SIZE - 6, TILE_SIZE - 6);
+            } else {
+              ctx.fillStyle = "#020617"; 
+              ctx.fillRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
+              ctx.strokeStyle = "#ca8a04";
+              ctx.lineWidth = 1;
+              ctx.strokeRect(worldX + 3, worldY + 3, TILE_SIZE - 6, TILE_SIZE - 6);
+            }
             break;
 
           case TileType.WALL:
-            ctx.fillStyle = "#1e293b"; 
-            ctx.fillRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
-            ctx.fillStyle = "#0f172a";
-            ctx.fillRect(worldX, worldY + 10, TILE_SIZE, 1.5);
-            ctx.fillRect(worldX, worldY + 20, TILE_SIZE, 1.5);
-            ctx.fillRect(worldX + 12, worldY, 1.5, 10);
-            ctx.fillRect(worldX + 22, worldY + 10, 1.5, 10);
-            ctx.fillStyle = "#334155";
-            ctx.fillRect(worldX, worldY, TILE_SIZE, 2);
+            if (currentRegion === "west") {
+              // Cyber Server Wall Plating
+              ctx.fillStyle = "#111827"; 
+              ctx.fillRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
+              ctx.fillStyle = "#06b6d4"; // Cyan glowing strip
+              ctx.fillRect(worldX, worldY, TILE_SIZE, 1.5);
+              ctx.fillStyle = "#1f2937";
+              ctx.fillRect(worldX, worldY + 10, TILE_SIZE, 1.5);
+              ctx.fillRect(worldX + 15, worldY, 1.5, TILE_SIZE);
+              
+              // Blinking server LEDs
+              if ((c * 3 + r * 7) % 13 === 0) {
+                ctx.fillStyle = (Math.floor(performance.now() / 300) % 2 === 0) ? "#ef4444" : "#1f2937";
+                ctx.fillRect(worldX + 4, worldY + 4, 2, 2);
+              } else if ((c * 5 + r * 11) % 17 === 0) {
+                ctx.fillStyle = (Math.floor(performance.now() / 400) % 2 === 0) ? "#3b82f6" : "#1f2937";
+                ctx.fillRect(worldX + TILE_SIZE - 6, worldY + 4, 2, 2);
+              }
+            } else {
+              ctx.fillStyle = "#1e293b"; 
+              ctx.fillRect(worldX, worldY, TILE_SIZE, TILE_SIZE);
+              ctx.fillStyle = "#0f172a";
+              ctx.fillRect(worldX, worldY + 10, TILE_SIZE, 1.5);
+              ctx.fillRect(worldX, worldY + 20, TILE_SIZE, 1.5);
+              ctx.fillRect(worldX + 12, worldY, 1.5, 10);
+              ctx.fillRect(worldX + 22, worldY + 10, 1.5, 10);
+              ctx.fillStyle = "#334155";
+              ctx.fillRect(worldX, worldY, TILE_SIZE, 2);
+            }
             break;
 
           // Portal types
@@ -1398,41 +1529,24 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       }
     }
 
-    // 2. Render Bridges Gate Barriers (Lock indications)
-    if (currentRegion === "center") {
-      if (gameState.quests.wallet.status !== "completed") {
-        drawEnergyGate(ctx, 29, 17, "#22d3ee");
-        drawEnergyGate(ctx, 30, 17, "#22d3ee");
-      }
-      if (gameState.quests.onramp.status !== "completed" && gameState.quests.wallet.status === "completed") {
-        drawEnergyGate(ctx, 17, 29, "#34d399");
-        drawEnergyGate(ctx, 17, 30, "#34d399");
-      }
-      if (gameState.quests.soroban.status !== "completed" && gameState.quests.onramp.status === "completed") {
-        drawEnergyGate(ctx, 29, 43, "#a78bfa");
-        drawEnergyGate(ctx, 30, 43, "#a78bfa");
-      }
-    }
+    // 2. Render Bridges Gate Barriers (Lock indications) - Removed for free unrestricted access
+    // All portals are open and freely accessible!
 
     // 3. Render Special Terminals
     if (currentRegion === "center") {
-      drawInteractiveTerminal(ctx, 26, 26, "ATF DEFI", "#f43f5e");
+      drawInteractiveTerminal(ctx, 33, 28, "ATM DEFI", "#f43f5e");
     } else if (currentRegion === "east") {
-      drawInteractiveTerminal(ctx, 54, 30, "FORJA CHAVE", "#22d3ee");
+      drawInteractiveTerminal(ctx, 30, 30, "FORJA CHAVE", "#22d3ee");
     } else if (currentRegion === "north") {
-      drawInteractiveTerminal(ctx, 30, 6, "ON RAMP PORT", "#34d399");
+      drawInteractiveTerminal(ctx, 30, 30, "ON RAMP PORT", "#34d399");
     } else if (currentRegion === "west") {
-      drawInteractiveTerminal(ctx, 6, 30, "SOROBAN SWAP", "#a78bfa");
+      drawInteractiveTerminal(ctx, 30, 30, "SOROBAN SWAP", "#a78bfa");
     } else if (currentRegion === "south") {
-      drawInteractiveTerminal(ctx, 30, 54, "GOLD ESCROW", "#fbbf24");
+      drawInteractiveTerminal(ctx, 30, 30, "GOLD ESCROW", "#fbbf24");
     }
 
     // 4. Render Decorative Objects
-    MAP_DECORATIONS.forEach((dec) => {
-      if (getCoordinateRegion(dec.x, dec.y) !== currentRegion) {
-        return;
-      }
-
+    getMapDecorations(currentRegion as MapId).forEach((dec) => {
       const worldX = dec.x * TILE_SIZE;
       const worldY = dec.y * TILE_SIZE;
 
@@ -1542,7 +1656,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
     // 5. Render Passive Slime Blobs
     creaturesRef.current.forEach((slime) => {
-      if (getCoordinateRegion(slime.x, slime.y) !== currentRegion) {
+      if (currentRegion !== "center") {
         return;
       }
 
@@ -1624,10 +1738,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const gameStateVal = latestGameState.current;
 
     npcsVal.forEach((npc) => {
-      if (getCoordinateRegion(npc.x, npc.y) !== currentRegion) {
-        return;
-      }
-
       const worldX = npc.x * TILE_SIZE;
       const worldY = npc.y * TILE_SIZE;
 
@@ -1698,8 +1808,14 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
     // 6.5. Render MMO Other Players on the map
     otherPlayersRef.current.forEach((p) => {
-      // Only draw if they are in the current active region to maintain perfect multi-region immersion!
-      if (getCoordinateRegion(p.x, p.y) !== currentRegion) {
+      let drawPlayerOk = false;
+      if (p.id === "mmo1" && currentRegion === "center") drawPlayerOk = true;
+      else if (p.id === "mmo2" && currentRegion === "west") drawPlayerOk = true;
+      else if (p.id === "mmo3" && currentRegion === "east") drawPlayerOk = true;
+      else if (p.id === "mmo4" && currentRegion === "north") drawPlayerOk = true;
+      else if (p.id === "mmo5" && currentRegion === "south") drawPlayerOk = true;
+
+      if (!drawPlayerOk) {
         return;
       }
 

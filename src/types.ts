@@ -67,6 +67,7 @@ export interface Player {
   faceType: "none" | "glasses" | "beard" | "eyepatch" | "smile";
   accessoryType: "none" | "backpack" | "cape" | "sword";
   name: string;
+  mapId?: "center" | "east" | "west" | "north" | "south";
 }
 
 export interface NPC {

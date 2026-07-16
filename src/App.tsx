@@ -10,6 +10,7 @@ import { FloatingWindows } from "./components/FloatingWindows";
 import { LoginScreen } from "./components/LoginScreen";
 import { GameState, Player, NPC, Transaction, QuestId, Quest, WalletState } from "./types";
 import { INITIAL_QUESTS, INITIAL_NPCS } from "./gameData";
+import { getNpcsForMap } from "./maps";
 import { 
   Rocket, 
   HelpCircle, 
@@ -108,9 +109,9 @@ export default function App() {
     }
     return {
       x: 30,
-      y: 31,
+      y: 30,
       targetX: 30,
-      targetY: 31,
+      targetY: 30,
       dir: "down",
       isMoving: false,
       frame: 0,
@@ -125,6 +126,7 @@ export default function App() {
       faceType: "smile",
       accessoryType: "backpack",
       name: "Anonymo",
+      mapId: "center",
     };
   });
 
@@ -154,6 +156,7 @@ export default function App() {
   const [showPassport, setShowPassport] = useState(false);
   const [passportTab, setPassportTab] = useState<"attributes" | "credentials">("attributes");
   const [passportSecVisible, setPassportSecVisible] = useState(false);
+  const [showMapModal, setShowMapModal] = useState(false);
 
   const handleResetAndNewCharacter = () => {
     try {
@@ -166,9 +169,9 @@ export default function App() {
     // Reset player position to center
     setPlayerPos({
       x: 30,
-      y: 31,
+      y: 30,
       targetX: 30,
-      targetY: 31,
+      targetY: 30,
       dir: "down",
       isMoving: false,
       frame: 0,
@@ -183,6 +186,7 @@ export default function App() {
       faceType: "smile",
       accessoryType: "backpack",
       name: "Anonymo",
+      mapId: "center",
     });
 
     // Reset game state
@@ -226,6 +230,7 @@ export default function App() {
       targetY: 30,
       isMoving: false,
       dir: "down",
+      mapId: "center",
     }));
   };
 
@@ -554,7 +559,7 @@ export default function App() {
     }
   };
 
-  // Keyboard shortcut listener to advance dialogue boxes
+  // Keyboard shortcut listener to advance dialogue boxes and toggle full map
   useEffect(() => {
     const handleGlobalKeys = (e: KeyboardEvent) => {
       if (e.key === " " || e.key === "Enter") {
@@ -562,6 +567,13 @@ export default function App() {
           e.preventDefault();
           handleAdvanceDialog();
         }
+      } else if (e.key.toLowerCase() === "m") {
+        const target = e.target as HTMLElement;
+        if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) {
+          return;
+        }
+        e.preventDefault();
+        setShowMapModal((prev) => !prev);
       }
     };
     window.addEventListener("keydown", handleGlobalKeys);
@@ -586,33 +598,25 @@ export default function App() {
     return base;
   };
 
-  // Helper to determine region of a coordinate
-  const getRegionName = (x: number, y: number): string => {
-    const roundedX = Math.round(x);
-    const roundedY = Math.round(y);
-    if (roundedX >= 48 && roundedX <= 59 && roundedY >= 10 && roundedY <= 50) {
-      return "Templo Stellar (Forja de Chaves)";
+  // Helper to determine region name based on mapId
+  const getRegionName = (mapId: string): string => {
+    switch (mapId) {
+      case "center":
+        return "Praça Central Stellar";
+      case "east":
+        return "Templo Stellar (Cavernas Arenosas)";
+      case "north":
+        return "Porto de Cargas (Praia dos Anchors)";
+      case "west":
+        return "Plataforma Soroban (Distrito Cypherpunk)";
+      case "south":
+        return "Santuário do Holder (Floresta e Plantações)";
+      default:
+        return "Praça Central Stellar";
     }
-    if (roundedX >= 1 && roundedX <= 12 && roundedY >= 10 && roundedY <= 50) {
-      return "Plataforma de Trocas Soroban";
-    }
-    if (roundedX >= 10 && roundedX <= 50 && roundedY >= 1 && roundedY <= 12) {
-      return "Porto de Cargas (On-Ramp)";
-    }
-    if (roundedX >= 10 && roundedX <= 50 && roundedY >= 48 && roundedY <= 59) {
-      return "Câmara de Custódia de Ouro";
-    }
-    if (roundedX >= 18 && roundedX <= 42 && roundedY >= 18 && roundedY <= 42) {
-      return "Praça Central Stellar";
-    }
-    if (((roundedY === 29 || roundedY === 30) && roundedX >= 13 && roundedX <= 47) ||
-        ((roundedX === 29 || roundedX === 30) && roundedY >= 13 && roundedY <= 47)) {
-      return "Pontes de Conexão de Stellar";
-    }
-    return "Oceano de Dados / Limbo";
   };
 
-  const currentRegion = getRegionName(playerPos.x, playerPos.y);
+  const currentRegion = getRegionName(playerPos.mapId || "center");
 
   // Dynamic Title based on completed quests
   let playerTitle = "Náufrago Recém-Chegado";
@@ -628,7 +632,7 @@ export default function App() {
   const attrRes = 10 + completedCount * 4;
   const attrFaith = gameState.wallet.hasWallet ? 20 + completedCount * 12 : 0;
 
-  const isMovementBlocked = !!gameState.activeModal || !!gameState.activeDialog || !!activeWindow || showPassport;
+  const isMovementBlocked = !!gameState.activeModal || !!gameState.activeDialog || !!activeWindow || showPassport || showMapModal;
 
   if (!isLoggedIn) {
     return (
@@ -823,6 +827,23 @@ export default function App() {
             <span className="text-xl md:text-lg">🛡️</span>
           </button>
 
+          {/* Complete World Map Button */}
+          <button
+            onClick={() => {
+              setShowMapModal(!showMapModal);
+              playSynthSound("beep");
+            }}
+            className={`w-11 h-11 md:w-9 md:h-9 border-2 border-black rounded-lg flex items-center justify-center shadow-[2px_2.5px_0px_#000] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer transition ${
+              showMapModal ? "bg-amber-400 animate-pulse" : "bg-[#ebd9c0] hover:bg-[#f3e6d3]"
+            } group relative`}
+            title="Mapa Completo de Stellar [M]"
+          >
+            <span className="text-xl md:text-lg">🗺️</span>
+            <span className="absolute left-13 bg-black text-white text-[8px] uppercase tracking-wider px-2 py-1 rounded border border-white/20 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 font-mono">
+              Ver Mapa de Stellar [M]
+            </span>
+          </button>
+
           {/* New Character / Reset Sandbox button */}
           <button
             onClick={() => {
@@ -953,7 +974,7 @@ export default function App() {
             gameState={gameState}
             playerPos={playerPos}
             setPlayerPos={setPlayerPos}
-            npcs={npcs}
+            npcs={getNpcsForMap(playerPos.mapId || "center")}
             onTalkToNPC={handleTalkToNPC}
             onNearTerminal={(type) => {
               setIsNearTerminal(type);
@@ -997,7 +1018,7 @@ export default function App() {
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 w-72 max-w-[90%] bg-white border-3 border-black p-3 rounded-xl shadow-[3px_3px_0px_#000] flex flex-col gap-1.5 animate-bounce text-center">
             <div className="font-mono">
               <span className="text-[7.5px] text-[#ffbf00] font-black uppercase block tracking-wider leading-none">Terminal Disponível</span>
-              <span className="text-black font-black text-xs uppercase leading-tight">CONECTAR AO TERMINAL {isNearTerminal.toUpperCase()}</span>
+              <span className="text-black font-black text-xs uppercase leading-tight">CONECTAR AO TERMINAL {isNearTerminal === "atf" ? "ATM" : isNearTerminal.toUpperCase()}</span>
             </div>
             <button
               id="btn-open-terminal"
@@ -1302,6 +1323,128 @@ export default function App() {
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* 2.5 COMPLETE WORLD MAP MODAL SHORTCUT */}
+        {showMapModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs pointer-events-auto select-none animate-fade-in">
+            <div className="bg-[#ebd9c0] border-4 border-[#5c3e21] p-5 rounded-2xl shadow-[4px_6px_0px_#27190c] max-w-lg w-full text-[#3e2714] relative flex flex-col gap-4 font-sans border-double">
+              
+              {/* Header */}
+              <div className="flex items-center justify-between border-b-2 border-[#8b5c30]/40 pb-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">🗺️</span>
+                  <div>
+                    <h3 className="font-extrabold text-base sm:text-lg uppercase tracking-wide text-[#5c3e21]">Mapa de Stellar</h3>
+                    <p className="text-[9px] sm:text-[10px] text-slate-700 font-mono font-medium">Guia de Viagem das Rúnias e Portais</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowMapModal(false);
+                    playSynthSound("beep");
+                  }}
+                  className="w-7 h-7 bg-red-600 hover:bg-red-500 text-white border-2 border-black rounded flex items-center justify-center shadow-[1.5px_2px_0px_#000] active:translate-y-0.5 active:shadow-none cursor-pointer font-bold text-xs"
+                >
+                  X
+                </button>
+              </div>
+
+              {/* Map Layout Diagram */}
+              <div className="flex flex-col items-center gap-3 bg-[#dfcca7]/50 p-4 rounded-xl border-2 border-[#5c3e21]/20">
+                
+                {/* 1. NORTH WORLD */}
+                <div className="flex flex-col items-center">
+                  <div className={`w-36 px-2.5 py-1.5 rounded-lg border-2 text-center shadow-[1.5px_2px_0px_#000] relative ${
+                    playerPos.mapId === "north" 
+                      ? "bg-cyan-100 border-cyan-600 ring-2 ring-cyan-400 ring-offset-1 ring-offset-[#dfcca7]" 
+                      : "bg-[#f5ebd3] border-[#5c3e21]/60"
+                  }`}>
+                    {playerPos.mapId === "north" && <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-cyan-600 text-white text-[7px] font-bold px-1 py-0.2 rounded uppercase animate-bounce font-mono">Aqui 📍</span>}
+                    <div className="text-[10px] font-extrabold text-cyan-800">Porto de Cargas</div>
+                    <div className="text-[8px] text-slate-600 font-medium">Praia dos Anchors [Norte]</div>
+                  </div>
+                  {/* Vertical Connection */}
+                  <div className="h-4 w-0.5 bg-dashed border-l-2 border-[#5c3e21]/40"></div>
+                </div>
+
+                {/* 2. WEST, CENTER, EAST ROW */}
+                <div className="flex items-center gap-2 sm:gap-4 w-full justify-center">
+                  {/* WEST WORLD */}
+                  <div className={`w-28 sm:w-32 px-2 py-1.5 rounded-lg border-2 text-center shadow-[1.5px_2px_0px_#000] relative ${
+                    playerPos.mapId === "west" 
+                      ? "bg-purple-100 border-purple-600 ring-2 ring-purple-400 ring-offset-1 ring-offset-[#dfcca7]" 
+                      : "bg-[#f5ebd3] border-[#5c3e21]/60"
+                  }`}>
+                    {playerPos.mapId === "west" && <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-purple-600 text-white text-[7px] font-bold px-1 py-0.2 rounded uppercase animate-bounce font-mono">Aqui 📍</span>}
+                    <div className="text-[10px] font-extrabold text-purple-800">Plataforma Soroban</div>
+                    <div className="text-[8px] text-slate-600 font-medium">Cypherpunk [Oeste]</div>
+                  </div>
+
+                  {/* Horizontal Connector Left */}
+                  <div className="w-2 sm:w-4 h-0.5 border-t-2 border-dashed border-[#5c3e21]/40"></div>
+
+                  {/* CENTER WORLD */}
+                  <div className={`w-28 sm:w-32 px-2 py-1.5 rounded-lg border-2 text-center shadow-[1.5px_2px_0px_#000] relative ${
+                    (!playerPos.mapId || playerPos.mapId === "center") 
+                      ? "bg-emerald-100 border-emerald-600 ring-2 ring-emerald-400 ring-offset-1 ring-offset-[#dfcca7]" 
+                      : "bg-[#f5ebd3] border-[#5c3e21]/60"
+                  }`}>
+                    {(!playerPos.mapId || playerPos.mapId === "center") && <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-[7px] font-bold px-1 py-0.2 rounded uppercase animate-bounce font-mono">Aqui 📍</span>}
+                    <div className="text-[10px] font-extrabold text-emerald-800">Praça Central</div>
+                    <div className="text-[8px] text-slate-600 font-medium">Ponto Inicial [Centro]</div>
+                  </div>
+
+                  {/* Horizontal Connector Right */}
+                  <div className="w-2 sm:w-4 h-0.5 border-t-2 border-dashed border-[#5c3e21]/40"></div>
+
+                  {/* EAST WORLD */}
+                  <div className={`w-28 sm:w-32 px-2 py-1.5 rounded-lg border-2 text-center shadow-[1.5px_2px_0px_#000] relative ${
+                    playerPos.mapId === "east" 
+                      ? "bg-amber-100 border-amber-600 ring-2 ring-amber-400 ring-offset-1 ring-offset-[#dfcca7]" 
+                      : "bg-[#f5ebd3] border-[#5c3e21]/60"
+                  }`}>
+                    {playerPos.mapId === "east" && <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-amber-600 text-white text-[7px] font-bold px-1 py-0.2 rounded uppercase animate-bounce font-mono">Aqui 📍</span>}
+                    <div className="text-[10px] font-extrabold text-amber-800">Templo Stellar</div>
+                    <div className="text-[8px] text-slate-600 font-medium">Cavernas [Leste]</div>
+                  </div>
+                </div>
+
+                {/* 3. SOUTH WORLD */}
+                <div className="flex flex-col items-center">
+                  {/* Vertical Connection */}
+                  <div className="h-4 w-0.5 bg-dashed border-l-2 border-[#5c3e21]/40"></div>
+                  <div className={`w-36 px-2.5 py-1.5 rounded-lg border-2 text-center shadow-[1.5px_2px_0px_#000] relative ${
+                    playerPos.mapId === "south" 
+                      ? "bg-yellow-100 border-yellow-600 ring-2 ring-yellow-400 ring-offset-1 ring-offset-[#dfcca7]" 
+                      : "bg-[#f5ebd3] border-[#5c3e21]/60"
+                  }`}>
+                    {playerPos.mapId === "south" && <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-yellow-600 text-white text-[7px] font-bold px-1 py-0.2 rounded uppercase animate-bounce font-mono">Aqui 📍</span>}
+                    <div className="text-[10px] font-extrabold text-yellow-800">Santuário Holder</div>
+                    <div className="text-[8px] text-slate-600 font-medium">Floresta [Sul]</div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Informational Details / Instructions */}
+              <div className="bg-[#fcf8f2] p-3 rounded-lg border border-[#8b5c30]/20 text-[9.5px] leading-relaxed flex flex-col gap-1.5 font-mono">
+                <div className="font-bold uppercase text-[#5c3e21] border-b border-[#8b5c30]/20 pb-0.5 mb-0.5">ℹ️ Portais de Viagem Livre:</div>
+                <div className="text-emerald-700 font-bold text-center py-0.5 bg-emerald-50 rounded border border-emerald-200">
+                  ✨ TODOS OS PORTAIS ESTÃO 100% LIBERADOS E ABERTOS! ✨
+                </div>
+                <div className="text-slate-600 text-[9px] leading-normal">
+                  As rotas para o Leste, Norte, Oeste e Sul estão totalmente desbloqueadas para livre ida e volta. Cada bioma funciona de forma isolada, sendo uma área fechada com apenas o portal de retorno ligando de volta à Praça Central.
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="text-center text-[9px] text-slate-500 font-semibold font-mono uppercase tracking-wider">
+                Dica: Pressione <span className="bg-[#5c3e21]/15 text-[#3e2714] px-1 py-0.5 rounded border border-black/10 font-bold">[ M ]</span> para fechar
+              </div>
+
             </div>
           </div>
         )}

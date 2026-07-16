@@ -1661,7 +1661,7 @@ const AtfDefiModal: React.FC<AtfDefiProps> = ({ wallet, onClose, playerName, onU
         <div className="inline-flex p-3 bg-rose-500/10 text-rose-500 rounded-full border border-rose-500/20 animate-bounce">
           <Sparkles className="w-8 h-8" />
         </div>
-        <h2 className="text-xl font-black uppercase text-rose-500 tracking-tight font-mono">Totem ATF DEFI Consolidado</h2>
+        <h2 className="text-xl font-black uppercase text-rose-500 tracking-tight font-mono">Totem ATM DEFI Consolidado</h2>
         <p className="text-slate-400 text-xs">A rede Stellar reconheceu suas 4 insígnias. Você é agora um Herói de Elite!</p>
       </div>
 
