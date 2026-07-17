@@ -33,15 +33,22 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const mapGrid = getMapGrid((playerPos.mapId || "center") as MapId);
   const [dimensions, setDimensions] = useState({ width: 680, height: 480 });
   const latestPlayerPos = useRef(playerPos);
   const latestGameState = useRef(gameState);
   const latestDimensions = useRef(dimensions);
   const latestNpcs = useRef(npcs);
 
+  // CORREÇÃO RAIZ: mapGrid precisa ser uma ref para que o loop de animação
+  // (que é um closure) sempre leia o grid correto ao trocar de mapa.
+  // Uma variável normal só seria atualizada no próximo render do React,
+  // mas o game loop roda 60x/s sem esperar re-renders.
+  const mapGridRef = useRef<number[][]>(getMapGrid((playerPos.mapId || "center") as MapId));
+
   useEffect(() => {
     latestPlayerPos.current = playerPos;
+    // Atualiza o grid SEMPRE que o mapId do jogador mudar
+    mapGridRef.current = getMapGrid((playerPos.mapId || "center") as MapId);
   }, [playerPos]);
 
   useEffect(() => {
@@ -55,40 +62,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   useEffect(() => {
     latestNpcs.current = npcs;
   }, [npcs]);
-
-  // Helper to determine region of a player/NPC coordinate
-  const getCoordinateRegion = (x: number, y: number): "center" | "east" | "west" | "north" | "south" => {
-    const roundedX = Math.round(x);
-    const roundedY = Math.round(y);
-    if (roundedX >= 48 && roundedX <= 59 && roundedY >= 2 && roundedY <= 57) {
-      return "east";
-    }
-    if (roundedX >= 1 && roundedX <= 12 && roundedY >= 2 && roundedY <= 57) {
-      return "west";
-    }
-    if (roundedX >= 13 && roundedX <= 47 && roundedY >= 1 && roundedY <= 12) {
-      return "north";
-    }
-    if (roundedX >= 13 && roundedX <= 47 && roundedY >= 48 && roundedY <= 59) {
-      return "south";
-    }
-    return "center";
-  };
-
-  // Helper to determine region of a tile coordinate
-  const getTileRegion = (c: number, r: number): "center" | "east" | "west" | "north" | "south" | "none" => {
-    if (c >= 48 && c <= 59 && r >= 2 && r <= 57) return "east";
-    if (c >= 1 && c <= 12 && r >= 2 && r <= 57) return "west";
-    if (c >= 13 && c <= 47 && r >= 1 && r <= 12) return "north";
-    if (c >= 13 && c <= 47 && r >= 48 && r <= 59) return "south";
-    
-    // Bridges and central plaza are center
-    if (c >= 18 && c <= 42 && r >= 18 && r <= 42) return "center";
-    if ((r === 29 || r === 30) && c >= 13 && c <= 47) return "center";
-    if ((c === 29 || c === 30) && r >= 13 && r <= 47) return "center";
-    
-    return "none";
-  };
 
   // 2.2x default zoom factor for that perfectly sized close-up retro feel!
   const zoomLevel = 2.2;
@@ -440,7 +413,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           }
 
           if (nextX >= 20 && nextX <= 40 && nextY >= 20 && nextY <= 40) {
-            const tile = mapGrid[nextY][nextX];
+            const tile = mapGridRef.current[nextY][nextX];
             if (tile === TileType.GRASS) {
               c.targetX = nextX;
               c.targetY = nextY;
@@ -509,7 +482,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             regionOk &&
             nextX >= 0 && nextX < GRID_COLS &&
             nextY >= 0 && nextY < GRID_ROWS &&
-            !isCollidable(mapGrid[nextY][nextX])
+            !isCollidable(mapGridRef.current[nextY][nextX])
           ) {
             p.targetX = nextX;
             p.targetY = nextY;
@@ -579,7 +552,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
         if (newX === targetX && newY === targetY) {
           // Finished moving to cell, check portal teleportation instantly!
-          const tile = mapGrid[targetY][targetX];
+          const tile = mapGridRef.current[targetY][targetX];
           let finalX = targetX;
           let finalY = targetY;
           let triggeredTeleport = false;
@@ -587,39 +560,47 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
           if (tile === TileType.PORTAL_EAST) {
             nextMapId = "east";
-            finalX = 29;
-            finalY = 30;
+            // Nasce perto do portal de retorno (lado esquerdo do mapa Leste)
+            finalX = 4;
+            finalY = 29;
             triggeredTeleport = true;
           } else if (tile === TileType.PORTAL_WEST) {
             nextMapId = "west";
-            finalX = 56;
-            finalY = 30;
+            // Nasce perto do portal de retorno (lado direito do mapa Oeste)
+            finalX = 55;
+            finalY = 29;
             triggeredTeleport = true;
           } else if (tile === TileType.PORTAL_NORTH) {
             nextMapId = "north";
-            finalX = 30;
-            finalY = 56;
+            // Nasce perto do portal de retorno (lado sul do mapa Norte)
+            finalX = 29;
+            finalY = 55;
             triggeredTeleport = true;
           } else if (tile === TileType.PORTAL_SOUTH) {
             nextMapId = "south";
-            finalX = 30;
-            finalY = 3;
+            // Nasce perto do portal de retorno (lado norte do mapa Sul)
+            finalX = 29;
+            finalY = 4;
             triggeredTeleport = true;
           } else if (tile === TileType.PORTAL_CENTER) {
             nextMapId = "center";
             triggeredTeleport = true;
+            // Nasce dentro da praça central, perto da entrada correspondente
             if (prev.mapId === "east") {
-              finalX = 56;
-              finalY = 30;
+              finalX = 55;
+              finalY = 29;
             } else if (prev.mapId === "west") {
-              finalX = 3;
-              finalY = 30;
+              finalX = 4;
+              finalY = 29;
             } else if (prev.mapId === "north") {
-              finalX = 30;
-              finalY = 3;
+              finalX = 29;
+              finalY = 4;
             } else if (prev.mapId === "south") {
-              finalX = 30;
-              finalY = 56;
+              finalX = 29;
+              finalY = 55;
+            } else {
+              finalX = 29;
+              finalY = 29;
             }
           }
 
@@ -697,7 +678,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             return { ...prev, dir: nextDir };
           }
 
-          const targetTile = mapGrid[nextTargetY][nextTargetX];
+          const targetTile = mapGridRef.current[nextTargetY][nextTargetX];
           if (isCollidable(targetTile)) {
             return { ...prev, dir: nextDir };
           }
@@ -767,7 +748,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const bottomBound = playerWorldY + halfH + TILE_SIZE;
 
     // 1. Draw Map Tiles
-    drawMapTiles(ctx, mapGrid, currentRegion as MapId, leftBound, rightBound, topBound, bottomBound, calculatedWaveOffset, TILE_SIZE, GRID_ROWS, GRID_COLS);
+    drawMapTiles(ctx, mapGridRef.current, currentRegion as MapId, leftBound, rightBound, topBound, bottomBound, calculatedWaveOffset, TILE_SIZE, GRID_ROWS, GRID_COLS);
 
     // 2. Render Bridges Gate Barriers (Lock indications) - Removed for free unrestricted access
     // All portals are open and freely accessible!
