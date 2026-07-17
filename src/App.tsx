@@ -595,7 +595,7 @@ export default function App() {
   }
 
   return (
-    <div className="w-screen h-screen bg-[#0c0d0e] flex flex-col selection:bg-[#ffc600] selection:text-black font-sans relative overflow-hidden select-none">
+    <div className="w-screen h-screen bg-[#0c0d0e] flex flex-col selection:bg-[#ffc600] selection:text-black font-sans relative overflow-hidden select-none outline-none" tabIndex={0}>
       
       {/* CENTRAL 100% STANDALONE IN-GAME CONSOLE CONTAINER */}
       <div className="relative w-full h-full bg-[#0c0d0e] overflow-hidden flex flex-col">

@@ -256,12 +256,24 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       keysPressed.current[key] = false;
     };
 
+    // Auto-focus para ambientes como iframes (Vercel)
+    const handleFocus = () => {
+      window.focus();
+    };
+
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("click", handleFocus);
+    window.addEventListener("touchstart", handleFocus);
+    
+    // Forçar o foco inicial
+    window.focus();
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("click", handleFocus);
+      window.removeEventListener("touchstart", handleFocus);
     };
   }, [playerPos, npcs, gameState, isMovementBlocked]);
 
