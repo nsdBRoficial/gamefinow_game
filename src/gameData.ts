@@ -391,13 +391,13 @@ export const INITIAL_QUESTS: Record<string, Quest> = {
 export const INITIAL_NPCS: NPC[] = [
   {
     id: "guide",
-    name: "Frank [NPC]",
+    name: "James [NPC]",
     x: 27,
     y: 28,
     dir: "down",
     dialogs: [
       "Olá, jovem herói! Bem-vindo ao saguão principal do Templo Stellar!",
-      "Eu sou Frank [NPC], o Mestre do Templo. Meu trabalho é garantir que você não seja derrotado por trolls e aprenda tudo sobre a rede Stellar!",
+      "Eu sou James [NPC], o Mestre do Templo. Meu trabalho é garantir que você não seja derrotado por trolls e aprenda tudo sobre a rede Stellar!",
       "Para começar a sua jornada e poder negociar Runas Raras, você precisa de uma conta/carteira Stellar para guardar seus ativos de batalha.",
       "Siga para o Leste (direita) cruzando a ponte e fale com Kael [NPC], o Ferreiro de Raros, para forjar suas chaves mágicas!"
     ],

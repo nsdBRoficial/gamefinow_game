@@ -210,7 +210,6 @@ interface WalletForgeProps {
 }
 
 const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated, wallet }) => {
-  // Todos os hooks DEVEM ficar no topo, antes de qualquer return condicional (regra do React)
   const [copied, setCopied] = useState(false);
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [name, setName] = useState("");
@@ -223,8 +222,8 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
   const [copiedPub, setCopiedPub] = useState(false);
   const [copiedSec, setCopiedSec] = useState(false);
   const [secVisible, setSecVisible] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Funções auxiliares
   const copyKey = () => {
     if (wallet.publicKey) {
       navigator.clipboard.writeText(wallet.publicKey);
@@ -233,14 +232,12 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
     }
   };
 
-  // ─── TELA: Wallet já existe ───────────────────────────────────────────────
   if (wallet.hasWallet && wallet.publicKey) {
     const last8 = wallet.publicKey.slice(-8);
     const first6 = wallet.publicKey.slice(0, 6);
 
     return (
       <div className="space-y-5">
-        {/* Header */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center">
             <Check className="w-5 h-5 text-cyan-400" />
@@ -251,7 +248,6 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
           </div>
         </div>
 
-        {/* Status card */}
         <div className="bg-slate-800/70 border border-cyan-500/30 rounded-xl p-4 space-y-3">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
@@ -274,7 +270,6 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
             </div>
           </div>
 
-          {/* Saldos */}
           <div className="grid grid-cols-3 gap-2 pt-1">
             <div className="bg-slate-900/60 rounded-lg p-2 text-center">
               <p className="text-[9px] text-slate-500 font-mono uppercase">XLM</p>
@@ -305,22 +300,12 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
     );
   }
 
-  // ─── TELA: Onboarding (novo usuário) ─────────────────────────────────────
-
-
-  const onboardingSteps = [
-    "[WalletNow SDK] Conectando ao Testnet Gateway...",
-    "[WalletNow SDK] Solicitando assinatura de e-mail e chave de segurança...",
-    "[WalletNow SDK] Gerando par de chaves ED25519 no navegador...",
-    "[WalletNow SDK] Registrando credenciais de teste no ledger da Stellar...",
-    "[WalletNow SDK] Autenticando com sucesso! Chave pública emitida."
-  ];
-
   const startOnboarding = (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     if (!name || !email || !pin) return;
     if (pin.length < 6 || pin.length > 8) {
-      alert("Sua senha PIN deve ter entre 6 e 8 dígitos numéricos!");
+      setError("Sua senha PIN deve ter entre 6 e 8 dígitos numéricos!");
       return;
     }
 
@@ -343,7 +328,6 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
           setSdkLogs(prev => [...prev, "[WalletNow SDK] Solicitando assinatura de e-mail e passkey..."]);
           await new Promise(resolve => setTimeout(resolve, 500));
           
-          // 1 & 2. Initialize SDK and Create User
           const addLog = (msg: string) => {
             if (isSubscribed) setSdkLogs(prev => [...prev, msg]);
           };
@@ -352,7 +336,6 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
           const { publicKey: userAddress, secretKey: finalSecretKey } = await onboardUser(email, name, addLog);
           const finalPublicKey = userAddress;
 
-          // 3. Asset seamless funding via StellarAnchorService
           if (!isSubscribed) return;
           setSdkLogs(prev => [...prev, `[WalletNow SDK] Iniciando depósito fiduciário invisível via StellarAnchorService.seamlessFund("walletnow-app.vercel.app", userAddress, ..., "BRW")...`]);
           await new Promise(resolve => setTimeout(resolve, 600));
@@ -387,7 +370,6 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
           ]);
 
           try {
-            // Make a real call to the Stellar Friendbot to activate and fund the account with 10k XLM
             const response = await fetch(`https://friendbot.stellar.org/?addr=${finalPublicKey}`);
             if (!isSubscribed) return;
             
@@ -426,7 +408,6 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
             `[WalletNow SDK] Ativando Modo Sandbox local de contingência para garantir o jogo...`
           ]);
           
-          // Contingency fallback so the game never breaks if the network or SDK has a hiccup
           const fallbackKeys = generateRealStellarKeypair();
           await new Promise(resolve => setTimeout(resolve, 1500));
           if (!isSubscribed) return;
@@ -460,7 +441,7 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
       {step === 1 && (
         <form onSubmit={startOnboarding} className="space-y-4">
           <div className="flex items-center space-x-3 text-cyan-400">
-            <Key className="h-7 w-7 animate-pulse" />
+            <Shield className="h-7 w-7 animate-pulse" />
             <h2 className="text-xl font-black uppercase tracking-tight font-mono">Onboarding WalletNow</h2>
           </div>
           <p className="text-xs text-slate-300 leading-relaxed">
@@ -513,6 +494,12 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
               <span className="text-[9px] text-slate-500 mt-0.5 block font-medium">Apenas números. O PIN deve ter entre 6 e 8 dígitos.</span>
             </div>
           </div>
+          
+          {error && (
+            <div className="bg-red-500/20 border border-red-500/50 text-red-400 p-2 text-xs rounded font-medium">
+              {error}
+            </div>
+          )}
 
           <div className="rounded-lg bg-cyan-950/40 p-3 border border-cyan-800/30 text-[10px] text-cyan-300 leading-relaxed space-y-1">
             <p className="font-black uppercase">ℹ Integração Testnet Kit:</p>
@@ -541,7 +528,7 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
                 <span className="text-slate-500">[{new Date().toLocaleTimeString()}]</span> {log}
               </p>
             ))}
-            {logIndex < onboardingSteps.length && (
+            {logIndex < 5 && (
               <p className="text-slate-600 animate-pulse">Running SDK pipeline...</p>
             )}
           </div>
@@ -658,11 +645,8 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, o
   const [fiatAmount, setFiatAmount] = useState<number>(100);
   const [step, setStep] = useState<1 | 2 | 3>(1); // 1: Config, 2: PIX QR Display / Processing, 3: Success
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // WalletNow Testnet Kit Coin Prices
-  // 1 XLM = R$ 0.66
-  // 1 USDW = R$ 5.40
-  // 1 BRW = R$ 1.00
   const coinRates = {
     XLM: 0.66,
     USDW: 5.40,
@@ -675,11 +659,11 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, o
     if (activeTab === "deposit") {
       setStep(2);
     } else {
-      // Direct simulated offramp withdrawal
+      setError(null);
       const balanceField = asset === "XLM" ? "xlmBalance" : asset === "USDW" ? "usdwBalance" : "brwBalance";
       const currentBalance = wallet[balanceField] || 0;
       if (currentBalance < computedCoins) {
-        alert("Saldo de moedas insuficiente para saque!");
+        setError("Saldo de moedas insuficiente para saque!");
         return;
       }
       setLoading(true);
@@ -708,6 +692,7 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, o
 
   const confirmDepositPayment = async () => {
     setLoading(true);
+    setError(null);
     try {
       const balanceField = asset === "XLM" ? "xlmBalance" : asset === "USDW" ? "usdwBalance" : "brwBalance";
       const currentBalance = wallet[balanceField] || 0;
@@ -724,7 +709,7 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, o
         id: txHash,
         type: "ON_RAMP_PIX",
         timestamp: new Date().toLocaleTimeString(),
-        amount: computedCoins.toString(), // amount from API is hardcoded in mock, use computed
+        amount: computedCoins.toString(),
         asset: asset,
         fee: "0.00001",
         memo: `Depósito via PIX (On-Ramp WalletNow)`,
@@ -741,7 +726,7 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, o
       setStep(3);
     } catch (err) {
       console.error(err);
-      alert("Erro ao processar depósito");
+      setError("Erro ao processar transação");
     } finally {
       setLoading(false);
     }
@@ -756,13 +741,13 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, o
             <h2 className="text-xl font-black uppercase tracking-tight font-mono">Câmbio PIX (WalletNow On/Off Ramp)</h2>
           </div>
 
-          {/* Tab Selector */}
           <div className="grid grid-cols-2 gap-2 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
             <button
               type="button"
               onClick={() => {
                 setActiveTab("deposit");
                 setFiatAmount(100);
+                setError(null);
               }}
               className={`py-1.5 rounded-lg text-xs font-bold uppercase transition cursor-pointer ${
                 activeTab === "deposit" ? "bg-emerald-500 text-black" : "text-slate-400 hover:text-white"
@@ -775,6 +760,7 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, o
               onClick={() => {
                 setActiveTab("withdraw");
                 setFiatAmount(100);
+                setError(null);
               }}
               className={`py-1.5 rounded-lg text-xs font-bold uppercase transition cursor-pointer ${
                 activeTab === "withdraw" ? "bg-red-500 text-white" : "text-slate-400 hover:text-white"
@@ -785,7 +771,6 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, o
           </div>
 
           <div className="space-y-3.5 bg-slate-950/50 p-4 rounded-xl border border-slate-800">
-            {/* Currency Selector */}
             <div>
               <label className="block text-[10px] text-slate-400 font-extrabold uppercase mb-1.5">Escolha a Moeda:</label>
               <div className="grid grid-cols-3 gap-2">
@@ -806,7 +791,6 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, o
               </div>
             </div>
 
-            {/* Amount input */}
             <div>
               <label className="block text-[10px] text-slate-400 font-extrabold uppercase mb-1">
                 {activeTab === "deposit" ? "Valor em Reais (R$):" : "Equivalente em Reais a Sacar (R$):"}
@@ -824,11 +808,16 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, o
               </div>
             </div>
 
-            {/* Calculations display */}
             <div className="flex justify-between items-center bg-slate-950 p-3 rounded-lg border border-slate-850 font-mono text-xs">
               <span className="text-slate-400">{activeTab === "deposit" ? "Você vai receber:" : "Você vai entregar:"}</span>
               <span className="text-emerald-400 font-extrabold">{computedCoins} {asset}</span>
             </div>
+            
+            {error && (
+              <div className="bg-red-500/20 border border-red-500/50 text-red-400 p-2 text-xs rounded font-medium">
+                {error}
+              </div>
+            )}
           </div>
 
           <button
@@ -856,7 +845,6 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, o
               Escaneie o QR Code simulado abaixo ou copie a chave de testes da WalletNow para liquidar.
             </p>
 
-            {/* Custom high contrast retro QR Code generator representation */}
             <div className="h-32 w-32 bg-white rounded-lg flex flex-col justify-between p-2.5 relative select-none">
               <div className="grid grid-cols-6 gap-1.5 w-full h-full">
                 {Array.from({ length: 36 }).map((_, i) => (
@@ -951,8 +939,6 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
   const [error, setError] = useState<string | null>(null);
 
   // Rate matrices
-  // Base rates: 1 XLM = 0.12 USDW = 0.65 BRW
-  // Therefore: 1 USDW = 5.40 BRW
   const rates = {
     XLM: { XLM: 1, USDW: 0.12, BRW: 0.65 },
     USDW: { XLM: 8.33, USDW: 1, BRW: 5.40 },
@@ -1121,7 +1107,6 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
             <h2 className="text-xl font-black uppercase tracking-tight font-mono">DEX & Liquidez (Soroban AMM)</h2>
           </div>
 
-          {/* Section Selector */}
           <div className="grid grid-cols-2 gap-2 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
             <button
               type="button"
@@ -1169,7 +1154,6 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
               </p>
 
               <div className="space-y-3 bg-slate-950 p-3.5 rounded-xl border border-slate-800">
-                {/* Pay block */}
                 <div>
                   <div className="flex justify-between items-center text-[10px] text-slate-400 font-extrabold uppercase mb-1">
                     <span>Você paga:</span>
@@ -1199,7 +1183,6 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
                   <ArrowRightLeft className="h-4 w-4 transform rotate-90" />
                 </div>
 
-                {/* Receive block */}
                 <div>
                   <div className="flex justify-between items-center text-[10px] text-slate-400 font-extrabold uppercase mb-1">
                     <span>Você recebe (Estimativa):</span>
@@ -1264,14 +1247,12 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
               </button>
             </div>
           ) : (
-            // POOLS COMPONENT
             <div className="space-y-3">
               <p className="text-xs text-slate-300 leading-relaxed">
                 Adicione liquidez a um dos pares para receber moedas LP do ecossistema WalletNow e ganhar taxas de negociação distribuídas.
               </p>
 
               <div className="space-y-3 bg-slate-950 p-4 rounded-xl border border-slate-800">
-                {/* Pool selector */}
                 <div>
                   <label className="block text-[10px] text-slate-400 font-extrabold uppercase mb-1.5">Escolha o Par da Piscina (AMM):</label>
                   <div className="grid grid-cols-2 gap-2">
@@ -1300,7 +1281,6 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
                   </div>
                 </div>
 
-                {/* Proportional amount input */}
                 <div className="grid grid-cols-2 gap-3 pt-1">
                   <div>
                     <label className="block text-[9px] text-slate-400 font-extrabold uppercase mb-1">
@@ -1331,7 +1311,6 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
                   </div>
                 </div>
 
-                {/* User shares display */}
                 <div className="border-t border-slate-800 pt-2.5 flex justify-between items-center text-xs">
                   <span className="text-slate-400">Seus tokens LP_{poolType}:</span>
                   <span className="text-violet-400 font-black font-mono">
@@ -1339,7 +1318,6 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
                   </span>
                 </div>
 
-                {/* On-Chain Verified Pool Details */}
                 <div className="border-t border-slate-800/60 pt-2.5 mt-2 text-[9px] space-y-1 font-mono text-slate-500">
                   <p className="text-[10px] text-slate-400 font-extrabold uppercase mb-1">🔗 Detalhes do Contrato Soroban:</p>
                   {poolType === "XLM_USDW" ? (
@@ -1446,23 +1424,21 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
   const [vaultAsset, setVaultAsset] = useState<"XLM" | "USDW" | "BRW">("XLM");
   const [amount, setAmount] = useState<number>(20);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   
-  // Realtime ticker states for simulated DeFi yield!
   const [simulatedYield, setSimulatedYield] = useState<number>(0);
 
-  // Vault interest rates (APY)
   const vaultAPYs = {
-    XLM: 12,  // 12% APY
-    USDW: 18, // 18% APY
-    BRW: 15   // 15% APY
+    XLM: 12,
+    USDW: 18,
+    BRW: 15
   };
 
-  // Simulating live compounding yield increase every second to blow the user's mind!
   useEffect(() => {
     const totalDeposited = (wallet.vaultXlm || 0) + (wallet.vaultUsdw || 0) + (wallet.vaultBrw || 0);
     if (totalDeposited > 0) {
       const interval = setInterval(() => {
-        // Increment yield by fractions
         setSimulatedYield(prev => prev + 0.000015 * (totalDeposited / 10));
       }, 1000);
       return () => clearInterval(interval);
@@ -1470,6 +1446,8 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
   }, [wallet.vaultXlm, wallet.vaultUsdw, wallet.vaultBrw]);
 
   const handleDeposit = async () => {
+    setError(null);
+    setSuccess(null);
     const balanceField = vaultAsset === "XLM" ? "xlmBalance" : vaultAsset === "USDW" ? "usdwBalance" : "brwBalance";
     const vaultField = vaultAsset === "XLM" ? "vaultXlm" : vaultAsset === "USDW" ? "vaultUsdw" : "vaultBrw";
 
@@ -1477,7 +1455,7 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
     const locked = wallet[vaultField] || 0;
 
     if (balance < amount) {
-      alert("Saldo de moedas insuficiente!");
+      setError("Saldo de moedas insuficiente!");
       return;
     }
 
@@ -1506,17 +1484,19 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
       };
 
       onHoldSuccess(vaultAsset, amount, updatedFields, tx);
-      alert(`Você depositou com sucesso ${amount} ${vaultAsset} no cofre de rendimentos da WalletNow! TX: ${txHash}`);
+      setSuccess(`Você depositou com sucesso ${amount} ${vaultAsset} no cofre de rendimentos da WalletNow! TX: ${txHash}`);
       setAmount(20);
     } catch (err) {
       console.error(err);
-      alert("Erro ao realizar depósito no Vault");
+      setError("Erro ao realizar depósito no Vault");
     } finally {
       setLoading(false);
     }
   };
 
   const handleWithdraw = () => {
+    setError(null);
+    setSuccess(null);
     const balanceField = vaultAsset === "XLM" ? "xlmBalance" : vaultAsset === "USDW" ? "usdwBalance" : "brwBalance";
     const vaultField = vaultAsset === "XLM" ? "vaultXlm" : vaultAsset === "USDW" ? "vaultUsdw" : "vaultBrw";
 
@@ -1524,7 +1504,7 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
     const locked = wallet[vaultField] || 0;
 
     if (locked <= 0) {
-      alert("Você não possui fundos travados neste cofre!");
+      setError("Você não possui fundos travados neste cofre!");
       return;
     }
 
@@ -1532,7 +1512,6 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
     setTimeout(() => {
       setLoading(false);
 
-      // Distribute back vault deposits plus any accumulated simulated yield for this asset
       const yieldEarned = Number(simulatedYield.toFixed(4));
       const totalRefund = locked + yieldEarned;
 
@@ -1554,7 +1533,7 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
 
       onUpdateWallet(updatedFields, tx);
       setSimulatedYield(0);
-      alert(`Cofre liquidado! Você recebeu de volta seu depósito de ${locked} ${vaultAsset} somado com ${yieldEarned} ${vaultAsset} de juros!`);
+      setSuccess(`Cofre liquidado! Você recebeu de volta seu depósito de ${locked} ${vaultAsset} somado com ${yieldEarned} ${vaultAsset} de juros!`);
     }, 1500);
   };
 
@@ -1571,7 +1550,18 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
         No altar do Sul, você bloqueia seus tokens em cofres automatizados sem custódia para ganhar juros distribuídos e fidelizar sua conta de jogador.
       </p>
 
-      {/* Vault selector tabs */}
+      {error && (
+        <div className="bg-red-500/20 border border-red-500/50 text-red-400 p-2 text-xs rounded font-medium">
+          {error}
+        </div>
+      )}
+      
+      {success && (
+        <div className="bg-green-500/20 border border-green-500/50 text-green-400 p-2 text-xs rounded font-medium">
+          {success}
+        </div>
+      )}
+
       <div className="grid grid-cols-3 gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
         {(["XLM", "USDW", "BRW"] as const).map((v) => (
           <button
@@ -1590,7 +1580,6 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {/* Actions panel */}
         <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 flex flex-col justify-between">
           <div className="space-y-1.5">
             <span className="text-[10px] text-slate-400 font-extrabold uppercase block">Depositar no Cofre:</span>
@@ -1631,7 +1620,6 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
           </div>
         </div>
 
-        {/* Dashboard Vault info */}
         <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3.5">
           <div>
             <span className="text-[10px] text-slate-500 font-bold uppercase font-mono block">Status do seu Cofre:</span>
@@ -1643,7 +1631,6 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
                 +{vaultAPYs[vaultAsset]}% APY
               </span>
             </div>
-            {/* On-chain Contract address display */}
             <div className="mt-2 pt-1.5 border-t border-slate-800/60 flex justify-between items-center text-[8.5px] font-mono text-slate-500">
               <span>Contrato do Vault:</span>
               <span className="text-amber-500/90 font-bold select-all cursor-help" title="GBTR4BH2TMOEELCVYBAZ46TKGFGGQGUJK5LI3C32XYGIM475MFRSMVLO">
@@ -1652,7 +1639,6 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
             </div>
           </div>
 
-          {/* Simulated Yield Compounding block */}
           <div className="border-t border-slate-850 pt-2.5 space-y-1">
             <div className="flex justify-between items-center text-[10px] text-slate-500 font-bold uppercase font-mono">
               <span>Rendimentos Acumulados:</span>

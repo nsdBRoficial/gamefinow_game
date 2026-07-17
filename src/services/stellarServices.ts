@@ -113,15 +113,26 @@ export class StellarAnchorService {
  * TestnetKit Service (Simulates smart contract interaction on Soroban/Testnet)
  */
 export class TestnetKitService {
+  static getSorobanLP(asset1: string, asset2: string): string {
+    const pair = [asset1, asset2].sort().join("_");
+    const lps: Record<string, string> = {
+      "USDW_XLM": "47a53a0397612027cf5b53ef75c51641a63abbd9b45cab5f2a190fe109d4fc95",
+      "BRW_XLM": "e17cffd02087d50c97cfe7e3962e72e3e7c1c0279512c12e8f664230ee56ce46",
+      "BRW_USDW": "f132db26dc15ba3b4e6af619ed346c8955b4e37f2b8749880707b19176d599e2"
+    };
+    return lps[pair] || "unknown_lp_contract";
+  }
+
   static async executeSwap(
     walletAddress: string,
     fromAsset: string,
     toAsset: string,
     amount: number
-  ): Promise<{ txHash: string; received: number }> {
-    console.log(`[TestnetKitService] Executando Swap de ${amount} ${fromAsset} para ${toAsset} via Soroban...`);
+  ): Promise<{ txHash: string; received: number; contractId: string }> {
+    const contractId = this.getSorobanLP(fromAsset, toAsset);
+    console.log(`[TestnetKitService] Invoking Soroban AMM Swap no contrato LP: ${contractId}...`);
     
-    // Simulate network delay
+    // Simulate network delay for smart contract execution
     await new Promise((resolve) => setTimeout(resolve, 1800));
 
     // Base rates mock (just for testing logic)
@@ -132,9 +143,9 @@ export class TestnetKitService {
     };
     
     const received = Number((amount * rates[fromAsset][toAsset]).toFixed(2));
-    const txHash = "tx_swap_" + Math.random().toString(16).substring(2, 10);
+    const txHash = "tx_soroban_" + Math.random().toString(16).substring(2, 10);
     
-    return { txHash, received };
+    return { txHash, received, contractId };
   }
 
   static async addLiquidity(
@@ -142,8 +153,9 @@ export class TestnetKitService {
     assetA: string,
     assetB: string,
     amountA: number
-  ): Promise<{ txHash: string; lpMinted: number; requiredAmountB: number }> {
-    console.log(`[TestnetKitService] Adicionando Liquidez no Pool ${assetA}/${assetB}...`);
+  ): Promise<{ txHash: string; lpMinted: number; requiredAmountB: number; contractId: string }> {
+    const contractId = this.getSorobanLP(assetA, assetB);
+    console.log(`[TestnetKitService] Adicionando Liquidez no contrato LP: ${contractId}...`);
     
     await new Promise((resolve) => setTimeout(resolve, 2000));
     
@@ -152,14 +164,22 @@ export class TestnetKitService {
       USDW_BRW: 5.40
     };
     
-    const rateKey = `${assetA}_${assetB}`;
-    const requiredAmountB = Number((amountA * poolRates[rateKey]).toFixed(2));
+    // Normalizing order for rate lookup
+    const rateKey = poolRates[`${assetA}_${assetB}`] ? `${assetA}_${assetB}` : (assetA === "XLM" || assetB === "XLM" ? "XLM_USDW" : "USDW_BRW");
+    // Fallback logic
+    let reqMultiplier = poolRates[`${assetA}_${assetB}`];
+    if (!reqMultiplier) {
+         reqMultiplier = assetA === 'XLM' ? 0.12 : assetA === 'USDW' ? 5.40 : 1; 
+    }
+    
+    const requiredAmountB = Number((amountA * reqMultiplier).toFixed(2));
     const lpMinted = Number((amountA * 1.5).toFixed(2));
     
     return {
-      txHash: "tx_lp_" + Math.random().toString(16).substring(2, 10),
+      txHash: "tx_soroban_lp_" + Math.random().toString(16).substring(2, 10),
       lpMinted,
-      requiredAmountB
+      requiredAmountB,
+      contractId
     };
   }
 
