@@ -167,6 +167,7 @@ export const GameOverlay: React.FC<GameOverlayProps> = ({
               wallet={wallet} 
               onClose={onClose} 
               onUpdateWallet={onUpdateWallet}
+              onOnRampSuccess={onOnRampSuccess}
             />
           )}
           {activeModal === "soroban" && (
@@ -648,9 +649,10 @@ interface OnRampProps {
   wallet: WalletState;
   onClose: () => void;
   onUpdateWallet: (updatedFields: Partial<WalletState>, tx?: Transaction) => void;
+  onOnRampSuccess?: (asset: "XLM" | "USDW" | "BRW", amount: number, method: "PIX" | "CARD") => void;
 }
 
-const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet }) => {
+const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, onOnRampSuccess }) => {
   const [activeTab, setActiveTab] = useState<"deposit" | "withdraw">("deposit");
   const [asset, setAsset] = useState<"XLM" | "USDW" | "BRW">("BRW");
   const [fiatAmount, setFiatAmount] = useState<number>(100);
@@ -729,9 +731,13 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet })
         ledgerSequence: 6184293 + Math.floor(Math.random() * 100)
       };
 
-      onUpdateWallet({
-        [balanceField]: nextBalance
-      }, tx);
+      if (onOnRampSuccess) {
+        onOnRampSuccess(asset, computedCoins, "PIX");
+      } else {
+        onUpdateWallet({
+          [balanceField]: nextBalance
+        }, tx);
+      }
       setStep(3);
     } catch (err) {
       console.error(err);

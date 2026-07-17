@@ -369,15 +369,15 @@ export default function App() {
     });
   };
 
-  const handleOnRampSuccess = (xlmAdded: number, method: "PIX" | "CARD") => {
+  const handleOnRampSuccess = (asset: "XLM" | "USDW" | "BRW", amountAdded: number, method: "PIX" | "CARD") => {
     playSynthSound("coin");
     setGameState((prev) => {
       const newTx: Transaction = {
         id: generateTxHash(),
         type: method === "PIX" ? "ON_RAMP_PIX" : "ON_RAMP_CARD",
         timestamp: new Date().toLocaleTimeString(),
-        amount: xlmAdded.toString(),
-        asset: "XLM",
+        amount: amountAdded.toString(),
+        asset: asset,
         fee: "0.00001",
         memo: `Depósito via ${method}`,
         ledgerSequence: prev.currentLedger,
@@ -387,11 +387,13 @@ export default function App() {
       updatedQuests.onramp.status = "completed";
       updatedQuests.soroban.status = "active";
 
+      const balanceField = asset === "XLM" ? "xlmBalance" : asset === "USDW" ? "usdwBalance" : "brwBalance";
+
       return {
         ...prev,
         wallet: {
           ...prev.wallet,
-          xlmBalance: prev.wallet.xlmBalance + xlmAdded,
+          [balanceField]: (prev.wallet[balanceField] || 0) + amountAdded,
         },
         quests: updatedQuests,
         transactions: [newTx, ...prev.transactions],
