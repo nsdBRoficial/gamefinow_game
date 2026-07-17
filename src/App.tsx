@@ -678,7 +678,14 @@ export default function App() {
               >
                 {playerPos.x === 30 && playerPos.y === 31 ? "🛡️" : "⚔️"}
               </span>
-              <span className="text-sm animate-pulse" title="⚡ Aura de Velocidade (+10%)">⚡</span>
+              
+              {gameState.quests.onramp.status === "completed" && (
+                <>
+                  <span className="text-sm animate-pulse" title="💰 Investidor (Ativo no Mercado)">💰</span>
+                  <span className="text-sm animate-pulse" title="⚡ Aura de Velocidade (+10%)">⚡</span>
+                </>
+              )}
+
               {gameState.wallet.hasWallet && (
                 <span className="text-sm text-cyan-700 font-bold" title="🔑 Chaves Stellar Sincronizadas">🔑</span>
               )}

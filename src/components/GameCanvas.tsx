@@ -606,7 +606,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
       if (isMoving) {
         // Fast, modern retro game movement speed (0.22)
-        const speed = 0.22 * (delta / 16.66);
+        // Se concluiu on-ramp, ganha +10% de velocidade
+        const hasSpeedBuff = latestGameState.current.quests.onramp.status === "completed";
+        const baseSpeed = hasSpeedBuff ? 0.22 * 1.10 : 0.22;
+        const speed = baseSpeed * (delta / 16.66);
         
         let newX = x;
         let newY = y;
@@ -1090,10 +1093,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       shadowBlurVal = 6;
       hasBorderNeon = true;
     } else if (hasOnramp) {
-      borderStyle = "#39ff14";
-      shadowColor = "#10b981";
-      shadowBlurVal = 6;
-      hasBorderNeon = true;
+      // "o efeito neon no nome deve ser somente no nome dele" (não na borda ainda)
+      // O neon da borda vai para as próximas missões
     }
 
     // Apply global shadow for border drawing
