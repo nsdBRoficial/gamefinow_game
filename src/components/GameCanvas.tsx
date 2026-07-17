@@ -79,6 +79,16 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     { id: "slime6", name: "Blob", x: 32, y: 35, targetX: 32, targetY: 35, isMoving: false, frame: 0, color: "#b45309", level: 2, hp: 100, maxHp: 100, bounceOffset: 0, dir: "right" },
   ]);
 
+  // Cave Worms — criaturas exclusivas da caverna do Leste (East Map)
+  // Patrulham entre as paredes particionantes (rows 16..44, cols 4..58)
+  const wormsRef = useRef<GameCreature[]>([
+    { id: "worm1", name: "Cave Worm", x: 12, y: 20, targetX: 12, targetY: 20, isMoving: false, frame: 0, color: "#7f1d1d", level: 3, hp: 80,  maxHp: 80,  bounceOffset: 0, dir: "right" },
+    { id: "worm2", name: "Cave Worm", x: 40, y: 8,  targetX: 40, targetY: 8,  isMoving: false, frame: 0, color: "#991b1b", level: 4, hp: 100, maxHp: 100, bounceOffset: 0, dir: "left"  },
+    { id: "worm3", name: "Cave Worm", x: 20, y: 38, targetX: 20, targetY: 38, isMoving: false, frame: 0, color: "#6b21a8", level: 5, hp: 120, maxHp: 120, bounceOffset: 0, dir: "right" },
+    { id: "worm4", name: "Cave Worm", x: 48, y: 25, targetX: 48, targetY: 25, isMoving: false, frame: 0, color: "#be123c", level: 3, hp: 80,  maxHp: 80,  bounceOffset: 0, dir: "left"  },
+    { id: "worm5", name: "Cave Worm", x: 35, y: 50, targetX: 35, targetY: 50, isMoving: false, frame: 0, color: "#9f1239", level: 6, hp: 150, maxHp: 150, bounceOffset: 0, dir: "right" },
+  ]);
+
   // MMO Other Players walking around the 60x60 map in real time!
   const otherPlayersRef = useRef<any[]>([
     {
@@ -349,6 +359,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       // Update passive bouncing slimes
       updateCreatures(delta);
 
+      // Update cave worms (East map only, safe to run always)
+      updateWorms(delta);
+
       // Update MMO other players
       updateOtherPlayers(delta);
 
@@ -419,6 +432,68 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
               c.targetY = nextY;
               c.isMoving = true;
               c.frame = 0;
+            }
+          }
+        }
+      }
+    });
+  };
+
+  // Update cave worms in the East map — movem-se em qualquer tile nao-colisavel da caverna
+  const updateWorms = (delta: number) => {
+    const worms = wormsRef.current;
+    // Worms sao mais rapidos e implacaveis que os slimes
+    const speed = 0.14 * (delta / 16.66);
+
+    worms.forEach((w) => {
+      if (w.isMoving) {
+        let newX = w.x;
+        let newY = w.y;
+
+        if (w.x < w.targetX) newX = Math.min(w.targetX, w.x + speed);
+        else if (w.x > w.targetX) newX = Math.max(w.targetX, w.x - speed);
+        if (w.y < w.targetY) newY = Math.min(w.targetY, w.y + speed);
+        else if (w.y > w.targetY) newY = Math.max(w.targetY, w.y - speed);
+
+        w.x = newX;
+        w.y = newY;
+        w.frame = (w.frame + 0.2) % 4;
+        w.bounceOffset = Math.sin(w.frame * Math.PI * 0.5) * 3;
+
+        if (newX === w.targetX && newY === w.targetY) {
+          w.isMoving = false;
+          w.frame = 0;
+          w.bounceOffset = 0;
+        }
+      } else {
+        // Worms se movem mais frequentemente (0.015 vs 0.007 dos blobs)
+        if (Math.random() < 0.015) {
+          const dirs = [
+            { dx: 0, dy: -1, d: "left" as const },
+            { dx: 0, dy: 1, d: "right" as const },
+            { dx: -1, dy: 0, d: "left" as const },
+            { dx: 1, dy: 0, d: "right" as const },
+            // Worms tem tendencia horizontal (deslizam mais pros lados)
+            { dx: -1, dy: 0, d: "left" as const },
+            { dx: 1, dy: 0, d: "right" as const },
+          ];
+          const chosen = dirs[Math.floor(Math.random() * dirs.length)];
+          const nextX = Math.round(w.x) + chosen.dx;
+          const nextY = Math.round(w.y) + chosen.dy;
+
+          // Bounds da cave do leste (entre as paredes r=15 e r=45, c=4..57)
+          const inCaveBounds = nextX >= 4 && nextX <= 57 && nextY >= 4 && nextY <= 55;
+          // Evita as paredes particionantes do leste (r=15 e r=45)
+          const notOnWall = nextY !== 15 && nextY !== 45;
+
+          if (inCaveBounds && notOnWall && nextX >= 0 && nextX < GRID_COLS && nextY >= 0 && nextY < GRID_ROWS) {
+            const tile = mapGridRef.current[nextY][nextX];
+            if (!isCollidable(tile)) {
+              w.targetX = nextX;
+              w.targetY = nextY;
+              w.dir = chosen.d;
+              w.isMoving = true;
+              w.frame = 0;
             }
           }
         }
@@ -838,10 +913,112 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       ctx.fillRect(worldX - 7, worldY - 6, 46 * (slime.hp / slime.maxHp), 2);
     });
 
+    // 5.5 Render Cave Worms (exclusivos do mapa Leste)
+    if (currentRegion === "east") {
+      wormsRef.current.forEach((worm) => {
+        const wx = worm.x * TILE_SIZE;
+        const wy = worm.y * TILE_SIZE + worm.bounceOffset;
+
+        // Culling
+        if (wx < leftBound || wx > rightBound || wy < topBound || wy > bottomBound) return;
+
+        const facing = worm.dir === "right" ? 1 : -1;
+        // Ondula\u00e7\u00e3o sinuosa do corpo baseada no frame
+        const wiggle = Math.sin(worm.frame * Math.PI) * 2.5;
+
+        // Sombra
+        ctx.beginPath();
+        ctx.ellipse(wx + 16, wy + 27, 14, 3.5, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0,0,0,0.4)";
+        ctx.fill();
+
+        // Corpo principal: 4 segmentos sobrepostos (calda -> cabe\u00e7a)
+        const segments = [
+          { ox: -facing * 18, oy: wiggle * 0.4, r: 6 },
+          { ox: -facing * 9,  oy: wiggle * 0.7, r: 7 },
+          { ox: facing * 1,   oy: wiggle,        r: 8 },
+          { ox: facing * 10,  oy: wiggle * 0.5,  r: 7.5 },  // cabe\u00e7a
+        ];
+
+        segments.forEach((seg, i) => {
+          // Gradiente de cor: mais escuro na calda, mais brilhante na cabe\u00e7a
+          const brightness = 0.6 + i * 0.15;
+          ctx.save();
+          ctx.globalAlpha = 1;
+
+          // Escamas: c\u00edrculos ligeiramente mais escuros no corpo
+          ctx.beginPath();
+          ctx.ellipse(wx + 16 + seg.ox, wy + 20 + seg.oy, seg.r, seg.r * 0.65, 0, 0, Math.PI * 2);
+          ctx.fillStyle = worm.color;
+          ctx.globalAlpha = brightness;
+          ctx.fill();
+
+          // Linha de escama (detalhe)
+          if (i < 3) {
+            ctx.strokeStyle = "rgba(0,0,0,0.3)";
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.arc(wx + 16 + seg.ox, wy + 20 + seg.oy, seg.r * 0.55, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+          ctx.restore();
+        });
+
+        // Cabe\u00e7a com detalhes
+        const headX = wx + 16 + facing * 10;
+        const headY = wy + 20 + wiggle * 0.5;
+
+        // Chifrinhos / antenas
+        ctx.strokeStyle = worm.color;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(headX + facing * 4, headY - 4);
+        ctx.lineTo(headX + facing * 7, headY - 9);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(headX + facing * 3, headY - 5);
+        ctx.lineTo(headX + facing * 6, headY - 10);
+        ctx.stroke();
+
+        // Olhos brilhantes (vermelhos)
+        ctx.fillStyle = "#ff2222";
+        ctx.shadowColor = "#ff0000";
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        ctx.arc(headX + facing * 3.5, headY - 1, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        // Pupila
+        ctx.fillStyle = "#000";
+        ctx.beginPath();
+        ctx.arc(headX + facing * 3.5, headY - 1, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // HUD — nome e HP
+        ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+        ctx.fillRect(wx - 8, wy - 18, 52, 11);
+        ctx.strokeStyle = "#7f1d1d";
+        ctx.lineWidth = 0.6;
+        ctx.strokeRect(wx - 8, wy - 18, 52, 11);
+
+        ctx.fillStyle = "#fca5a5";
+        ctx.font = "bold 6px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(`WORM (LV.${worm.level})`, wx + 18, wy - 12);
+
+        // Barra de HP — vermelho escuro
+        ctx.fillStyle = "#1e293b";
+        ctx.fillRect(wx - 5, wy - 9, 46, 2);
+        ctx.fillStyle = "#dc2626";
+        ctx.fillRect(wx - 5, wy - 9, 46 * (worm.hp / worm.maxHp), 2);
+      });
+    }
+
     // 6. Render NPCs using the pixel character engine
     const npcsVal = latestNpcs.current;
     const gameStateVal = latestGameState.current;
     drawNPCs(ctx, npcsVal, gameStateVal, leftBound, rightBound, topBound, bottomBound);
+
 
     // 6.5. Render MMO Other Players on the map
     drawOtherPlayers(ctx, otherPlayersRef.current, currentRegion as MapId);
