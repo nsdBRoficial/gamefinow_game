@@ -454,9 +454,19 @@ export default function App() {
   useEffect(() => {
     const handleGlobalKeys = (e: KeyboardEvent) => {
       if (e.key === " " || e.key === "Enter") {
+        // Prevent default scroll on Space
+        const target = e.target as HTMLElement;
+        if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) {
+          return;
+        }
+        e.preventDefault();
+
         if (gameState.activeDialog) {
-          e.preventDefault();
+          // Avança diálogo se tiver um ativo
           handleAdvanceDialog();
+        } else if (!gameState.activeModal) {
+          // Abre terminal se jogador estiver próximo e não tiver modal aberto
+          handleTriggerModal();
         }
       } else if (e.key.toLowerCase() === "m") {
         const target = e.target as HTMLElement;
@@ -469,7 +479,7 @@ export default function App() {
     };
     window.addEventListener("keydown", handleGlobalKeys);
     return () => window.removeEventListener("keydown", handleGlobalKeys);
-  }, [gameState.activeDialog]);
+  }, [gameState.activeDialog, gameState.activeModal, isNearTerminal]);
 
   const activeQuestsArray = Object.values(gameState.quests) as Quest[];
   const completedCount = activeQuestsArray.filter(q => q.status === "completed").length;

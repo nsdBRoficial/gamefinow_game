@@ -158,7 +158,8 @@ export const GameOverlay: React.FC<GameOverlayProps> = ({
           {activeModal === "wallet" && (
             <WalletForgeModal 
               onClose={onClose} 
-              onWalletCreated={onWalletCreated} 
+              onWalletCreated={onWalletCreated}
+              wallet={wallet}
             />
           )}
           {activeModal === "onramp" && (
@@ -204,10 +205,13 @@ export const GameOverlay: React.FC<GameOverlayProps> = ({
 interface WalletForgeProps {
   onClose: () => void;
   onWalletCreated: (pubKey: string, secKey: string, name: string, email: string, pin: string) => void;
+  wallet: WalletState;
 }
 
-const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated }) => {
-  const [step, setStep] = useState<1 | 2 | 3>(1); // 1: Info & Fields, 2: SDK Onboarding Loading, 3: Keys display
+const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated, wallet }) => {
+  // Todos os hooks DEVEM ficar no topo, antes de qualquer return condicional (regra do React)
+  const [copied, setCopied] = useState(false);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [pin, setPin] = useState("");
@@ -218,6 +222,90 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
   const [copiedPub, setCopiedPub] = useState(false);
   const [copiedSec, setCopiedSec] = useState(false);
   const [secVisible, setSecVisible] = useState(false);
+
+  // Funções auxiliares
+  const copyKey = () => {
+    if (wallet.publicKey) {
+      navigator.clipboard.writeText(wallet.publicKey);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  // ─── TELA: Wallet já existe ───────────────────────────────────────────────
+  if (wallet.hasWallet && wallet.publicKey) {
+    const last8 = wallet.publicKey.slice(-8);
+    const first6 = wallet.publicKey.slice(0, 6);
+
+    return (
+      <div className="space-y-5">
+        {/* Header */}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center">
+            <Check className="w-5 h-5 text-cyan-400" />
+          </div>
+          <div>
+            <h2 className="text-lg font-black text-white font-mono tracking-tight">WALLET DETECTADA</h2>
+            <p className="text-xs text-cyan-400 font-mono">Wallet Forge — East Biome Terminal</p>
+          </div>
+        </div>
+
+        {/* Status card */}
+        <div className="bg-slate-800/70 border border-cyan-500/30 rounded-xl p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            <span className="text-green-400 text-xs font-bold font-mono uppercase tracking-wider">Conta Ativa na Stellar Testnet</span>
+          </div>
+
+          <div className="space-y-1">
+            <p className="text-slate-400 text-[10px] font-mono uppercase tracking-wider">Chave Pública</p>
+            <div className="flex items-center gap-2">
+              <code className="text-cyan-300 text-xs font-mono bg-slate-900/60 px-2 py-1 rounded-lg truncate flex-1">
+                {first6}...{last8}
+              </code>
+              <button
+                onClick={copyKey}
+                className="flex items-center gap-1 bg-cyan-600 hover:bg-cyan-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg transition-all font-mono"
+              >
+                {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                {copied ? "Copiado!" : "Copiar"}
+              </button>
+            </div>
+          </div>
+
+          {/* Saldos */}
+          <div className="grid grid-cols-3 gap-2 pt-1">
+            <div className="bg-slate-900/60 rounded-lg p-2 text-center">
+              <p className="text-[9px] text-slate-500 font-mono uppercase">XLM</p>
+              <p className="text-white font-black text-sm font-mono">{wallet.xlmBalance?.toFixed(2) ?? "0.00"}</p>
+            </div>
+            <div className="bg-slate-900/60 rounded-lg p-2 text-center">
+              <p className="text-[9px] text-slate-500 font-mono uppercase">USDW</p>
+              <p className="text-white font-black text-sm font-mono">{wallet.usdwBalance?.toFixed(2) ?? "0.00"}</p>
+            </div>
+            <div className="bg-slate-900/60 rounded-lg p-2 text-center">
+              <p className="text-[9px] text-slate-500 font-mono uppercase">BRW</p>
+              <p className="text-white font-black text-sm font-mono">{wallet.brwBalance?.toFixed(2) ?? "0.00"}</p>
+            </div>
+          </div>
+        </div>
+
+        <p className="text-slate-400 text-[11px] font-mono text-center">
+          💡 Vá ao <span className="text-amber-400 font-bold">Norte</span> para fazer On-Ramp e adquirir XLM.
+        </p>
+
+        <button
+          onClick={onClose}
+          className="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 rounded-xl font-mono text-sm transition-all"
+        >
+          Fechar Terminal
+        </button>
+      </div>
+    );
+  }
+
+  // ─── TELA: Onboarding (novo usuário) ─────────────────────────────────────
+
 
   const onboardingSteps = [
     "[WalletNow SDK] Conectando ao Testnet Gateway...",
