@@ -177,3 +177,35 @@ export class TestnetKitService {
     };
   }
 }
+
+/**
+ * Fetches real on-chain balances for a given public key from Stellar Testnet Horizon.
+ */
+export const fetchOnChainBalances = async (publicKey: string) => {
+  try {
+    const response = await fetch(`https://horizon-testnet.stellar.org/accounts/${publicKey}`);
+    if (!response.ok) return null;
+    const data = await response.json();
+    
+    let xlmBalance = 0;
+    let usdwBalance = 0;
+    let brwBalance = 0;
+
+    if (data.balances && Array.isArray(data.balances)) {
+      data.balances.forEach((bal: any) => {
+        if (bal.asset_type === "native") {
+          xlmBalance = parseFloat(bal.balance);
+        } else if (bal.asset_code === "USDW") {
+          usdwBalance = parseFloat(bal.balance);
+        } else if (bal.asset_code === "BRW") {
+          brwBalance = parseFloat(bal.balance);
+        }
+      });
+    }
+    
+    return { xlmBalance, usdwBalance, brwBalance };
+  } catch (err) {
+    console.error("[WalletNow SDK] Failed to fetch on-chain balances:", err);
+    return null;
+  }
+};

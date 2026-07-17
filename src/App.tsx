@@ -15,6 +15,7 @@ import { GameState, Player, NPC, Transaction, QuestId, Quest, WalletState } from
 import { INITIAL_QUESTS, INITIAL_NPCS } from "./gameData";
 import { getNpcsForMap } from "./maps";
 import { useGameStore } from "./store/gameStore";
+import { fetchOnChainBalances } from "./services/stellarServices";
 import { 
   Rocket, 
   HelpCircle, 
@@ -129,13 +130,49 @@ export default function App() {
   const [isNearTerminal, setIsNearTerminal] = useState<"wallet" | "onramp" | "soroban" | "hold" | "atf" | null>(null);
 
   // Simulate periodic Stellar Ledger sequence increments (Consensus in 5 seconds)
+  // And fetch real on-chain balances from testnet!
   useEffect(() => {
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
+      // Advance Ledger sequence
       setGameState((prev) => ({
         ...prev,
         currentLedger: prev.currentLedger + 1,
       }));
+
+      // Acessando gameState mais recente via currentLedger tick 
+      // Mas para evitar stale state do gameState inteiro no closure, 
+      // faremos um setGameState com callback onde resolvemos de forma limpa.
+      setGameState((prev) => {
+        if (prev.wallet.hasWallet && prev.wallet.publicKey) {
+          fetchOnChainBalances(prev.wallet.publicKey).then(balances => {
+            if (balances) {
+              setGameState(current => {
+                // Previne re-renders desnecessarios se os saldos forem exatamente os mesmos
+                if (
+                  current.wallet.xlmBalance === balances.xlmBalance && 
+                  current.wallet.usdwBalance === balances.usdwBalance && 
+                  current.wallet.brwBalance === balances.brwBalance
+                ) {
+                  return current;
+                }
+                
+                return {
+                  ...current,
+                  wallet: {
+                    ...current.wallet,
+                    xlmBalance: balances.xlmBalance,
+                    usdwBalance: balances.usdwBalance,
+                    brwBalance: balances.brwBalance,
+                  }
+                };
+              });
+            }
+          });
+        }
+        return prev;
+      });
     }, 5000);
+    
     return () => clearInterval(interval);
   }, []);
 
