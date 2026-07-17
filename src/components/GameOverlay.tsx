@@ -5,9 +5,8 @@
 
 import React, { useState, useEffect } from "react";
 import { WalletNowClient } from "@walletnow/sdk";
-import { AccountEngine } from "@walletnow/wallet";
-import { LocalStorageAdapter } from "@walletnow/storage";
 import { WalletState, Transaction } from "../types";
+import { onboardUser, StellarAnchorService, TestnetKitService } from "../services/stellarServices";
 import { 
   Copy, 
   Key, 
@@ -109,31 +108,7 @@ const generateRealStellarKeypair = (): { publicKey: string; secretKey: string } 
   return { publicKey, secretKey };
 };
 
-// Pure TypeScript implementation/wrapper for StellarAnchorService to provide seamless asset funding
-export class StellarAnchorService {
-  static async seamlessFund(
-    anchorDomain: string,
-    userAddress: string,
-    userSecretKey: string,
-    assetCode: string
-  ): Promise<{ txHash: string; amount: string }> {
-    console.log(`[StellarAnchorService] Chamando seamlessFund para o domínio ${anchorDomain}`);
-    console.log(`[StellarAnchorService] Endereço do usuário: ${userAddress}`);
-    // NUNCA exponha chaves privadas no frontend de produção - mantemos logs locais limpos e seguros
-    console.log(`[StellarAnchorService] Chave privada protegida contra vazamento.`);
-
-    // Simulate standard anchoring processing time
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
-    const txHash = "tx_" + Math.random().toString(16).substring(2, 10) + "000000000000000000000";
-    const amount = assetCode === "BRW" ? "250" : assetCode === "USDW" ? "50" : "100";
-
-    return {
-      txHash,
-      amount,
-    };
-  }
-}
+// Removed inline StellarAnchorService (moved to stellarServices.ts)
 
 const generateTxHash = () => {
   const chars = "abcdef0123456789";
@@ -278,74 +253,15 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
           if (!isSubscribed) return;
           setSdkLogs(prev => [...prev, "[WalletNow SDK] Solicitando assinatura de e-mail e passkey..."]);
           await new Promise(resolve => setTimeout(resolve, 500));
-
-          // 1. Initialize WalletNowClient
-          if (!isSubscribed) return;
-          setSdkLogs(prev => [...prev, "[WalletNow SDK] Inicializando WalletNowClient.init({ network: 'testnet' })..."]);
           
-          // Create custom robust AccountEngine to avoid trustline 400 errors during propagation lag
-          const baseAccountEngine = new AccountEngine("https://horizon-testnet.stellar.org", new LocalStorageAdapter("account"));
-          const robustAccountEngine = {
-            async existsOnChain(publicKey: string): Promise<boolean> {
-              return baseAccountEngine.existsOnChain(publicKey);
-            },
-            async getState(publicKey: string): Promise<any> {
-              // Retry up to 8 times with a 1 second delay to ensure account is fully populated on-chain
-              for (let i = 0; i < 8; i++) {
-                try {
-                  const state = await baseAccountEngine.getState(publicKey);
-                  if (state.exists && state.sequenceNumber !== "0") {
-                    return state;
-                  }
-                } catch (err) {
-                  console.warn("[RobustAccountEngine] Error on getState attempt:", err);
-                }
-                await new Promise(resolve => setTimeout(resolve, 1000));
-              }
-              return baseAccountEngine.getState(publicKey);
-            },
-            async sync(publicKey: string): Promise<any> {
-              return this.getState(publicKey);
-            }
+          // 1 & 2. Initialize SDK and Create User
+          const addLog = (msg: string) => {
+            if (isSubscribed) setSdkLogs(prev => [...prev, msg]);
           };
-
-          const wn = await WalletNowClient.init({ 
-            network: "testnet",
-            engines: {
-              account: robustAccountEngine as any
-            }
-          });
           
           if (!isSubscribed) return;
-          setSdkLogs(prev => [...prev, "[WalletNow SDK] ✓ WalletNowClient inicializado com sucesso no ecossistema Stellar!"]);
-          await new Promise(resolve => setTimeout(resolve, 500));
-
-          // 2. Create user with Passkey (gasless/sponsored account creation)
-          if (!isSubscribed) return;
-          setSdkLogs(prev => [...prev, `[WalletNow SDK] Registrando credenciais via wn.onboarding.createUser({ externalId: "${email}", authMethod: "passkeys" })...`]);
-          
-          const userResult = await wn.onboarding.createUser({
-            externalId: email,
-            displayName: name,
-            authMethod: "passkeys",
-            sponsored: true,
-            trustlines: ["BRW", "USDW"]
-          });
-
-          if (!isSubscribed) return;
-          const userAddress = userResult.stellarAddress;
-          setSdkLogs(prev => [
-            ...prev,
-            `[WalletNow SDK] ✓ Usuário criado de forma gasless patrocinada com sucesso!`,
-            `[WalletNow SDK] Endereço Público Stellar: ${userAddress}`
-          ]);
-          await new Promise(resolve => setTimeout(resolve, 600));
-
-          // Generate a cryptographic keypair to associate with this testnet account locally
-          const keys = generateRealStellarKeypair();
-          const finalPublicKey = userAddress || keys.publicKey;
-          // Note: In production we never expose private keys. We generate a safe test fallback key for operations.
-          const finalSecretKey = keys.secretKey;
+          const { publicKey: userAddress, secretKey: finalSecretKey } = await onboardUser(email, name, addLog);
+          const finalPublicKey = userAddress;
 
           // 3. Asset seamless funding via StellarAnchorService
           if (!isSubscribed) return;
@@ -700,19 +616,25 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet })
     }
   };
 
-  const confirmDepositPayment = () => {
+  const confirmDepositPayment = async () => {
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
       const balanceField = asset === "XLM" ? "xlmBalance" : asset === "USDW" ? "usdwBalance" : "brwBalance";
       const currentBalance = wallet[balanceField] || 0;
       const nextBalance = currentBalance + computedCoins;
 
+      const { txHash, amount } = await StellarAnchorService.seamlessFund(
+        "walletnow-app.vercel.app",
+        wallet.publicKey || "",
+        wallet.secretKey || "",
+        asset
+      );
+
       const tx: Transaction = {
-        id: generateTxHash(),
+        id: txHash,
         type: "ON_RAMP_PIX",
         timestamp: new Date().toLocaleTimeString(),
-        amount: computedCoins.toString(),
+        amount: computedCoins.toString(), // amount from API is hardcoded in mock, use computed
         asset: asset,
         fee: "0.00001",
         memo: `Depósito via PIX (On-Ramp WalletNow)`,
@@ -723,7 +645,12 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet })
         [balanceField]: nextBalance
       }, tx);
       setStep(3);
-    }, 1500);
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao processar depósito");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -950,7 +877,7 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
     ? Number((poolAmountAsset1 * poolRates.XLM_USDW).toFixed(2))
     : Number((poolAmountAsset1 * poolRates.USDW_BRW).toFixed(2));
 
-  const handleSwap = () => {
+  const handleSwap = async () => {
     setError(null);
     if (swapFrom === swapTo) {
       setError("Selecione moedas de origem e destino diferentes!");
@@ -966,15 +893,25 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      onSwapSuccess(swapFrom, swapTo, swapAmount, computedSwapOutput);
-      setSuccessMessage(`Transação enviada com sucesso ao Smart Contract Soroban no pool de liquidez da WalletNow (Pool: 47a53a0397612027cf5b53ef75c51641a63abbd9b45cab5f2a190fe109d4fc95)! Você trocou ${swapAmount} ${swapFrom} por ${computedSwapOutput} ${swapTo}.`);
+    try {
+      const { txHash, received } = await TestnetKitService.executeSwap(
+        wallet.publicKey || "",
+        swapFrom,
+        swapTo,
+        swapAmount
+      );
+      onSwapSuccess(swapFrom, swapTo, swapAmount, received); // Pass received from service
+      setSuccessMessage(`Transação enviada com sucesso ao Smart Contract Soroban no pool de liquidez da WalletNow! TX: ${txHash}. Você trocou ${swapAmount} ${swapFrom} por ${received} ${swapTo}.`);
       setSuccess(true);
-    }, 1800);
+    } catch (err) {
+      console.error(err);
+      setError("Falha ao executar swap no TestnetKit");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleAddLiquidity = () => {
+  const handleAddLiquidity = async () => {
     setError(null);
     const field1 = poolType === "XLM_USDW" ? "xlmBalance" : "usdwBalance";
     const field2 = poolType === "XLM_USDW" ? "usdwBalance" : "brwBalance";
@@ -990,36 +927,43 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-
-      // LP tokens minted is proportional to first asset deposited
-      const lpMinted = Number((poolAmountAsset1 * 1.5).toFixed(2));
+    try {
+      const token1 = poolType === "XLM_USDW" ? "XLM" : "USDW";
+      const token2 = poolType === "XLM_USDW" ? "USDW" : "BRW";
+      
+      const { txHash, lpMinted, requiredAmountB } = await TestnetKitService.addLiquidity(
+        wallet.publicKey || "",
+        token1,
+        token2,
+        poolAmountAsset1
+      );
 
       const updatedFields: Partial<WalletState> = {
         [field1]: bal1 - poolAmountAsset1,
-        [field2]: bal2 - computedPoolAmountAsset2,
+        [field2]: bal2 - requiredAmountB,
         [lpField]: currentLp + lpMinted
       };
 
-      const token1 = poolType === "XLM_USDW" ? "XLM" : "USDW";
-      const token2 = poolType === "XLM_USDW" ? "USDW" : "BRW";
-
       const tx: Transaction = {
-        id: generateTxHash(),
+        id: txHash,
         type: "POOL_ADD",
         timestamp: new Date().toLocaleTimeString(),
         amount: lpMinted.toString(),
         asset: poolType,
         fee: "0.00012",
-        memo: `Adicionado liquidez: ${poolAmountAsset1} ${token1} + ${computedPoolAmountAsset2} ${token2}`,
+        memo: `Adicionado liquidez: ${poolAmountAsset1} ${token1} + ${requiredAmountB} ${token2}`,
         ledgerSequence: 6184293 + Math.floor(Math.random() * 100)
       };
 
       onUpdateWallet(updatedFields, tx);
-      setSuccessMessage(`Par de liquidez provisionado com sucesso! Recebido: ${lpMinted} tokens LP_${poolType}.`);
+      setSuccessMessage(`Par de liquidez provisionado com sucesso! Recebido: ${lpMinted} tokens LP_${poolType}. TX: ${txHash}`);
       setSuccess(true);
-    }, 1800);
+    } catch (err) {
+      console.error(err);
+      setError("Falha ao adicionar liquidez");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRemoveLiquidity = () => {
@@ -1431,7 +1375,7 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
     }
   }, [wallet.vaultXlm, wallet.vaultUsdw, wallet.vaultBrw]);
 
-  const handleDeposit = () => {
+  const handleDeposit = async () => {
     const balanceField = vaultAsset === "XLM" ? "xlmBalance" : vaultAsset === "USDW" ? "usdwBalance" : "brwBalance";
     const vaultField = vaultAsset === "XLM" ? "vaultXlm" : vaultAsset === "USDW" ? "vaultUsdw" : "vaultBrw";
 
@@ -1444,8 +1388,12 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const { txHash, rewardEstimate } = await TestnetKitService.vaultStake(
+        wallet.publicKey || "",
+        vaultAsset,
+        amount
+      );
 
       const updatedFields: Partial<WalletState> = {
         [balanceField]: balance - amount,
@@ -1453,20 +1401,25 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
       };
 
       const tx: Transaction = {
-        id: generateTxHash(),
+        id: txHash,
         type: "VAULT_DEPOSIT",
         timestamp: new Date().toLocaleTimeString(),
         amount: amount.toString(),
         asset: vaultAsset,
         fee: "0.00005",
-        memo: `Depósito no Cofre de Rendimento WalletNow`,
+        memo: `Depósito no Cofre de Rendimento WalletNow (Estimativa base: +${rewardEstimate})`,
         ledgerSequence: 6184293 + Math.floor(Math.random() * 100)
       };
 
       onHoldSuccess(vaultAsset, amount, updatedFields, tx);
-      alert(`Você depositou com sucesso ${amount} ${vaultAsset} no cofre de rendimentos da WalletNow (Contrato: GBTR4BH2TMOEELCVYBAZ46TKGFGGQGUJK5LI3C32XYGIM475MFRSMVLO)!`);
+      alert(`Você depositou com sucesso ${amount} ${vaultAsset} no cofre de rendimentos da WalletNow! TX: ${txHash}`);
       setAmount(20);
-    }, 1500);
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao realizar depósito no Vault");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleWithdraw = () => {

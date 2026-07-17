@@ -1,0 +1,185 @@
+import { create } from "zustand";
+import { GameState, Player, NPC, Quest, QuestId, WalletState, Transaction } from "../types";
+import { INITIAL_QUESTS } from "../gameData";
+
+interface GameStore extends GameState {
+  playerPos: Player;
+  setGameState: (state: Partial<GameState> | ((prev: GameState) => Partial<GameState>)) => void;
+  setPlayerPos: (state: Partial<Player> | ((prev: Player) => Partial<Player>)) => void;
+  updateWallet: (walletUpdate: Partial<WalletState>) => void;
+  addTransaction: (tx: Transaction) => void;
+  completeQuest: (questId: QuestId, newStatus?: Quest["status"]) => void;
+  setActiveModal: (modal: GameState["activeModal"]) => void;
+  setActiveDialog: (dialog: GameState["activeDialog"]) => void;
+}
+
+const getInitialGameState = (): GameState => {
+  try {
+    const saved = localStorage.getItem("stellar_island_game_state_v1");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed && parsed.quests && parsed.wallet) {
+        return {
+          ...parsed,
+          wallet: {
+            name: "",
+            email: "",
+            usdwBalance: 0,
+            brwBalance: 0,
+            vaultXlm: 0,
+            vaultUsdw: 0,
+            vaultBrw: 0,
+            poolXlmUsdw: 0,
+            poolUsdwBrw: 0,
+            ...parsed.wallet,
+          },
+          activeDialog: null,
+          activeModal: null,
+        };
+      }
+    }
+  } catch (err) {
+    console.warn("Could not load gameState from localStorage", err);
+  }
+  return {
+    wallet: {
+      hasWallet: false,
+      publicKey: "",
+      secretKey: "",
+      xlmBalance: 0,
+      usdcBalance: 0,
+      soroBalance: 0,
+      isLocked: false,
+      lockedAmount: 0,
+      name: "",
+      email: "",
+      usdwBalance: 0,
+      brwBalance: 0,
+      vaultXlm: 0,
+      vaultUsdw: 0,
+      vaultBrw: 0,
+      poolXlmUsdw: 0,
+      poolUsdwBrw: 0,
+    },
+    quests: INITIAL_QUESTS,
+    transactions: [],
+    activeDialog: null,
+    activeModal: null,
+    currentLedger: 6184293,
+  };
+};
+
+const getInitialPlayerPos = (): Player => {
+  try {
+    const saved = localStorage.getItem("stellar_island_player_pos_v1");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed && typeof parsed.x === "number") {
+        return {
+          ...parsed,
+          targetX: parsed.x,
+          targetY: parsed.y,
+          isMoving: false,
+          frame: 0,
+        };
+      }
+    }
+  } catch (err) {
+    console.warn("Could not load playerPos from localStorage", err);
+  }
+  return {
+    x: 30,
+    y: 30,
+    targetX: 30,
+    targetY: 30,
+    dir: "down",
+    isMoving: false,
+    frame: 0,
+    headColor: "#fcd34d",
+    torsoColor: "#ef4444",
+    legsColor: "#2563eb",
+    shoesColor: "#1e293b",
+    headType: "square",
+    torsoType: "plain",
+    shoesType: "sneakers",
+    skinColor: "#ffdbac",
+    faceType: "smile",
+    accessoryType: "backpack",
+    name: "Anonymo",
+    mapId: "center",
+  };
+};
+
+export const useGameStore = create<GameStore>((set, get) => ({
+  ...getInitialGameState(),
+  playerPos: getInitialPlayerPos(),
+
+  setGameState: (updater) => set((state) => {
+    const nextState = typeof updater === "function" ? updater(state) : updater;
+    const newState = { ...state, ...nextState };
+    
+    // Extract only GameState properties for localStorage
+    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, ...gameStateToSave } = newState;
+    localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
+    
+    return nextState;
+  }),
+
+  setPlayerPos: (updater) => set((state) => {
+    const nextPlayer = typeof updater === "function" ? updater(state.playerPos) : updater;
+    const newPlayer = { ...state.playerPos, ...nextPlayer };
+    
+    localStorage.setItem("stellar_island_player_pos_v1", JSON.stringify(newPlayer));
+    
+    return { playerPos: newPlayer };
+  }),
+
+  updateWallet: (walletUpdate) => set((state) => {
+    const newWallet = { ...state.wallet, ...walletUpdate };
+    const newState = { ...state, wallet: newWallet };
+    
+    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, ...gameStateToSave } = newState;
+    localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
+    
+    return { wallet: newWallet };
+  }),
+
+  addTransaction: (tx) => set((state) => {
+    const newTxList = [tx, ...state.transactions];
+    const newState = { ...state, transactions: newTxList, currentLedger: state.currentLedger + 1 };
+    
+    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, ...gameStateToSave } = newState;
+    localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
+    
+    return { transactions: newTxList, currentLedger: newState.currentLedger };
+  }),
+
+  completeQuest: (questId, newStatus = "completed") => set((state) => {
+    const newQuests = {
+      ...state.quests,
+      [questId]: { ...state.quests[questId], status: newStatus },
+    };
+    
+    if (questId === "wallet" && newStatus === "completed" && newQuests.onramp.status === "locked") {
+      newQuests.onramp.status = "active";
+    }
+    if (questId === "onramp" && newStatus === "completed" && newQuests.soroban.status === "locked") {
+      newQuests.soroban.status = "active";
+    }
+    if (questId === "soroban" && newStatus === "completed" && newQuests.hold.status === "locked") {
+      newQuests.hold.status = "active";
+    }
+
+    const newState = { ...state, quests: newQuests };
+    
+    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, ...gameStateToSave } = newState;
+    localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
+    
+    return { quests: newQuests };
+  }),
+
+  setActiveModal: (modal) => set({ activeModal: modal }),
+  
+  setActiveDialog: (dialog) => set({ activeDialog: dialog }),
+
+}));
