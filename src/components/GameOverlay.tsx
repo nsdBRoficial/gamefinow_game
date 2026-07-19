@@ -7,6 +7,7 @@ import React, { useState, useEffect } from "react";
 import { WalletNowClient } from "@walletnow/sdk";
 import { WalletState, Transaction } from "../types";
 import { onboardUser, StellarAnchorService, TestnetKitService } from "../services/stellarServices";
+import { SEP24Service } from "../services/sep24Service";
 import { 
   Copy, 
   Key, 
@@ -623,27 +624,105 @@ interface OnRampProps {
 
 const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, onOnRampSuccess }) => {
   const [activeTab, setActiveTab] = useState<"deposit" | "withdraw">("deposit");
-  const [asset, setAsset] = useState<"XLM" | "USDW" | "BRW">("BRW");
-  const [fiatAmount, setFiatAmount] = useState<number>(100);
-  const [step, setStep] = useState<1 | 2 | 3>(1); // 1: Config, 2: PIX QR Display / Processing, 3: Success
+  const [asset, setAsset] = useState<"XLM" | "USDW" | "BRW" | "SRT" | "USDC">("BRW");
+  const [fiatAmount, setFiatAmount] = useState<number>(10);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1); // 1: Config, 2: Withdraw, 3: Success, 4: SEP-24 Iframe
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sep24IframeUrl, setSep24IframeUrl] = useState<string | null>(null);
+  const [sep24TxId, setSep24TxId] = useState<string | null>(null);
+  const [sep24Jwt, setSep24Jwt] = useState<string | null>(null);
 
   const coinRates = {
     XLM: 0.66,
     USDW: 5.40,
-    BRW: 1.00
+    BRW: 1.00,
+    SRT: 1.00,
+    USDC: 5.40
   };
 
   const computedCoins = Number((fiatAmount / coinRates[asset]).toFixed(2));
 
-  const handleAction = () => {
+  const handleAction = async () => {
     if (activeTab === "deposit") {
-      setStep(2);
+      setLoading(true);
+      setError(null);
+      try {
+        const depositAsset = asset; // Usa o ativo real selecionado pelo usuário!
+        // A âncora de testes da SDF tem um limite máximo de 10 unidades por depósito!
+        // Aplicamos esse limite apenas aos ativos que vão para a âncora real (SRT, USDC).
+        // Ativos em mock (BRW, USDW) não têm esse limite.
+        if ((depositAsset === "SRT" || depositAsset === "USDC") && computedCoins > 10) {
+          setError(`A âncora de testes SDF limita depósitos a no máximo 10 unidades. Você tentou depositar ${computedCoins} ${depositAsset}. Reduza o valor.`);
+          setLoading(false);
+          return;
+        }
+
+        const { url, id, jwt } = await SEP24Service.initiateDeposit(
+          wallet.publicKey || "",
+          wallet.secretKey || "",
+          depositAsset,
+          computedCoins.toString()
+        );
+        setSep24IframeUrl(url);
+        setSep24TxId(id);
+        setSep24Jwt(jwt);
+        setStep(4);
+        
+        let pollTimer: any;
+        const checkStatus = async () => {
+          try {
+            const status = await SEP24Service.pollTransactionStatus(id, jwt);
+            if (status === "completed") {
+              clearInterval(pollTimer);
+              setStep(3); // Success
+              // Em um ambiente real, leríamos o saldo da rede
+              const balanceField = asset === "XLM" ? "xlmBalance" : asset === "USDW" ? "usdwBalance" : asset === "SRT" ? "brwBalance" : "usdwBalance";
+              const currentBalance = wallet[balanceField as keyof WalletState] as number || 0;
+              // Se for o mock in-game, vamos disparar uma microtransação on-chain para gerar a Hash Real (Prova)
+              let finalTxId = id;
+              if (id.startsWith("mock-tx-")) {
+                const { txHash } = await StellarAnchorService.seamlessFund(
+                  "mock-anchor.gamefinow",
+                  wallet.publicKey || "",
+                  wallet.secretKey || "",
+                  depositAsset
+                );
+                finalTxId = txHash;
+              }
+
+              const tx: Transaction = {
+                id: finalTxId,
+                type: "ON_RAMP_PIX",
+                timestamp: new Date().toLocaleTimeString(),
+                amount: computedCoins.toString(),
+                asset: asset as any,
+                fee: "0.00000",
+                memo: `SEP-24 Deposit (${depositAsset})`,
+                ledgerSequence: 6184293
+              };
+              if (onOnRampSuccess) onOnRampSuccess(asset as any, computedCoins, "PIX");
+              else onUpdateWallet({ [balanceField]: currentBalance + computedCoins }, tx);
+            } else if (status === "error") {
+              clearInterval(pollTimer);
+              setError("Depósito rejeitado ou falhou na âncora.");
+              setStep(1);
+            }
+          } catch(e) {
+            console.error("Polling error:", e);
+          }
+        };
+        pollTimer = setInterval(checkStatus, 5000);
+      } catch (err: any) {
+        console.error(err);
+        setError("Erro SEP-24: " + (err.message || "Falha ao iniciar"));
+      } finally {
+        setLoading(false);
+      }
     } else {
       setError(null);
       const balanceField = asset === "XLM" ? "xlmBalance" : asset === "USDW" ? "usdwBalance" : "brwBalance";
-      const currentBalance = wallet[balanceField] || 0;
+      const currentBalance = wallet[balanceField as keyof WalletState] as number || 0;
       if (currentBalance < computedCoins) {
         setError("Saldo de moedas insuficiente para saque!");
         return;
@@ -658,7 +737,7 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, o
           type: "OFF_RAMP_PIX",
           timestamp: new Date().toLocaleTimeString(),
           amount: computedCoins.toString(),
-          asset: asset,
+          asset: asset as any,
           fee: "0.00001",
           memo: `Saque PIX para Banco Comercial`,
           ledgerSequence: 6184293 + Math.floor(Math.random() * 100)
@@ -672,47 +751,7 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, o
     }
   };
 
-  const confirmDepositPayment = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const balanceField = asset === "XLM" ? "xlmBalance" : asset === "USDW" ? "usdwBalance" : "brwBalance";
-      const currentBalance = wallet[balanceField] || 0;
-      const nextBalance = currentBalance + computedCoins;
-
-      const { txHash, amount } = await StellarAnchorService.seamlessFund(
-        "walletnow-app.vercel.app",
-        wallet.publicKey || "",
-        wallet.secretKey || "",
-        asset
-      );
-
-      const tx: Transaction = {
-        id: txHash,
-        type: "ON_RAMP_PIX",
-        timestamp: new Date().toLocaleTimeString(),
-        amount: computedCoins.toString(),
-        asset: asset,
-        fee: "0.00001",
-        memo: `Depósito via PIX (On-Ramp WalletNow)`,
-        ledgerSequence: 6184293 + Math.floor(Math.random() * 100)
-      };
-
-      if (onOnRampSuccess) {
-        onOnRampSuccess(asset, computedCoins, "PIX");
-      } else {
-        onUpdateWallet({
-          [balanceField]: nextBalance
-        }, tx);
-      }
-      setStep(3);
-    } catch (err) {
-      console.error(err);
-      setError("Erro ao processar transação");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // confirmDepositPayment removed as we now use SEP-24 in handleAction
 
   return (
     <div id="onramp-panel" className="text-slate-100">
@@ -755,19 +794,19 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, o
           <div className="space-y-3.5 bg-slate-950/50 p-4 rounded-xl border border-slate-800">
             <div>
               <label className="block text-[10px] text-slate-400 font-extrabold uppercase mb-1.5">Escolha a Moeda:</label>
-              <div className="grid grid-cols-3 gap-2">
-                {(["XLM", "USDW", "BRW"] as const).map((coin) => (
+              <div className="grid grid-cols-5 gap-1">
+                {(["XLM", "USDW", "BRW", "SRT", "USDC"] as const).map((coin) => (
                   <button
                     key={coin}
                     type="button"
                     onClick={() => setAsset(coin)}
-                    className={`py-2 px-3 rounded-lg text-xs font-black border transition cursor-pointer ${
+                    className={`py-1.5 px-2 rounded-lg text-[9px] font-black border transition cursor-pointer ${
                       asset === coin 
                         ? "border-emerald-500 bg-emerald-950/30 text-emerald-300" 
                         : "border-slate-800 bg-slate-900/40 text-slate-400 hover:border-slate-700"
                     }`}
                   >
-                    {coin === "XLM" ? "🌟 XLM" : coin === "USDW" ? "💵 USDW" : "🇧🇷 BRW"}
+                    {coin === "XLM" ? "🌟 XLM" : coin === "USDW" ? "💵 USDW" : coin === "BRW" ? "🇧🇷 BRW" : coin === "SRT" ? "🔵 SRT" : "🪙 USDC"}
                   </button>
                 ))}
               </div>
@@ -815,48 +854,63 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, o
         </div>
       )}
 
-      {step === 2 && (
+      {/* Step 2 (Fake QR code) removed for SEP-24 implementation */}
+
+      {step === 4 && sep24IframeUrl && (
         <div className="space-y-4 text-center">
           <div className="flex items-center space-x-3 text-emerald-400 border-b border-slate-800 pb-2">
             <RefreshCw className="h-5 w-5 animate-spin" />
-            <h2 className="text-sm font-black uppercase tracking-wider font-mono">Aguardando Liquidação PIX</h2>
+            <h2 className="text-sm font-black uppercase tracking-wider font-mono">Processando Depósito SEP-24</h2>
           </div>
-
-          <div className="flex flex-col items-center space-y-3 bg-slate-950 p-4 rounded-xl border border-slate-800">
-            <p className="text-[11px] text-slate-300">
-              Escaneie o QR Code simulado abaixo ou copie a chave de testes da WalletNow para liquidar.
-            </p>
-
-            <div className="h-32 w-32 bg-white rounded-lg flex flex-col justify-between p-2.5 relative select-none">
-              <div className="grid grid-cols-6 gap-1.5 w-full h-full">
-                {Array.from({ length: 36 }).map((_, i) => (
-                  <div 
-                    key={i} 
-                    className={`rounded-sm ${
-                      i === 0 || i === 4 || i === 5 || i === 30 || i === 35 || (i * 13) % 4 === 0 ? "bg-slate-900" : "bg-white"
-                    }`} 
-                  />
-                ))}
-              </div>
+          
+          {sep24IframeUrl === "game-internal:mock-kyc" ? (
+            <div className="w-full bg-slate-900 rounded-xl p-6 border border-emerald-500/50 flex flex-col items-center justify-center space-y-4 shadow-lg shadow-emerald-900/20">
+               <div className="text-emerald-400 bg-emerald-950 p-2 rounded-full mb-2">
+                 <RefreshCw className="h-6 w-6" />
+               </div>
+               <h3 className="text-sm font-black text-white font-mono text-center">Simulador de Parceiro de Câmbio</h3>
+               <p className="text-xs text-slate-400 text-center">
+                 A âncora recebeu o pedido via SEP-24 para {computedCoins} {asset}.<br/>
+                 (Modo Invisível / Mock In-Game)
+               </p>
+               <button
+                 type="button"
+                 onClick={() => {
+                   if (sep24TxId && (window as any).mockSep24Status) {
+                     (window as any).mockSep24Status[sep24TxId] = "completed";
+                   }
+                 }}
+                 className="mt-4 w-full py-3 px-6 rounded-xl font-bold text-xs uppercase text-black bg-emerald-500 hover:bg-emerald-400 transition shadow-lg shadow-emerald-900/50 cursor-pointer"
+               >
+                 Aprovar Pagamento PIX Fictício
+               </button>
             </div>
+          ) : (
+            <div className="w-full bg-slate-900 rounded-xl p-6 border border-slate-700 flex flex-col items-center justify-center space-y-4">
+               <p className="text-xs text-slate-300">
+                 A âncora oficial da Stellar requer autenticação em uma janela segura.
+               </p>
+               <button
+                 type="button"
+                 onClick={() => window.open(sep24IframeUrl, "SEP24_Window", "width=500,height=700,left=200,top=100")}
+                 className="py-3 px-6 rounded-xl font-bold text-xs uppercase text-white bg-blue-600 hover:bg-blue-500 transition shadow-lg shadow-blue-900/50"
+               >
+                 Abrir Ambiente Seguro (KYC)
+               </button>
+            </div>
+          )}
 
-            <span className="text-[9px] font-mono font-bold bg-slate-900 text-emerald-400 px-3 py-1.5 rounded border border-emerald-950/60 select-all">
-              walletnow_pix_testnet_kit_ref_482910398
-            </span>
+          <div className="bg-slate-950 p-2 rounded text-[10px] text-slate-400 font-mono">
+            ID da Transação: {sep24TxId} <br/>
+            Escutando Webhooks e Polling do status via SEP-24...
           </div>
-
-          <div className="bg-slate-950/60 p-3 rounded-lg text-left text-xs font-mono space-y-1">
-            <p>💰 Valor do Depósito: <strong className="text-slate-100">R$ {fiatAmount}</strong></p>
-            <p>⚡ Ativo Creditado: <strong className="text-emerald-400">{computedCoins} {asset}</strong></p>
-          </div>
-
+          
           <button
             type="button"
-            onClick={confirmDepositPayment}
-            disabled={loading}
-            className="w-full py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider text-black bg-emerald-400 hover:bg-emerald-300 font-mono transition cursor-pointer"
+            onClick={() => setStep(1)}
+            className="w-full py-2.5 px-4 rounded-xl font-bold text-xs uppercase text-slate-400 bg-slate-800 hover:bg-slate-700 transition"
           >
-            {loading ? "Processando..." : "Simular Pagamento no Aplicativo do Banco"}
+            Cancelar
           </button>
         </div>
       )}

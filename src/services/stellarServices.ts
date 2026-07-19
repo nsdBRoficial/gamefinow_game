@@ -2,10 +2,12 @@ import { WalletNowClient } from "@walletnow/sdk";
 import { AccountEngine } from "@walletnow/wallet";
 import { LocalStorageAdapter } from "@walletnow/storage";
 import { WalletState } from "../types";
-import { Keypair, Horizon, TransactionBuilder, Networks, Asset, Operation } from "@stellar/stellar-sdk";
+import { Keypair, Horizon, TransactionBuilder, Networks, Asset, Operation, Memo } from "@stellar/stellar-sdk";
 
 export const ISSUER_USDW = "GDKZT3AXAOMMYVVG3TKFVUYDJODAIAL2ADHNJYQLK2PJQ6CE2U6KKFLQ";
 export const ISSUER_BRW = "GCJIRFZQJAO6JSYS4YFXFHLVJ6R4WWWB2VTREMRK7WXNNLMGIAXBBNC6";
+export const ISSUER_SRT = "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B";
+export const ISSUER_USDC = "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5";
 
 const server = new Horizon.Server("https://horizon-testnet.stellar.org");
 
@@ -92,22 +94,20 @@ export const onboardUser = async (
     // Atraso de 3 segundos para garantir que o Horizon da rede de testes tenha indexado a conta recém-criada
     await new Promise(resolve => setTimeout(resolve, 3000));
     const account = await server.loadAccount(publicKey);
+    
+    const assetUSDW = new Asset("USDW", ISSUER_USDW);
+    const assetBRW = new Asset("BRW", ISSUER_BRW);
+    const assetSRT = new Asset("SRT", ISSUER_SRT);
+    const assetUSDC = new Asset("USDC", ISSUER_USDC);
+
     const tx = new TransactionBuilder(account, {
       fee: "1000",
       networkPassphrase: Networks.TESTNET
     })
-      .addOperation(
-        // @ts-ignore
-        Operation.changeTrust({
-          asset: new Asset("USDW", ISSUER_USDW)
-        })
-      )
-      .addOperation(
-        // @ts-ignore
-        Operation.changeTrust({
-          asset: new Asset("BRW", ISSUER_BRW)
-        })
-      )
+      .addOperation(Operation.changeTrust({ asset: assetUSDW, limit: "1000000" }))
+      .addOperation(Operation.changeTrust({ asset: assetBRW, limit: "1000000" }))
+      .addOperation(Operation.changeTrust({ asset: assetSRT, limit: "1000000" }))
+      .addOperation(Operation.changeTrust({ asset: assetUSDC, limit: "1000000" }))
       .setTimeout(30)
       .build();
 
@@ -144,13 +144,39 @@ export class StellarAnchorService {
   ): Promise<{ txHash: string; amount: string }> {
     console.log(`[StellarAnchorService] Chamando seamlessFund para o domínio ${anchorDomain}`);
     
-    // Simulate anchoring delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const server = new Horizon.Server("https://horizon-testnet.stellar.org");
+      const keypair = Keypair.fromSecret(userSecretKey);
+      const account = await server.loadAccount(keypair.publicKey());
+      
+      let stellarAsset;
+      if (assetCode === "USDW") stellarAsset = new Asset("USDW", ISSUER_USDW);
+      else if (assetCode === "BRW") stellarAsset = new Asset("BRW", ISSUER_BRW);
+      else if (assetCode === "SRT") stellarAsset = new Asset("SRT", ISSUER_SRT);
+      else if (assetCode === "USDC") stellarAsset = new Asset("USDC", ISSUER_USDC);
+      else stellarAsset = Asset.native();
 
-    const txHash = "tx_" + Math.random().toString(16).substring(2, 10) + "000000000000000000000";
-    const amount = assetCode === "BRW" ? "250" : assetCode === "USDW" ? "50" : "100";
-
-    return { txHash, amount };
+      const tx = new TransactionBuilder(account, {
+        fee: "100",
+        networkPassphrase: Networks.TESTNET
+      })
+        .addOperation(Operation.payment({
+          destination: keypair.publicKey(),
+          asset: stellarAsset,
+          amount: "0.0000001"
+        }))
+        .addMemo(Memo.text("MOCK-SEP24"))
+        .setTimeout(30)
+        .build();
+        
+      tx.sign(keypair);
+      const res = await server.submitTransaction(tx);
+      
+      return { txHash: res.hash, amount: "100" };
+    } catch(e) {
+      console.error("[StellarAnchorService] Falha na transação on-chain do mock:", e);
+      return { txHash: "tx_mock_" + Math.random().toString(16).substring(2, 10), amount: "100" };
+    }
   }
 }
 
@@ -182,6 +208,8 @@ export class TestnetKitService {
       if (code === "XLM") return Asset.native();
       if (code === "USDW") return new Asset("USDW", ISSUER_USDW);
       if (code === "BRW") return new Asset("BRW", ISSUER_BRW);
+      if (code === "SRT") return new Asset("SRT", ISSUER_SRT);
+      if (code === "USDC") return new Asset("USDC", ISSUER_USDC);
       return Asset.native();
     };
 
