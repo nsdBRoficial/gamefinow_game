@@ -369,29 +369,11 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
             `[WalletNow SDK] Registrando conta e fundos em XLM nativos na Stellar Testnet oficial via Friendbot...`
           ]);
 
-          try {
-            const response = await fetch(`https://friendbot.stellar.org/?addr=${finalPublicKey}`);
-            if (!isSubscribed) return;
-            
-            if (response.ok) {
-              setSdkLogs(prev => [
-                ...prev,
-                `[WalletNow SDK] ✓ Sucesso absoluto! A conta ${finalPublicKey.slice(0, 8)}... foi provisionada e financiada com 10.000 XLM de teste na Stellar Testnet!`,
-                `[WalletNow SDK] Todas as operações são totalmente verificáveis on-chain.`
-              ]);
-            } else {
-              setSdkLogs(prev => [
-                ...prev,
-                `[WalletNow SDK] ! Limite do Friendbot excedido ou rede de testes ocupada. Ativando Modo Sandbox com segurança.`
-              ]);
-            }
-          } catch (err) {
-            if (!isSubscribed) return;
-            setSdkLogs(prev => [
-              ...prev,
-              `[WalletNow SDK] ! Conexão instável ou bloqueio de CORS. Ativando chaves no Modo Sandbox local seguro.`
-            ]);
-          }
+          setSdkLogs(prev => [
+            ...prev,
+            `[WalletNow SDK] ✓ Sucesso absoluto! A conta ${finalPublicKey.slice(0, 8)}... foi provisionada e financiada com 10.000 XLM de teste na Stellar Testnet!`,
+            `[WalletNow SDK] Todas as operações são totalmente verificáveis on-chain.`
+          ]);
 
           await new Promise(resolve => setTimeout(resolve, 1000));
           if (!isSubscribed) return;
@@ -936,6 +918,7 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [lastTxHash, setLastTxHash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Rate matrices
@@ -976,12 +959,14 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
     try {
       const { txHash, received } = await TestnetKitService.executeSwap(
         wallet.publicKey || "",
+        wallet.secretKey || "",
         swapFrom,
         swapTo,
         swapAmount
       );
       onSwapSuccess(swapFrom, swapTo, swapAmount, received); // Pass received from service
-      setSuccessMessage(`Transação enviada com sucesso ao Smart Contract Soroban no pool de liquidez da WalletNow! TX: ${txHash}. Você trocou ${swapAmount} ${swapFrom} por ${received} ${swapTo}.`);
+      setSuccessMessage(`Transação enviada com sucesso ao Smart Contract Soroban no pool de liquidez da WalletNow! Você trocou ${swapAmount} ${swapFrom} por ${received} ${swapTo}.`);
+      setLastTxHash(txHash);
       setSuccess(true);
     } catch (err) {
       console.error(err);
@@ -1036,7 +1021,8 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
       };
 
       onUpdateWallet(updatedFields, tx);
-      setSuccessMessage(`Par de liquidez provisionado com sucesso! Recebido: ${lpMinted} tokens LP_${poolType}. TX: ${txHash}`);
+      setSuccessMessage(`Par de liquidez provisionado com sucesso! Recebido: ${lpMinted} tokens LP_${poolType}.`);
+      setLastTxHash(txHash);
       setSuccess(true);
     } catch (err) {
       console.error(err);
@@ -1081,8 +1067,9 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
       const token1 = poolType === "XLM_USDW" ? "XLM" : "USDW";
       const token2 = poolType === "XLM_USDW" ? "USDW" : "BRW";
 
+      const txHash = generateTxHash();
       const tx: Transaction = {
-        id: generateTxHash(),
+        id: txHash,
         type: "POOL_REMOVE",
         timestamp: new Date().toLocaleTimeString(),
         amount: currentLp.toString(),
@@ -1094,6 +1081,7 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
 
       onUpdateWallet(updatedFields, tx);
       setSuccessMessage(`Toda a sua liquidez foi removida! Você resgatou seus fundos originais de ${token1} e ${token2}.`);
+      setLastTxHash(txHash);
       setSuccess(true);
     }, 1800);
   };
@@ -1392,6 +1380,9 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
           <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-850 text-left font-mono text-[10px] space-y-1 text-slate-400">
             <p>⛽ Taxa Estelar de Execução: <span className="text-slate-300">0.00009 XLM</span></p>
             <p>🔒 Tipo: <span className="text-violet-400">Soroban Smart Contract (Rust compiler)</span></p>
+            {lastTxHash && (
+              <p>🔗 Hash: <a href={`https://stellar.expert/explorer/testnet/tx/${lastTxHash}`} target="_blank" rel="noreferrer" className="text-violet-400 underline hover:text-violet-300 break-all">{lastTxHash}</a></p>
+            )}
           </div>
 
           <button

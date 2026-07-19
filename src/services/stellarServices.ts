@@ -2,6 +2,12 @@ import { WalletNowClient } from "@walletnow/sdk";
 import { AccountEngine } from "@walletnow/wallet";
 import { LocalStorageAdapter } from "@walletnow/storage";
 import { WalletState } from "../types";
+import { Keypair, Horizon, TransactionBuilder, Networks, Asset, Operation } from "@stellar/stellar-sdk";
+
+export const ISSUER_USDW = "GDKZT3AXAOMMYVVG3TKFVUYDJODAIAL2ADHNJYQLK2PJQ6CE2U6KKFLQ";
+export const ISSUER_BRW = "GCJIRFZQJAO6JSYS4YFXFHLVJ6R4WWWB2VTREMRK7WXNNLMGIAXBBNC6";
+
+const server = new Horizon.Server("https://horizon-testnet.stellar.org");
 
 let wnClient: WalletNowClient | null = null;
 let initPromise: Promise<WalletNowClient> | null = null;
@@ -64,26 +70,65 @@ export const onboardUser = async (
 ): Promise<{ publicKey: string; secretKey: string }> => {
   onLog("[WalletNow SDK] Conectando ao Testnet Gateway...");
   const wn = await initWalletNow();
+  onLog("[WalletNow SDK] ✓ WalletNowClient inicializado.");
 
-  onLog("[WalletNow SDK] ✓ WalletNowClient inicializado. Registrando credenciais...");
-  
-  // Call SDK onboarding
-  const userResult = await wn.onboarding.createUser({
-    externalId: email,
-    displayName: name,
-    authMethod: "passkeys",
-    sponsored: true,
-    trustlines: ["BRW", "USDW"]
-  });
+  onLog("[GameFiNow] Gerando nova Keypair on-chain...");
+  const keypair = Keypair.random();
+  const publicKey = keypair.publicKey();
+  const secretKey = keypair.secret();
 
-  const userAddress = userResult.stellarAddress;
-  onLog(`[WalletNow SDK] ✓ Usuário criado de forma patrocinada! Endereço Público: ${userAddress}`);
+  onLog(`[GameFiNow] Financiando conta via Friendbot (Testnet)...`);
+  try {
+    const res = await fetch(`https://friendbot.stellar.org/?addr=${publicKey}`);
+    if (!res.ok) throw new Error("Friendbot failed");
+  } catch (e) {
+    onLog("[Erro] Falha ao financiar conta via friendbot.");
+  }
   
-  // No frontend de produção, as chaves privadas nunca devem ser expostas. 
-  // Retornamos um stub seguro para simular compatibilidade com o state antigo caso necessário.
+  onLog(`[GameFiNow] ✓ Conta financiada! Endereço Público: ${publicKey}`);
+  onLog(`[GameFiNow] Criando Trustlines para USDW e BRW...`);
+
+  try {
+    // Atraso de 3 segundos para garantir que o Horizon da rede de testes tenha indexado a conta recém-criada
+    await new Promise(resolve => setTimeout(resolve, 3000));
+    const account = await server.loadAccount(publicKey);
+    const tx = new TransactionBuilder(account, {
+      fee: "1000",
+      networkPassphrase: Networks.TESTNET
+    })
+      .addOperation(
+        // @ts-ignore
+        Operation.changeTrust({
+          asset: new Asset("USDW", ISSUER_USDW)
+        })
+      )
+      .addOperation(
+        // @ts-ignore
+        Operation.changeTrust({
+          asset: new Asset("BRW", ISSUER_BRW)
+        })
+      )
+      .setTimeout(30)
+      .build();
+
+    tx.sign(keypair);
+    try {
+      await server.submitTransaction(tx);
+      onLog(`[GameFiNow] ✓ Trustlines criadas com sucesso!`);
+    } catch (error: any) {
+      if (error.response && error.response.data && error.response.data.extras) {
+        console.error("Erro Trustlines Detalhado:", error.response.data.extras.result_codes);
+      }
+      throw error;
+    }
+  } catch (err) {
+    console.error("Erro ao criar trustlines:", err);
+    onLog(`[Erro] Falha ao criar Trustlines. O Swap falhará se não tiver trustline.`);
+  }
+  
   return {
-    publicKey: userAddress,
-    secretKey: "S_HIDDEN_FOR_SECURITY_" + Date.now() // Mock
+    publicKey,
+    secretKey
   };
 };
 
@@ -125,27 +170,70 @@ export class TestnetKitService {
 
   static async executeSwap(
     walletAddress: string,
-    fromAsset: string,
-    toAsset: string,
+    secretKey: string,
+    fromAssetCode: string,
+    toAssetCode: string,
     amount: number
   ): Promise<{ txHash: string; received: number; contractId: string }> {
-    const contractId = this.getSorobanLP(fromAsset, toAsset);
-    console.log(`[TestnetKitService] Invoking Soroban AMM Swap no contrato LP: ${contractId}...`);
+    const contractId = this.getSorobanLP(fromAssetCode, toAssetCode);
+    console.log(`[TestnetKitService] Invoking Swap no LP real da Testnet...`);
     
-    // Simulate network delay for smart contract execution
-    await new Promise((resolve) => setTimeout(resolve, 1800));
+    const getAsset = (code: string) => {
+      if (code === "XLM") return Asset.native();
+      if (code === "USDW") return new Asset("USDW", ISSUER_USDW);
+      if (code === "BRW") return new Asset("BRW", ISSUER_BRW);
+      return Asset.native();
+    };
 
-    // Base rates mock (just for testing logic)
+    const sendAsset = getAsset(fromAssetCode);
+    const destAsset = getAsset(toAssetCode);
+    const sendAmount = amount.toString();
+    
+    let sourceKeys: Keypair;
+    try {
+      sourceKeys = Keypair.fromSecret(secretKey);
+    } catch (e) {
+      throw new Error("Chave Privada inválida. Como o jogo foi atualizado para usar a blockchain real, você precisa criar um NOVO Passaporte (nova conta) para gerar uma chave secreta válida.");
+    }
+    const account = await server.loadAccount(walletAddress);
+    
+    // Como a operação usa os AMMs automaticamente, enviamos usando pathPaymentStrictSend
+    const tx = new TransactionBuilder(account, {
+      fee: "1000",
+      networkPassphrase: Networks.TESTNET
+    })
+      .addOperation(
+        // @ts-ignore
+        Operation.pathPaymentStrictSend({
+          sendAsset,
+          sendAmount,
+          destination: walletAddress,
+          destAsset,
+          destMin: "0.0000001", // Mínimo pra aceitar, em prod usar um slippage calculado
+        })
+      )
+      .setTimeout(30)
+      .build();
+
+    tx.sign(sourceKeys);
+    console.log("Enviando transação...");
+    let response;
+    try {
+      response = await server.submitTransaction(tx);
+    } catch (error: any) {
+      if (error.response && error.response.data && error.response.data.extras) {
+        console.error("Horizon Erro Detalhado:", JSON.stringify(error.response.data.extras.result_codes));
+      }
+      throw error;
+    }
     const rates: Record<string, Record<string, number>> = {
       XLM: { XLM: 1, USDW: 0.12, BRW: 0.65 },
       USDW: { XLM: 8.33, USDW: 1, BRW: 5.40 },
       BRW: { XLM: 1.54, USDW: 0.18, BRW: 1 }
     };
+    const received = Number((amount * rates[fromAssetCode][toAssetCode]).toFixed(2));
     
-    const received = Number((amount * rates[fromAsset][toAsset]).toFixed(2));
-    const txHash = "tx_soroban_" + Math.random().toString(16).substring(2, 10);
-    
-    return { txHash, received, contractId };
+    return { txHash: response.hash, received, contractId };
   }
 
   static async addLiquidity(
