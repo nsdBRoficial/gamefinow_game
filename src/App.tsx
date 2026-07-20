@@ -11,6 +11,7 @@ import { LoginScreen } from "./components/LoginScreen";
 import { MapModal } from "./components/MapModal";
 import { PassportModal } from "./components/PassportModal";
 import { DialogSystem } from "./components/DialogSystem";
+import ReactNipple from "react-nipple";
 import { GameState, Player, NPC, Transaction, QuestId, Quest, WalletState } from "./types";
 import { INITIAL_QUESTS, INITIAL_NPCS } from "./gameData";
 import { getNpcsForMap } from "./maps";
@@ -965,39 +966,54 @@ export default function App() {
           </div>
         </div>
 
-        {/* MOBILE JOYSTICK TOUCH PAD (Absolute bottom-left overlay elevated above status bar) */}
+        {/* MOBILE JOYSTICK TOUCH PAD AND ACTION BUTTON */}
         {!gameState.activeDialog && (
-          <div className="absolute bottom-10 left-3 z-10 flex items-center gap-1 bg-[#ece9df] border-2 border-black rounded-lg p-1.5 shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] md:hidden">
-            <div className="grid grid-cols-3 gap-1 w-36 h-26 font-mono">
-              <div />
+          <div className="absolute bottom-10 left-0 right-0 z-10 flex justify-between items-end px-6 pointer-events-none md:hidden">
+            
+            {/* Joystick no lado esquerdo */}
+            <div className="pointer-events-auto bg-[#ece9df] border-2 border-black rounded-full p-2 shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] opacity-80">
+              <ReactNipple
+                options={{
+                  mode: "static",
+                  position: { top: "50%", left: "50%" },
+                  size: 90,
+                  color: "black",
+                }}
+                style={{
+                  width: 90,
+                  height: 90,
+                  position: "relative",
+                }}
+                onMove={(evt: any, data: any) => {
+                  if (data && data.direction) {
+                    handleMoveButtonPress(data.direction.angle); // 'up', 'down', 'left', 'right'
+                  }
+                }}
+                onEnd={() => {
+                  // Parar de mover
+                  window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowUp' }));
+                  window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowDown' }));
+                  window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowLeft' }));
+                  window.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowRight' }));
+                }}
+              />
+            </div>
+
+            {/* Action button no lado direito */}
+            <div className="pointer-events-auto bg-[#ece9df] border-2 border-black rounded-full p-1.5 shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] opacity-80 mb-2">
               <button 
-                id="btn-move-up"
-                onClick={() => handleMoveButtonPress("up")}
-                className="bg-white hover:bg-slate-100 text-black rounded-lg border-2 border-black cursor-pointer text-base font-bold active:translate-y-0.5 flex items-center justify-center shadow-[0_2px_0_#000] active:shadow-none"
+                id="btn-action"
+                onClick={() => {
+                  // Simulate space bar press for interactions
+                  if (gameState.activeDialog) {
+                    handleAdvanceDialog();
+                  } else if (!gameState.activeModal) {
+                    handleTriggerModal();
+                  }
+                }}
+                className="w-16 h-16 bg-[#ffc600] hover:bg-[#e6b300] text-black rounded-full border-2 border-black cursor-pointer text-sm font-bold active:translate-y-1 flex items-center justify-center shadow-[0_4px_0_#000] active:shadow-none"
               >
-                ▲
-              </button>
-              <div />
-              <button 
-                id="btn-move-left"
-                onClick={() => handleMoveButtonPress("left")}
-                className="bg-white hover:bg-slate-100 text-black rounded-lg border-2 border-black cursor-pointer text-base font-bold active:translate-y-0.5 flex items-center justify-center shadow-[0_2px_0_#000] active:shadow-none"
-              >
-                ◀
-              </button>
-              <button 
-                id="btn-move-down"
-                onClick={() => handleMoveButtonPress("down")}
-                className="bg-white hover:bg-slate-100 text-black rounded-lg border-2 border-black cursor-pointer text-base font-bold active:translate-y-0.5 flex items-center justify-center shadow-[0_2px_0_#000] active:shadow-none"
-              >
-                ▼
-              </button>
-              <button 
-                id="btn-move-right"
-                onClick={() => handleMoveButtonPress("right")}
-                className="bg-white hover:bg-slate-100 text-black rounded-lg border-2 border-black cursor-pointer text-base font-bold active:translate-y-0.5 flex items-center justify-center shadow-[0_2px_0_#000] active:shadow-none"
-              >
-                ▶
+                AÇÃO
               </button>
             </div>
           </div>

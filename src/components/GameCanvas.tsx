@@ -1101,8 +1101,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const dims = latestDimensions.current;
     const calculatedWaveOffset = Math.floor(performance.now() / 250) % 16;
 
-    // Dynamic zoom level: 3.5 for desktop (close-up retro zoom), 2.2 for mobile (looks perfect/roomy)
-    const currentZoomLevel = dims.width < 768 ? 2.2 : 3.5;
+    // Dynamic zoom level: 3.5 for desktop (close-up retro zoom), 1.5 for mobile (looks perfect/roomy)
+    const currentZoomLevel = dims.width < 768 ? 1.5 : 3.5;
 
     // Background base
     ctx.fillStyle = "#0f172a"; // Deep rich dark background
