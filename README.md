@@ -144,6 +144,6 @@ Zero-config deployment. The Canvas engine is iframe-resistant (custom `tabIndex`
 ---
 
 <div align="center">
-  <b>Built with ❤️ by Hackers Club / GameFiNow Team</b><br/>
+  <b>Built by nsdBR GameFiNow Team</b><br/>
   <sub>v0.7.0 — Stellar Testnet — July 2026</sub>
 </div>
