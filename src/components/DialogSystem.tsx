@@ -8,12 +8,15 @@ interface DialogSystemProps {
   handleTriggerModal: () => void;
 }
 
+import { useTranslation } from "react-i18next";
+
 export function DialogSystem({
   activeDialog,
   isNearTerminal,
   handleAdvanceDialog,
   handleTriggerModal,
 }: DialogSystemProps) {
+  const { t } = useTranslation();
   return (
     <>
       {/* AUTHENTIC DIALOG SPEECH BUBBLE OVERLAY */}
@@ -36,7 +39,7 @@ export function DialogSystem({
               "{activeDialog.text[activeDialog.currentStep]}"
             </p>
             <div className="flex justify-between items-center pt-2 text-[9px] md:text-xs text-slate-600 font-mono border-t border-dashed border-black/20">
-              <span>Pressione [ESPAÇO / ENTER] ou toque para avançar.</span>
+              <span>{t('ui.pressSpace')}</span>
               <span className="bg-[#ece9df] px-1.5 py-0.5 rounded border border-black/15 text-black font-bold">
                 {activeDialog.currentStep + 1} / {activeDialog.text.length}
               </span>
@@ -49,15 +52,15 @@ export function DialogSystem({
       {isNearTerminal && !activeDialog && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 w-72 max-w-[90%] bg-white border-3 border-black p-3 rounded-xl shadow-[3px_3px_0px_#000] flex flex-col gap-1.5 animate-bounce text-center">
           <div className="font-mono">
-            <span className="text-[7.5px] text-[#ffbf00] font-black uppercase block tracking-wider leading-none">Terminal Disponível</span>
-            <span className="text-black font-black text-xs uppercase leading-tight">CONECTAR AO TERMINAL {isNearTerminal === "atf" ? "ATM" : isNearTerminal.toUpperCase()}</span>
+            <span className="text-[7.5px] text-[#ffbf00] font-black uppercase block tracking-wider leading-none">{t('ui.terminalAvailable')}</span>
+            <span className="text-black font-black text-xs uppercase leading-tight">{t('ui.connectTerminal')} {isNearTerminal === "atf" ? "ATM" : isNearTerminal?.toUpperCase()}</span>
           </div>
           <button
             id="btn-open-terminal"
             onClick={handleTriggerModal}
             className="w-full py-1.5 rounded bg-[#5db81d] text-white border-2 border-black shadow-[inset_-2px_-2px_0px_rgba(0,0,0,0.2),inset_2px_2px_0px_rgba(255,255,255,0.4),0_2.5px_0px_#000] active:translate-y-0.5 active:shadow-[inset_2px_2px_0px_rgba(0,0,0,0.2),0_1px_0px_#000] font-black text-[10px] tracking-wider cursor-pointer transition"
           >
-            💻 CONECTAR DISPOSITIVO WEB3
+            💻 {t('ui.connectWeb3Device')}
           </button>
         </div>
       )}

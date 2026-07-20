@@ -8,10 +8,12 @@ import { GameCanvas } from "./components/GameCanvas";
 import { GameOverlay } from "./components/GameOverlay";
 import { FloatingWindows } from "./components/FloatingWindows";
 import { LoginScreen } from "./components/LoginScreen";
+import { LandingPage } from "./components/LandingPage";
 import { MapModal } from "./components/MapModal";
 import { PassportModal } from "./components/PassportModal";
 import { DialogSystem } from "./components/DialogSystem";
 import ReactNipple from "react-nipple";
+import { useTranslation } from "react-i18next";
 import { GameState, Player, NPC, Transaction, QuestId, Quest, WalletState } from "./types";
 import { INITIAL_QUESTS, INITIAL_NPCS } from "./gameData";
 import { getNpcsForMap } from "./maps";
@@ -37,6 +39,7 @@ import {
 } from "lucide-react";
 
 export default function App() {
+  const { t } = useTranslation();
   const gameState = useGameStore();
   const setGameState = useGameStore((s) => s.setGameState);
   const playerPos = useGameStore((s) => s.playerPos);
@@ -45,6 +48,7 @@ export default function App() {
   const [npcs] = useState<NPC[]>(INITIAL_NPCS);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
   
   // Handle active retro floating window overlays: "customizer" | "backpack" | "ledger" | "guide" | null
   const [activeWindow, setActiveWindow] = useState<"customizer" | "backpack" | "ledger" | "guide" | null>(null);
@@ -276,25 +280,29 @@ export default function App() {
   const handleTalkToNPC = (npc: NPC) => {
     playSynthSound("beep");
 
-    let dialogueLines = npc.dialogs;
+    let dialogKey = `npcs.${npc.id}.dialogs`;
     if (npc.questTrigger) {
       const activeQuest = gameState.quests[npc.questTrigger];
       if (activeQuest.status === "active" && npc.activeQuestDialogs) {
-        dialogueLines = npc.activeQuestDialogs;
+        dialogKey = `npcs.${npc.id}.activeQuestDialogs`;
       } else if (activeQuest.status === "completed") {
-        dialogueLines = npc.completedDialogs;
+        dialogKey = `npcs.${npc.id}.completedDialogs`;
       }
     } else if (npc.id === "guide") {
       const walletStatus = gameState.quests.wallet.status;
       if (walletStatus === "completed") {
-        dialogueLines = npc.completedDialogs;
+        dialogKey = `npcs.${npc.id}.completedDialogs`;
+      } else if (walletStatus === "active") {
+        dialogKey = `npcs.${npc.id}.activeQuestDialogs`;
       }
     }
+
+    const dialogueLines: string[] = t(dialogKey, { returnObjects: true }) as string[];
 
     setGameState((prev) => ({
       ...prev,
       activeDialog: {
-        npcName: npc.name,
+        npcName: t(`npcs.${npc.id}.name`),
         text: dialogueLines,
         currentStep: 0,
         npcId: npc.id,
@@ -530,8 +538,8 @@ export default function App() {
   if (!currentActiveQuest && isCompletedAll) {
     currentActiveQuest = {
       id: "all_done" as any,
-      title: "Novas missões em breve...",
-      description: "Você se tornou um Lendário. Aguarde por novas atualizações, missões e aventuras que serão adicionadas em breve! Continue explorando.",
+      title: t("quests.all_done.title"),
+      description: t("quests.all_done.description"),
       status: "completed"
     };
   } else if (!currentActiveQuest) {
@@ -586,6 +594,15 @@ export default function App() {
 
   const isMovementBlocked = !!gameState.activeModal || !!gameState.activeDialog || !!activeWindow || showPassport || showMapModal;
 
+  if (!hasStarted) {
+    return (
+      <LandingPage
+        onPlay={() => setHasStarted(true)}
+        playSynthSound={playSynthSound}
+      />
+    );
+  }
+
   if (!isLoggedIn) {
     return (
       <LoginScreen
@@ -623,7 +640,7 @@ export default function App() {
                   playSynthSound("beep");
                 }}
                 className="w-10 h-10 md:w-10 md:h-10 bg-[#fbf5eb] border-2 border-black rounded-lg flex items-center justify-center hover:bg-white active:translate-y-0.5 shadow-[2px_2px_0px_#000] cursor-pointer transition"
-                title="Alternar Áudio"
+                title={t("ui.toggleAudio")}
               >
                 <span className="text-base md:text-base">{soundEnabled ? "🔊" : "🔇"}</span>
               </button>
@@ -755,7 +772,7 @@ export default function App() {
             className={`w-11 h-11 md:w-9 md:h-9 border-2 border-black rounded-lg flex items-center justify-center shadow-[2px_2.5px_0px_#000] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer transition ${
               activeWindow === "backpack" ? "bg-emerald-400" : "bg-[#ebd9c0] hover:bg-[#f3e6d3]"
             }`}
-            title="Sinalizadores de Missões"
+            title={t("ui.quests")}
           >
             <span className="text-xl md:text-lg">📝</span>
           </button>
@@ -764,7 +781,7 @@ export default function App() {
           <button
             onClick={handleTeleportToCenter}
             className="w-11 h-11 md:w-9 md:h-9 bg-cyan-100 hover:bg-cyan-50 border-2 border-black rounded-lg flex items-center justify-center shadow-[2px_2.5px_0px_#000] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer transition group relative"
-            title="Teletransporte ao Centro (Runa de Regresso)"
+            title={t("ui.teleportCenter")}
           >
             <span className="text-xl md:text-lg animate-spin-slow">🌀</span>
             <span className="absolute left-13 bg-black text-white text-[8px] uppercase tracking-wider px-2 py-1 rounded border border-white/20 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 font-mono">
@@ -781,7 +798,7 @@ export default function App() {
             className={`w-11 h-11 md:w-9 md:h-9 border-2 border-black rounded-lg flex items-center justify-center shadow-[2px_2.5px_0px_#000] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer transition ${
               showPassport ? "bg-amber-400" : "bg-[#ebd9c0] hover:bg-[#f3e6d3]"
             }`}
-            title="ID do Viajante (Passport)"
+            title={t("ui.passport")}
           >
             <span className="text-xl md:text-lg">🛡️</span>
           </button>
@@ -840,7 +857,7 @@ export default function App() {
             className={`w-11 h-11 md:w-9 md:h-9 border-2 border-black rounded-lg flex items-center justify-center shadow-[2px_2.5px_0px_#000] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer transition ${
               activeWindow === "backpack" ? "bg-emerald-500 text-white" : "bg-[#ebd9c0] hover:bg-[#f3e6d3]"
             }`}
-            title="Inventário & Runas"
+            title={t("ui.backpack")}
           >
             <span className="text-xl md:text-lg">🎒</span>
           </button>
@@ -854,7 +871,7 @@ export default function App() {
             className={`w-11 h-11 md:w-9 md:h-9 border-2 border-black rounded-lg flex items-center justify-center shadow-[2px_2.5px_0px_#000] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer transition ${
               activeWindow === "customizer" ? "bg-amber-400" : "bg-[#ebd9c0] hover:bg-[#f3e6d3]"
             }`}
-            title="Guarda-roupa (Outfits)"
+            title={t("ui.wardrobe")}
           >
             <span className="text-xl md:text-lg">⚒️</span>
           </button>
@@ -868,7 +885,7 @@ export default function App() {
             className={`w-11 h-11 md:w-9 md:h-9 border-2 border-black rounded-lg flex items-center justify-center shadow-[2px_2.5px_0px_#000] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer transition ${
               activeWindow === "ledger" ? "bg-[#007ba4] text-white" : "bg-[#ebd9c0] hover:bg-[#f3e6d3]"
             }`}
-            title={`Histórico de Transações (${gameState.transactions.length})`}
+            title={t("ui.ledger")}
           >
             <span className="text-xl md:text-lg">📜</span>
           </button>
@@ -882,7 +899,7 @@ export default function App() {
             className={`w-11 h-11 md:w-9 md:h-9 border-2 border-black rounded-lg flex items-center justify-center shadow-[2px_2.5px_0px_#000] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer transition ${
               activeWindow === "guide" ? "bg-red-600 text-white" : "bg-[#ebd9c0] hover:bg-[#f3e6d3]"
             }`}
-            title="Livro de Regras do Continente"
+            title={t("ui.rulebook")}
           >
             <span className="text-xl md:text-lg">📖</span>
           </button>
@@ -893,22 +910,22 @@ export default function App() {
         <div className="absolute top-26 md:top-20 left-[62px] md:left-[54px] z-10 bg-[#fbf5eb]/95 border-2 border-black rounded-lg p-2.5 w-[260px] sm:w-[380px] md:w-[480px] shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] text-[10px] md:text-[9.5px] leading-snug font-mono select-none pointer-events-none text-left">
           <div className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 bg-[#ffbf00] rounded-full animate-ping" />
-            <span className="text-[8px] md:text-[7.5px] text-amber-800 font-extrabold uppercase tracking-wider">Missão Ativa</span>
+            <span className="text-[8px] md:text-[7.5px] text-amber-800 font-extrabold uppercase tracking-wider">{t('ui.activeQuest')}</span>
           </div>
           <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2 mt-0.5">
             <span className="text-black font-black block leading-tight text-[11.5px] md:text-[10.5px] uppercase shrink-0">
-              {currentActiveQuest?.title}
+              {currentActiveQuest ? t(`quests.${currentActiveQuest.id}.title`) : ''}
             </span>
             <span className="text-slate-600 text-[10px] md:text-[9px] block leading-snug sm:border-l sm:border-black/15 sm:pl-2">
-              {currentActiveQuest?.description}
+              {currentActiveQuest ? t(`quests.${currentActiveQuest.id}.description`) : ''}
             </span>
           </div>
         </div>
 
-        {/* 5. TRAVELER LENDÁRIO CELEBRATION RIBBON */}
+        {/* 5. TRAVELER LENDÁRIO CELEBRATION RIBLED */}
         {isCompletedAll && (
           <div className="absolute top-[150px] md:top-32 left-1/2 -translate-x-1/2 z-10 bg-[#ffbf00] border-2 border-black px-3.5 py-1.5 rounded-full shadow-[2px_2px_0px_#000] text-[9.5px] md:text-[8.5px] font-black text-black tracking-wider flex items-center gap-1.5 animate-bounce select-none pointer-events-none">
-            🏆 CONQUISTA MÁXIMA: TRAVELER LENDÁRIO DE STELLAR! 🌟
+            {t('ui.legendaryRibbon')}
           </div>
         )}
 
@@ -934,8 +951,6 @@ export default function App() {
           handleAdvanceDialog={handleAdvanceDialog}
           handleTriggerModal={handleTriggerModal}
         />
-
-        {/* NEW ENHANCED BOTTOM STATUS/REGION BAR HUD */}
         <div className="absolute bottom-0 left-0 right-0 z-20 h-8 bg-black/90 border-t-2 border-[#8b5a2b]/60 flex items-center justify-between px-3 text-[8.5px] sm:text-[9.5px] font-mono text-slate-300 pointer-events-auto select-none">
           <div className="flex items-center gap-1.5 font-bold text-[#ffbf00]">
             <span className="animate-pulse">🗺️</span>
@@ -950,7 +965,7 @@ export default function App() {
 
           <div className="hidden sm:flex items-center gap-2 text-[9px] font-semibold text-slate-400">
             <span className="inline-block w-2 h-2 rounded-full bg-[#5db81d] animate-ping mr-0.5" />
-            <span className="text-[#5db81d] font-bold uppercase tracking-wider">REDE ATIVA (Ledger #{gameState.currentLedger})</span>
+            <span className="text-[#5db81d] font-bold uppercase tracking-wider">{t("ui.networkActive")}</span>
             <span className="text-slate-600">|</span>
             <span>Simulação Sandbox Stellar</span>
           </div>

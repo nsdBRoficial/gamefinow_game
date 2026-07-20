@@ -539,7 +539,7 @@ export function isBridgeBlocked(c: number, r: number, quests: Record<string, Que
     if (quests.wallet.status !== "completed") {
       return { 
         blocked: true, 
-        message: "O portão de energia Azul está trancado! Complete a missão 'Forja da Carteira' no Leste para liberá-lo." 
+        message: "north" 
       };
     }
   }
@@ -549,7 +549,7 @@ export function isBridgeBlocked(c: number, r: number, quests: Record<string, Que
     if (quests.onramp.status !== "completed") {
       return { 
         blocked: true, 
-        message: "O portão de energia Roxo está trancado! Complete a missão 'Portal de Câmbio (On-Ramp)' no Norte para liberá-lo." 
+        message: "west" 
       };
     }
   }
@@ -559,7 +559,7 @@ export function isBridgeBlocked(c: number, r: number, quests: Record<string, Que
     if (quests.soroban.status !== "completed") {
       return { 
         blocked: true, 
-        message: "O portão de energia Dourado está trancado! Complete a missão 'Mercado Soroban' no Oeste para liberá-lo." 
+        message: "south" 
       };
     }
   }

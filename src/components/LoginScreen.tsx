@@ -12,8 +12,10 @@ import {
   UserCheck,
   Zap,
   Globe,
-  Loader2
+  Loader2,
+  Languages
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface LoginScreenProps {
   existingWallet: {
@@ -37,25 +39,28 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   onResetCharacter,
   playSynthSound,
 }) => {
+  const { t, i18n } = useTranslation();
   const [name, setName] = useState(existingPlayerName || "Anonymo");
   const [showPasskeyModal, setShowPasskeyModal] = useState(false);
   const [passkeyStep, setPasskeyStep] = useState<"idle" | "scanning" | "success">("idle");
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
-  // Background star blinking animation effect
-  const [stars, setStars] = useState<{ id: number; top: number; left: number; size: number; delay: number }[]>([]);
+  // Background images from 'imagens/'
+  const backgrounds = [
+    "/imagens/capa-0.png",
+    "/imagens/capa-1.png",
+    "/imagens/capa-2.png",
+    "/imagens/capa-3.png",
+    "/imagens/capa-4.png"
+  ];
+  const [currentBg, setCurrentBg] = useState(0);
 
   useEffect(() => {
-    // Generate static-random stars positions
-    const newStars = Array.from({ length: 60 }).map((_, i) => ({
-      id: i,
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      size: Math.random() * 2 + 1,
-      delay: Math.random() * 5,
-    }));
-    setStars(newStars);
-  }, []);
+    const interval = setInterval(() => {
+      setCurrentBg((prev) => (prev + 1) % backgrounds.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [backgrounds.length]);
 
   // Handle Frictionless Play
   const handleFrictionlessPlay = (e: React.FormEvent) => {
@@ -93,46 +98,73 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
     setShowResetConfirm(false);
   };
 
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+    playSynthSound("beep");
+  };
+
   return (
-    <div className="relative w-full h-full min-h-screen bg-[#07080a] text-slate-100 flex items-center justify-center p-4 overflow-y-auto selection:bg-cyan-400 selection:text-black">
+    <div className="relative w-full h-full min-h-screen bg-black text-slate-100 flex items-center justify-center p-4 overflow-y-auto selection:bg-cyan-400 selection:text-black">
       
-      {/* 1. BACKGROUND COSMIC STARFIELD */}
+      {/* 1. BACKGROUND CAROUSEL */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {stars.map((star) => (
+        {backgrounds.map((bg, index) => (
           <div
-            key={star.id}
-            className="absolute rounded-full bg-white opacity-40 animate-pulse"
-            style={{
-              top: `${star.top}%`,
-              left: `${star.left}%`,
-              width: `${star.size}px`,
-              height: `${star.size}px`,
-              animationDelay: `${star.delay}s`,
-              animationDuration: "3s",
-              boxShadow: star.size > 2 ? "0 0 4px rgba(255, 255, 255, 0.8)" : "none",
-            }}
+            key={bg}
+            className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out ${
+              index === currentBg ? "opacity-100 scale-105" : "opacity-0 scale-100"
+            }`}
+            style={{ backgroundImage: `url(${bg})` }}
           />
         ))}
-        {/* Ambient colored nebulas */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-950/15 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-amber-950/10 rounded-full blur-[120px] pointer-events-none" />
-        
+        {/* Dark Gradient Overlay for Readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/80 pointer-events-none" />
         {/* Retro scanlines overlay */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.02),rgba(0,255,0,0.01),rgba(0,0,255,0.02))] bg-[size:100%_4px,6px_100%] pointer-events-none" />
       </div>
 
+      {/* LANGUAGE SELECTOR */}
+      <div className="absolute top-6 right-6 z-50 flex flex-col items-end gap-2">
+        <div className="flex items-center gap-1.5 text-slate-400 text-[10px] uppercase font-bold tracking-wider mb-1">
+          <Languages className="w-3.5 h-3.5" />
+          {t('ui.login.selectLanguage')}
+        </div>
+        <div className="flex bg-black/40 backdrop-blur-md border border-slate-700 rounded-lg overflow-hidden shadow-lg">
+          <button 
+            onClick={() => changeLanguage('en')} 
+            className={`px-3 py-1.5 text-[10px] font-bold uppercase transition ${i18n.language === 'en' ? 'bg-cyan-500 text-black' : 'text-slate-400 hover:bg-slate-800'}`}
+          >
+            EN
+          </button>
+          <div className="w-px bg-slate-700" />
+          <button 
+            onClick={() => changeLanguage('pt')} 
+            className={`px-3 py-1.5 text-[10px] font-bold uppercase transition ${i18n.language === 'pt' ? 'bg-cyan-500 text-black' : 'text-slate-400 hover:bg-slate-800'}`}
+          >
+            PT-BR
+          </button>
+          <div className="w-px bg-slate-700" />
+          <button 
+            onClick={() => changeLanguage('es')} 
+            className={`px-3 py-1.5 text-[10px] font-bold uppercase transition ${i18n.language === 'es' ? 'bg-cyan-500 text-black' : 'text-slate-400 hover:bg-slate-800'}`}
+          >
+            ES
+          </button>
+        </div>
+      </div>
+
       {/* 2. MAIN CONSOLE CONTAINER */}
-      <div className="relative w-full max-w-4xl bg-[#0f1115] border-2 border-slate-800 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8),_inset_0_1px_1px_rgba(255,255,255,0.05)] overflow-hidden z-10 font-mono">
+      <div className="relative w-full max-w-4xl bg-black/60 backdrop-blur-xl border border-white/20 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8),_inset_0_1px_1px_rgba(255,255,255,0.1)] overflow-hidden z-10 font-mono mt-12 md:mt-0">
         
         {/* Top retro status bar */}
-        <div className="bg-[#14181f] border-b border-slate-800/80 px-4 py-2.5 flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+        <div className="bg-black/40 backdrop-blur-md border-b border-white/10 px-4 py-2.5 flex items-center justify-between text-[10px] text-slate-300 font-bold uppercase tracking-wider">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-green-500 animate-ping" />
-            <span className="text-green-400">SERVIDORES DE ESTRELAS ONLINE</span>
+            <span className="text-green-400">{t('ui.onlineServers')}</span>
           </div>
           <div className="flex items-center gap-4">
-            <span>NETWORK: STELLAR TESTNET</span>
-            <span className="text-cyan-400 font-semibold">V2.5.0-ALPHA</span>
+            <span>{t('ui.login.network')}: {t('ui.login.testnet')}</span>
+            <span className="text-cyan-400 font-semibold">{t('ui.login.version')}</span>
           </div>
         </div>
 
@@ -140,10 +172,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
         <div className="p-6 md:p-8 grid md:grid-cols-12 gap-8 items-center">
           
           {/* LEFT COLUMN: HERO GAME CONCEPT & LOGO */}
-          <div className="md:col-span-5 flex flex-col items-center md:items-start text-center md:text-left space-y-4">
+          <div className="md:col-span-5 flex flex-col items-center md:items-start text-center md:text-left space-y-4 animate-[pulse_6s_ease-in-out_infinite]">
             
             {/* Pulsing floating game emblem */}
-            <div className="relative w-24 h-24 md:w-32 md:h-32 bg-slate-950 border-2 border-dashed border-cyan-800/60 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.15)] group animate-bounce" style={{ animationDuration: "6s" }}>
+            <div className="relative w-24 h-24 md:w-32 md:h-32 bg-black/50 backdrop-blur-md border-2 border-dashed border-cyan-800/60 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.15)] group animate-bounce" style={{ animationDuration: "6s" }}>
               <div className="absolute inset-2 bg-gradient-to-tr from-cyan-950 to-slate-950 rounded-full flex items-center justify-center border border-cyan-500/20">
                 <Globe className="h-10 w-10 md:h-14 md:w-14 text-cyan-400/80 animate-spin" style={{ animationDuration: "25s" }} />
               </div>
@@ -154,25 +186,25 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
             <div>
               <h1 className="text-2xl md:text-3xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-slate-100 via-cyan-100 to-cyan-400 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] leading-tight uppercase">
-                Stellar Island
+                {t('ui.login.title')}
               </h1>
               <p className="text-[11px] md:text-xs text-slate-400 leading-relaxed mt-1.5 font-medium max-w-sm">
-                O arquipélago educacional onde você domina a Rede Stellar e contratos inteligentes Soroban através de uma jornada gamificada de exploração offline-first.
+                {t('ui.login.subtitle')}
               </p>
             </div>
 
             {/* Quick stats panel */}
-            <div className="w-full bg-slate-950/60 rounded-xl p-3 border border-slate-850 space-y-1.5 text-[10px]">
+            <div className="w-full bg-black/40 hover:bg-black/60 transition-colors backdrop-blur-sm rounded-xl p-3 border border-slate-850 space-y-1.5 text-[10px]">
               <div className="flex justify-between">
-                <span className="text-slate-500">CONECTIVIDADE:</span>
+                <span className="text-slate-500">{t('ui.login.connectivity')}</span>
                 <span className="text-cyan-400 font-semibold">OFFLINE SECURE (LOCAL)</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">MÓDULO DE WALLET:</span>
+                <span className="text-slate-500">{t('ui.login.walletModule')}</span>
                 <span className="text-amber-400 font-semibold">STELLAR WALLETNOW SDK</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">PERSISTÊNCIA:</span>
+                <span className="text-slate-500">{t('ui.login.persistence')}</span>
                 <span className="text-purple-400 font-semibold">DURABLE INDEXED DB</span>
               </div>
             </div>
@@ -180,11 +212,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           </div>
 
           {/* RIGHT COLUMN: INTERACTIVE LOGIN INTERFACES */}
-          <div className="md:col-span-7 space-y-6">
+          <div className="md:col-span-7 space-y-6 group">
             
             {/* OPTION A: RECOGNIZED PASSKEY IDENTITY */}
             {existingWallet.hasWallet ? (
-              <div className="bg-slate-950 border border-cyan-500/30 rounded-xl p-5 shadow-[0_0_15px_rgba(6,182,212,0.06)] relative overflow-hidden group">
+              <div className="bg-black/50 backdrop-blur-md border border-cyan-500/30 hover:shadow-[0_0_25px_rgba(6,182,212,0.15)] hover:border-cyan-500/50 hover:-translate-y-1 transition-all duration-500 rounded-xl p-5 shadow-[0_0_15px_rgba(6,182,212,0.06)] relative overflow-hidden group">
                 <div className="absolute -top-10 -right-10 w-28 h-28 bg-cyan-500/5 rounded-full blur-xl pointer-events-none" />
                 
                 <div className="flex items-start gap-4">
@@ -199,9 +231,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                       {existingWallet.name || existingPlayerName}
                     </h3>
                     <p className="text-[10px] text-slate-400 truncate">
-                      📧 {existingWallet.email || "Sem e-mail registrado"}
+                      📧 {existingWallet.email || "{t('ui.login.noEmail')}"}
                     </p>
-                    <p className="text-[9px] text-cyan-500/80 font-mono tracking-wider truncate bg-slate-900 px-1.5 py-0.5 rounded mt-1.5 max-w-[240px]">
+                    <p className="text-[9px] text-cyan-500/80 font-mono tracking-wider truncate bg-black/40 backdrop-blur-md px-1.5 py-0.5 rounded mt-1.5 max-w-[240px]">
                       🔑 {existingWallet.publicKey?.slice(0, 8)}...{existingWallet.publicKey?.slice(-8)}
                     </p>
                   </div>
@@ -213,7 +245,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                     onClick={handleStartPasskey}
                     className="flex-1 py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider text-black bg-cyan-400 hover:bg-cyan-300 hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 font-mono shadow-[0_4px_12px_rgba(34,211,238,0.25)]"
                   >
-                    <Fingerprint className="h-4 w-4" /> Logar com Passkey
+                    <Fingerprint className="h-4 w-4" /> {t('ui.login.loginPasskey')}
                   </button>
 
                   <button
@@ -222,28 +254,28 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                       playSynthSound("beep");
                       onLogin(existingWallet.name || existingPlayerName);
                     }}
-                    className="py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider text-slate-400 hover:text-slate-200 bg-slate-900 hover:bg-slate-850 active:scale-[0.99] transition-all cursor-pointer border border-slate-800"
-                    title="Entrar sem precisar re-escanear biometria"
+                    className="py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider text-slate-400 hover:text-slate-200 bg-black/40 backdrop-blur-md hover:bg-slate-850 active:scale-[0.99] transition-all cursor-pointer border border-slate-800"
+                    title={t('ui.login.fastLoginTitle')}
                   >
-                    Login Rápido ⚡
+                    {t('ui.login.fastLogin')}
                   </button>
                 </div>
               </div>
             ) : (
               /* IF NO WALLET: SHOW FRICTIONLESS LOGIN FORM WITH NAME PREFILL */
-              <form onSubmit={handleFrictionlessPlay} className="bg-slate-950 border border-slate-850 rounded-xl p-5 space-y-4">
+              <form onSubmit={handleFrictionlessPlay} className="bg-black/50 backdrop-blur-md border border-slate-850 hover:border-slate-700 hover:-translate-y-1 transition-all duration-500 rounded-xl p-5 space-y-4 shadow-lg hover:shadow-xl">
                 <div className="space-y-1">
                   <h3 className="text-xs font-black text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <Zap className="h-4 w-4 text-amber-400" /> Modo Sem Fricção Ativo
+                    <Zap className="h-4 w-4 text-amber-400 animate-pulse" /> {t('ui.login.frictionlessMode')}
                   </h3>
                   <p className="text-[10px] text-slate-400 leading-relaxed">
-                    Entre instantaneamente sem preencher formulários complicados. Você poderá forjar sua carteira com segurança criptográfica quando explorar a ilha.
+                    {t('ui.login.frictionlessDesc')}
                   </p>
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="block text-[10px] text-slate-400 font-extrabold uppercase tracking-wide flex items-center gap-1.5">
-                    <User className="h-3 w-3 text-cyan-400" /> Nome do Seu Personagem
+                    <User className="h-3 w-3 text-cyan-400" /> {t('ui.login.characterName')}
                   </label>
                   <div className="relative">
                     <input
@@ -251,15 +283,15 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                       maxLength={18}
                       value={name}
                       onChange={(e) => setName(e.target.value.replace(/[^a-zA-Z0-9_ ]/g, ""))}
-                      placeholder="Anonymo"
-                      className="w-full bg-slate-900 border border-slate-800 rounded-xl py-3 px-4 text-xs font-bold focus:outline-none focus:border-cyan-500 focus:bg-[#0c0d10] text-slate-100 placeholder:text-slate-600 tracking-wide transition-all"
+                      placeholder={t('ui.loginNamePlaceholder')}
+                      className="w-full bg-black/40 hover:bg-black/60 transition-colors backdrop-blur-md border border-slate-800 rounded-xl py-3 px-4 text-xs font-bold focus:outline-none focus:border-cyan-500 focus:bg-[#0c0d10] text-slate-100 placeholder:text-slate-600 tracking-wide transition-all"
                     />
-                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-500 bg-slate-950 px-1.5 py-0.5 rounded border border-slate-800">
+                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[9px] text-slate-500 bg-black/50 backdrop-blur-md px-1.5 py-0.5 rounded border border-slate-800">
                       EDITÁVEL
                     </span>
                   </div>
                   <span className="text-[9px] text-slate-500 block font-medium">
-                    Deixe em branco ou digite qualquer apelido para entrar de forma 100% livre.
+                    {t('ui.login.nameHint')}
                   </span>
                 </div>
 
@@ -267,18 +299,18 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                   type="submit"
                   className="w-full py-3.5 px-4 rounded-xl font-black text-xs uppercase tracking-wider text-black bg-amber-400 hover:bg-amber-300 hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 font-mono shadow-[0_4px_12px_rgba(245,158,11,0.2)]"
                 >
-                  Jogar Agora Sem Fricção <ChevronRight className="h-4 w-4" />
+                  {t('ui.login.playNow')} <ChevronRight className="h-4 w-4" />
                 </button>
               </form>
             )}
 
             {/* INTERACTIVE CREDENTIAL PASSKEY DESCRIPTION */}
-            <div className="bg-[#12161f]/40 p-4 rounded-xl border border-slate-800/80 text-[10.5px] leading-relaxed space-y-1.5 text-slate-400">
+            <div className="bg-black/30 backdrop-blur-md p-4 rounded-xl border border-slate-800/80 text-[10.5px] leading-relaxed space-y-1.5 text-slate-400">
               <span className="text-[9px] bg-slate-800 text-slate-300 font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wide">
-                ℹ️ Como Funciona
+                {t('ui.login.howItWorks')}
               </span>
               <p>
-                Os dados de progresso e estatísticas são mantidos no seu navegador. Após criar a carteira na região leste (East Region), o game se integra à autenticação local de <span className="text-cyan-400 font-semibold">Chaves de Acesso (Passkeys)</span>, permitindo logar com um único toque sem necessitar de senhas convencionais.
+                {t('ui.login.howItWorksDesc1')}<span className="text-cyan-400 font-semibold">{t('ui.login.howItWorksDesc2')}</span>{t('ui.login.howItWorksDesc3')}
               </p>
             </div>
 
@@ -289,9 +321,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                   <div className="flex items-start gap-2 text-red-400 text-xs font-bold">
                     <ShieldAlert className="h-5 w-5 shrink-0 mt-0.5" />
                     <div>
-                      <h4>Confirmar Novo Personagem?</h4>
+                      <h4>{t('ui.login.confirmResetTitle')}</h4>
                       <p className="text-[10px] text-slate-400 font-normal mt-0.5">
-                        Isso removerá todo o progresso atual, histórico de transações e a carteira criptográfica gerada no seu navegador. Ótimo para testar o onboarding do zero!
+                        {t('ui.login.confirmResetDesc')}
                       </p>
                     </div>
                   </div>
@@ -299,7 +331,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                     <button
                       type="button"
                       onClick={() => setShowResetConfirm(false)}
-                      className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 hover:text-slate-100 bg-slate-900 rounded-lg hover:bg-slate-850 cursor-pointer"
+                      className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400 hover:text-slate-100 bg-black/40 backdrop-blur-md rounded-lg hover:bg-slate-850 cursor-pointer"
                     >
                       Cancelar
                     </button>
@@ -319,10 +351,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                     playSynthSound("beep");
                     setShowResetConfirm(true);
                   }}
-                  className="text-[10px] text-slate-500 hover:text-orange-400 font-bold tracking-wider uppercase flex items-center gap-1.5 transition px-2 py-1 rounded hover:bg-slate-900 cursor-pointer"
-                  title="Permite reiniciar o jogo limpando localStorage para novos testes de onboarding."
+                  className="text-[10px] text-slate-500 hover:text-orange-400 font-bold tracking-wider uppercase flex items-center gap-1.5 transition px-2 py-1 rounded hover:bg-black/40 backdrop-blur-md cursor-pointer"
+                  title={t('ui.newCharacter')}
                 >
-                  <Trash2 className="h-3.5 w-3.5 text-slate-600" /> ✨ Resetar & Criar Novo Personagem (Modo Teste)
+                  <Trash2 className="h-3.5 w-3.5 text-slate-600" /> ✨ {t('ui.newCharacter')} (Modo Teste)
                 </button>
               )}
             </div>
@@ -334,13 +366,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       {/* 3. SIMULATED BROWSER / OS PASSKEY BIOMETRIC DIALOG */}
       {showPasskeyModal && (
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border-2 border-slate-750 w-full max-w-sm rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.85)] font-mono overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-black/40 backdrop-blur-md border-2 border-slate-750 w-full max-w-sm rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.85)] font-mono overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             
             {/* Header simulating OS biometric request */}
-            <div className="bg-slate-950 px-4 py-3 border-b border-slate-850 flex items-center justify-between">
+            <div className="bg-black/50 backdrop-blur-md px-4 py-3 border-b border-slate-850 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Smartphone className="h-4 w-4 text-cyan-400" />
-                <span className="text-[10px] font-bold text-slate-400 tracking-wide uppercase">Chave de Acesso Local</span>
+                <span className="text-[10px] font-bold text-slate-400 tracking-wide uppercase">{t('ui.login.passkeyLocal')}</span>
               </div>
               <div className="flex gap-1">
                 <span className="w-2.5 h-2.5 rounded-full bg-slate-700" />
@@ -354,7 +386,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                   Autenticação de Dispositivo
                 </h3>
                 <p className="text-[10.5px] text-slate-400 leading-normal max-w-xs mx-auto">
-                  Por favor, escaneie sua impressão digital ou use a autenticação facial cadastrada para verificar sua carteira estelar.
+                  {t('ui.login.deviceAuthDesc')}
                 </p>
               </div>
 
@@ -375,7 +407,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 }`} />
 
                 {/* Biometric container */}
-                <div className={`w-14 h-14 rounded-2xl bg-slate-950 border-2 flex items-center justify-center shadow-inner transition-all duration-300 ${
+                <div className={`w-14 h-14 rounded-2xl bg-black/50 backdrop-blur-md border-2 flex items-center justify-center shadow-inner transition-all duration-300 ${
                   passkeyStep === "scanning"
                     ? "border-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.15)]"
                     : "border-green-400 shadow-[0_0_15px_rgba(74,222,128,0.2)]"
@@ -396,20 +428,20 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 {passkeyStep === "scanning" ? (
                   <>
                     <Loader2 className="h-3.5 w-3.5 text-cyan-400 animate-spin" />
-                    <span className="text-[10px] font-bold text-cyan-400 tracking-wider uppercase animate-pulse">Escaneando Biometria...</span>
+                    <span className="text-[10px] font-bold text-cyan-400 tracking-wider uppercase animate-pulse">{t('ui.login.scanningBio')}</span>
                   </>
                 ) : (
                   <>
                     <span className="text-green-400 font-extrabold">✓</span>
-                    <span className="text-[10px] font-bold text-green-400 tracking-wider uppercase">AUTENTICAÇÃO APROVADA!</span>
+                    <span className="text-[10px] font-bold text-green-400 tracking-wider uppercase">{t('ui.login.authApproved')}</span>
                   </>
                 )}
               </div>
 
               {/* Simulated user profile info in biometric prompt */}
-              <div className="bg-slate-950/60 p-2.5 rounded-lg border border-slate-850/80 text-left text-[9px] text-slate-500 space-y-0.5 max-w-[250px] mx-auto">
-                <div className="truncate"><span className="text-slate-400 font-bold">USUÁRIO:</span> {existingWallet.name}</div>
-                <div className="truncate"><span className="text-slate-400 font-bold">CONTA:</span> {existingWallet.publicKey?.slice(0, 12)}...</div>
+              <div className="bg-black/40 backdrop-blur-sm p-2.5 rounded-lg border border-slate-850/80 text-left text-[9px] text-slate-500 space-y-0.5 max-w-[250px] mx-auto">
+                <div className="truncate"><span className="text-slate-400 font-bold">{t('ui.login.userLabel')}</span> {existingWallet.name}</div>
+                <div className="truncate"><span className="text-slate-400 font-bold">{t('ui.login.accountLabel')}</span> {existingWallet.publicKey?.slice(0, 12)}...</div>
               </div>
             </div>
 

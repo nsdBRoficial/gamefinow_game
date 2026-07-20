@@ -120,6 +120,8 @@ const generateTxHash = () => {
   return hash;
 };
 
+import { useTranslation } from "react-i18next";
+
 export const GameOverlay: React.FC<GameOverlayProps> = ({
   activeModal,
   wallet,
@@ -266,7 +268,7 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
                 className="flex items-center gap-1 bg-cyan-600 hover:bg-cyan-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg transition-all font-mono"
               >
                 {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                {copied ? "Copiado!" : "Copiar"}
+                {copied ? t("wallet.copied") : t("wallet.copy")}
               </button>
             </div>
           </div>

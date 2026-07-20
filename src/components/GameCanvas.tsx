@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { GameState, Player, NPC, Quest } from "../types";
 import { TILE_SIZE, TileType, isCollidable, GRID_COLS, GRID_ROWS, GameDecoration, GameCreature } from "../gameData";
 import { getMapGrid, getMapDecorations, isGateBlocked, MapId } from "../maps";
+import { useTranslation } from "react-i18next";
 import { Compass, MapPin, Sparkles } from "lucide-react";
 import { drawPixelCharacter, getNPCPixelChar } from "./canvas/PlayerSprite";
 import { drawMapTiles, drawSpecialTerminals, drawMapDecorations } from "./canvas/MapRenderer";
@@ -23,14 +24,15 @@ interface GameCanvasProps {
 }
 
 export const GameCanvas: React.FC<GameCanvasProps> = ({
-  gameState,
   playerPos,
   setPlayerPos,
   npcs,
+  gameState,
   onTalkToNPC,
   onNearTerminal,
   isMovementBlocked = false,
 }) => {
+  const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [dimensions, setDimensions] = useState({ width: 680, height: 480 });
@@ -137,7 +139,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       skinColor: "#f1c27d",
       faceType: "glasses",
       accessoryType: "sword",
-      bubbleText: "Terminei a Tarefa 1! Conectei ao terminal!",
+      bubbleText: t('otherPlayers.bot1.bubble'),
       bubbleTimer: 5000,
     },
     {
@@ -159,7 +161,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       skinColor: "#ffdbac",
       faceType: "glasses",
       accessoryType: "cape",
-      bubbleText: "O Soroban permite criar Smart Contracts incríveis!",
+      bubbleText: t('otherPlayers.bot2.bubble'),
       bubbleTimer: 4000,
     },
     {
@@ -181,7 +183,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       skinColor: "#ffdbac",
       faceType: "smile",
       accessoryType: "backpack",
-      bubbleText: "Forjei minhas chaves Stellar com sucesso!",
+      bubbleText: t('otherPlayers.bot3.bubble'),
       bubbleTimer: 6000,
     },
     {
@@ -203,7 +205,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       skinColor: "#ffdbac",
       faceType: "eyepatch",
       accessoryType: "cape",
-      bubbleText: "Fazendo Pix On-Ramp para abastecer XLM!",
+      bubbleText: t('otherPlayers.bot4.bubble'),
       bubbleTimer: 4500,
     },
     {
@@ -225,7 +227,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       skinColor: "#e0ac69",
       faceType: "smile",
       accessoryType: "backpack",
-      bubbleText: "Vou guardar minhas moedas no Escrow!",
+      bubbleText: t('otherPlayers.bot5.bubble'),
       bubbleTimer: 7000,
     }
   ]);

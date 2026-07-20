@@ -1,0 +1,288 @@
+{
+  "quests": {
+    "wallet": {
+      "title": "1. Forjar sua Identidade (Carteira)",
+      "description": "Toda aventura começa com uma identidade única na Blockchain Stellar. Crie sua carteira para guardar seus ativos com segurança.",
+      "instructions": "Atravesse a ponte Leste (Azul) até o Arsenal e fale com Kael [NPC].",
+      "reward": "Par de Chaves Criptográficas 🔑"
+    },
+    "onramp": {
+      "title": "2. Adquirir Moedas do Reino (On-Ramp)",
+      "description": "Você precisa de recursos (XLM) para negociar itens mágicos. Uma âncora troca seu ouro do mundo real por moedas da rede.",
+      "instructions": "Entre no Portal Norte (Verde) para ir ao Porto de Câmbio e fale com o Capitão HC [NPC].",
+      "reward": "150 XLM de Saldo"
+    },
+    "soroban": {
+      "title": "3. Negociar no Catálogo (Smart Swap)",
+      "description": "Use contratos inteligentes Soroban para trocar seus XLM por USDC (Ouro Estável) ou Runas de Batalha SORO.",
+      "instructions": "Entre no Portal Oeste (Roxo) para ir ao Mercado do Templo e fale com a Alquimista [NPC].",
+      "reward": "Runas de Batalha SORO + USDC de Platina"
+    },
+    "hold": {
+      "title": "4. Cofre do VIP Legend Holder",
+      "description": "Mostre seu compromisso de longo prazo travando suas moedas em um cofre inteligente para se tornar um Guardião Lendário.",
+      "instructions": "Entre no Portal Sul (Dourado) para ir à Câmara Secreta e fale com Bobba [NPC], o Ancião.",
+      "reward": "Título de Guardião Lendário VIP Stellar Holder 🌟"
+    }
+  },
+  "dialogs": {
+    "guide": {
+      "main": [
+        "Olá, jovem herói! Bem-vindo ao saguão principal do Templo Stellar!",
+        "Eu sou James [NPC], o Mestre do Templo. Meu trabalho é garantir que você não seja derrotado por trolls e aprenda tudo sobre a rede Stellar!",
+        "Para começar a sua jornada e poder negociar Runas Raras, você precisa de uma conta/carteira Stellar para guardar seus ativos de batalha.",
+        "Siga para o Leste (direita) cruzando a ponte e fale com Kael [NPC], o Ferreiro de Raros, para forjar suas chaves mágicas!"
+      ],
+      "active": [
+        "Ainda sem uma conta? Vá para o Leste e fale com o Kael [NPC] para forjar seu par de chaves criptográficas!"
+      ],
+      "completed": [
+        "Sensacional! Você já registrou sua carteira Stellar. Veja seu endereço seguro no HUD na barra superior!",
+        "Sua próxima missão é adquirir suas primeiras moedas XLM. O corredor ao Norte foi liberado!",
+        "Entre no Portal Norte e fale com o lendário Capitão HC [NPC] na guarita de câmbio para realizar seu primeiro On-Ramp!"
+      ]
+    },
+    "keymaster": {
+      "main": [
+        "Saudações de batalha! Eu sou o Kael [NPC], o maior ferreiro de Magic Plate Armors e Elmos Raros deste templo.",
+        "Na Stellar, você não faz login com e-mail e senha tradicionais. Você cria sua conta através de Criptografia Assimétrica de herói!",
+        "A Chave Pública (começa com 'G') é o seu endereço ou ID do Templo. Todos no continente podem ver para te enviar moedas.",
+        "A Chave Secreta (começa com 'S') é a chave do seu baú pessoal de tesouros. Se algum orc conseguir ela, levará todos os seus raros! Nunca revele ela a ninguém!",
+        "Aproxime-se do Altar de Chaves logo atrás de mim para forjar a sua conta!"
+      ],
+      "active": [
+        "Use o terminal azul de chaves cybernéticas para gerar seu par de chaves e receber seu endereço de hotel!"
+      ],
+      "completed": [
+        "Sua conta foi criada e registrada com sucesso no Ledger da rede Stellar!",
+        "Agora que possui uma identidade, você está pronto para pegar moedas de catálogo. Siga para o Norte e fale com o Capitão HC [NPC]!"
+      ]
+    },
+    "portmaster": {
+      "main": [
+        "Ahoy, aventureiro! Eu sou o Capitão HC [NPC], encarregado das rotas navais e das pontes financeiras do continente.",
+        "Na rede Stellar, chamamos as rampas de depósito e saque de 'Anchors' (Âncoras). Elas convertem ouro fictício em moedas digitais de verdade (XLM).",
+        "Sem uma âncora, as moedas do mundo real não conseguiriam entrar na blockchain!",
+        "Aproxime-se do Altar de Câmbio ao meu lado para fazer um depósito de ouro simulado e ganhar suas primeiras Crystal Coins!"
+      ],
+      "active": [
+        "Acesse o Terminal de Câmbio ao meu lado para depositar via PIX ou Cartão fictício e carregar seu saldo!"
+      ],
+      "completed": [
+        "Transação de elite, aventureiro! A âncora identificou seu depósito e enviou 150 XLM de saldo para você.",
+        "Seu saldo atualizado já brilha no topo direito! Agora você pode negociar ativos no catálogo.",
+        "Siga para o Leste até o Mercado de Soroban para negociar via Smart Contracts!"
+      ]
+    },
+    "scholar": {
+      "main": [
+        "Bem-vindo à Central de Negociação do Templo!",
+        "Soroban é o motor de contratos inteligentes (Smart Contracts) ultra-eficientes da Stellar.",
+        "Com eles, programamos regras financeiras inquebráveis. Podemos trocar (Swap) moedas instantaneamente sem intermediários ou bancos!",
+        "Para provar suas habilidades, aproxime-se do painel alquímico roxo ao meu lado.",
+        "Dispare o contrato inteligente para trocar 50 XLM por USDC (Dólar Digital) ou tokens de governança SORO!"
+      ],
+      "active": [
+        "Aproxime-se do terminal roxo de Soroban e execute o swap automático via Smart Contract!"
+      ],
+      "completed": [
+        "Magnífico! A troca foi liquidada em menos de 2 segundos com taxas de centésimos de centavo!",
+        "Seu inventário agora possui USDC e tokens SORO. Você é um mestre da negociação no catálogo!",
+        "O último teste te aguarda no Sul. Vá até a Câmara de Hold e fale com Bobba [NPC], o Ancião!"
+      ]
+    },
+    "sage": {
+      "main": [
+        "Bobba bobba bobba! Que jornada fantástica, jovem guerreiro!",
+        "Você forjou chaves, adquiriu moedas com o Anchor e negociou raros usando contratos inteligentes Soroban.",
+        "O teste final é a virtude máxima: a paciência e lealdade, isto é, fazer 'Hold'.",
+        "Travar suas moedas em um contrato de garantia (Escrow) descentralizado comprova que você é um holder fiel ao ecossistema.",
+        "Aproxime-se da Câmara Dourada de Hold à frente para travar um percentual de XLM e ganhar o título de Guardião Lendário!"
+      ],
+      "active": [
+        "Interaja com a Câmara Sagrada dourada para selar seu hold de longo prazo e ganhar a insígnia definitiva!"
+      ],
+      "completed": [
+        "🌟 O templo celebra em festa! Você concluiu todos os módulos do Onboarding Archipelago!",
+        "Suas moedas estão trancadas em segurança no cofre. Você é oficialmente um Guardião Lendário Stellar Holder!",
+        "Lembre-se: transações velozes, taxas ínfimas e finanças acessíveis de verdade. Agora relaxe na taverna com hidromel! Bobba!"
+      ]
+    }
+  },
+  "barriers": {
+    "north": "O portão de energia Azul está trancado! Complete a missão 'Forja da Carteira' no Leste para liberá-lo.",
+    "west": "O portão de energia Roxo está trancado! Complete a missão 'Portal de Câmbio (On-Ramp)' no Norte para liberá-lo.",
+    "south": "O portão de energia Dourado está trancado! Complete a missão 'Mercado Soroban' no Oeste para liberá-lo."
+  },
+  "ui": {
+    "activeQuest": "Missão Ativa",
+    "legendaryRibbon": "🏆 CONQUISTA MÁXIMA: VIAJANTE LENDÁRIO STELLAR! 🌟",
+    "keyboard": "Teclado",
+    "space": "ESPAÇO",
+    "action": "AÇÃO",
+    "newCharacter": "Novo Personagem (Resetar Tudo)",
+    "resetConfirm": "Isso irá DELETAR SEU PROGRESSO. Você quer começar um novo jogo do zero?",
+    "onlineServers": "SERVIDORES DE ESTRELAS ONLINE",
+    "startJourney": "INICIAR JORNADA (JOGAR)",
+    "resumeJourney": "RETOMAR JORNADA",
+    "loginNamePlaceholder": "Digite seu nome de herói...",
+    "backpack": "Mochila de Runas",
+    "wardrobe": "Armário (Roupas)",
+    "ledger": "Histórico do Ledger",
+    "rulebook": "Regras do Continente",
+    "day": "Dia",
+    "login": {
+      "title": "Bem-vindo à Ilha Stellar",
+      "subtitle": "Uma aventura RPG interativa Web3 para aprender sobre o ecossistema Stellar, carteiras e contratos inteligentes.",
+      "security": "Segurança Biométrica",
+      "securityDesc": "Use Passkeys para login Web3 sem senha",
+      "fast": "Velocidade da Luz",
+      "fastDesc": "Transações confirmam em segundos na Stellar",
+      "playNow": "Jogar Agora",
+      "selectLanguage": "Selecionar Idioma",
+      "playForFree": "JOGUE DE GRAÇA AGORA",
+      "network": "REDE",
+      "testnet": "STELLAR TESTNET",
+      "version": "V2.5.0-ALPHA",
+      "connectivity": "CONECTIVIDADE:",
+      "walletModule": "MÓDULO DE WALLET:",
+      "persistence": "PERSISTÊNCIA:",
+      "activeProfile": "Perfil Ativo Detectado",
+      "noEmail": "Sem e-mail registrado",
+      "loginPasskey": "Logar com Passkey",
+      "fastLogin": "Login Rápido ⚡",
+      "fastLoginTitle": "Entrar sem precisar re-escanear biometria",
+      "frictionlessMode": "Modo Sem Fricção Ativo",
+      "frictionlessDesc": "Entre instantaneamente sem preencher formulários complicados. Você poderá forjar sua carteira com segurança criptográfica quando explorar a ilha.",
+      "characterName": "Nome do Seu Personagem",
+      "editable": "EDITÁVEL",
+      "nameHint": "Deixe em branco ou digite qualquer apelido para entrar de forma 100% livre.",
+      "howItWorks": "ℹ️ Como Funciona",
+      "howItWorksDesc1": "Os dados de progresso e estatísticas são mantidos no seu navegador. Após criar a carteira na região leste (East Region), o game se integra à autenticação local de ",
+      "howItWorksDesc2": "Chaves de Acesso (Passkeys)",
+      "howItWorksDesc3": ", permitindo logar com um único toque sem necessitar de senhas convencionais.",
+      "confirmResetTitle": "Confirmar Novo Personagem?",
+      "confirmResetDesc": "Isso removerá todo o progresso atual, histórico de transações e a carteira criptográfica gerada no seu navegador. Ótimo para testar o onboarding do zero!",
+      "cancel": "Cancelar",
+      "yesReset": "Sim, Resetar Tudo",
+      "passkeyLocal": "Chave de Acesso Local",
+      "deviceAuth": "Autenticação de Dispositivo",
+      "deviceAuthDesc": "Por favor, escaneie sua impressão digital ou use a autenticação facial cadastrada para verificar sua carteira estelar.",
+      "scanningBio": "Escaneando Biometria...",
+      "authApproved": "AUTENTICAÇÃO APROVADA!",
+      "userLabel": "USUÁRIO:",
+      "accountLabel": "CONTA:",
+      "landingSubtitle": "APRENDA. JOGUE. CRESÇA."
+    },
+    "quests": "Sinalizadores de Missões",
+    "teleportCenter": "Teletransporte ao Centro (Runa de Regresso)",
+    "passport": "ID do Viajante (Passport)",
+    "worldMap": "Mapa Mundi (Estelar)",
+    "guide": "Guia",
+    "toggleAudio": "Alternar Áudio",
+    "expLvl": "EXP LVL",
+    "buffs": "BUFFS",
+    "networkActive": "REDE ATIVA"
+  },
+  "wallet": {
+    "detected": "WALLET DETECTADA",
+    "terminal_subtitle": "Wallet Forge — East Biome Terminal",
+    "active_account": "Conta Ativa na Stellar Testnet",
+    "public_key_label": "Chave Pública",
+    "copied": "Copiado!",
+    "copy": "Copiar",
+    "close_terminal": "Fechar Terminal",
+    "onboarding_title": "Onboarding WalletNow"
+  },
+  "otherPlayers": {
+    "bot1": {
+      "bubble": "Olá viajante! Procurando por runas?"
+    }
+  },
+  "npcs": {
+    "guide": {
+      "name": "James [NPC]",
+      "dialogs": [
+        "Bem-vindo ao saguão principal do Templo Stellar, jovem viajante!",
+        "Eu sou James [NPC], o Mestre do Templo. Estou aqui para guiá-lo no caminho para se tornar um Viajante Lendário.",
+        "Sua jornada começa criando sua identidade digital, a única forma de guardar tesouros neste mundo descentralizado.",
+        "Para forjar sua carteira mágica, atravesse a ponte azul ao Leste e encontre Kael [NPC], o nosso Mestre das Chaves!"
+      ],
+      "activeQuestDialogs": [
+        "Você ainda não tem uma conta! Siga para o Leste e converse com Kael [NPC] para forjar seu par de chaves."
+      ],
+      "completedDialogs": [
+        "Excelente! Vejo que você forjou sua carteira Stellar com sucesso.",
+        "Agora você precisa de moedas para negociar. O corredor Norte foi liberado!",
+        "Atravesse o Portal Norte e fale com o Capitão HC [NPC] para adquirir seus primeiros XLM."
+      ]
+    },
+    "keymaster": {
+      "name": "Kael [NPC]",
+      "dialogs": [
+        "Saudações! Eu sou Kael [NPC], o forjador de relíquias raras do templo.",
+        "Aqui, você não usa e-mails ou senhas. Você cria uma identidade usando criptografia!",
+        "Sua Chave Pública (começa com 'G') é seu endereço público. Todos podem vê-la e enviar moedas para você.",
+        "A Chave Secreta (começa com 'S') é a chave mestra do seu cofre. Nunca a revele, ou perderá tudo!",
+        "Acesse o Altar de Chaves atrás de mim para forjar sua conta agora."
+      ],
+      "activeQuestDialogs": [
+        "Use o terminal azul para gerar seu par de chaves e receber seu endereço de rede!"
+      ],
+      "completedDialogs": [
+        "Aí está! Sua conta foi perfeitamente forjada na rede Stellar.",
+        "Volte ao Saguão Principal e procure seu próximo destino ao Norte!"
+      ]
+    },
+    "portmaster": {
+      "name": "Capitão HC [NPC]",
+      "dialogs": [
+        "Ahoy, aventureiro! Sou o Capitão HC [NPC], o encarregado do porto financeiro.",
+        "Na Stellar, usamos Âncoras (Anchors) para converter dinheiro do mundo real em ativos digitais.",
+        "Sem uma Âncora, moedas reais nunca entrariam na blockchain!",
+        "Acesse o Terminal de Câmbio ao meu lado para fazer um depósito simulado e receber Crystal Coins (XLM)!"
+      ],
+      "activeQuestDialogs": [
+        "Interaja com o Terminal de Câmbio para depositar e carregar sua carteira com XLM!"
+      ],
+      "completedDialogs": [
+        "Transação completa! A Âncora enviou 150 XLM brilhantes para sua carteira.",
+        "Agora você tem fundos para negociar. Siga para o Oeste e procure a Alquimista!"
+      ]
+    },
+    "scholar": {
+      "name": "Alquimista [NPC]",
+      "dialogs": [
+        "Saudações, herói! Bem-vindo ao mercado arcano de Soroban.",
+        "Soroban é o sistema de contratos inteligentes da Stellar. Ele é rápido, barato e seguro.",
+        "Com contratos inteligentes, podemos fazer trocas instantâneas (Swaps) sem a necessidade de um banco.",
+        "Interaja com o painel roxo alquímico para executar um contrato e trocar alguns XLM por USDC e tokens SORO!"
+      ],
+      "activeQuestDialogs": [
+        "Acesse o terminal roxo para testar o poder de um contrato inteligente Soroban!"
+      ],
+      "completedDialogs": [
+        "Mágico! A troca foi liquidada em poucos segundos e por uma fração de centavo.",
+        "Seu inventário agora guarda USDC e SORO. Você dominou as negociações do catálogo!",
+        "Apenas um desafio resta. Siga para o Sul e encontre o Ancião Bobba."
+      ]
+    },
+    "sage": {
+      "name": "Bobba [NPC]",
+      "dialogs": [
+        "Bobba bobba bobba! Que jornada magnífica, jovem guerreiro!",
+        "Você forjou suas chaves, fez on-ramp e usou a magia dos contratos inteligentes.",
+        "A virtude final de um aventureiro Stellar é a lealdade de longo prazo, o sagrado 'Hold'.",
+        "Aproxime-se da Câmara Dourada de Hold. Trave uma parte dos seus tesouros para receber o título supremo de Guardião Lendário!"
+      ],
+      "activeQuestDialogs": [
+        "Interaja com a câmara dourada para travar seus fundos em um contrato de Escrow!"
+      ],
+      "completedDialogs": [
+        "🌟 O templo exalta o seu nome! Você completou toda a jornada do Onboarding Archipelago!",
+        "Seus tesouros estão guardados em segurança. Você agora é oficialmente um Guardião Lendário Stellar Holder!",
+        "Aproveite as finanças rápidas e descentralizadas. Bobba!"
+      ]
+    }
+  }
+}
