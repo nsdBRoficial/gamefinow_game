@@ -27,13 +27,15 @@ export enum TileType {
   PORTAL_SOUTH = 12,
   PORTAL_CENTER = 13,
   BLOCK = 14,
+  CROPS = 15,
+  FENCE = 16,
 }
 
 // Decoration interface for high-fidelity assets
 export interface GameDecoration {
   x: number;
   y: number;
-  type: "tree" | "bench" | "lamp" | "barrel" | "box" | "statue" | "flower_pot" | "boat" | "stand";
+  type: "tree" | "bench" | "lamp" | "barrel" | "box" | "statue" | "flower_pot" | "boat" | "stand" | "palm_tree" | "umbrella" | "towel" | "sandcastle";
   color?: string;
   text?: string;
   width?: number;
@@ -525,7 +527,8 @@ export function isCollidable(tileType: number): boolean {
   return (
     tileType === TileType.WATER ||
     tileType === TileType.WALL ||
-    tileType === TileType.BLOCK
+    tileType === TileType.BLOCK ||
+    tileType === TileType.FENCE
   );
 }
 

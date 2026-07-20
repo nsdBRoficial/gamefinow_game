@@ -249,6 +249,41 @@ export const drawMapTiles = (
           ctx.fillRect(worldX + 10, worldY + 12, 2, 2);
           break;
 
+        case TileType.CROPS:
+          // Dirt floor base
+          ctx.fillStyle = "#a16207"; // Dark brown dirt
+          ctx.fillRect(worldX, worldY, tileSize, tileSize);
+          // Crop lines
+          ctx.fillStyle = "#713f12";
+          ctx.fillRect(worldX, worldY + 8, tileSize, 2);
+          ctx.fillRect(worldX, worldY + 20, tileSize, 2);
+          
+          // Corn stalks
+          ctx.fillStyle = "#22c55e"; // Green stalk
+          ctx.fillRect(worldX + 6, worldY + 2, 2, 8);
+          ctx.fillRect(worldX + 22, worldY + 2, 2, 8);
+          ctx.fillRect(worldX + 14, worldY + 14, 2, 8);
+          
+          // Corn cobs (yellow pixels)
+          ctx.fillStyle = "#facc15";
+          ctx.fillRect(worldX + 5, worldY + 4, 1.5, 3);
+          ctx.fillRect(worldX + 23, worldY + 5, 1.5, 3);
+          ctx.fillRect(worldX + 15, worldY + 16, 1.5, 3);
+          break;
+
+        case TileType.FENCE:
+          // Grass base beneath the fence
+          ctx.fillStyle = "#166534";
+          ctx.fillRect(worldX, worldY, tileSize, tileSize);
+          
+          // Wooden fence
+          ctx.fillStyle = "#78350f"; // Dark wood
+          ctx.fillRect(worldX + 4, worldY + 14, tileSize - 8, 4); // Horizontal plank
+          ctx.fillStyle = "#92400e"; // Lighter wood posts
+          ctx.fillRect(worldX + 6, worldY + 8, 4, 16);
+          ctx.fillRect(worldX + 22, worldY + 8, 4, 16);
+          break;
+
         case TileType.STONE_PATH:
           if (currentRegion === "west") {
             // Carbon fiber cyber track
@@ -499,6 +534,88 @@ export const drawMapDecorations = (
         ctx.fillStyle = "#22c55e";
         ctx.beginPath();
         ctx.arc(worldX + 12, worldY + 6, 8, 0, Math.PI * 2);
+        ctx.fill();
+        break;
+
+      case "palm_tree":
+        // Shadow
+        ctx.beginPath();
+        ctx.ellipse(worldX + 16, worldY + 28, 11, 4, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
+        ctx.fill();
+        // Trunk (curved slightly)
+        ctx.fillStyle = "#a16207";
+        ctx.beginPath();
+        ctx.moveTo(worldX + 14, worldY + 28);
+        ctx.bezierCurveTo(worldX + 14, worldY + 14, worldX + 12, worldY + 6, worldX + 16, worldY + 6);
+        ctx.bezierCurveTo(worldX + 18, worldY + 6, worldX + 18, worldY + 14, worldX + 18, worldY + 28);
+        ctx.fill();
+        // Palm Leaves
+        ctx.fillStyle = "#15803d";
+        const drawLeaf = (angle: number) => {
+          ctx.beginPath();
+          ctx.ellipse(worldX + 16 + Math.cos(angle)*10, worldY + 6 + Math.sin(angle)*6, 12, 3, angle, 0, Math.PI*2);
+          ctx.fill();
+        };
+        drawLeaf(-Math.PI/6);
+        drawLeaf(-Math.PI*5/6);
+        drawLeaf(Math.PI/6);
+        drawLeaf(Math.PI*5/6);
+        drawLeaf(-Math.PI/2);
+        ctx.fillStyle = "#16a34a"; // Highlights
+        ctx.beginPath();
+        ctx.arc(worldX + 16, worldY + 6, 4, 0, Math.PI*2);
+        ctx.fill();
+        break;
+
+      case "umbrella":
+        // Shadow
+        ctx.beginPath();
+        ctx.ellipse(worldX + 16, worldY + 26, 12, 5, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
+        ctx.fill();
+        // Pole
+        ctx.fillStyle = "#cbd5e1";
+        ctx.fillRect(worldX + 15, worldY + 12, 2, 16);
+        // Canopy
+        ctx.fillStyle = dec.color || "#ef4444"; // default red
+        ctx.beginPath();
+        ctx.arc(worldX + 16, worldY + 12, 14, Math.PI, 0);
+        ctx.fill();
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(worldX + 16, worldY + 12, 8, Math.PI, 0);
+        ctx.fill();
+        ctx.fillStyle = dec.color || "#ef4444";
+        ctx.beginPath();
+        ctx.arc(worldX + 16, worldY + 12, 3, Math.PI, 0);
+        ctx.fill();
+        break;
+
+      case "towel":
+        ctx.fillStyle = dec.color || "#3b82f6";
+        ctx.fillRect(worldX + 8, worldY + 12, 16, 10);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(worldX + 8, worldY + 12, 2, 10);
+        ctx.fillRect(worldX + 22, worldY + 12, 2, 10);
+        break;
+
+      case "sandcastle":
+        ctx.fillStyle = "#facc15";
+        ctx.fillRect(worldX + 8, worldY + 18, 16, 10);
+        // Towers
+        ctx.fillRect(worldX + 6, worldY + 12, 6, 16);
+        ctx.fillRect(worldX + 20, worldY + 12, 6, 16);
+        // Crenellations
+        ctx.fillStyle = "#fef08a";
+        ctx.fillRect(worldX + 6, worldY + 10, 2, 2);
+        ctx.fillRect(worldX + 10, worldY + 10, 2, 2);
+        ctx.fillRect(worldX + 20, worldY + 10, 2, 2);
+        ctx.fillRect(worldX + 24, worldY + 10, 2, 2);
+        // Door
+        ctx.fillStyle = "#ca8a04";
+        ctx.beginPath();
+        ctx.arc(worldX + 16, worldY + 28, 3, Math.PI, 0);
         ctx.fill();
         break;
 

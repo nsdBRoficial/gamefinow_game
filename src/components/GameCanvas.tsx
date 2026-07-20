@@ -89,6 +89,33 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     { id: "worm5", name: "Cave Worm", x: 35, y: 50, targetX: 35, targetY: 50, isMoving: false, frame: 0, color: "#9f1239", level: 6, hp: 150, maxHp: 150, bounceOffset: 0, dir: "right" },
   ]);
 
+  // Crabs — criaturas exclusivas da praia do Norte (North Map)
+  const crabsRef = useRef<GameCreature[]>([
+    { id: "crab1", name: "Crab", x: 15, y: 26, targetX: 15, targetY: 26, isMoving: false, frame: 0, color: "#dc2626", level: 2, hp: 60, maxHp: 60, bounceOffset: 0, dir: "right" },
+    { id: "crab2", name: "Crab", x: 25, y: 24, targetX: 25, targetY: 24, isMoving: false, frame: 0, color: "#f97316", level: 3, hp: 80, maxHp: 80, bounceOffset: 0, dir: "left" },
+    { id: "crab3", name: "Crab", x: 35, y: 26, targetX: 35, targetY: 26, isMoving: false, frame: 0, color: "#b91c1c", level: 2, hp: 60, maxHp: 60, bounceOffset: 0, dir: "right" },
+    { id: "crab4", name: "Crab", x: 45, y: 24, targetX: 45, targetY: 24, isMoving: false, frame: 0, color: "#ea580c", level: 4, hp: 100, maxHp: 100, bounceOffset: 0, dir: "left" },
+    { id: "crab5", name: "Crab", x: 30, y: 25, targetX: 30, targetY: 25, isMoving: false, frame: 0, color: "#991b1b", level: 5, hp: 120, maxHp: 120, bounceOffset: 0, dir: "right" },
+  ]);
+
+  // Bees — criaturas exclusivas do jardim do Oeste (West Map)
+  const beesRef = useRef<GameCreature[]>([
+    { id: "bee1", name: "Bee", x: 10, y: 25, targetX: 10, targetY: 25, isMoving: false, frame: 0, color: "#facc15", level: 1, hp: 50, maxHp: 50, bounceOffset: 0, dir: "right" },
+    { id: "bee2", name: "Bee", x: 50, y: 30, targetX: 50, targetY: 30, isMoving: false, frame: 0, color: "#eab308", level: 2, hp: 65, maxHp: 65, bounceOffset: 0, dir: "left" },
+    { id: "bee3", name: "Bee", x: 10, y: 35, targetX: 10, targetY: 35, isMoving: false, frame: 0, color: "#fef08a", level: 1, hp: 50, maxHp: 50, bounceOffset: 0, dir: "right" },
+    { id: "bee4", name: "Bee", x: 50, y: 35, targetX: 50, targetY: 35, isMoving: false, frame: 0, color: "#ca8a04", level: 3, hp: 80, maxHp: 80, bounceOffset: 0, dir: "left" },
+    { id: "bee5", name: "Bee", x: 30, y: 22, targetX: 30, targetY: 22, isMoving: false, frame: 0, color: "#fde047", level: 2, hp: 65, maxHp: 65, bounceOffset: 0, dir: "right" },
+  ]);
+
+  // Snakes — criaturas exclusivas do santuário do Sul (South Map)
+  const snakesRef = useRef<GameCreature[]>([
+    { id: "snake1", name: "Snake", x: 15, y: 15, targetX: 15, targetY: 15, isMoving: false, frame: 0, color: "#16a34a", level: 4, hp: 110, maxHp: 110, bounceOffset: 0, dir: "right" },
+    { id: "snake2", name: "Snake", x: 45, y: 15, targetX: 45, targetY: 15, isMoving: false, frame: 0, color: "#15803d", level: 5, hp: 130, maxHp: 130, bounceOffset: 0, dir: "left" },
+    { id: "snake3", name: "Snake", x: 15, y: 45, targetX: 15, targetY: 45, isMoving: false, frame: 0, color: "#22c55e", level: 3, hp: 90,  maxHp: 90,  bounceOffset: 0, dir: "right" },
+    { id: "snake4", name: "Snake", x: 45, y: 45, targetX: 45, targetY: 45, isMoving: false, frame: 0, color: "#166534", level: 6, hp: 150, maxHp: 150, bounceOffset: 0, dir: "left" },
+    { id: "snake5", name: "Snake", x: 30, y: 35, targetX: 30, targetY: 35, isMoving: false, frame: 0, color: "#4ade80", level: 4, hp: 110, maxHp: 110, bounceOffset: 0, dir: "right" },
+  ]);
+
   // MMO Other Players walking around the 60x60 map in real time!
   const otherPlayersRef = useRef<any[]>([
     {
@@ -458,6 +485,15 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
       // Update cave worms (East map only, safe to run always)
       updateWorms(delta);
+      
+      // Update crabs (North map)
+      updateCrabs(delta);
+
+      // Update bees (West map)
+      updateBees(delta);
+
+      // Update snakes (South map)
+      updateSnakes(delta);
 
       // Update MMO other players
       updateOtherPlayers(delta);
@@ -591,6 +627,174 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
               w.dir = chosen.d;
               w.isMoving = true;
               w.frame = 0;
+            }
+          }
+        }
+      }
+    });
+  };
+
+  const updateCrabs = (delta: number) => {
+    const crabs = crabsRef.current;
+    const speed = 0.08 * (delta / 16.66);
+
+    crabs.forEach((c) => {
+      if (c.isMoving) {
+        let newX = c.x;
+        let newY = c.y;
+
+        if (c.x < c.targetX) newX = Math.min(c.targetX, c.x + speed);
+        else if (c.x > c.targetX) newX = Math.max(c.targetX, c.x - speed);
+        if (c.y < c.targetY) newY = Math.min(c.targetY, c.y + speed);
+        else if (c.y > c.targetY) newY = Math.max(c.targetY, c.y - speed);
+
+        c.x = newX;
+        c.y = newY;
+        c.frame = (c.frame + 0.3) % 4;
+        c.bounceOffset = Math.abs(Math.sin(c.frame * Math.PI)) * 2;
+
+        if (newX === c.targetX && newY === c.targetY) {
+          c.isMoving = false;
+          c.frame = 0;
+          c.bounceOffset = 0;
+        }
+      } else {
+        // Crabs tend to move mostly sideways
+        if (Math.random() < 0.01) {
+          const dirs = [
+            { dx: -1, dy: 0, d: "left" as const },
+            { dx: 1, dy: 0, d: "right" as const },
+            { dx: -1, dy: 0, d: "left" as const },
+            { dx: 1, dy: 0, d: "right" as const },
+            { dx: 0, dy: -1, d: "left" as const },
+            { dx: 0, dy: 1, d: "right" as const },
+          ];
+          const chosen = dirs[Math.floor(Math.random() * dirs.length)];
+          const nextX = Math.round(c.x) + chosen.dx;
+          const nextY = Math.round(c.y) + chosen.dy;
+
+          // North map safe bounds (Sandy shore / docks)
+          const inBounds = nextX >= 2 && nextX <= 57 && nextY >= 23 && nextY <= 50;
+
+          if (inBounds) {
+            const tile = mapGridRef.current[nextY][nextX];
+            if (!isCollidable(tile)) {
+              c.targetX = nextX;
+              c.targetY = nextY;
+              c.dir = chosen.d;
+              c.isMoving = true;
+              c.frame = 0;
+            }
+          }
+        }
+      }
+    });
+  };
+
+  const updateBees = (delta: number) => {
+    const bees = beesRef.current;
+    const speed = 0.12 * (delta / 16.66); // bees are fast
+
+    bees.forEach((b) => {
+      if (b.isMoving) {
+        let newX = b.x;
+        let newY = b.y;
+
+        if (b.x < b.targetX) newX = Math.min(b.targetX, b.x + speed);
+        else if (b.x > b.targetX) newX = Math.max(b.targetX, b.x - speed);
+        if (b.y < b.targetY) newY = Math.min(b.targetY, b.y + speed);
+        else if (b.y > b.targetY) newY = Math.max(b.targetY, b.y - speed);
+
+        b.x = newX;
+        b.y = newY;
+        b.frame = (b.frame + 0.4) % 4; // fast wing flap
+        // Bees fly and bob up and down (slower bob than wing flap)
+        b.bounceOffset = 6 + Math.sin(b.frame * Math.PI * 0.5) * 2; 
+
+        if (newX === b.targetX && newY === b.targetY) {
+          b.isMoving = false;
+        }
+      } else {
+        // Keeps bobbing even when still
+        b.frame = (b.frame + 0.4) % 4;
+        b.bounceOffset = 6 + Math.sin(b.frame * Math.PI * 0.5) * 2; 
+
+        if (Math.random() < 0.02) {
+          const dirs = [
+            { dx: 0, dy: -1, d: "left" as const },
+            { dx: 0, dy: 1, d: "right" as const },
+            { dx: -1, dy: 0, d: "left" as const },
+            { dx: 1, dy: 0, d: "right" as const },
+            { dx: -1, dy: -1, d: "left" as const },
+            { dx: 1, dy: 1, d: "right" as const },
+            { dx: -1, dy: 1, d: "left" as const },
+            { dx: 1, dy: -1, d: "right" as const },
+          ];
+          const chosen = dirs[Math.floor(Math.random() * dirs.length)];
+          const nextX = Math.round(b.x) + chosen.dx;
+          const nextY = Math.round(b.y) + chosen.dy;
+
+          const inBounds = nextX >= 2 && nextX <= 57 && nextY >= 4 && nextY <= 55;
+
+          if (inBounds) {
+            const tile = mapGridRef.current[nextY][nextX];
+            // Bees can fly over water and hedges, but not walls
+            if (tile !== TileType.WALL) {
+              b.targetX = nextX;
+              b.targetY = nextY;
+              if (chosen.dx !== 0) b.dir = chosen.d;
+              b.isMoving = true;
+            }
+          }
+        }
+      }
+    });
+  };
+
+  const updateSnakes = (delta: number) => {
+    const snakes = snakesRef.current;
+    const speed = 0.06 * (delta / 16.66); // snakes are sneaky and slower
+
+    snakes.forEach((s) => {
+      if (s.isMoving) {
+        let newX = s.x;
+        let newY = s.y;
+
+        if (s.x < s.targetX) newX = Math.min(s.targetX, s.x + speed);
+        else if (s.x > s.targetX) newX = Math.max(s.targetX, s.x - speed);
+        if (s.y < s.targetY) newY = Math.min(s.targetY, s.y + speed);
+        else if (s.y > s.targetY) newY = Math.max(s.targetY, s.y - speed);
+
+        s.x = newX;
+        s.y = newY;
+        s.frame = (s.frame + 0.15) % 4; // slither slowly
+        s.bounceOffset = 0; // they stay flat on the ground
+
+        if (newX === s.targetX && newY === s.targetY) {
+          s.isMoving = false;
+          s.frame = 0;
+        }
+      } else {
+        if (Math.random() < 0.01) {
+          const dirs = [
+            { dx: 0, dy: -1, d: "left" as const },
+            { dx: 0, dy: 1, d: "right" as const },
+            { dx: -1, dy: 0, d: "left" as const },
+            { dx: 1, dy: 0, d: "right" as const },
+          ];
+          const chosen = dirs[Math.floor(Math.random() * dirs.length)];
+          const nextX = Math.round(s.x) + chosen.dx;
+          const nextY = Math.round(s.y) + chosen.dy;
+
+          const inBounds = nextX >= 2 && nextX <= 57 && nextY >= 4 && nextY <= 55;
+
+          if (inBounds) {
+            const tile = mapGridRef.current[nextY][nextX];
+            if (!isCollidable(tile)) {
+              s.targetX = nextX;
+              s.targetY = nextY;
+              s.dir = chosen.d;
+              s.isMoving = true;
             }
           }
         }
@@ -1111,6 +1315,207 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         ctx.fillRect(wx - 5, wy - 9, 46, 2);
         ctx.fillStyle = "#dc2626";
         ctx.fillRect(wx - 5, wy - 9, 46 * (worm.hp / worm.maxHp), 2);
+      });
+    }
+
+    // 5.6 Render Crabs (exclusivos do mapa Norte)
+    if (currentRegion === "north") {
+      crabsRef.current.forEach((crab) => {
+        const wx = crab.x * TILE_SIZE;
+        const wy = crab.y * TILE_SIZE - crab.bounceOffset;
+
+        if (wx < leftBound || wx > rightBound || wy < topBound || wy > bottomBound) return;
+
+        // Sombra
+        ctx.beginPath();
+        ctx.ellipse(wx + 16, wy + 26, 12, 3, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0,0,0,0.3)";
+        ctx.fill();
+
+        // Patas laterais
+        ctx.fillStyle = "#7f1d1d";
+        const legWiggle = crab.isMoving ? Math.sin(crab.frame * Math.PI) * 2 : 0;
+        ctx.fillRect(wx + 4 - legWiggle, wy + 20, 4, 2);
+        ctx.fillRect(wx + 6 + legWiggle, wy + 23, 4, 2);
+        ctx.fillRect(wx + 24 + legWiggle, wy + 20, 4, 2);
+        ctx.fillRect(wx + 22 - legWiggle, wy + 23, 4, 2);
+
+        // Corpo
+        ctx.fillStyle = crab.color;
+        ctx.beginPath();
+        ctx.ellipse(wx + 16, wy + 18, 10, 7, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Garras (Claws)
+        ctx.fillStyle = crab.color;
+        const clawRaise = crab.isMoving ? Math.abs(Math.sin(crab.frame * Math.PI)) * 3 : 0;
+        ctx.beginPath();
+        ctx.arc(wx + 7, wy + 14 - clawRaise, 4, 0, Math.PI * 2);
+        ctx.arc(wx + 25, wy + 14 - clawRaise, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Olhinhos arregalados (stalks)
+        ctx.fillStyle = crab.color;
+        ctx.fillRect(wx + 11, wy + 9, 2, 4);
+        ctx.fillRect(wx + 19, wy + 9, 2, 4);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(wx + 10.5, wy + 7, 3, 3);
+        ctx.fillRect(wx + 18.5, wy + 7, 3, 3);
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(wx + 11, wy + 7.5, 1.5, 1.5);
+        ctx.fillRect(wx + 19, wy + 7.5, 1.5, 1.5);
+
+        // Name tag & HP bar
+        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+        ctx.fillRect(wx - 8, wy - 18, 48, 11);
+        ctx.strokeStyle = "#991b1b";
+        ctx.lineWidth = 0.6;
+        ctx.strokeRect(wx - 8, wy - 18, 48, 11);
+
+        ctx.fillStyle = "#fb923c";
+        ctx.font = "bold 6px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(`CRAB (LV.${crab.level})`, wx + 16, wy - 12);
+
+        ctx.fillStyle = "#1e293b";
+        ctx.fillRect(wx - 5, wy - 9, 42, 2);
+        ctx.fillStyle = "#ef4444";
+        ctx.fillRect(wx - 5, wy - 9, 42 * (crab.hp / crab.maxHp), 2);
+      });
+    }
+
+    // 5.7 Render Bees (West Map)
+    if (currentRegion === "west") {
+      beesRef.current.forEach((bee) => {
+        const wx = bee.x * TILE_SIZE;
+        const wy = bee.y * TILE_SIZE; // base y without bounce
+        const bob = bee.bounceOffset;
+
+        if (wx < leftBound || wx > rightBound || wy < topBound || wy > bottomBound) return;
+
+        // Shadow (stable)
+        ctx.beginPath();
+        ctx.ellipse(wx + 16, wy + 26, 10, 3, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0,0,0,0.3)";
+        ctx.fill();
+
+        const facing = bee.dir === "right" ? 1 : -1;
+
+        // Wings (bobs)
+        ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+        const flap = Math.sin(bee.frame * Math.PI * 2) * 4;
+        ctx.beginPath();
+        ctx.ellipse(wx + 16 - facing * 2, wy + 14 - bob - flap, 4, 8, Math.PI / 6 * facing, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.ellipse(wx + 16 + facing * 2, wy + 14 - bob + flap, 3, 6, -Math.PI / 8 * facing, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Body (striped) (bobs)
+        ctx.fillStyle = bee.color;
+        ctx.beginPath();
+        ctx.ellipse(wx + 16, wy + 20 - bob, 8, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#1e293b"; // Black stripes
+        ctx.fillRect(wx + 14 - facing * 2, wy + 15 - bob, 2, 9);
+        ctx.fillRect(wx + 18 - facing * 2, wy + 15 - bob, 2, 9);
+
+        // Stinger (bobs)
+        ctx.fillStyle = "#1e293b";
+        ctx.beginPath();
+        ctx.moveTo(wx + 16 - facing * 8, wy + 20 - bob);
+        ctx.lineTo(wx + 16 - facing * 12, wy + 20 - bob);
+        ctx.lineTo(wx + 16 - facing * 8, wy + 22 - bob);
+        ctx.fill();
+
+        // Eye (bobs)
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(wx + 16 + facing * 4, wy + 17 - bob, 3, 3);
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(wx + 16 + facing * 5, wy + 17.5 - bob, 1.5, 1.5);
+
+        // Name tag & HP bar (STABLE - no bob)
+        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+        ctx.fillRect(wx - 8, wy - 22, 48, 11);
+        ctx.strokeStyle = "#ca8a04";
+        ctx.lineWidth = 0.6;
+        ctx.strokeRect(wx - 8, wy - 22, 48, 11);
+
+        ctx.fillStyle = "#fef08a";
+        ctx.font = "bold 6px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(`BEE (LV.${bee.level})`, wx + 16, wy - 16);
+
+        ctx.fillStyle = "#1e293b";
+        ctx.fillRect(wx - 5, wy - 13, 42, 2);
+        ctx.fillStyle = "#eab308";
+        ctx.fillRect(wx - 5, wy - 13, 42 * (bee.hp / bee.maxHp), 2);
+      });
+    }
+
+    // 5.8 Render Snakes (South Map)
+    if (currentRegion === "south") {
+      snakesRef.current.forEach((snake) => {
+        const wx = snake.x * TILE_SIZE;
+        const wy = snake.y * TILE_SIZE;
+
+        if (wx < leftBound || wx > rightBound || wy < topBound || wy > bottomBound) return;
+
+        const facing = snake.dir === "right" ? 1 : -1;
+        const slither = Math.sin(snake.frame * Math.PI) * 3;
+
+        // Shadow
+        ctx.beginPath();
+        ctx.ellipse(wx + 16, wy + 28, 16, 4, 0, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(0,0,0,0.3)";
+        ctx.fill();
+
+        // Body segments (Tail to head)
+        const segments = [
+          { ox: -facing * 12, oy: -slither, r: 3 },
+          { ox: -facing * 6, oy: slither, r: 4.5 },
+          { ox: 0, oy: -slither, r: 5 },
+          { ox: facing * 6, oy: slither, r: 5.5 },
+          { ox: facing * 12, oy: -slither * 0.5 - 4, r: 5 }, // Raised head
+        ];
+
+        segments.forEach((seg, i) => {
+          ctx.beginPath();
+          ctx.arc(wx + 16 + seg.ox, wy + 26 + seg.oy, seg.r, 0, Math.PI * 2);
+          ctx.fillStyle = i === segments.length - 1 ? "#14532d" : snake.color;
+          ctx.fill();
+        });
+
+        // Eye
+        const headX = wx + 16 + facing * 12;
+        const headY = wy + 22 - slither * 0.5;
+        ctx.fillStyle = "#fef08a"; // Yellow eye
+        ctx.fillRect(headX + facing * 2, headY - 1, 2, 2);
+        ctx.fillStyle = "#000000"; // Slit pupil
+        ctx.fillRect(headX + facing * 2.5, headY - 1, 1, 2);
+
+        // Tongue (flickering)
+        if (Math.random() < 0.2) {
+          ctx.fillStyle = "#ef4444";
+          ctx.fillRect(headX + facing * 5, headY + 2, 3, 1);
+        }
+
+        // Name tag & HP bar
+        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+        ctx.fillRect(wx - 8, wy - 14, 48, 11);
+        ctx.strokeStyle = "#14532d";
+        ctx.lineWidth = 0.6;
+        ctx.strokeRect(wx - 8, wy - 14, 48, 11);
+
+        ctx.fillStyle = "#86efac";
+        ctx.font = "bold 6px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(`SNAKE (LV.${snake.level})`, wx + 16, wy - 8);
+
+        ctx.fillStyle = "#1e293b";
+        ctx.fillRect(wx - 5, wy - 5, 42, 2);
+        ctx.fillStyle = "#22c55e";
+        ctx.fillRect(wx - 5, wy - 5, 42 * (snake.hp / snake.maxHp), 2);
       });
     }
 
