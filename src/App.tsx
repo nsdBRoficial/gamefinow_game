@@ -524,8 +524,19 @@ export default function App() {
   const activeQuestsArray = Object.values(gameState.quests) as Quest[];
   const completedCount = activeQuestsArray.filter(q => q.status === "completed").length;
   const progressPercent = Math.round((completedCount / activeQuestsArray.length) * 100);
-  const currentActiveQuest = activeQuestsArray.find(q => q.status === "active") || activeQuestsArray[activeQuestsArray.length - 1];
   const isCompletedAll = gameState.quests.hold.status === "completed";
+
+  let currentActiveQuest = activeQuestsArray.find(q => q.status === "active");
+  if (!currentActiveQuest && isCompletedAll) {
+    currentActiveQuest = {
+      id: "all_done" as any,
+      title: "Novas missões em breve...",
+      description: "Você se tornou um Lendário. Aguarde por novas atualizações, missões e aventuras que serão adicionadas em breve! Continue explorando.",
+      status: "completed"
+    };
+  } else if (!currentActiveQuest) {
+    currentActiveQuest = activeQuestsArray[activeQuestsArray.length - 1];
+  }
 
   const getFormattedName = () => {
     let base = playerPos.name || "Anonymo";
@@ -789,21 +800,6 @@ export default function App() {
             <span className="text-xl md:text-lg">🗺️</span>
             <span className="absolute left-13 bg-black text-white text-[8px] uppercase tracking-wider px-2 py-1 rounded border border-white/20 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 font-mono">
               Ver Mapa de Stellar [M]
-            </span>
-          </button>
-
-          {/* New Character / Reset Sandbox button */}
-          <button
-            onClick={() => {
-              playSynthSound("unlock");
-              handleResetAndNewCharacter();
-            }}
-            className="w-11 h-11 md:w-9 md:h-9 bg-red-600 hover:bg-red-500 border-2 border-black rounded-lg flex items-center justify-center shadow-[2px_2.5px_0px_#000] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer transition group relative"
-            title="Novo Personagem (Resetar Tudo)"
-          >
-            <span className="text-xl md:text-lg">✨</span>
-            <span className="absolute left-13 bg-black text-white text-[8px] uppercase tracking-wider px-2 py-1 rounded border border-white/20 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 font-mono">
-              Novo Personagem (Resetar Tudo)
             </span>
           </button>
 
