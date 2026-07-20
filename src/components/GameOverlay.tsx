@@ -122,6 +122,7 @@ const generateTxHash = () => {
 
 import { useTranslation } from "react-i18next";
 
+
 export const GameOverlay: React.FC<GameOverlayProps> = ({
   activeModal,
   wallet,
@@ -226,6 +227,7 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
   const [copiedSec, setCopiedSec] = useState(false);
   const [secVisible, setSecVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   const copyKey = () => {
     if (wallet.publicKey) {

@@ -1,57 +1,149 @@
 <div align="center">
   <img src="https://stellar.org/images/stellar-logo.svg" alt="Stellar Logo" width="100"/>
-  <h1>GameFiNow - v0.5.0</h1>
+  <h1>GameFiNow — v0.7.0</h1>
   <p><strong>A Gamified On-Boarding Experience for the Stellar Ecosystem</strong></p>
+  <p>
+    <img src="https://img.shields.io/badge/version-v0.7.0-cyan?style=flat-square" alt="version"/>
+    <img src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square" alt="license"/>
+    <img src="https://img.shields.io/badge/network-Stellar_Testnet-yellow?style=flat-square" alt="network"/>
+    <img src="https://img.shields.io/badge/i18n-EN_|_PT_|_ES-green?style=flat-square" alt="languages"/>
+  </p>
 </div>
 
-## 🌟 Sobre o Projeto (v0.5.0)
+---
 
-O **GameFiNow** é um MMO RPG retro focado em Web3 que visa educar e integrar novos usuários na rede Stellar de forma intuitiva, divertida e fluida. O projeto atua como uma ponte gamificada onde os jogadores realizam missões interativas que simulam interações reais e on-chain (como On-Ramp de PIX, integração com a WalletNow SDK, AMM Swap via Soroban, e Holding de criptoativos).
+## 🌟 About the Project
 
-Nesta **v0.5.0 (East Map & WalletNow On-Ramp Integration)**, trouxemos um grande avanço no fluxo central do jogo!
+**GameFiNow** is a retro-style MMO RPG built on Web3, designed to educate and onboard new users into the Stellar network in an intuitive, fun, and engaging way. Players complete interactive quests that simulate real on-chain interactions — from generating a cryptographic keypair, to depositing funds via an Anchor (On-Ramp), to swapping tokens using Soroban smart contracts and locking assets in a hold vault.
 
-### ✨ Principais Novidades da v0.5.0
-
-- 🗺️ **Sistema de Mapas Isolados & East Map:** Arquitetura do World Map remodelada. Agora os biomas são isolados. O *East Map* foi totalmente redesenhado como o lar dos temíveis Worms e do Terminal de On-Ramp PIX.
-- 💳 **WalletNow On-Ramp Integrado:** Implementação do portal de conversão Fiduciário → Crypto simulando uma operação Pix via **WalletNow SDK** (Testnet). Suporte a XLM, USDW e BRW!
-- ⚡ **Buffs de Status em Tempo Real:** 
-  - Completar o On-Ramp agora concede ao jogador o título de **Investidor** 💰.
-  - A Aura de Velocidade (+10%) ⚡ agora aumenta a velocidade de movimento do herói visivelmente (+10% real no motor de movimento).
-- 💚 **Neon Dinâmico e Customização Visual:** Jogadores que concluem etapas essenciais ganham um brilho *Neon Radioativo* no nome (On-Ramp) que avança pelas bordas da carteira nas missões seguintes.
-- 🎯 **HUD Reativa de Missões Ativas:** O Painel de Missões no canto superior esquerdo agora acompanha organicamente o estado da *Quest* atual. Completou On-Ramp? O HUD atualiza imediatamente para o passo seguinte (Soroban AMM Swap).
-- 🐛 **Correção de Eventos e Ambiente Vercel:** Correção profunda de captura de eventos de teclado (WASD, Setas e Espaço) resolvendo travamentos em ambientes iframes/Vercel (Shadow DOM). A Engine agora auto-força o foco garantindo jogabilidade suave em deploy de produção!
-- 💬 **Balões de Diálogo (NPC Bubbles) Dinâmicos:** Outros jogadores (MMO NPCs) agora possuem um chat randômico que enriquece a lore da Stellar e do mundo DeFi (ex: "Consenso em 5 segundos!", "Taxa quase zero!").
-
-## 🕹️ Tecnologias Utilizadas
-
-- **React 19 + TypeScript**: Base da interface e componentes da HUD.
-- **Vite**: Bundler rápido para dev e produção.
-- **HTML5 Canvas API**: Motor de renderização em 60 FPS com Tilemaps retro customizados.
-- **Tailwind CSS v4**: Estilização dinâmica, grids, glassmorphism UI e animações da HUD.
-- **Zustand**: Gerenciamento de estado global de Alta Performance (Inventário, Missões, Carteira).
-- **Stellar Horizon / WalletNow SDK**: Mock/Integração para gerar transações educacionais de testnet.
-
-## 🚀 Como Rodar Localmente
-
-**Pré-requisitos:** Node.js v18+
-
-1. Instale as dependências:
-   ```bash
-   npm install
-   ```
-2. Inicie o servidor de desenvolvimento:
-   ```bash
-   npm run dev
-   ```
-3. Acesse `http://localhost:3000`
-
-## 🛠️ Deploy na Vercel
-
-O projeto está otimizado para deploy *zero-config* na Vercel. Devido às otimizações de `tabIndex` e `window.focus()` da **v0.5**, o Web Canvas é resistente aos containers Iframe/Shadow DOM da plataforma, capturando as teclas direcionais de imediato e sem rolagem indevida do navegador principal.
-
-Basta associar seu repositório no dashboard da Vercel e rodar o pipeline automático (`npm run build`).
+The game runs entirely in the browser, using a 60 FPS HTML5 Canvas engine, and communicates with the **Stellar Testnet** via **WalletNow SDK** and the **Horizon API**.
 
 ---
+
+## ✨ What's New in v0.7.0 — Multilingual & Lore Overhaul
+
+### 🌐 Full Internationalization (i18n)
+- **3 Languages supported natively:** English (default), Portuguese (PT-BR), Spanish (ES)
+- Powered by `react-i18next` with dedicated locale files in `src/i18n/locales/`
+- All UI labels, HUD elements, quest texts, NPC dialogues, and barrier messages are fully localized
+- Language can be switched at any time from the Landing Page or Login Screen — quest progress is preserved
+
+### 🏠 New Landing Page
+- Animated hero section before the login screen
+- Highlights the core value proposition: Learn → Play → Grow
+- CTA button: **"PLAY FOR FREE NOW"** leads directly to the Login Screen
+
+### 🎮 Redesigned Login Screen
+- Animated pixel art aesthetic with dynamic particle effects
+- Character selection, name input, and language switcher
+- Fully translated in all 3 languages
+
+### 🧙 Improved NPC Storyline & Dialogues
+- **James [NPC]** — Temple Master: Now delivers a complete, immersive introduction guiding the player through the entire journey from wallet creation to legendary status
+- **Kael [NPC]** — Keymaster: Clear cryptographic keypair explanation in RPG lore
+- **Captain HC [NPC]** — Anchor/On-Ramp: Financial bridging explained as a harbor port
+- **Alchemist [NPC]** — Soroban Market: Smart contract swaps explained as alchemical transmutation
+- **Elder Bobba [NPC]** — Hold Vault: Long-term holding as the final virtue of a legendary guardian
+
+### 🐛 Fixes & Cleanup
+- Fixed all hardcoded Portuguese strings remaining in the HUD
+- Fixed TypeScript type errors (`Quest` interface, `t()` hook scoping in sub-components)
+- QA pass: `tsc --noEmit` runs clean with zero errors
+
+---
+
+## 🗺️ The 4-Quest Onboarding Journey
+
+| # | Quest | Zone | NPC | Blockchain Concept |
+|---|-------|------|-----|--------------------|
+| 1 | **Forge Your Identity** | East (Blue Bridge) | Kael [NPC] | Cryptographic Keypair |
+| 2 | **Acquire Realm Coins** | North (Green Portal) | Captain HC [NPC] | Anchor / On-Ramp |
+| 3 | **Trade on the Catalog** | West (Purple Portal) | Alchemist [NPC] | Soroban Smart Contracts |
+| 4 | **VIP Legend Vault** | South (Golden Portal) | Elder Bobba [NPC] | Escrow / Hold |
+
+---
+
+## 🕹️ Tech Stack
+
+| Technology | Role |
+|------------|------|
+| **React 19 + TypeScript** | UI components and HUD |
+| **Vite 6** | Fast bundler for dev & production |
+| **HTML5 Canvas API** | 60 FPS game engine with retro tilemaps |
+| **Tailwind CSS v4** | Styling, glassmorphism, animations |
+| **Zustand** | Global state management (inventory, quests, wallet) |
+| **react-i18next** | Multilingual support (EN / PT / ES) |
+| **WalletNow SDK** | On-Ramp, Vault, Swap integrations |
+| **Stellar Horizon API** | Testnet balance fetching & transactions |
+| **NippleJS** | Mobile joystick controls |
+
+---
+
+## 🚀 Running Locally
+
+**Prerequisites:** Node.js v18+
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+# → http://localhost:3000
+
+# Type check (zero-error guarantee)
+npm run lint
+
+# Production build
+npm run build
+```
+
+---
+
+## 📁 Project Structure
+
+```
+src/
+├── App.tsx                   # Main app router & game loop orchestrator
+├── gameData.ts               # Tile types, NPC definitions, quest config
+├── types.ts                  # TypeScript interfaces (Quest, NPC, WalletState...)
+├── components/
+│   ├── LandingPage.tsx       # Marketing landing page (new in v0.7.0)
+│   ├── LoginScreen.tsx       # Animated login / character creation
+│   ├── GameCanvas.tsx        # 60 FPS canvas engine & player controller
+│   ├── GameOverlay.tsx       # Quest modals (Wallet, OnRamp, Soroban, Hold)
+│   ├── DialogSystem.tsx      # NPC dialogue pop-up system
+│   ├── FloatingWindows.tsx   # Inventory, wardrobe, ledger, rulebook
+│   ├── MapModal.tsx          # Full-screen world map viewer
+│   └── PassportModal.tsx     # Player passport / ID card
+├── i18n/
+│   ├── i18n.ts               # i18next configuration
+│   └── locales/
+│       ├── en.json           # English strings (default)
+│       ├── pt.json           # Portuguese strings
+│       └── es.json           # Spanish strings
+├── maps/                     # Map tile definitions (center, east, west, north, south)
+├── services/
+│   ├── stellarServices.ts    # WalletNow SDK & Horizon API integrations
+│   └── sep24Service.ts       # SEP-24 anchor deposit flow
+└── store/
+    └── gameStore.ts          # Zustand global state store
+```
+
+---
+
+## ☁️ Deploying to Vercel
+
+Zero-config deployment. The Canvas engine is iframe-resistant (custom `tabIndex` and `window.focus()` handling ensures WASD/Arrow keys work inside Vercel's sandbox):
+
+1. Connect your repo to [vercel.com](https://vercel.com)
+2. Framework preset: **Vite**
+3. Build command: `npm run build`
+4. Output directory: `dist`
+
+---
+
 <div align="center">
-  <b>Built with ❤️ by Hackers Club / GameFiNow Team</b>
+  <b>Built with ❤️ by Hackers Club / GameFiNow Team</b><br/>
+  <sub>v0.7.0 — Stellar Testnet — July 2026</sub>
 </div>

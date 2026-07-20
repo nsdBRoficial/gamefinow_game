@@ -1,6 +1,30 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
+ *
+ * GameFiNow - v0.7.0
+ * A Gamified On-Boarding Experience for the Stellar Ecosystem
+ *
+ * Main Application Component — orchestrates routing between:
+ *   - LandingPage (welcome screen / marketing)
+ *   - LoginScreen (character creation & authentication)
+ *   - Main Game Loop (GameCanvas + HUD + Modals)
+ *
+ * Core Architecture:
+ *   - State: Zustand (gameStore.ts) + local React state
+ *   - i18n: react-i18next (EN/PT/ES via src/i18n/locales/*.json)
+ *   - Rendering: HTML5 Canvas 60 FPS (GameCanvas.tsx)
+ *   - Blockchain: Stellar Testnet via WalletNow SDK & Horizon API
+ *
+ * Changelog v0.7.0:
+ *   - Full i18n support: English (default), Portuguese, Spanish
+ *   - Redesigned animated Login Screen with particle effects
+ *   - New Landing Page with hero section and CTA button
+ *   - All NPC dialogues and quest texts migrated to i18n JSON
+ *   - Improved James NPC storyline and all NPC lore
+ *   - Fixed all hardcoded Portuguese strings in UI/HUD
+ *   - TypeScript errors resolved (Quest type, t() hook scoping)
+ *   - QA pass: tsc --noEmit clean
  */
 
 import React, { useState, useEffect } from "react";
@@ -540,6 +564,8 @@ export default function App() {
       id: "all_done" as any,
       title: t("quests.all_done.title"),
       description: t("quests.all_done.description"),
+      instructions: "",
+      reward: "",
       status: "completed"
     };
   } else if (!currentActiveQuest) {

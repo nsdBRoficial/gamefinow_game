@@ -1,6 +1,19 @@
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
+ *
+ * GameFiNow - v0.7.0
+ * gameData.ts — Static Game Data & World Configuration
+ *
+ * Contains:
+ *   - Tile type enums (TileType) for the 60x60 tilemap grid
+ *   - GameDecoration and GameCreature interfaces
+ *   - INITIAL_QUESTS: starting state for the 4-quest onboarding journey
+ *     (Wallet Forge → On-Ramp → Soroban Swap → VIP Hold)
+ *   - INITIAL_NPCS: all NPC definitions (James, Kael, Captain HC, Alchemist, Elder Bobba)
+ *     NPC dialogue texts are loaded from i18n JSON at runtime via handleTalkToNPC()
+ *   - isBridgeBlocked(): enforces quest-gated bridges between map zones
+ *   - isCollidable(): collision detection helper
  */
 
 import { NPC, Quest } from "./types";
