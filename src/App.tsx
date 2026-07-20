@@ -1003,13 +1003,13 @@ export default function App() {
             <div className="pointer-events-auto bg-[#ece9df] border-2 border-black rounded-full p-1.5 shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] opacity-80 mb-2">
               <button 
                 id="btn-action"
-                onClick={() => {
-                  // Simulate space bar press for interactions
-                  if (gameState.activeDialog) {
-                    handleAdvanceDialog();
-                  } else if (!gameState.activeModal) {
-                    handleTriggerModal();
-                  }
+                onClick={(e) => {
+                  e.preventDefault();
+                  // Simulate space bar press for ALL interactions (GameCanvas & App)
+                  window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
+                  setTimeout(() => {
+                    window.dispatchEvent(new KeyboardEvent('keyup', { key: ' ' }));
+                  }, 50);
                 }}
                 className="w-16 h-16 bg-[#ffc600] hover:bg-[#e6b300] text-black rounded-full border-2 border-black cursor-pointer text-sm font-bold active:translate-y-1 flex items-center justify-center shadow-[0_4px_0_#000] active:shadow-none"
               >
