@@ -34,12 +34,12 @@ export function generateAnchorPortMap(): number[][] {
       }
 
       // Sandy shoreline separating land and water
-      if (r === 23 && tile !== TileType.BRIDGE) {
+      if (r >= 23 && r <= 27 && tile !== TileType.BRIDGE) {
         tile = TileType.SAND;
       }
 
       // Dockyard warehouses flooring
-      if (r >= 24 && r <= 50) {
+      if (r >= 28 && r <= 50) {
         tile = TileType.FLOOR_DARK;
       }
 
@@ -92,4 +92,9 @@ export const PORT_DECORATIONS: GameDecoration[] = [
   { x: 26, y: 31, type: "box" },
   { x: 34, y: 28, type: "barrel" },
   { x: 34, y: 31, type: "box" },
+
+  // Boats anchored off the coast
+  { x: 10, y: 22, type: "boat" },
+  { x: 38, y: 22, type: "boat" },
+  { x: 50, y: 21, type: "boat" },
 ];

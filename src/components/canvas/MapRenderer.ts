@@ -186,6 +186,7 @@ export const drawMapTiles = (
           }
           break;
 
+        case TileType.BLOCK:
         case TileType.GRASS:
           if (currentRegion === "west") {
             // Motherboard circuits green
@@ -550,6 +551,68 @@ export const drawMapDecorations = (
         ctx.strokeStyle = "#7c2d12";
         ctx.lineWidth = 1.5;
         ctx.strokeRect(worldX + 8, worldY + 12, 16, 16);
+        break;
+
+      case "boat":
+        // Simple top-down boat shape
+        ctx.fillStyle = "#8B4513"; // SaddleBrown
+        ctx.beginPath();
+        ctx.ellipse(worldX + 16, worldY + 16, 14, 6, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // Inner part of the boat
+        ctx.fillStyle = "#A0522D"; // Sienna
+        ctx.beginPath();
+        ctx.ellipse(worldX + 16, worldY + 16, 11, 3.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // Little wooden seat
+        ctx.fillStyle = "#5c3e21"; // Dark brown
+        ctx.fillRect(worldX + 14, worldY + 14, 4, 4);
+        break;
+
+      case "stand":
+        const w = (dec.width || 1) * tileSize;
+        // Desk base
+        ctx.fillStyle = dec.color || "#0284c7"; // Default blueish or whatever color passed
+        ctx.fillRect(worldX + 2, worldY + 16, w - 4, 14);
+        // Desk top
+        ctx.fillStyle = "#e2e8f0";
+        ctx.fillRect(worldX, worldY + 10, w, 8);
+        
+        // Laptop on desk
+        ctx.fillStyle = "#1e293b"; // Dark gray laptop
+        ctx.fillRect(worldX + (w / 2) - 8, worldY + 12, 10, 6);
+        ctx.fillStyle = "#38bdf8"; // Screen glow
+        ctx.fillRect(worldX + (w / 2) - 6, worldY + 13, 6, 4);
+
+        // Giant glowing sign on top
+        if (dec.text) {
+          ctx.fillStyle = "rgba(0,0,0,0.5)";
+          // shadow
+          ctx.fillRect(worldX + 4, worldY - 22, w - 8, 22);
+
+          // border/box
+          ctx.fillStyle = "#1e293b";
+          ctx.fillRect(worldX + 2, worldY - 24, w - 4, 22);
+          ctx.strokeStyle = dec.color || "#0284c7";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(worldX + 2, worldY - 24, w - 4, 22);
+
+          // text
+          ctx.fillStyle = dec.color || "#38bdf8";
+          ctx.font = "bold 14px sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          // shadow text
+          ctx.fillText(dec.text, worldX + (w / 2), worldY - 13);
+          
+          ctx.fillStyle = "#ffffff";
+          ctx.fillText(dec.text, worldX + (w / 2) - 1, worldY - 14);
+          
+          // structural poles connecting sign to desk
+          ctx.fillStyle = "#475569";
+          ctx.fillRect(worldX + 6, worldY - 2, 3, 12);
+          ctx.fillRect(worldX + w - 9, worldY - 2, 3, 12);
+        }
         break;
     }
   });

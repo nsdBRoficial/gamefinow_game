@@ -46,14 +46,16 @@ import { INITIAL_NPCS } from "../gameData";
 export function getNpcsForMap(mapId: MapId): NPC[] {
   if (mapId === "center") {
     const guide = INITIAL_NPCS.find(n => n.id === "guide");
+    const npcs = [];
     if (guide) {
-      return [{
+      npcs.push({
         ...guide,
         x: 27,
         y: 28,
         dir: "down"
-      }];
+      });
     }
+    return npcs;
   } else if (mapId === "east") {
     const keymaster = INITIAL_NPCS.find(n => n.id === "keymaster");
     if (keymaster) {

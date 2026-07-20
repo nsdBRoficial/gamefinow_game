@@ -26,14 +26,17 @@ export enum TileType {
   PORTAL_NORTH = 11,
   PORTAL_SOUTH = 12,
   PORTAL_CENTER = 13,
+  BLOCK = 14,
 }
 
 // Decoration interface for high-fidelity assets
 export interface GameDecoration {
   x: number;
   y: number;
-  type: "tree" | "bench" | "lamp" | "barrel" | "box" | "statue" | "flower_pot";
+  type: "tree" | "bench" | "lamp" | "barrel" | "box" | "statue" | "flower_pot" | "boat" | "stand";
   color?: string;
+  text?: string;
+  width?: number;
 }
 
 // Passive creature/monster interface (slime blobs)
@@ -514,14 +517,15 @@ export const INITIAL_NPCS: NPC[] = [
     color: "#ca8a04",
     accentColor: "#eab308",
     emoji: "🧙‍♂️",
-  },
+  }
 ];
 
 // Helper to determine if a tile blocks movement (Collision logic)
 export function isCollidable(tileType: number): boolean {
   return (
     tileType === TileType.WATER ||
-    tileType === TileType.WALL
+    tileType === TileType.WALL ||
+    tileType === TileType.BLOCK
   );
 }
 

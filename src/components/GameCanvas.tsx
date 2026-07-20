@@ -310,6 +310,91 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       onTalkToNPC(exactNPC);
       return;
     }
+    
+    // Interact with notebook on the GAMEFINOW stand
+    if (playerPos.mapId === "center" && checkX === 22 && checkY === 28) {
+      onTalkToNPC({
+        id: "gamefinow_info",
+        name: "GAMEFINOW INFO",
+        x: 22,
+        y: 28,
+        dir: "down",
+        dialogs: [
+          "Bem-vindo ao GameFiNow!",
+          "Somos um ecossistema que conecta finanças descentralizadas (DeFi) com a diversão dos jogos (GameFi).",
+          "Nossa missão é educar e integrar usuários à rede Stellar através de gamificação e recompensas on-chain."
+        ]
+      });
+      return;
+    }
+
+    // Interact with notebook on the DEFINDEX stand
+    if (playerPos.mapId === "center" && checkX === 17 && checkY === 28) {
+      onTalkToNPC({
+        id: "defindex_info",
+        name: "DEFINDEX INFO",
+        x: 17,
+        y: 28,
+        dir: "down",
+        dialogs: [
+          "Bem-vindo ao DEFINDEX!",
+          "Nós construímos ferramentas incríveis e índices descentralizados no ecossistema Soroban.",
+          "Explore nossos produtos para automatizar e otimizar seus rendimentos em DeFi!"
+        ]
+      });
+      return;
+    }
+
+    // Interact with notebook on the WALLETNOW stand
+    if (playerPos.mapId === "center" && checkX === 38 && checkY === 28) {
+      onTalkToNPC({
+        id: "walletnow_info",
+        name: "WALLETNOW INFO",
+        x: 38,
+        y: 28,
+        dir: "down",
+        dialogs: [
+          "Bem-vindo ao WALLETNOW!",
+          "A solução definitiva para o rastreamento e análise da sua carteira DeFi.",
+          "Acompanhe seus ativos e rendimentos com segurança e inteligência através dos nossos painéis."
+        ]
+      });
+      return;
+    }
+
+    // Interact with notebook on the SOROSWAP stand
+    if (playerPos.mapId === "center" && checkX === 32 && checkY === 18) {
+      onTalkToNPC({
+        id: "soroswap_info",
+        name: "SOROSWAP INFO",
+        x: 32,
+        y: 18,
+        dir: "down",
+        dialogs: [
+          "Bem-vindo à SOROSWAP!",
+          "A exchange descentralizada líder no ecossistema Soroban.",
+          "Troque tokens de forma rápida, barata e segura utilizando nossos pools de liquidez."
+        ]
+      });
+      return;
+    }
+
+    // Interact with notebook on the NEARX stand
+    if (playerPos.mapId === "center" && checkX === 27 && checkY === 45) {
+      onTalkToNPC({
+        id: "nearx_info",
+        name: "NEARX INFO",
+        x: 27,
+        y: 45,
+        dir: "down",
+        dialogs: [
+          "Bem-vindo à NEARX!",
+          "Inovação e escalabilidade de ponta para a Web3.",
+          "Conheça nossas soluções para impulsionar a tecnologia de contratos inteligentes no ecossistema."
+        ]
+      });
+      return;
+    }
 
     checkTerminalProximity(targetX, targetY, playerPos.mapId || "center");
   };

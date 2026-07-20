@@ -79,6 +79,40 @@ export function generateCentralMap(): number[][] {
     grid.push(row);
   }
 
+  // Make the stand tiles solid
+  grid[28][21] = TileType.BLOCK;
+  grid[28][22] = TileType.BLOCK;
+  grid[28][23] = TileType.BLOCK;
+  grid[28][16] = TileType.BLOCK;
+  grid[28][17] = TileType.BLOCK;
+  grid[28][18] = TileType.BLOCK;
+  grid[28][37] = TileType.BLOCK;
+  grid[28][38] = TileType.BLOCK;
+  grid[28][39] = TileType.BLOCK;
+  grid[18][31] = TileType.BLOCK;
+  grid[18][32] = TileType.BLOCK;
+  grid[18][33] = TileType.BLOCK;
+
+  // Add the white street
+  grid[19][31] = TileType.STONE_PATH;
+  grid[19][32] = TileType.STONE_PATH;
+  grid[19][33] = TileType.STONE_PATH;
+  grid[46][26] = TileType.STONE_PATH;
+  grid[46][27] = TileType.STONE_PATH;
+  grid[46][28] = TileType.STONE_PATH;
+
+  // Add the NEARX stand blocks
+  grid[45][26] = TileType.BLOCK;
+  grid[45][27] = TileType.BLOCK;
+  grid[45][28] = TileType.BLOCK;
+
+  // Add the extra black flooring on the left
+  grid[27][26] = TileType.TEMPLE_FLOOR;
+  grid[28][26] = TileType.TEMPLE_FLOOR;
+  grid[31][26] = TileType.TEMPLE_FLOOR;
+  grid[32][26] = TileType.TEMPLE_FLOOR;
+  grid[33][26] = TileType.TEMPLE_FLOOR;
+
   // Inject Portals at the far edges
   grid[29][1] = TileType.PORTAL_WEST;
   grid[30][1] = TileType.PORTAL_WEST;
@@ -126,4 +160,19 @@ export const CENTRAL_DECORATIONS: GameDecoration[] = [
   { x: 20, y: 32, type: "flower_pot" },
   { x: 40, y: 28, type: "flower_pot" },
   { x: 40, y: 32, type: "flower_pot" },
+
+  // GAMEFINOW Stand
+  { x: 21, y: 28, type: "stand", text: "GAMEFINOW", width: 3, color: "#f59e0b" },
+  
+  // DEFINDEX Stand
+  { x: 16, y: 28, type: "stand", text: "DEFINDEX", width: 3, color: "#3b82f6" },
+
+  // WALLETNOW Stand
+  { x: 37, y: 28, type: "stand", text: "WALLETNOW", width: 3, color: "#10b981" },
+
+  // SOROSWAP Stand
+  { x: 31, y: 18, type: "stand", text: "SOROSWAP", width: 3, color: "#ec4899" },
+
+  // NEARX Stand
+  { x: 26, y: 45, type: "stand", text: "NEARX", width: 3, color: "#9333ea" },
 ];
