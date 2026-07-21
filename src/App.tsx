@@ -330,6 +330,25 @@ export default function App() {
   const handleTriggerModal = () => {
     playSynthSound("beep");
     if (isNearTerminal) {
+      if (isNearTerminal === "atf") {
+        const isCompletedAll = gameState.quests.hold.status === "completed";
+        if (!isCompletedAll) {
+          setGameState((prev) => ({
+            ...prev,
+            activeDialog: {
+              npcName: "Sistema ATM DeFi",
+              text: [
+                "Acesso Negado.",
+                "Você precisa concluir todas as 4 missões (Obter a Estrela) para utilizar o terminal consolidado."
+              ],
+              currentStep: 0,
+              npcId: "system",
+            },
+          }));
+          return;
+        }
+      }
+
       setGameState((prev) => ({
         ...prev,
         activeModal: isNearTerminal,

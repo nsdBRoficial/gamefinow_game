@@ -94,6 +94,145 @@ export const drawInteractiveTerminal = (
   }
 };
 
+export const drawClassicAtm = (ctx: CanvasRenderingContext2D, tx: number, ty: number, tileSize: number, playerPos: Player) => {
+  const wx = tx * tileSize;
+  const wy = ty * tileSize;
+
+  // Base and body
+  ctx.fillStyle = "#94a3b8"; // Light slate gray
+  ctx.fillRect(wx + 4, wy + 2, 24, 30);
+  ctx.fillStyle = "#cbd5e1"; // Highlight
+  ctx.fillRect(wx + 6, wy + 4, 20, 28);
+  ctx.strokeStyle = "#475569";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(wx + 4, wy + 2, 24, 30);
+
+  // Screen
+  ctx.fillStyle = "#1e293b";
+  ctx.fillRect(wx + 8, wy + 8, 16, 10);
+  ctx.fillStyle = "#10b981"; // Bright green screen
+  ctx.fillRect(wx + 9, wy + 9, 14, 8);
+  
+  // Card Slot
+  ctx.fillStyle = "#0f172a";
+  ctx.fillRect(wx + 20, wy + 20, 6, 2);
+  
+  // Keypad
+  ctx.fillStyle = "#64748b";
+  ctx.fillRect(wx + 8, wy + 20, 10, 6);
+  ctx.fillStyle = "#cbd5e1";
+  ctx.fillRect(wx + 9, wy + 21, 2, 1);
+  ctx.fillRect(wx + 12, wy + 21, 2, 1);
+  ctx.fillRect(wx + 15, wy + 21, 2, 1);
+
+  // Sign: "ATM DEFI"
+  ctx.fillStyle = "#1e40af"; // Blue sign
+  ctx.fillRect(wx + 4, wy - 8, 24, 8);
+  ctx.strokeStyle = "#ffffff";
+  ctx.strokeRect(wx + 4, wy - 8, 24, 8);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 5px sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("ATM DeFi", wx + 16, wy - 4);
+
+  // Prompt if player is adjacent
+  const dx = Math.abs(playerPos.x - tx);
+  const dy = Math.abs(playerPos.y - ty);
+  if (dx <= 1 && dy <= 1) {
+    const cx = wx + tileSize / 2;
+    const cy = wy - 16 + Math.sin(performance.now() / 150) * 2;
+
+    ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+    ctx.fillRect(cx - 30, cy - 8, 60, 14);
+    ctx.strokeStyle = "#10b981";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(cx - 30, cy - 8, 60, 14);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 7px monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("USAR [ESPAÇO]", cx, cy - 1);
+  }
+};
+
+export const drawCyberpunkAtm = (ctx: CanvasRenderingContext2D, tx: number, ty: number, tileSize: number, playerPos: Player) => {
+  const wx = tx * tileSize;
+  const wy = ty * tileSize;
+
+  // Holographic projection base
+  ctx.fillStyle = "#0f172a";
+  ctx.beginPath();
+  ctx.ellipse(wx + 16, wy + 28, 14, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = "#a855f7";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Floating Cyber Body
+  const floatY = Math.sin(performance.now() / 200) * 2;
+  
+  ctx.fillStyle = "#1e1b4b"; // Deep violet
+  ctx.fillRect(wx + 6, wy + 4 + floatY, 20, 20);
+  ctx.strokeStyle = "#d946ef"; // Fuchsia neon outline
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(wx + 6, wy + 4 + floatY, 20, 20);
+
+  // Cyber Screen
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(wx + 8, wy + 6 + floatY, 16, 10);
+  
+  // Glitching text/data stream on screen
+  ctx.fillStyle = "#22d3ee"; // Cyan
+  if (Math.random() > 0.1) {
+    ctx.fillRect(wx + 10, wy + 8 + floatY, 12, 1);
+    ctx.fillRect(wx + 10, wy + 11 + floatY, 8, 1);
+    ctx.fillRect(wx + 10, wy + 14 + floatY, 10, 1);
+  }
+
+  // Neon cables
+  ctx.strokeStyle = "#06b6d4";
+  ctx.beginPath();
+  ctx.moveTo(wx + 10, wy + 24 + floatY);
+  ctx.lineTo(wx + 14, wy + 28);
+  ctx.stroke();
+
+  ctx.strokeStyle = "#ec4899";
+  ctx.beginPath();
+  ctx.moveTo(wx + 22, wy + 24 + floatY);
+  ctx.lineTo(wx + 18, wy + 28);
+  ctx.stroke();
+
+  // Floating Holographic Sign
+  ctx.fillStyle = "rgba(217, 70, 239, 0.8)";
+  ctx.font = "bold 6px monospace";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("CYBER ATM", wx + 16, wy - 2 + floatY);
+
+  // Prompt if player is adjacent
+  const dx = Math.abs(playerPos.x - tx);
+  const dy = Math.abs(playerPos.y - ty);
+  if (dx <= 1 && dy <= 1) {
+    const cx = wx + tileSize / 2;
+    const cy = wy - 12 + floatY;
+
+    ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+    ctx.fillRect(cx - 30, cy - 8, 60, 14);
+    ctx.strokeStyle = "#d946ef";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(cx - 30, cy - 8, 60, 14);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 7px monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("USAR [ESPAÇO]", cx, cy - 1);
+  }
+};
+
 export const drawEnergyGate = (ctx: CanvasRenderingContext2D, tx: number, ty: number, color: string, tileSize: number) => {
   const wx = tx * tileSize;
   const wy = ty * tileSize;
@@ -464,13 +603,14 @@ export const drawMapTiles = (
 
 export const drawSpecialTerminals = (ctx: CanvasRenderingContext2D, currentRegion: MapId, playerPos: Player, tileSize: number) => {
   if (currentRegion === "center") {
-    drawInteractiveTerminal(ctx, 33, 28, "ATM DEFI", "#f43f5e", tileSize, playerPos);
+    drawClassicAtm(ctx, 33, 28, tileSize, playerPos);
   } else if (currentRegion === "east") {
     drawInteractiveTerminal(ctx, 35, 28, "FORJA CHAVE", "#22d3ee", tileSize, playerPos);
   } else if (currentRegion === "north") {
     drawInteractiveTerminal(ctx, 31, 24, "ON RAMP PORT", "#34d399", tileSize, playerPos);
   } else if (currentRegion === "west") {
     drawInteractiveTerminal(ctx, 31, 27, "SOROBAN SWAP", "#a78bfa", tileSize, playerPos);
+    drawCyberpunkAtm(ctx, 47, 28, tileSize, playerPos);
   } else if (currentRegion === "south") {
     drawInteractiveTerminal(ctx, 33, 24, "GOLD ESCROW", "#fbbf24", tileSize, playerPos);
   }

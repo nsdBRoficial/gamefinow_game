@@ -460,6 +460,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         onNearTerminal("soroban");
         return;
       }
+      if (Math.abs(x - 47) <= 2 && Math.abs(y - 28) <= 2) {
+        onNearTerminal("atf");
+        return;
+      }
     } else if (currentMapId === "south") {
       if (Math.abs(x - 33) <= 2 && Math.abs(y - 24) <= 2) {
         onNearTerminal("hold");

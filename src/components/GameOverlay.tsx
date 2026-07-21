@@ -196,6 +196,9 @@ export const GameOverlay: React.FC<GameOverlayProps> = ({
               onClose={onClose} 
               playerName={playerName}
               onUpdateWallet={onUpdateWallet}
+              onOnRampSuccess={onOnRampSuccess}
+              onSwapSuccess={onSwapSuccess}
+              onHoldSuccess={onHoldSuccess}
             />
           )}
         </div>
@@ -1749,114 +1752,158 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
 };
 
 // =================================================================
-// 5. ATF DEFI MODAL (Center Region: Totem / NFT consolidation)
+// 5. ATM DEFI MODAL (Consolidated Interface)
 // =================================================================
 interface AtfDefiProps {
   wallet: WalletState;
   onClose: () => void;
   playerName: string;
   onUpdateWallet: (updatedFields: Partial<WalletState>, tx?: Transaction) => void;
+  onOnRampSuccess: (asset: "XLM" | "USDW" | "BRW", amountAdded: number, method: "PIX" | "CARD") => void;
+  onSwapSuccess: (fromAsset: "XLM" | "USDW" | "BRW", toAsset: "XLM" | "USDW" | "BRW", amountFrom: number, amountTo: number) => void;
+  onHoldSuccess: (asset: "XLM" | "USDW" | "BRW", amount: number, updatedFields: Partial<WalletState>, tx: Transaction) => void;
 }
 
-const AtfDefiModal: React.FC<AtfDefiProps> = ({ wallet, onClose, playerName, onUpdateWallet }) => {
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-
-  const handleConsolidate = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setSuccess(true);
-    }, 2000);
-  };
+const AtfDefiModal: React.FC<AtfDefiProps> = ({ 
+  wallet, onClose, playerName, onUpdateWallet, 
+  onOnRampSuccess, onSwapSuccess, onHoldSuccess 
+}) => {
+  const [activeTab, setActiveTab] = useState<"saldos" | "onramp" | "swap" | "vault">("saldos");
 
   return (
-    <div className="space-y-5 text-white">
-      <div className="text-center space-y-1.5">
-        <div className="inline-flex p-3 bg-rose-500/10 text-rose-500 rounded-full border border-rose-500/20 animate-bounce">
-          <Sparkles className="w-8 h-8" />
+    <div className="space-y-4 text-white">
+      {/* Header */}
+      <div className="flex items-center gap-3 border-b border-rose-500/30 pb-3">
+        <div className="w-12 h-12 bg-rose-500/10 text-rose-500 rounded-lg border border-rose-500/30 flex items-center justify-center shadow-[0_0_15px_rgba(244,63,94,0.3)]">
+          <Sparkles className="w-6 h-6 animate-pulse" />
         </div>
-        <h2 className="text-xl font-black uppercase text-rose-500 tracking-tight font-mono">Totem ATM DEFI Consolidado</h2>
-        <p className="text-slate-400 text-xs">A rede Stellar reconheceu suas 4 insígnias. Você é agora um Herói de Elite!</p>
+        <div>
+          <h2 className="text-xl font-black uppercase text-rose-500 tracking-tight font-mono leading-none">ATM DEFI LENDÁRIO</h2>
+          <p className="text-slate-400 text-[10px] mt-1 uppercase font-bold">Bem-vindo, herói. Acesso irrestrito concedido.</p>
+        </div>
       </div>
 
-      <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-3.5">
-        <div className="flex justify-between items-center pb-2.5 border-b border-slate-800 text-xs">
-          <span className="text-slate-500 font-bold uppercase font-mono">Identidade Lendária:</span>
-          <span className="text-[#39ff14] font-black tracking-tight uppercase [text-shadow:0_0_5px_#39ff14]">{playerName}</span>
-        </div>
+      {/* Navigation Tabs */}
+      <div className="flex gap-2 p-1 bg-slate-950 border border-slate-800 rounded-lg overflow-x-auto no-scrollbar">
+        {[
+          { id: "saldos", label: "Saldos" },
+          { id: "onramp", label: "On/Off Ramp" },
+          { id: "swap", label: "Soroban Swap" },
+          { id: "vault", label: "Cofres Yield" },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`flex-1 min-w-[90px] py-2 px-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider rounded transition-all whitespace-nowrap ${
+              activeTab === tab.id 
+                ? "bg-rose-600 text-white shadow-[0_0_10px_rgba(225,29,72,0.5)]" 
+                : "bg-transparent text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
 
-        <div className="space-y-2 text-xs">
-          <span className="text-slate-500 font-bold uppercase font-mono block mb-1">Seus Ativos WalletNow:</span>
-          
-          <div className="grid grid-cols-2 gap-2">
-            <div className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg flex items-center gap-2">
-              <span className="text-xl">🌟</span>
-              <div>
-                <p className="font-extrabold text-cyan-400 leading-tight">Saldo XLM</p>
-                <p className="text-[10px] text-slate-500 font-mono">{wallet.xlmBalance} XLM</p>
-              </div>
+      {/* Tab Content Area */}
+      <div className="min-h-[300px]">
+        {activeTab === "saldos" && (
+          <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-4 animate-in fade-in duration-300">
+            <div className="flex justify-between items-center pb-2.5 border-b border-slate-800 text-xs">
+              <span className="text-slate-500 font-bold uppercase font-mono">Identidade Lendária:</span>
+              <span className="text-[#39ff14] font-black tracking-tight uppercase [text-shadow:0_0_5px_#39ff14]">{playerName}</span>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg flex items-center gap-2">
-              <span className="text-xl">💵</span>
-              <div>
-                <p className="font-extrabold text-emerald-400 leading-tight">Saldo USDW</p>
-                <p className="text-[10px] text-slate-500 font-mono">{wallet.usdwBalance || 0} USDW</p>
+            <div className="space-y-3 text-xs">
+              <span className="text-slate-500 font-bold uppercase font-mono block">Seus Ativos Consolidados:</span>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-slate-900 border border-slate-800 p-3 rounded-lg flex items-center gap-3">
+                  <span className="text-2xl">🌟</span>
+                  <div>
+                    <p className="font-extrabold text-cyan-400 leading-tight">Saldo XLM</p>
+                    <p className="text-xs text-slate-300 font-mono">{wallet.xlmBalance} XLM</p>
+                  </div>
+                </div>
+
+                <div className="bg-slate-900 border border-slate-800 p-3 rounded-lg flex items-center gap-3">
+                  <span className="text-2xl">💵</span>
+                  <div>
+                    <p className="font-extrabold text-emerald-400 leading-tight">Saldo USDW</p>
+                    <p className="text-xs text-slate-300 font-mono">{wallet.usdwBalance || 0} USDW</p>
+                  </div>
+                </div>
+
+                <div className="bg-slate-900 border border-slate-800 p-3 rounded-lg flex items-center gap-3">
+                  <span className="text-2xl">🇧🇷</span>
+                  <div>
+                    <p className="font-extrabold text-violet-400 leading-tight">Saldo BRW</p>
+                    <p className="text-xs text-slate-300 font-mono">{wallet.brwBalance || 0} BRW</p>
+                  </div>
+                </div>
+
+                <div className="bg-slate-900 border border-slate-800 p-3 rounded-lg flex items-center gap-3">
+                  <span className="text-2xl">🏦</span>
+                  <div>
+                    <p className="font-extrabold text-amber-400 leading-tight">Yield Vaults</p>
+                    <p className="text-[11px] text-slate-300 font-mono">
+                      {((wallet.vaultXlm || 0) + (wallet.vaultUsdw || 0) + (wallet.vaultBrw || 0)).toFixed(2)} tokens
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-
-            <div className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg flex items-center gap-2">
-              <span className="text-xl">🇧🇷</span>
-              <div>
-                <p className="font-extrabold text-violet-400 leading-tight">Saldo BRW</p>
-                <p className="text-[10px] text-slate-500 font-mono">{wallet.brwBalance || 0} BRW</p>
-              </div>
-            </div>
-
-            <div className="bg-slate-900 border border-slate-800 p-2.5 rounded-lg flex items-center gap-2">
-              <span className="text-xl">🏦</span>
-              <div>
-                <p className="font-extrabold text-amber-400 leading-tight">Yield Vaults</p>
-                <p className="text-[10px] text-slate-500 font-mono">
-                  {((wallet.vaultXlm || 0) + (wallet.vaultUsdw || 0) + (wallet.vaultBrw || 0))} bloqueados
-                </p>
-              </div>
+            
+            <div className="mt-4 bg-rose-500/10 border border-rose-500/30 p-3 rounded-lg flex items-start gap-2">
+              <Shield className="w-5 h-5 text-rose-400 flex-shrink-0 mt-0.5" />
+              <p className="text-[10px] text-rose-300 leading-relaxed">
+                Este terminal bancário unificado é acessível apenas àqueles que provaram seu valor. Todas as suas transações agora são roteadas diretamente pelo hub central da WalletNow na Testnet.
+              </p>
             </div>
           </div>
-        </div>
-      </div>
+        )}
 
-      {!success ? (
-        <button
-          onClick={handleConsolidate}
-          disabled={loading}
-          className="w-full py-3 bg-rose-600 hover:bg-rose-500 active:translate-y-0.5 text-white font-extrabold rounded-xl border border-rose-700 shadow-[inset_0_-3px_0_rgba(0,0,0,0.3)] hover:shadow-[inset_0_-2px_0_rgba(0,0,0,0.3)] transition-all flex items-center justify-center gap-2 cursor-pointer text-sm font-mono uppercase"
-        >
-          {loading ? (
-            <>
-              <RefreshCw className="w-4 h-4 animate-spin" />
-              <span>Consensuando no Ledger Stellar...</span>
-            </>
-          ) : (
-            <>
-              <span>Consolidar Ativos no Ledger</span>
-            </>
-          )}
-        </button>
-      ) : (
-        <div className="bg-emerald-500/10 border border-emerald-500/30 p-3.5 rounded-xl text-center space-y-1">
-          <p className="text-emerald-400 font-extrabold text-sm uppercase">✦ Transação de Consolidação Executada! ✦</p>
-          <p className="text-[11px] text-slate-400">Seus NFTs e o Título de Guardião Lendário foram gravados permanentemente no Ledger da rede Stellar com consenso distribuído!</p>
-        </div>
-      )}
+        {activeTab === "onramp" && (
+          <div className="animate-in fade-in duration-300 relative">
+            <div className="absolute -inset-2 bg-slate-950/50 backdrop-blur-sm pointer-events-none z-10 hidden" />
+            <OnRampModal 
+              wallet={wallet} 
+              onClose={() => setActiveTab("saldos")} 
+              onUpdateWallet={onUpdateWallet}
+              onOnRampSuccess={onOnRampSuccess}
+            />
+          </div>
+        )}
+
+        {activeTab === "swap" && (
+          <div className="animate-in fade-in duration-300 relative">
+            <SorobanSwapModal 
+              wallet={wallet} 
+              onClose={() => setActiveTab("saldos")} 
+              onUpdateWallet={onUpdateWallet}
+              onSwapSuccess={onSwapSuccess}
+            />
+          </div>
+        )}
+
+        {activeTab === "vault" && (
+          <div className="animate-in fade-in duration-300 relative">
+            <StellarHoldModal 
+              wallet={wallet} 
+              onClose={() => setActiveTab("saldos")} 
+              onUpdateWallet={onUpdateWallet}
+              onHoldSuccess={onHoldSuccess}
+            />
+          </div>
+        )}
+      </div>
 
       <div className="flex justify-end pt-2 border-t border-slate-800">
         <button
           onClick={onClose}
-          className="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 active:translate-y-0.5 border border-slate-700 text-white text-xs font-bold rounded-lg cursor-pointer transition"
+          className="px-6 py-2 bg-slate-800 hover:bg-slate-700 active:translate-y-0.5 border border-slate-700 text-white text-xs font-bold rounded-lg cursor-pointer transition"
         >
-          Fechar Totem
+          Sair do ATM
         </button>
       </div>
     </div>
