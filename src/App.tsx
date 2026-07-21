@@ -952,10 +952,10 @@ export default function App() {
           </div>
           <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2 mt-0.5">
             <span className="text-black font-black block leading-tight text-[11.5px] md:text-[10.5px] uppercase shrink-0">
-              {currentActiveQuest ? t(`quests.${currentActiveQuest.id}.title`) : ''}
+              {currentActiveQuest ? t(`quests.${currentActiveQuest.id}.title`) : t("ui.noActiveQuestTitle", { defaultValue: "NEW QUESTS COMING SOON" })}
             </span>
             <span className="text-slate-600 text-[10px] md:text-[9px] block leading-snug sm:border-l sm:border-black/15 sm:pl-2">
-              {currentActiveQuest ? t(`quests.${currentActiveQuest.id}.description`) : ''}
+              {currentActiveQuest ? t(`quests.${currentActiveQuest.id}.instructions`) : t("ui.noActiveQuestDesc", { defaultValue: "You have completed all available quests!" })}
             </span>
           </div>
         </div>
@@ -1005,13 +1005,15 @@ export default function App() {
             <span className="inline-block w-2 h-2 rounded-full bg-[#5db81d] animate-ping mr-0.5" />
             <span className="text-[#5db81d] font-bold uppercase tracking-wider">{t("ui.networkActive")}</span>
             <span className="text-slate-600">|</span>
-            <span>Simulação Sandbox Stellar</span>
+            <span>{t("ui.sandboxSimulation")}</span>
+            <span className="text-slate-600">|</span>
+            <span>{t("huds.ledger")}: <span className="text-[#5db81d] font-bold">#{gameState.currentLedger} ({t("ui.active")})</span></span>
           </div>
 
           <div className="flex items-center gap-1.5 font-extrabold text-slate-400">
-            <span>🎮 Teclado:</span>
+            <span>🎮 {t("ui.keyboard")}:</span>
             <span className="bg-slate-800 text-white border border-slate-700 px-1 py-0.5 rounded text-[7.5px]">WASD</span>
-            <span className="bg-slate-800 text-white border border-slate-700 px-1 py-0.5 rounded text-[7.5px]">ESPAÇO</span>
+            <span className="bg-slate-800 text-white border border-slate-700 px-1 py-0.5 rounded text-[7.5px]">{t("ui.space")}</span>
           </div>
         </div>
 
@@ -1062,7 +1064,7 @@ export default function App() {
                 }}
                 className="w-16 h-16 bg-[#ffc600] hover:bg-[#e6b300] text-black rounded-full border-2 border-black cursor-pointer text-sm font-bold active:translate-y-1 flex items-center justify-center shadow-[0_4px_0_#000] active:shadow-none"
               >
-                AÇÃO
+                {t("ui.action")}
               </button>
             </div>
           </div>
@@ -1121,10 +1123,7 @@ export default function App() {
       />
 
       {/* SUBTLE IMMERSIVE CREDITS TEXT IN OUTER SPACE */}
-      <div className="absolute bottom-1 md:bottom-2 text-[8px] sm:text-[9.5px] text-white/35 font-mono pointer-events-none select-none tracking-wider text-center">
-        Stellar Onboarding Island • GameFiNow Engine v2.5 • Ledger: <span className="text-[#5db81d] font-bold">#28,492 (ACTIVE)</span>
-      </div>
-
+      {/* (Moved to bottom HUD) */}
     </div>
   );
 }

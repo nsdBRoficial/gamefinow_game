@@ -126,6 +126,16 @@ export function generateCentralMap(): number[][] {
   grid[GRID_ROWS - 2][29] = TileType.PORTAL_SOUTH;
   grid[GRID_ROWS - 2][30] = TileType.PORTAL_SOUTH;
 
+  // Stands Collisions
+  grid[28][21] = TileType.BLOCK; grid[28][22] = TileType.BLOCK; grid[28][23] = TileType.BLOCK; // GAMEFINOW
+  grid[28][16] = TileType.BLOCK; grid[28][17] = TileType.BLOCK; grid[28][18] = TileType.BLOCK; // DEFINDEX
+  grid[28][37] = TileType.BLOCK; grid[28][38] = TileType.BLOCK; grid[28][39] = TileType.BLOCK; // WALLETNOW
+  grid[18][31] = TileType.BLOCK; grid[18][32] = TileType.BLOCK; grid[18][33] = TileType.BLOCK; // SOROSWAP
+  grid[45][26] = TileType.BLOCK; grid[45][27] = TileType.BLOCK; grid[45][28] = TileType.BLOCK; // NEARX
+
+  // ATM Collision
+  grid[28][33] = TileType.BLOCK;
+
   return grid;
 }
 

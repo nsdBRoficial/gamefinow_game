@@ -20,6 +20,7 @@ import {
   Clipboard,
   CheckCircle2
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface FloatingWindowsProps {
   activeWindow: "customizer" | "backpack" | "ledger" | "guide" | null;
@@ -39,6 +40,7 @@ export const FloatingWindows: React.FC<FloatingWindowsProps> = ({
   if (!activeWindow) return null;
 
   const { wallet, quests, transactions, currentLedger } = gameState;
+  const { t } = useTranslation();
 
   // Copy to clipboard helper
   const handleCopyText = (text: string, label: string) => {
@@ -56,25 +58,25 @@ export const FloatingWindows: React.FC<FloatingWindowsProps> = ({
             {activeWindow === "customizer" && (
               <>
                 <Sparkles className="h-4 w-4 text-[#ffbf00]" />
-                <span className="text-xs font-black uppercase tracking-wide text-[#ffbf00] font-mono">🎨 Guarda-Roupa do Viajante (Outfit)</span>
+                <span className="text-xs font-black uppercase tracking-wide text-[#ffbf00] font-mono">{t("huds.customizer_title")}</span>
               </>
             )}
             {activeWindow === "backpack" && (
               <>
                 <Coins className="h-4 w-4 text-[#5db81d]" />
-                <span className="text-xs font-black uppercase tracking-wide text-[#5db81d] font-mono">🎒 Inventário & Runas</span>
+                <span className="text-xs font-black uppercase tracking-wide text-[#5db81d] font-mono">{t("huds.backpack_title")}</span>
               </>
             )}
             {activeWindow === "ledger" && (
               <>
                 <Database className="h-4 w-4 text-[#00a8e1]" />
-                <span className="text-xs font-black uppercase tracking-wide text-[#00a8e1] font-mono">📜 Console de Registros Stellar</span>
+                <span className="text-xs font-black uppercase tracking-wide text-[#00a8e1] font-mono">{t("huds.ledger_title")}</span>
               </>
             )}
             {activeWindow === "guide" && (
               <>
                 <BookOpen className="h-4 w-4 text-[#c33309]" />
-                <span className="text-xs font-black uppercase tracking-wide text-[#c33309] font-mono">📖 Pergaminho de Instruções</span>
+                <span className="text-xs font-black uppercase tracking-wide text-[#c33309] font-mono">{t("huds.guide_title")}</span>
               </>
             )}
           </div>
@@ -103,15 +105,15 @@ export const FloatingWindows: React.FC<FloatingWindowsProps> = ({
               {/* Wallet credentials card */}
               <div className="bg-white border-2 border-black p-4 rounded-lg space-y-3 font-mono shadow-[2px_2px_0px_rgba(0,0,0,0.15)]">
                 <div className="flex items-center justify-between border-b border-black/10 pb-2">
-                  <span className="text-[10px] text-slate-500 font-extrabold uppercase">Cofre Descentralizado de Chaves</span>
+                  <span className="text-[10px] text-slate-500 font-extrabold uppercase">{t("huds.decentralized_vault")}</span>
                   <span className="text-[10px] text-[#5db81d] font-black flex items-center gap-1 uppercase">
-                    <ShieldCheck className="h-3.5 w-3.5" /> Chaves Ativas
+                    <ShieldCheck className="h-3.5 w-3.5" /> {t("huds.active_keys")}
                   </span>
                 </div>
                 {wallet.hasWallet ? (
                   <div className="space-y-2.5 text-xs">
                     <div className="space-y-1">
-                      <span className="text-[9px] text-[#005370] font-bold block uppercase">CHAVE PÚBLICA (Endereço para Receber Moedas)</span>
+                      <span className="text-[9px] text-[#005370] font-bold block uppercase">{t("huds.public_key")}</span>
                       <div className="flex gap-2 items-center bg-[#f4f2ea] p-2 rounded border border-black/20">
                         <span className="text-[#005370] font-black truncate flex-1">{wallet.publicKey}</span>
                         <button 
@@ -124,7 +126,7 @@ export const FloatingWindows: React.FC<FloatingWindowsProps> = ({
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <span className="text-[9px] text-[#c33309] font-bold block uppercase">⚠ CHAVE SECRETA (Senha Administrativa - Guarde bem!)</span>
+                      <span className="text-[9px] text-[#c33309] font-bold block uppercase">{t("huds.secret_key")}</span>
                       <div className="flex gap-2 items-center bg-red-50 p-2 rounded border border-[#c33309]/30">
                         <span className="text-[#c33309] font-bold truncate flex-1 font-password">S{wallet.secretKey.substring(1).replace(/./g, "•")}</span>
                         <button 
@@ -139,33 +141,33 @@ export const FloatingWindows: React.FC<FloatingWindowsProps> = ({
                   </div>
                 ) : (
                   <div className="text-center py-6 text-slate-500 space-y-1 select-none">
-                    <p className="text-[#c33309] font-black animate-pulse uppercase">Nenhuma identidade forjada ainda!</p>
-                    <p className="text-[10px]">Fale com Frank [NPC] no Templo Stellar para criar sua carteira.</p>
+                    <p className="text-[#c33309] font-black animate-pulse uppercase">{t("huds.no_identity")}</p>
+                    <p className="text-[10px]">{t("huds.no_identity_desc")}</p>
                   </div>
                 )}
               </div>
 
               {/* Balances detailed list */}
               <div className="space-y-3">
-                <span className="text-[10px] text-slate-500 font-extrabold uppercase font-mono block">Saldos Disponíveis (WalletNow)</span>
+                <span className="text-[10px] text-slate-500 font-extrabold uppercase font-mono block">{t("huds.available_balances")}</span>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div className="bg-white border-2 border-black p-3 rounded-lg flex items-center justify-between shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
                     <div className="space-y-0.5">
-                      <span className="text-[9px] text-slate-500 font-bold block uppercase">Moedas de Cristal (XLM)</span>
+                      <span className="text-[9px] text-slate-500 font-bold block uppercase">{t("huds.crystal_coins")}</span>
                       <span className="text-sm font-black text-[#d97706] font-mono">{wallet.xlmBalance} XLM</span>
                     </div>
                     <div className="w-8 h-8 bg-[#ffc600] text-black border-2 border-black rounded-full flex items-center justify-center font-black font-mono text-xs shadow-[1.5px_1.5px_0_#000]">🌟</div>
                   </div>
                   <div className="bg-white border-2 border-black p-3 rounded-lg flex items-center justify-between shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
                     <div className="space-y-0.5">
-                      <span className="text-[9px] text-slate-500 font-bold block uppercase">Estável Dólar (USDW)</span>
+                      <span className="text-[9px] text-slate-500 font-bold block uppercase">{t("huds.stable_dollar")}</span>
                       <span className="text-sm font-black text-[#10b981] font-mono">{wallet.usdwBalance || 0} USDW</span>
                     </div>
                     <div className="w-8 h-8 bg-[#10b981] text-white border-2 border-black rounded flex items-center justify-center font-black font-mono text-xs shadow-[1.5px_1.5px_0_#000]">💵</div>
                   </div>
                   <div className="bg-white border-2 border-black p-3 rounded-lg flex items-center justify-between shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
                     <div className="space-y-0.5">
-                      <span className="text-[9px] text-slate-500 font-bold block uppercase">Estável Real (BRW)</span>
+                      <span className="text-[9px] text-slate-500 font-bold block uppercase">{t("huds.stable_real")}</span>
                       <span className="text-sm font-black text-[#6366f1] font-mono">{wallet.brwBalance || 0} BRW</span>
                     </div>
                     <div className="w-8 h-8 bg-[#6366f1] text-white border-2 border-black rounded flex items-center justify-center font-black font-mono text-xs shadow-[1.5px_1.5px_0_#000]">🇧🇷</div>
@@ -175,37 +177,37 @@ export const FloatingWindows: React.FC<FloatingWindowsProps> = ({
                 {/* Vault & LP Balances */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="bg-slate-100 border-2 border-dashed border-slate-400 p-3 rounded-lg space-y-1.5 shadow-[1.5px_1.5px_0px_rgba(0,0,0,0.05)]">
-                    <span className="text-[8.5px] text-slate-500 font-black uppercase font-mono block">🏦 COFRES DE RENDIMENTO (VAULTS)</span>
+                    <span className="text-[8.5px] text-slate-500 font-black uppercase font-mono block">{t("huds.yield_vaults")}</span>
                     <div className="text-[11px] font-mono space-y-1 text-slate-700">
                       <div className="flex justify-between">
-                        <span>Cofre XLM:</span>
+                        <span>{t("huds.vault_xlm")}</span>
                         <span className="font-bold">{wallet.vaultXlm || 0} XLM</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Cofre USDW:</span>
+                        <span>{t("huds.vault_usdw")}</span>
                         <span className="font-bold">{wallet.vaultUsdw || 0} USDW</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Cofre BRW:</span>
+                        <span>{t("huds.vault_brw")}</span>
                         <span className="font-bold">{wallet.vaultBrw || 0} BRW</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="bg-slate-100 border-2 border-dashed border-slate-400 p-3 rounded-lg space-y-1.5 shadow-[1.5px_1.5px_0px_rgba(0,0,0,0.05)]">
-                    <span className="text-[8.5px] text-slate-500 font-black uppercase font-mono block">💧 COTAS DE LIQUIDEZ (AMM LP)</span>
+                    <span className="text-[8.5px] text-slate-500 font-black uppercase font-mono block">{t("huds.liquidity_shares")}</span>
                     <div className="text-[11px] font-mono space-y-1 text-slate-700">
                       <div className="flex justify-between">
-                        <span>Piscina XLM - USDW:</span>
+                        <span>{t("huds.pool_xlm_usdw")}</span>
                         <span className="font-bold text-violet-600">{wallet.poolXlmUsdw || 0} LP</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Piscina USDW - BRW:</span>
+                        <span>{t("huds.pool_usdw_brw")}</span>
                         <span className="font-bold text-violet-600">{wallet.poolUsdwBrw || 0} LP</span>
                       </div>
                       <div className="flex justify-between text-[10px] text-slate-400 pt-0.5 border-t border-slate-200">
-                        <span>Recompensa de Taxas:</span>
-                        <span className="font-bold text-emerald-500">Acumulando...</span>
+                        <span>{t("huds.fee_rewards")}</span>
+                        <span className="font-bold text-emerald-500">{t("huds.accumulating")}</span>
                       </div>
                     </div>
                   </div>
@@ -214,7 +216,7 @@ export const FloatingWindows: React.FC<FloatingWindowsProps> = ({
 
               {/* Quests timeline card */}
               <div className="bg-white border-2 border-black p-4 rounded-lg space-y-3 shadow-[2px_2px_0px_rgba(0,0,0,0.15)]">
-                <h3 className="text-xs font-black uppercase tracking-wider text-black font-mono">Missões Educacionais Concluídas</h3>
+                <h3 className="text-xs font-black uppercase tracking-wider text-black font-mono">{t("huds.completed_quests")}</h3>
                 <div className="space-y-2.5 text-xs">
                   {Object.values(quests).map((q: Quest) => (
                     <div 
@@ -234,12 +236,12 @@ export const FloatingWindows: React.FC<FloatingWindowsProps> = ({
                           q.status === "active" ? "bg-[#ffbf00] text-black" :
                           "bg-[#ece9df] text-black/40"
                         }`}>
-                          {q.status === "completed" ? "✔ CONCLUÍDO" :
-                           q.status === "active" ? "● ATIVO" : "🔒 BLOQUEADO"}
+                          {q.status === "completed" ? t("huds.completed") :
+                           q.status === "active" ? t("huds.active") : t("huds.blocked")}
                         </span>
                       </div>
                       <p className="text-[11px] leading-relaxed mb-1.5">{q.description}</p>
-                      <span className="text-[10px] text-slate-500 block font-bold">★ Recompensa de Missão: {q.reward}</span>
+                      <span className="text-[10px] text-slate-500 block font-bold">{t("huds.quest_reward")} {q.reward}</span>
                     </div>
                   ))}
                 </div>
@@ -252,14 +254,12 @@ export const FloatingWindows: React.FC<FloatingWindowsProps> = ({
             <div className="space-y-3 font-mono text-xs">
               <div className="bg-white border-2 border-black p-4 rounded-lg flex flex-col md:flex-row justify-between items-center gap-3 shadow-[2px_2px_0px_rgba(0,0,0,0.15)]">
                 <div className="space-y-1">
-                  <span className="text-[10px] text-[#005370] font-black uppercase tracking-wider block font-mono">Blockchain Ledger Sequencer</span>
-                  <p className="text-black/80 leading-relaxed text-[11px]">
-                    Stellar opera em lotes rápidos de consenso a cada 5 segundos. Nenhuma energia de mineração ou taxas pesadas são desperdiçadas.
-                  </p>
+                  <span className="text-[10px] text-[#005370] font-black uppercase tracking-wider block font-mono">{t("huds.ledger_sequencer")}</span>
+                  <p className="text-black/80 leading-relaxed text-[11px]">{t("huds.ledger_sequencer_desc")}</p>
                 </div>
                 <div className="text-center shrink-0 bg-[#f4f2ea] px-4 py-2.5 rounded border-2 border-black shadow-[1.5px_1.5px_0_#000]">
-                  <span className="text-[9px] text-slate-500 uppercase font-black block">Sequência Consenso</span>
-                  <span className="text-xs font-black text-[#00a8e1]">Ledger #{currentLedger}</span>
+                  <span className="text-[9px] text-slate-500 uppercase font-black block">{t("huds.consensus_sequence")}</span>
+                  <span className="text-xs font-black text-[#00a8e1]">{t("huds.ledger")} #{currentLedger}</span>
                 </div>
               </div>
 
@@ -267,8 +267,8 @@ export const FloatingWindows: React.FC<FloatingWindowsProps> = ({
               <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1">
                 {transactions.length === 0 ? (
                   <div className="text-center py-12 text-slate-400 space-y-1 border-2 border-dashed border-black/20 rounded-lg">
-                    <p className="font-mono font-bold uppercase text-[10px]">Aguardando transações na rede...</p>
-                    <p className="text-[10px]">Interaja com os altares do templo para emitir transações live!</p>
+                    <p className="font-mono font-bold uppercase text-[10px]">{t("huds.awaiting_transactions")}</p>
+                    <p className="text-[10px]">{t("huds.interact_altars")}</p>
                   </div>
                 ) : (
                   transactions.map((tx) => (
@@ -296,8 +296,8 @@ export const FloatingWindows: React.FC<FloatingWindowsProps> = ({
                       </div>
 
                       <div className="pt-1.5 border-t border-black/10 flex justify-between items-center text-[9px] text-slate-400">
-                        <span className="truncate max-w-[220px]">HASH: {tx.id}</span>
-                        <span>TAXA: {tx.fee} XLM</span>
+                        <span className="truncate max-w-[220px]">{t("huds.tx_hash")}: {tx.id}</span>
+                        <span>{t("huds.tx_fee")}: {tx.fee} XLM</span>
                       </div>
                     </div>
                   ))
@@ -310,44 +310,34 @@ export const FloatingWindows: React.FC<FloatingWindowsProps> = ({
           {activeWindow === "guide" && (
             <div className="space-y-4 text-xs leading-relaxed text-black/80">
               <div className="bg-white border-2 border-black p-4 rounded-lg space-y-2 shadow-[2px_2px_0px_rgba(0,0,0,0.15)]">
-                <h3 className="text-xs font-black text-[#c33309] uppercase tracking-wide font-mono">Instruções de Sobrevivência no Continente</h3>
-                <p>
-                  Bem-vindo ao templo educacional! O objetivo deste RPG é guiar você pelos conceitos práticos do Web3 através da rede <strong>Stellar</strong> de forma totalmente compreensível.
-                </p>
+                <h3 className="text-xs font-black text-[#c33309] uppercase tracking-wide font-mono">{t("huds.survival_instructions")}</h3>
+                <p dangerouslySetInnerHTML={{ __html: t("huds.survival_desc") }}></p>
               </div>
 
               <div className="space-y-3.5">
                 <div className="space-y-1">
-                  <h4 className="font-extrabold text-[#005370] text-xs font-mono uppercase">1. Como funciona a Criptografia Assimétrica?</h4>
-                  <p className="text-[11px]">
-                    No Web3, você não cria logins com e-mail e senha convencionais. Em vez disso, seu endereço é uma <strong>Chave Pública</strong> (que todos podem ver, como um PIX) gerada matematicamente a partir de uma <strong>Chave Secreta</strong> (sua senha privada, guardada em cofre). Se perder a secreta, perde tudo!
-                  </p>
+                  <h4 className="font-extrabold text-[#005370] text-xs font-mono uppercase">{t("huds.guide_q1")}</h4>
+                  <p className="text-[11px]" dangerouslySetInnerHTML={{ __html: t("huds.guide_a1") }}></p>
                 </div>
 
                 <div className="space-y-1">
-                  <h4 className="font-extrabold text-[#5db81d] text-xs font-mono uppercase">2. O que são Anchors (Âncoras)?</h4>
-                  <p className="text-[11px]">
-                    Uma das maiores inovações da Stellar são as <strong>Anchors</strong>. Elas funcionam como casas de câmbio digitais licenciadas integradas na blockchain, permitindo enviar moedas fiduciárias locais (como Reais ou Dólares) e transformá-las em ativos virtuais estáveis (como USDC) instantaneamente.
-                  </p>
+                  <h4 className="font-extrabold text-[#5db81d] text-xs font-mono uppercase">{t("huds.guide_q2")}</h4>
+                  <p className="text-[11px]" dangerouslySetInnerHTML={{ __html: t("huds.guide_a2") }}></p>
                 </div>
 
                 <div className="space-y-1">
-                  <h4 className="font-extrabold text-[#8a2be2] text-xs font-mono uppercase">3. O que são Smart Contracts Soroban?</h4>
-                  <p className="text-[11px]">
-                    <strong>Soroban</strong> é a engine de contratos inteligentes da Stellar que executa código Rust seguro diretamente no consenso. Com eles, podemos programar transações automáticas sem intermediários, como fazer Swaps (trocas de moedas) em piscinas de liquidez descentralizadas de forma imediata.
-                  </p>
+                  <h4 className="font-extrabold text-[#8a2be2] text-xs font-mono uppercase">{t("huds.guide_q3")}</h4>
+                  <p className="text-[11px]" dangerouslySetInnerHTML={{ __html: t("huds.guide_a3") }}></p>
                 </div>
 
                 <div className="space-y-1">
-                  <h4 className="font-extrabold text-[#c33309] text-xs font-mono uppercase">4. O que significa fazer Hold / Escrow?</h4>
-                  <p className="text-[11px]">
-                    Fazer "Hold" significa travar ativos financeiros em um cofre automatizado sem custódia de terceiros por um período pré-determinado. Isso garante fidelidade ao ecossistema, permitindo ganhar recompensas e consolidar sua presença como holder no ecossistema global.
-                  </p>
+                  <h4 className="font-extrabold text-[#c33309] text-xs font-mono uppercase">{t("huds.guide_q4")}</h4>
+                  <p className="text-[11px]">{t("huds.guide_a4")}</p>
                 </div>
               </div>
 
               <div className="border-t border-black/10 pt-3 text-center text-[10px] text-slate-500">
-                <span>Stellar Temple • Todos os dados simulados localmente para fins de capacitação de guerreiros.</span>
+                <span>{t("huds.guide_footer")}</span>
               </div>
             </div>
           )}
@@ -360,7 +350,7 @@ export const FloatingWindows: React.FC<FloatingWindowsProps> = ({
             onClick={onClose}
             className="px-4 py-1.5 bg-[#ece9df] hover:bg-[#f4f2ea] active:translate-y-0.5 border-2 border-black text-black text-xs font-bold rounded shadow-[inset_-1.5px_-1.5px_0px_rgba(0,0,0,0.15),0_2px_0px_rgba(0,0,0,1)] active:shadow-[0_0.5px_0px_rgba(0,0,0,1)] cursor-pointer"
           >
-            Fechar Janela
+            {t("huds.close_window")}
           </button>
         </div>
 

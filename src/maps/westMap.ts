@@ -60,6 +60,9 @@ export function generateSorobanSwapMap(): number[][] {
 
   // Soroban Swap pedestal
   grid[27][31] = TileType.WALL;
+  
+  // ATM Cyberpunk Collision
+  grid[28][47] = TileType.BLOCK;
 
   return grid;
 }
@@ -70,6 +73,9 @@ export const BAZAAR_DECORATIONS: GameDecoration[] = [
   { x: 32, y: 28, type: "lamp" },
   { x: 28, y: 32, type: "lamp" },
   { x: 32, y: 32, type: "lamp" },
+
+  // ATM Cyberpunk
+  { x: 47, y: 28, type: "atm_cyberpunk" },
 
   // Market stalls, barrels, and flower pots
   { x: 10, y: 25, type: "barrel" },
