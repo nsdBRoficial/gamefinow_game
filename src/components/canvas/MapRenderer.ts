@@ -466,13 +466,13 @@ export const drawSpecialTerminals = (ctx: CanvasRenderingContext2D, currentRegio
   if (currentRegion === "center") {
     drawInteractiveTerminal(ctx, 33, 28, "ATM DEFI", "#f43f5e", tileSize, playerPos);
   } else if (currentRegion === "east") {
-    drawInteractiveTerminal(ctx, 30, 30, "FORJA CHAVE", "#22d3ee", tileSize, playerPos);
+    drawInteractiveTerminal(ctx, 35, 28, "FORJA CHAVE", "#22d3ee", tileSize, playerPos);
   } else if (currentRegion === "north") {
-    drawInteractiveTerminal(ctx, 30, 30, "ON RAMP PORT", "#34d399", tileSize, playerPos);
+    drawInteractiveTerminal(ctx, 31, 24, "ON RAMP PORT", "#34d399", tileSize, playerPos);
   } else if (currentRegion === "west") {
-    drawInteractiveTerminal(ctx, 30, 30, "SOROBAN SWAP", "#a78bfa", tileSize, playerPos);
+    drawInteractiveTerminal(ctx, 31, 27, "SOROBAN SWAP", "#a78bfa", tileSize, playerPos);
   } else if (currentRegion === "south") {
-    drawInteractiveTerminal(ctx, 30, 30, "GOLD ESCROW", "#fbbf24", tileSize, playerPos);
+    drawInteractiveTerminal(ctx, 33, 24, "GOLD ESCROW", "#fbbf24", tileSize, playerPos);
   }
 };
 

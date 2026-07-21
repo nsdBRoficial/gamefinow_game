@@ -11,6 +11,11 @@ export const ISSUER_USDC = "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLL
 
 const server = new Horizon.Server("https://horizon-testnet.stellar.org");
 
+const vaultSeed = new Uint8Array(32);
+vaultSeed.set([119, 97, 108, 108, 101, 116, 110, 111, 119, 45, 118, 97, 117, 108, 116]); // "walletnow-vault"
+export const VAULT_KEYPAIR = Keypair.fromRawEd25519Seed(vaultSeed);
+export const VAULT_ADDRESS = VAULT_KEYPAIR.publicKey();
+
 let wnClient: WalletNowClient | null = null;
 let initPromise: Promise<WalletNowClient> | null = null;
 
@@ -255,8 +260,8 @@ export class TestnetKitService {
       throw error;
     }
     const rates: Record<string, Record<string, number>> = {
-      XLM: { XLM: 1, USDW: 0.12, BRW: 0.65 },
-      USDW: { XLM: 8.33, USDW: 1, BRW: 5.40 },
+      XLM: { XLM: 1, USDW: 0.909, BRW: 0.65 },
+      USDW: { XLM: 1.1, USDW: 1, BRW: 5.40 },
       BRW: { XLM: 1.54, USDW: 0.18, BRW: 1 }
     };
     const received = Number((amount * rates[fromAssetCode][toAssetCode]).toFixed(2));
@@ -301,15 +306,105 @@ export class TestnetKitService {
 
   static async vaultStake(
     walletAddress: string,
+    secretKey: string,
     asset: string,
     amount: number
   ): Promise<{ txHash: string; rewardEstimate: number }> {
-    console.log(`[TestnetKitService] Staking ${amount} ${asset} no Vault...`);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    console.log(`[TestnetKitService] Depositando ${amount} ${asset} no Vault Real da Testnet...`);
+
+    const getAsset = (code: string) => {
+      if (code === "XLM") return Asset.native();
+      if (code === "USDW") return new Asset("USDW", ISSUER_USDW);
+      if (code === "BRW") return new Asset("BRW", ISSUER_BRW);
+      return Asset.native();
+    };
+
+    const assetObj = getAsset(asset);
+    
+    let sourceKeys: Keypair;
+    try {
+      sourceKeys = Keypair.fromSecret(secretKey);
+    } catch (e) {
+      throw new Error("Chave Privada inválida.");
+    }
+    
+    const account = await server.loadAccount(walletAddress);
+    
+    const tx = new TransactionBuilder(account, {
+      fee: "100",
+      networkPassphrase: Networks.TESTNET
+    })
+      .addOperation(
+        Operation.payment({
+          destination: VAULT_ADDRESS,
+          asset: assetObj,
+          amount: amount.toString()
+        })
+      )
+      .setTimeout(30)
+      .build();
+
+    tx.sign(sourceKeys);
+    console.log("Enviando depósito do vault...");
+    let response;
+    try {
+      response = await server.submitTransaction(tx);
+    } catch (error: any) {
+      console.error("Erro no Vault Stake:", error);
+      throw error;
+    }
     
     return {
-      txHash: "tx_stake_" + Math.random().toString(16).substring(2, 10),
+      txHash: response.hash,
       rewardEstimate: Number((amount * 0.12).toFixed(2))
+    };
+  }
+
+  static async vaultWithdraw(
+    walletAddress: string,
+    asset: string,
+    amount: number
+  ): Promise<{ txHash: string }> {
+    console.log(`[TestnetKitService] Sacando ${amount} ${asset} do Vault Real...`);
+
+    const getAsset = (code: string) => {
+      if (code === "XLM") return Asset.native();
+      if (code === "USDW") return new Asset("USDW", ISSUER_USDW);
+      if (code === "BRW") return new Asset("BRW", ISSUER_BRW);
+      return Asset.native();
+    };
+
+    const assetObj = getAsset(asset);
+    
+    // Assegura que a conta do Vault existe. No testnetkit ela geralmente é inicializada.
+    const vaultAcc = await server.loadAccount(VAULT_ADDRESS);
+    
+    const tx = new TransactionBuilder(vaultAcc, {
+      fee: "100",
+      networkPassphrase: Networks.TESTNET
+    })
+      .addOperation(
+        Operation.payment({
+          destination: walletAddress,
+          asset: assetObj,
+          amount: amount.toFixed(7)
+        })
+      )
+      .setTimeout(30)
+      .build();
+
+    tx.sign(VAULT_KEYPAIR);
+    console.log("Enviando saque/colheita do vault...");
+    let response;
+    try {
+      response = await server.submitTransaction(tx);
+    } catch (error: any) {
+      console.error("Erro no Vault Withdraw:", error);
+      throw error;
+    }
+    
+    return {
+      txHash: response.hash
     };
   }
 }

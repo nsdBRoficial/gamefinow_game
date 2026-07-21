@@ -71,8 +71,8 @@ export function getNpcsForMap(mapId: MapId): NPC[] {
     if (portmaster) {
       return [{
         ...portmaster,
-        x: 30,
-        y: 27,
+        x: 31,
+        y: 34,
         dir: "down"
       }];
     }
@@ -81,8 +81,8 @@ export function getNpcsForMap(mapId: MapId): NPC[] {
     if (scholar) {
       return [{
         ...scholar,
-        x: 30,
-        y: 27,
+        x: 42,
+        y: 28,
         dir: "down"
       }];
     }
@@ -91,8 +91,8 @@ export function getNpcsForMap(mapId: MapId): NPC[] {
     if (sage) {
       return [{
         ...sage,
-        x: 30,
-        y: 27,
+        x: 27,
+        y: 14,
         dir: "down"
       }];
     }

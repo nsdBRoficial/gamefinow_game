@@ -59,7 +59,7 @@ export function generateSorobanSwapMap(): number[][] {
   grid[30][GRID_COLS - 2] = TileType.PORTAL_CENTER;
 
   // Soroban Swap pedestal
-  grid[30][30] = TileType.WALL;
+  grid[27][31] = TileType.WALL;
 
   return grid;
 }

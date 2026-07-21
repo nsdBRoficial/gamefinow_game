@@ -628,7 +628,7 @@ interface OnRampProps {
 
 const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, onOnRampSuccess }) => {
   const [activeTab, setActiveTab] = useState<"deposit" | "withdraw">("deposit");
-  const [asset, setAsset] = useState<"XLM" | "USDW" | "BRW" | "SRT" | "USDC">("BRW");
+  const [asset, setAsset] = useState<"XLM" | "USDW" | "BRW" | "SRT" | "USDC">("XLM");
   const [fiatAmount, setFiatAmount] = useState<number>(10);
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1); // 1: Config, 2: Withdraw, 3: Success, 4: SEP-24 Iframe
   const [loading, setLoading] = useState(false);
@@ -981,8 +981,8 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
 
   // Rate matrices
   const rates = {
-    XLM: { XLM: 1, USDW: 0.12, BRW: 0.65 },
-    USDW: { XLM: 8.33, USDW: 1, BRW: 5.40 },
+    XLM: { XLM: 1, USDW: 0.909, BRW: 0.65 },
+    USDW: { XLM: 1.1, USDW: 1, BRW: 5.40 },
     BRW: { XLM: 1.54, USDW: 0.18, BRW: 1 }
   };
 
@@ -990,7 +990,7 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
 
   // Balanced deposit calculation for Liquidity Pools
   const poolRates = {
-    XLM_USDW: 0.12, // 1 XLM requires 0.12 USDW
+    XLM_USDW: 0.909, // 1 XLM requires 0.909 USDW
     USDW_BRW: 5.40  // 1 USDW requires 5.40 BRW
   };
 
@@ -1512,6 +1512,7 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
     try {
       const { txHash, rewardEstimate } = await TestnetKitService.vaultStake(
         wallet.publicKey || "",
+        wallet.secretKey || "",
         vaultAsset,
         amount
       );
@@ -1543,7 +1544,7 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
     }
   };
 
-  const handleWithdraw = () => {
+  const handleWithdraw = async (claimOnly: boolean = false) => {
     setError(null);
     setSuccess(null);
     const balanceField = vaultAsset === "XLM" ? "xlmBalance" : vaultAsset === "USDW" ? "usdwBalance" : "brwBalance";
@@ -1552,38 +1553,62 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
     const balance = wallet[balanceField] || 0;
     const locked = wallet[vaultField] || 0;
 
-    if (locked <= 0) {
+    const yieldEarned = Number(simulatedYield.toFixed(6));
+    const withdrawAmount = claimOnly ? yieldEarned : locked + yieldEarned;
+
+    if (claimOnly && yieldEarned <= 0) {
+      setError("Você não possui rendimentos para colher!");
+      return;
+    }
+
+    if (!claimOnly && locked <= 0) {
       setError("Você não possui fundos travados neste cofre!");
       return;
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-
-      const yieldEarned = Number(simulatedYield.toFixed(4));
-      const totalRefund = locked + yieldEarned;
+    try {
+      const { txHash } = await TestnetKitService.vaultWithdraw(
+        wallet.publicKey || "",
+        vaultAsset,
+        withdrawAmount
+      );
 
       const updatedFields: Partial<WalletState> = {
-        [balanceField]: balance + totalRefund,
-        [vaultField]: 0
+        [balanceField]: balance + withdrawAmount,
+        [vaultField]: claimOnly ? locked : 0
       };
 
+      const txType = claimOnly ? "VAULT_CLAIM" : "VAULT_WITHDRAW";
+      const txMemo = claimOnly 
+        ? `Colheita de Rendimento (${yieldEarned} ${vaultAsset})` 
+        : `Resgate do Cofre: Principal + Rendimento (${yieldEarned} ${vaultAsset})`;
+
       const tx: Transaction = {
-        id: generateTxHash(),
-        type: "VAULT_WITHDRAW",
+        id: txHash,
+        type: txType as "VAULT_WITHDRAW",
         timestamp: new Date().toLocaleTimeString(),
-        amount: totalRefund.toString(),
+        amount: withdrawAmount.toString(),
         asset: vaultAsset,
         fee: "0.00005",
-        memo: `Resgate do Cofre: Principal + Rendimento (${yieldEarned} ${vaultAsset})`,
+        memo: txMemo,
         ledgerSequence: 6184293 + Math.floor(Math.random() * 100)
       };
 
       onUpdateWallet(updatedFields, tx);
       setSimulatedYield(0);
-      setSuccess(`Cofre liquidado! Você recebeu de volta seu depósito de ${locked} ${vaultAsset} somado com ${yieldEarned} ${vaultAsset} de juros!`);
-    }, 1500);
+      
+      if (claimOnly) {
+        setSuccess(`Rendimentos colhidos! Você recebeu ${yieldEarned} ${vaultAsset} de juros! TX: ${txHash}`);
+      } else {
+        setSuccess(`Cofre liquidado! Você recebeu de volta seu depósito de ${locked} ${vaultAsset} somado com ${yieldEarned} ${vaultAsset} de juros! TX: ${txHash}`);
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Erro ao realizar o saque no Vault Real");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const activeVaultBalance = vaultAsset === "XLM" ? (wallet.vaultXlm || 0) : vaultAsset === "USDW" ? (wallet.vaultUsdw || 0) : (wallet.vaultBrw || 0);
@@ -1649,20 +1674,28 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 pt-1.5">
+          <div className="grid grid-cols-3 gap-2 pt-1.5">
             <button
               type="button"
               onClick={handleDeposit}
               disabled={loading}
-              className="py-2 px-3 bg-amber-400 hover:bg-amber-300 text-black text-xs font-extrabold uppercase rounded-lg transition cursor-pointer font-mono"
+              className="py-2 px-2 bg-amber-400 hover:bg-amber-300 text-black text-[10px] sm:text-xs font-extrabold uppercase rounded-lg transition cursor-pointer font-mono"
             >
               Depositar
             </button>
             <button
               type="button"
-              onClick={handleWithdraw}
+              onClick={() => handleWithdraw(true)}
+              disabled={loading || simulatedYield <= 0}
+              className="py-2 px-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-emerald-400 border border-slate-700 text-[10px] sm:text-xs font-extrabold uppercase rounded-lg transition cursor-pointer font-mono"
+            >
+              Colher
+            </button>
+            <button
+              type="button"
+              onClick={() => handleWithdraw(false)}
               disabled={loading || activeVaultBalance <= 0}
-              className="py-2 px-3 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-red-400 border border-slate-700 text-xs font-extrabold uppercase rounded-lg transition cursor-pointer font-mono"
+              className="py-2 px-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-red-400 border border-slate-700 text-[10px] sm:text-xs font-extrabold uppercase rounded-lg transition cursor-pointer font-mono"
             >
               Sacar Cofre
             </button>

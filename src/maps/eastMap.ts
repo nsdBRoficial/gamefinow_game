@@ -55,7 +55,7 @@ export function generateWalletForgeMap(): number[][] {
   grid[30][1] = TileType.PORTAL_CENTER;
 
   // Wallet Forge pedestal
-  grid[30][30] = TileType.WALL;
+  grid[28][35] = TileType.WALL;
 
   return grid;
 }

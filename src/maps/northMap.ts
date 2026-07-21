@@ -66,7 +66,7 @@ export function generateAnchorPortMap(): number[][] {
   grid[GRID_ROWS - 2][30] = TileType.PORTAL_CENTER;
 
   // Anchor Port pedestal (Central point)
-  grid[30][30] = TileType.WALL;
+  grid[24][31] = TileType.WALL;
 
   return grid;
 }

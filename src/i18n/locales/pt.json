@@ -116,6 +116,10 @@
   },
   "ui": {
     "activeQuest": "Missão Ativa",
+    "pressSpace": "Pressione ESPAÇO para continuar",
+    "terminalAvailable": "Terminal Disponível",
+    "connectTerminal": "Conectar Terminal",
+    "connectWeb3Device": "Conectar Dispositivo Web3",
     "legendaryRibbon": "🏆 CONQUISTA MÁXIMA: VIAJANTE LENDÁRIO STELLAR! 🌟",
     "keyboard": "Teclado",
     "space": "ESPAÇO",
@@ -201,12 +205,16 @@
   },
   "npcs": {
     "guide": {
-      "name": "James [NPC]",
+      "name": "James",
       "dialogs": [
-        "Bem-vindo ao saguão principal do Templo Stellar, jovem viajante!",
-        "Eu sou James [NPC], o Mestre do Templo. Estou aqui para guiá-lo no caminho para se tornar um Viajante Lendário.",
-        "Sua jornada começa criando sua identidade digital, a única forma de guardar tesouros neste mundo descentralizado.",
-        "Para forjar sua carteira mágica, atravesse a ponte azul ao Leste e encontre Kael [NPC], o nosso Mestre das Chaves!"
+        "Bem-vindo ao saguão principal do Templo Stellar, jovem viajante! Aqui é onde a magia da Web3 ganha vida.",
+        "Eu sou James, o Mestre do Templo, e serei o seu guia por esta ilha de inovações descentralizadas.",
+        "Nossa ilha é um arquipélago educacional projetado para ensinar tudo sobre finanças descentralizadas (DeFi) através de 4 missões cruciais.",
+        "Primeiro, você precisará de uma identidade digital segura. Atravesse a ponte azul ao Leste até a Caverna e forje sua Carteira com o Mestre das Chaves.",
+        "Com sua carteira pronta, a segunda missão o levará ao Porto Norte, onde você aprenderá a usar o 'On-Ramp' para transformar moedas locais em ativos digitais.",
+        "Em seguida, na terceira missão, a praça Oeste revelará os segredos dos Contratos Inteligentes, onde você fará trocas rápidas de tokens.",
+        "E por fim, a quarta missão no Santuário Sul testará sua lealdade ensinando o poder do 'Hold' a longo prazo.",
+        "Complete todas as missões para ganhar o título de Guardião Lendário! Vamos começar? Siga primeiro para o Leste e crie sua carteira!"
       ],
       "activeQuestDialogs": [
         "Você ainda não tem uma conta! Siga para o Leste e converse com Kael [NPC] para forjar seu par de chaves."
@@ -283,6 +291,67 @@
         "Seus tesouros estão guardados em segurança. Você agora é oficialmente um Guardião Lendário Stellar Holder!",
         "Aproveite as finanças rápidas e descentralizadas. Bobba!"
       ]
+    },
+    "gamefinow_info": {
+      "name": "GAMEFINOW INFO",
+      "dialogs": [
+        "Terminal Informativo Gamefinow.",
+        "O Gamefinow é o principal ecossistema que conecta finanças descentralizadas (DeFi) à diversão interativa (GameFi) na rede Stellar.",
+        "Aqui no Templo, você aprenderá as bases da Web3: forjar carteiras, usar on-ramp, realizar swaps e entender o poder do hold.",
+        "Interaja com as missões para liberar os caminhos e obter seu NFT Lendário!"
+      ]
+    },
+    "walletnow_info": {
+      "name": "WALLETNOW INFO",
+      "dialogs": [
+        "Terminal Informativo Walletnow.",
+        "A Walletnow é o seu painel definitivo de análise e rastreamento para o ecossistema DeFi.",
+        "Sua tecnologia garante que você tenha um portal seguro para a Web3, rastreando seus rendimentos e NFTs de forma otimizada.",
+        "Encontre o terminal oficial da Walletnow na caverna ao Leste para criar sua própria carteira."
+      ]
+    },
+    "nearx_info": {
+      "name": "NEARX INFO",
+      "dialogs": [
+        "Terminal Informativo Nearx.",
+        "A Nearx é a principal infraestrutura de transações On-Ramp e Off-Ramp na blockchain Stellar.",
+        "Ela funciona como uma ponte confiável para que você possa comprar ativos digitais utilizando sua moeda local de forma 100% segura e regulada.",
+        "O porto principal da Nearx pode ser encontrado na praia ao Norte do mapa central."
+      ]
+    },
+    "defindex_info": {
+      "name": "DEFINDEX INFO",
+      "dialogs": [
+        "Terminal Informativo Defindex.",
+        "A Defindex é pioneira na construção de ferramentas para automatizar e otimizar rendimentos de forma descentralizada.",
+        "Com foco no ecossistema Soroban, eles desenvolvem cofres e índices inteligentes para facilitar seus investimentos em DeFi.",
+        "Encontre os simuladores dos contratos da Defindex integrados com Soroswap na praça ao Oeste."
+      ]
+    },
+    "soroswap_info": {
+      "name": "SOROSWAP INFO",
+      "dialogs": [
+        "Terminal Informativo Soroswap.",
+        "O Soroswap é a exchange descentralizada (DEX) líder e formador de mercado automatizado (AMM) no ecossistema Soroban.",
+        "A plataforma permite que qualquer usuário troque tokens da rede Stellar de forma incrivelmente rápida e com taxas próximas a zero.",
+        "Você poderá testar as poderosas liquidações de Swap no terminal localizado no lado Oeste."
+      ]
     }
+  },
+  "mmo": {
+    "phrases": [
+      "Partiu fazer Pix On-Ramp!",
+      "Adorei o visual das costas do herói!",
+      "Este terminal ATM DEFI é massa demais!",
+      "Conectando ao terminal Stellar...",
+      "Consenso em 5 segundos!",
+      "A taxa de rede da Stellar é quase zero!",
+      "Olha meu elmo de guerreiro!",
+      "Que massa, o jogo carrega instantaneamente!",
+      "Stellar é muito rápida e barata de verdade!",
+      "Este MMO está fantástico!",
+      "A Chave Secreta nunca deve ser compartilhada!",
+      "Olá! Alguém quer fazer trade de moedas?"
+    ]
   }
 }

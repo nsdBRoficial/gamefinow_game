@@ -61,6 +61,14 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     latestDimensions.current = dimensions;
   }, [dimensions]);
 
+  const mmoPhrasesRef = useRef<string[]>([]);
+  useEffect(() => {
+    const phrases = t("mmo.phrases", { returnObjects: true });
+    if (Array.isArray(phrases)) {
+      mmoPhrasesRef.current = phrases;
+    }
+  }, [t]);
+
   useEffect(() => {
     latestNpcs.current = npcs;
   }, [npcs]);
@@ -438,29 +446,23 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         return;
       }
     } else if (currentMapId === "east") {
-      if (Math.abs(x - 30) <= 2 && Math.abs(y - 30) <= 2) {
+      if (Math.abs(x - 35) <= 2 && Math.abs(y - 28) <= 2) {
         onNearTerminal("wallet");
         return;
       }
     } else if (currentMapId === "north") {
-      if (Math.abs(x - 30) <= 2 && Math.abs(y - 30) <= 2) {
-        if (state.quests.wallet.status === "completed") {
-          onNearTerminal("onramp");
-        }
+      if (Math.abs(x - 31) <= 2 && Math.abs(y - 24) <= 2) {
+        onNearTerminal("onramp");
         return;
       }
     } else if (currentMapId === "west") {
-      if (Math.abs(x - 30) <= 2 && Math.abs(y - 30) <= 2) {
-        if (state.quests.onramp.status === "completed") {
-          onNearTerminal("soroban");
-        }
+      if (Math.abs(x - 31) <= 2 && Math.abs(y - 27) <= 2) {
+        onNearTerminal("soroban");
         return;
       }
     } else if (currentMapId === "south") {
-      if (Math.abs(x - 30) <= 2 && Math.abs(y - 30) <= 2) {
-        if (state.quests.soroban.status === "completed") {
-          onNearTerminal("hold");
-        }
+      if (Math.abs(x - 33) <= 2 && Math.abs(y - 24) <= 2) {
+        onNearTerminal("hold");
         return;
       }
     }
@@ -879,21 +881,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       } else {
         // 0.2% chance per frame to shout something funny/useful
         if (Math.random() < 0.002) {
-          const PHRASES = [
-            "Partiu fazer Pix On-Ramp!",
-            "Adorei o visual das costas do herói!",
-            "Este terminal ATM DEFI é massa demais!",
-            "Conectando ao terminal Stellar...",
-            "Consenso em 5 segundos!",
-            "A taxa de rede da Stellar é quase zero!",
-            "Olha meu elmo de guerreiro!",
-            "Que massa, o jogo carrega instantaneamente!",
-            "Stellar é muito rápida e barata de verdade!",
-            "Este MMO está fantástico!",
-            "A Chave Secreta nunca deve ser compartilhada!",
-            "Olá! Alguém quer fazer trade de moedas?"
-          ];
-          p.bubbleText = PHRASES[Math.floor(Math.random() * PHRASES.length)];
+          const PHRASES = mmoPhrasesRef.current;
+          if (PHRASES && PHRASES.length > 0) {
+            p.bubbleText = PHRASES[Math.floor(Math.random() * PHRASES.length)];
+          } else {
+            p.bubbleText = "Hello!";
+          }
           p.bubbleTimer = 4000 + Math.random() * 3000;
         }
       }

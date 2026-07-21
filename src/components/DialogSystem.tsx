@@ -50,7 +50,7 @@ export function DialogSystem({
 
       {/* WEb3 TERMINAL PROXIMITY DIALOG ACTION TRIGGER */}
       {isNearTerminal && !activeDialog && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 w-72 max-w-[90%] bg-white border-3 border-black p-3 rounded-xl shadow-[3px_3px_0px_#000] flex flex-col gap-1.5 animate-bounce text-center">
+        <div className="absolute top-28 left-1/2 -translate-x-1/2 z-20 w-72 max-w-[90%] bg-white border-3 border-black p-3 rounded-xl shadow-[3px_3px_0px_#000] flex flex-col gap-1.5 animate-bounce text-center">
           <div className="font-mono">
             <span className="text-[7.5px] text-[#ffbf00] font-black uppercase block tracking-wider leading-none">{t('ui.terminalAvailable')}</span>
             <span className="text-black font-black text-xs uppercase leading-tight">{t('ui.connectTerminal')} {isNearTerminal === "atf" ? "ATM" : isNearTerminal?.toUpperCase()}</span>

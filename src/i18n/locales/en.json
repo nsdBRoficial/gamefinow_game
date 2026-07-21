@@ -116,7 +116,11 @@
   },
   "ui": {
     "activeQuest": "Active Quest",
-    "legendaryRibbon": "🏆 ULTIMATE ACHIEVEMENT: LEGENDARY STELLAR TRAVELER! 🌟",
+    "pressSpace": "Press SPACE to continue",
+    "terminalAvailable": "Terminal Available",
+    "connectTerminal": "Connect Terminal",
+    "connectWeb3Device": "Connect Web3 Device",
+    "legendaryRibbon": "🏆 MAXIMUM ACHIEVEMENT: LEGENDARY STELLAR TRAVELER! 🌟",
     "keyboard": "Keyboard",
     "space": "SPACE",
     "action": "ACTION",
@@ -201,12 +205,16 @@
   },
   "npcs": {
     "guide": {
-      "name": "James [NPC]",
+      "name": "James",
       "dialogs": [
-        "Welcome to the grand lobby of the Stellar Temple, young traveler!",
-        "I am James [NPC], the Temple Master. I am here to guide you on the path to becoming a Legendary Traveler.",
-        "Your journey begins by forging a digital identity, the only way to safeguard treasures in this decentralized realm.",
-        "To forge your magical wallet, cross the blue bridge to the East and find Kael [NPC], our Keymaster!"
+        "Welcome to the main hall of the Stellar Temple, young traveler! This is where Web3 magic comes to life.",
+        "I am James, the Temple Master, and I will be your guide through this island of decentralized innovations.",
+        "Our island is an educational archipelago designed to teach you everything about decentralized finance (DeFi) through 4 crucial quests.",
+        "First, you will need a secure digital identity. Cross the blue bridge to the East to the Cave and forge your Wallet with the Key Master.",
+        "With your wallet ready, the second quest will take you to the North Port, where you will learn to use 'On-Ramp' to turn local currency into digital assets.",
+        "Next, in the third quest, the West plaza will reveal the secrets of Smart Contracts, where you'll make lightning-fast token swaps.",
+        "And finally, the fourth quest in the South Sanctuary will test your loyalty by teaching the power of long-term 'Holding'.",
+        "Complete all quests to earn the title of Legendary Guardian! Shall we begin? Head East first and create your wallet!"
       ],
       "activeQuestDialogs": [
         "You still lack an account! Head East and speak with Kael [NPC] to forge your keypair."
@@ -283,6 +291,67 @@
         "Your treasures are securely locked. You are now officially a Legendary Stellar Holder Guardian!",
         "Enjoy blazing fast, decentralized finance. Bobba!"
       ]
+    },
+    "gamefinow_info": {
+      "name": "GAMEFINOW INFO",
+      "dialogs": [
+        "Gamefinow Info Terminal.",
+        "Gamefinow is the premier ecosystem bridging decentralized finance (DeFi) with interactive fun (GameFi) on the Stellar network.",
+        "Here in the Temple, you will learn the basics of Web3: forging wallets, using on-ramp, executing swaps, and understanding the power of holding.",
+        "Interact with the quests to unlock the paths and earn your Legendary NFT!"
+      ]
+    },
+    "walletnow_info": {
+      "name": "WALLETNOW INFO",
+      "dialogs": [
+        "Walletnow Info Terminal.",
+        "Walletnow is your ultimate analytics and tracking dashboard for the DeFi ecosystem.",
+        "Their technology ensures you have a secure portal to Web3, tracking your yields and NFTs optimally.",
+        "Find the official Walletnow terminal in the Eastern cave to create your own wallet."
+      ]
+    },
+    "nearx_info": {
+      "name": "NEARX INFO",
+      "dialogs": [
+        "Nearx Info Terminal.",
+        "Nearx is the leading On-Ramp and Off-Ramp infrastructure on the Stellar blockchain.",
+        "It acts as a reliable bridge so you can buy digital assets using your local currency 100% securely and regulated.",
+        "The main Nearx port can be found on the beach North of the central map."
+      ]
+    },
+    "defindex_info": {
+      "name": "DEFINDEX INFO",
+      "dialogs": [
+        "Defindex Info Terminal.",
+        "Defindex pioneers in building tools to automate and optimize yields in a decentralized way.",
+        "Focusing on the Soroban ecosystem, they develop smart vaults and indexes to facilitate your DeFi investments.",
+        "Find the Defindex contract simulators integrated with Soroswap in the Western square."
+      ]
+    },
+    "soroswap_info": {
+      "name": "SOROSWAP INFO",
+      "dialogs": [
+        "Soroswap Info Terminal.",
+        "Soroswap is the leading decentralized exchange (DEX) and automated market maker (AMM) in the Soroban ecosystem.",
+        "The platform allows any user to swap Stellar network tokens incredibly fast with near-zero fees.",
+        "You can test the powerful Swap settlements at the terminal located on the West side."
+      ]
     }
+  },
+  "mmo": {
+    "phrases": [
+      "Let's do a Pix On-Ramp!",
+      "I love the look of the hero's back!",
+      "This ATM DEFI terminal is awesome!",
+      "Connecting to the Stellar terminal...",
+      "Consensus in 5 seconds!",
+      "Stellar network fee is almost zero!",
+      "Look at my warrior helm!",
+      "So cool, the game loads instantly!",
+      "Stellar is truly fast and cheap!",
+      "This MMO is fantastic!",
+      "The Secret Key must never be shared!",
+      "Hello! Anyone want to trade coins?"
+    ]
   }
 }

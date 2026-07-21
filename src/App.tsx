@@ -282,15 +282,8 @@ export default function App() {
       setGameState((prev) => {
         let nextModal = prev.activeModal;
         
-        if (npcId === "keymaster" && prev.quests.wallet.status === "active") {
-          nextModal = "wallet";
-        } else if (npcId === "portmaster" && prev.quests.onramp.status === "active") {
-          nextModal = "onramp";
-        } else if (npcId === "scholar" && prev.quests.soroban.status === "active") {
-          nextModal = "soroban";
-        } else if (npcId === "sage" && prev.quests.hold.status === "active") {
-          nextModal = "hold";
-        }
+        // NPCs now only teach and direct the player to the nearby terminals.
+        // The terminals are responsible for opening the modals.
 
         return {
           ...prev,

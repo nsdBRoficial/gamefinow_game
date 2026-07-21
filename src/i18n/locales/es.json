@@ -116,7 +116,11 @@
   },
   "ui": {
     "activeQuest": "Misión Activa",
-    "legendaryRibbon": "🏆 LOGRO MÁXIMO: ¡VIAJERO LENDARIO STELLAR! 🌟",
+    "pressSpace": "Presiona ESPACIO para continuar",
+    "terminalAvailable": "Terminal Disponible",
+    "connectTerminal": "Conectar Terminal",
+    "connectWeb3Device": "Conectar Dispositivo Web3",
+    "legendaryRibbon": "🏆 LOGRO MÁXIMO: ¡VIAJERO ESTELAR LEGENDARIO! 🌟",
     "keyboard": "Teclado",
     "space": "ESPACIO",
     "action": "ACCIÓN",
@@ -201,12 +205,16 @@
   },
   "npcs": {
     "guide": {
-      "name": "James [NPC]",
+      "name": "James",
       "dialogs": [
-        "¡Bienvenido al vestíbulo principal del Templo Stellar, joven viajero!",
-        "Soy James [NPC], el Maestro del Templo. Estoy aquí para guiarte en el camino para convertirte en un Viajero Legendario.",
-        "Tu viaje comienza forjando una identidad digital, la única forma de salvaguardar tesoros en este reino descentralizado.",
-        "¡Para forjar tu billetera mágica, cruza el puente azul hacia el Este y encuentra a Kael [NPC], nuestro Maestro de las Llaves!"
+        "¡Bienvenido al salón principal del Templo Stellar, joven viajero! Aquí es donde la magia de Web3 cobra vida.",
+        "Soy James, el Maestro del Templo, y seré tu guía por esta isla de innovaciones descentralizadas.",
+        "Nuestra isla es un archipiélago educativo diseñado para enseñarte todo sobre las finanzas descentralizadas (DeFi) a través de 4 misiones cruciales.",
+        "Primero, necesitarás una identidad digital segura. Cruza el puente azul al Este hacia la Cueva y forja tu Billetera con el Maestro de las Llaves.",
+        "Con tu billetera lista, la segunda misión te llevará al Puerto Norte, donde aprenderás a usar el 'On-Ramp' para transformar dinero local en activos digitales.",
+        "Luego, en la tercera misión, la plaza Oeste revelará los secretos de los Contratos Inteligentes, donde harás intercambios rápidos de tokens.",
+        "Y finalmente, la cuarta misión en el Santuario Sur probará tu lealtad enseñando el poder del 'Hold' a largo plazo.",
+        "¡Completa todas las misiones para ganar el título de Guardián Legendario! ¿Empezamos? ¡Dirígete primero al Este y crea tu billetera!"
       ],
       "activeQuestDialogs": [
         "¡Aún no tienes una cuenta! Dirígete al Este y habla con Kael [NPC] para forjar tu par de llaves."
@@ -270,8 +278,8 @@
     "sage": {
       "name": "Anciano Bobba [NPC]",
       "dialogs": [
-        "¡Bobba bobba bobba! ¡Qué viaje tan magnífico, joven guerrero!",
-        "Forjaste tus llaves, ingresaste fondos y manejaste la magia de los contratos inteligentes.",
+        "¡Bobba bobba bobba! ¡Qué magnífico viaje, joven guerrero!",
+        "Has forjado tus llaves, comprado fondos y usado la magia de los contratos inteligentes.",
         "La virtud final de un aventurero Stellar es la lealtad a largo plazo, el sagrado 'Hold'.",
         "Acércate a la Cámara Dorada de Hold. ¡Bloquea una parte de tus tesoros para reclamar el título definitivo de Guardián Legendario!"
       ],
@@ -279,10 +287,71 @@
         "¡Interactúa con la cámara dorada para bloquear tus fondos en un contrato de Escrow!"
       ],
       "completedDialogs": [
-        "🌟 ¡El templo exalta tu nombre! ¡Has completado todo el viaje del Onboarding Archipelago!",
+        "🌟 ¡El templo exalta tu nombre! ¡Has completado todo el viaje del Archipiélago de Onboarding!",
         "Tus tesoros están bloqueados de forma segura. ¡Ahora eres oficialmente un Guardián Legendario Stellar Holder!",
-        "Disfruta de las finanzas descentralizadas y ultrarrápidas. ¡Bobba!"
+        "Disfruta de finanzas rápidas y descentralizadas. ¡Bobba!"
+      ]
+    },
+    "gamefinow_info": {
+      "name": "GAMEFINOW INFO",
+      "dialogs": [
+        "Terminal Informativo Gamefinow.",
+        "Gamefinow es el principal ecosistema que conecta las finanzas descentralizadas (DeFi) con la diversión interactiva (GameFi) en la red Stellar.",
+        "Aquí en el Templo aprenderás las bases de Web3: forjar billeteras, usar on-ramp, realizar swaps y comprender el poder de mantener (hold).",
+        "¡Interactúa con las misiones para desbloquear los caminos y ganar tu NFT Legendario!"
+      ]
+    },
+    "walletnow_info": {
+      "name": "WALLETNOW INFO",
+      "dialogs": [
+        "Terminal Informativo Walletnow.",
+        "Walletnow es tu panel definitivo de análisis y seguimiento para el ecosistema DeFi.",
+        "Su tecnología garantiza que tengas un portal seguro a Web3, rastreando tus rendimientos y NFTs de manera óptima.",
+        "Encuentra el terminal oficial de Walletnow en la cueva al Este para crear tu propia billetera."
+      ]
+    },
+    "nearx_info": {
+      "name": "NEARX INFO",
+      "dialogs": [
+        "Terminal Informativo Nearx.",
+        "Nearx es la infraestructura líder de On-Ramp y Off-Ramp en la blockchain Stellar.",
+        "Actúa como un puente confiable para que puedas comprar activos digitales utilizando tu moneda local de forma 100% segura y regulada.",
+        "El puerto principal de Nearx se encuentra en la playa al Norte del mapa central."
+      ]
+    },
+    "defindex_info": {
+      "name": "DEFINDEX INFO",
+      "dialogs": [
+        "Terminal Informativo Defindex.",
+        "Defindex es pionero en la construcción de herramientas para automatizar y optimizar rendimientos de forma descentralizada.",
+        "Enfocándose en el ecosistema Soroban, desarrollan bóvedas e índices inteligentes para facilitar tus inversiones en DeFi.",
+        "Encuentra los simuladores de contratos de Defindex integrados con Soroswap en la plaza Oeste."
+      ]
+    },
+    "soroswap_info": {
+      "name": "SOROSWAP INFO",
+      "dialogs": [
+        "Terminal Informativo Soroswap.",
+        "Soroswap es el intercambio descentralizado (DEX) y creador de mercado automatizado (AMM) líder en el ecosistema Soroban.",
+        "La plataforma permite a cualquier usuario intercambiar tokens de la red Stellar de forma increíblemente rápida y con tarifas casi nulas.",
+        "Puedes probar las potentes liquidaciones de Swap en el terminal ubicado en el lado Oeste."
       ]
     }
+  },
+  "mmo": {
+    "phrases": [
+      "¡Hagamos un Pix On-Ramp!",
+      "¡Me encanta el diseño de la espalda del héroe!",
+      "¡Este terminal ATM DEFI es increíble!",
+      "Conectando al terminal Stellar...",
+      "¡Consenso en 5 segundos!",
+      "¡La tarifa de la red Stellar es casi nula!",
+      "¡Mira mi casco de guerrero!",
+      "¡Qué genial, el juego carga al instante!",
+      "¡Stellar es realmente rápido y barato!",
+      "¡Este MMO es fantástico!",
+      "¡La Clave Secreta nunca debe compartirse!",
+      "¡Hola! ¿Alguien quiere intercambiar monedas?"
+    ]
   }
 }

@@ -85,7 +85,7 @@ export function generateHolderSanctuaryMap(): number[][] {
   grid[1][30] = TileType.PORTAL_CENTER;
 
   // Escrow Hold pedestal (Central mission point)
-  grid[30][30] = TileType.BLOCK;
+  grid[24][33] = TileType.BLOCK;
 
   // Barn door opening
   grid[54][10] = TileType.FLOOR_DARK;
