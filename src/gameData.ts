@@ -48,10 +48,12 @@ export enum TileType {
 export interface GameDecoration {
   x: number;
   y: number;
-  type: "tree" | "bench" | "lamp" | "barrel" | "box" | "statue" | "flower_pot" | "boat" | "stand" | "palm_tree" | "umbrella" | "towel" | "sandcastle";
+  type: "tree" | "bench" | "lamp" | "barrel" | "box" | "statue" | "flower_pot" | "boat" | "stand" | "palm_tree" | "umbrella" | "towel" | "sandcastle" | "p2p_store" | "burn_altar" | "pixel_shop" | "pixel_burn_brazier" | "pixel_faucet";
   color?: string;
   text?: string;
+  subText?: string;
   width?: number;
+  height?: number;
 }
 
 // Passive creature/monster interface (slime blobs)

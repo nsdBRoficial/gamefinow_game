@@ -1,9 +1,9 @@
 <div align="center">
   <img src="https://stellar.org/images/stellar-logo.svg" alt="Stellar Logo" width="100"/>
-  <h1>GameFiNow — v0.7.0</h1>
+  <h1>GameFiNow — v0.7.5</h1>
   <p><strong>A Gamified On-Boarding Experience for the Stellar Ecosystem</strong></p>
   <p>
-    <img src="https://img.shields.io/badge/version-v0.7.0-cyan?style=flat-square" alt="version"/>
+    <img src="https://img.shields.io/badge/version-v0.7.5-cyan?style=flat-square" alt="version"/>
     <img src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square" alt="license"/>
     <img src="https://img.shields.io/badge/network-Stellar_Testnet-yellow?style=flat-square" alt="network"/>
     <img src="https://img.shields.io/badge/i18n-EN_|_PT_|_ES-green?style=flat-square" alt="languages"/>
@@ -20,7 +20,24 @@ The game runs entirely in the browser, using a 60 FPS HTML5 Canvas engine, and c
 
 ---
 
-## ✨ What's New in v0.7.0 — Multilingual & Lore Overhaul
+## ✨ What's New in v0.7.5 — Advanced Interactions & Tokenomics Expansion
+
+### 🌟 Guardian Star Mechanics
+- **End-Game Access Control**: The center of the map is now protected. Players must complete the 4 main quests (acquiring the 4 NFT Jewels) to forge their **Guardian Star**.
+- **Exclusive Structures**: Only Guardians can access the Faucet, Burn Altar, P2P Store, and Cyber ATM.
+
+### 🏛️ New Interactive Structures & Tokenomics
+- **Magic Faucet (Fonte)**: A daily blessing of 10 GAMEFI tokens for active Guardians.
+- **Burn Altar (Pira)**: A deflationary mechanic allowing players to burn tokens directly on-chain.
+- **P2P Store (Mercado)**: A vibrant marketplace for players to trade assets.
+- **Cyber ATM**: Enhanced terminal for advanced DeFi interactions.
+- **HUD Update**: The GAMEFI COIN balance now features its own prominent golden badge and dedicated chip separated from traditional assets.
+
+### 📚 New Educative NPCs
+- **PigFi [NPC]**: Focuses on micro-investments and family savings ("O cofrinho da infância evoluiu. Com o PigFi, sua família poderá começar a guardar dólar a partir de R$50 via Pix de um jeito simples, visual e divertido.").
+- **Wave [NPC]**: Educates on transparent condominium administration and governance via blockchain ("Administração e governança de condomínios com transparência e segurança").
+
+---
 
 ### 🌐 Full Internationalization (i18n)
 - **3 Languages supported natively:** English (default), Portuguese (PT-BR), Spanish (ES)
@@ -145,5 +162,5 @@ Zero-config deployment. The Canvas engine is iframe-resistant (custom `tabIndex`
 
 <div align="center">
   <b>Built by nsdBR GameFiNow Team</b><br/>
-  <sub>v0.7.0 — Stellar Testnet — July 2026</sub>
+  <sub>v0.7.5 — Stellar Testnet — July 2026</sub>
 </div>

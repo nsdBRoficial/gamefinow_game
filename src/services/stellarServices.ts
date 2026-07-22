@@ -1,19 +1,27 @@
+import { Buffer } from "buffer";
 import { WalletNowClient } from "@walletnow/sdk";
 import { AccountEngine } from "@walletnow/wallet";
 import { LocalStorageAdapter } from "@walletnow/storage";
 import { WalletState } from "../types";
 import { Keypair, Horizon, TransactionBuilder, Networks, Asset, Operation, Memo } from "@stellar/stellar-sdk";
+import {
+  GAMEFI_TREASURY_PUBLIC_KEY,
+  GAMEFI_TOKEN_ISSUER,
+  estimateFeeInXlm,
+  validateXlmBalanceForFee
+} from "./economyService";
 
 export const ISSUER_USDW = "GDKZT3AXAOMMYVVG3TKFVUYDJODAIAL2ADHNJYQLK2PJQ6CE2U6KKFLQ";
 export const ISSUER_BRW = "GCJIRFZQJAO6JSYS4YFXFHLVJ6R4WWWB2VTREMRK7WXNNLMGIAXBBNC6";
 export const ISSUER_SRT = "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B";
 export const ISSUER_USDC = "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5";
+export const ISSUER_GAMEFI = GAMEFI_TOKEN_ISSUER;
 
 const server = new Horizon.Server("https://horizon-testnet.stellar.org");
 
 const vaultSeed = new Uint8Array(32);
 vaultSeed.set([119, 97, 108, 108, 101, 116, 110, 111, 119, 45, 118, 97, 117, 108, 116]); // "walletnow-vault"
-export const VAULT_KEYPAIR = Keypair.fromRawEd25519Seed(vaultSeed);
+export const VAULT_KEYPAIR = Keypair.fromRawEd25519Seed(Buffer.from(vaultSeed) as any);
 export const VAULT_ADDRESS = VAULT_KEYPAIR.publicKey();
 
 let wnClient: WalletNowClient | null = null;
@@ -93,7 +101,7 @@ export const onboardUser = async (
   }
   
   onLog(`[GameFiNow] ✓ Conta financiada! Endereço Público: ${publicKey}`);
-  onLog(`[GameFiNow] Criando Trustlines para USDW e BRW...`);
+  onLog(`[GameFiNow] Criando Trustlines para GAMEFI, USDW, BRW e USDC...`);
 
   try {
     // Atraso de 3 segundos para garantir que o Horizon da rede de testes tenha indexado a conta recém-criada
@@ -104,6 +112,7 @@ export const onboardUser = async (
     const assetBRW = new Asset("BRW", ISSUER_BRW);
     const assetSRT = new Asset("SRT", ISSUER_SRT);
     const assetUSDC = new Asset("USDC", ISSUER_USDC);
+    const assetGAMEFI = new Asset("GAMEFI", ISSUER_GAMEFI);
 
     const tx = new TransactionBuilder(account, {
       fee: "1000",
@@ -113,6 +122,7 @@ export const onboardUser = async (
       .addOperation(Operation.changeTrust({ asset: assetBRW, limit: "1000000" }))
       .addOperation(Operation.changeTrust({ asset: assetSRT, limit: "1000000" }))
       .addOperation(Operation.changeTrust({ asset: assetUSDC, limit: "1000000" }))
+      .addOperation(Operation.changeTrust({ asset: assetGAMEFI, limit: "1000000" }))
       .setTimeout(30)
       .build();
 
@@ -229,8 +239,16 @@ export class TestnetKitService {
       throw new Error("Chave Privada inválida. Como o jogo foi atualizado para usar a blockchain real, você precisa criar um NOVO Passaporte (nova conta) para gerar uma chave secreta válida.");
     }
     const account = await server.loadAccount(walletAddress);
-    
-    // Como a operação usa os AMMs automaticamente, enviamos usando pathPaymentStrictSend
+
+    // Validação de saldo XLM para pagamento da GameFi Fee (0.5%)
+    const feeInXlm = estimateFeeInXlm(fromAssetCode, amount);
+    const xlmBalance = parseFloat(account.balances.find((b: any) => b.asset_type === "native")?.balance || "0");
+    const val = validateXlmBalanceForFee(xlmBalance, feeInXlm);
+    if (!val.hasSufficientBalance) {
+      throw new Error(`Saldo insuficiente de XLM para pagar a taxa GameFi (0.5%). Mínimo necessário: ${val.minRequired.toFixed(4)} XLM. Saldo atual: ${xlmBalance.toFixed(4)} XLM.`);
+    }
+
+    // Transação atômica: Swap + Cobrança da Taxa GameFi em XLM na mesma transação
     const tx = new TransactionBuilder(account, {
       fee: "1000",
       networkPassphrase: Networks.TESTNET
@@ -242,7 +260,14 @@ export class TestnetKitService {
           sendAmount,
           destination: walletAddress,
           destAsset,
-          destMin: "0.0000001", // Mínimo pra aceitar, em prod usar um slippage calculado
+          destMin: "0.0000001",
+        })
+      )
+      .addOperation(
+        Operation.payment({
+          destination: GAMEFI_TREASURY_PUBLIC_KEY,
+          asset: Asset.native(),
+          amount: feeInXlm.toString()
         })
       )
       .setTimeout(30)
@@ -329,9 +354,17 @@ export class TestnetKitService {
     }
     
     const account = await server.loadAccount(walletAddress);
+
+    // Validação e cobrança da GameFi Fee (0.5% em XLM)
+    const feeInXlm = estimateFeeInXlm(asset, amount);
+    const xlmBalance = parseFloat(account.balances.find((b: any) => b.asset_type === "native")?.balance || "0");
+    const val = validateXlmBalanceForFee(xlmBalance, feeInXlm);
+    if (!val.hasSufficientBalance) {
+      throw new Error(`Saldo insuficiente de XLM para pagar a taxa GameFi (0.5%). Mínimo necessário: ${val.minRequired.toFixed(4)} XLM.`);
+    }
     
     const tx = new TransactionBuilder(account, {
-      fee: "100",
+      fee: "1000",
       networkPassphrase: Networks.TESTNET
     })
       .addOperation(
@@ -341,11 +374,18 @@ export class TestnetKitService {
           amount: amount.toString()
         })
       )
+      .addOperation(
+        Operation.payment({
+          destination: GAMEFI_TREASURY_PUBLIC_KEY,
+          asset: Asset.native(),
+          amount: feeInXlm.toString()
+        })
+      )
       .setTimeout(30)
       .build();
 
     tx.sign(sourceKeys);
-    console.log("Enviando depósito do vault...");
+    console.log("Enviando depósito do vault com taxa atômica...");
     let response;
     try {
       response = await server.submitTransaction(tx);
@@ -362,6 +402,7 @@ export class TestnetKitService {
 
   static async vaultWithdraw(
     walletAddress: string,
+    secretKey: string,
     asset: string,
     amount: number
   ): Promise<{ txHash: string }> {
@@ -375,12 +416,21 @@ export class TestnetKitService {
     };
 
     const assetObj = getAsset(asset);
+
+    let sourceKeys: Keypair | null = null;
+    if (secretKey) {
+      try {
+        sourceKeys = Keypair.fromSecret(secretKey);
+      } catch (e) {
+        console.warn("Chave privada não fornecida ou inválida para taxa de saque.");
+      }
+    }
     
-    // Assegura que a conta do Vault existe. No testnetkit ela geralmente é inicializada.
+    // Assegura que a conta do Vault existe.
     const vaultAcc = await server.loadAccount(VAULT_ADDRESS);
     
     const tx = new TransactionBuilder(vaultAcc, {
-      fee: "100",
+      fee: "1000",
       networkPassphrase: Networks.TESTNET
     })
       .addOperation(
@@ -395,12 +445,36 @@ export class TestnetKitService {
 
     tx.sign(VAULT_KEYPAIR);
     console.log("Enviando saque/colheita do vault...");
-    let response;
-    try {
-      response = await server.submitTransaction(tx);
-    } catch (error: any) {
-      console.error("Erro no Vault Withdraw:", error);
-      throw error;
+    let response = await server.submitTransaction(tx);
+
+    // Se o usuário forneceu a chave secreta, cobra a taxa de 0.5% em XLM para o Tesouro
+    if (sourceKeys) {
+      try {
+        const feeInXlm = estimateFeeInXlm(asset, amount);
+        const userAcc = await server.loadAccount(walletAddress);
+        const xlmBalance = parseFloat(userAcc.balances.find((b: any) => b.asset_type === "native")?.balance || "0");
+        const val = validateXlmBalanceForFee(xlmBalance, feeInXlm);
+        if (val.hasSufficientBalance) {
+          const txFee = new TransactionBuilder(userAcc, {
+            fee: "1000",
+            networkPassphrase: Networks.TESTNET
+          })
+            .addOperation(
+              Operation.payment({
+                destination: GAMEFI_TREASURY_PUBLIC_KEY,
+                asset: Asset.native(),
+                amount: feeInXlm.toString()
+              })
+            )
+            .setTimeout(30)
+            .build();
+          txFee.sign(sourceKeys);
+          const feeRes = await server.submitTransaction(txFee);
+          return { txHash: feeRes.hash };
+        }
+      } catch (e) {
+        console.warn("Não foi possível debitar a taxa de saque:", e);
+      }
     }
     
     return {
@@ -421,6 +495,7 @@ export const fetchOnChainBalances = async (publicKey: string) => {
     let xlmBalance = 0;
     let usdwBalance = 0;
     let brwBalance = 0;
+    let gamefiBalance = 0;
 
     if (data.balances && Array.isArray(data.balances)) {
       data.balances.forEach((bal: any) => {
@@ -430,11 +505,13 @@ export const fetchOnChainBalances = async (publicKey: string) => {
           usdwBalance = parseFloat(bal.balance);
         } else if (bal.asset_code === "BRW") {
           brwBalance = parseFloat(bal.balance);
+        } else if (bal.asset_code === "GAMEFI") {
+          gamefiBalance = parseFloat(bal.balance);
         }
       });
     }
     
-    return { xlmBalance, usdwBalance, brwBalance };
+    return { xlmBalance, usdwBalance, brwBalance, gamefiBalance };
   } catch (err) {
     console.error("[WalletNow SDK] Failed to fetch on-chain balances:", err);
     return null;

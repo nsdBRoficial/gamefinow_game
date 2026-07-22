@@ -36,10 +36,10 @@ A progressão do Viajante é marcada por transformações visíveis em sua próp
 [Oeste Concluído] ───► Recebe Joia do Oeste NFT  ───► Mantém o Efeito Neon Verde-Lima
        │
        ▼
-[Sul Concluído]   ───► Recebe Joia do Sul NFT    ───► Nome ganha uma Estrela Dourada (🌟)
+[Sul Concluído]   ───► Recebe Joia do Sul NFT    ───► Nome ganha uma Estrela Dourada (🌟) -> "A Estrela de Guardião"
        │
        ▼
-[Desbloqueio Central] ───► Desbloqueia o Totem ATF DEFI na Praça Central Stellar
+[Desbloqueio Central] ───► Desbloqueia o acesso exclusivo às Estruturas Centrais (Fonte Faucet, Pira, Loja P2P, Totem ATF DEFI)
 ```
 
 ---
@@ -84,9 +84,29 @@ Todos os NPCs foram reformulados para nomes curtos, objetivos e portam o sufixo 
     *   *"No Altar do Sul, ensinamos sobre Hold e Escrows: travar ativos temporariamente sob regras matemáticas inquebráveis."*
     *   *"Acesse o terminal ao sul para selar um contrato de Hold. Seus XLM ficarão travados com segurança, conferindo a você o título dourado de Guardião do Ecossistema!"*
 
+### 6. PigFi [NPC] (A Bússola do Cofrinho)
+*   **Papel**: Educa sobre investimentos de pequeno valor e planejamento familiar, focado em reservas a longo prazo.
+*   **Falas Principais**:
+    *   *"Pequenos valores, um universo de possibilidades. O cofrinho da infância evoluiu."*
+    *   *"Com o PigFi, sua família poderá começar a guardar dólar a partir de R$50 via Pix de um jeito simples, visual e divertido."*
+
+### 7. Wave [NPC] (O Arauto da Governança)
+*   **Papel**: Introduz a aplicação da blockchain no mundo real, especificamente para gestão condominial transparente.
+*   **Falas Principais**:
+    *   *"Administração e governança de condomínios com transparência e segurança."*
+    *   *"Na Wave, cada decisão e recurso é registrado imutavelmente, garantindo que a comunidade viva em harmonia e confiança."*
+
 ---
 
-## 💎 CONSOLIDAÇÃO DE ATIVOS: O TOTEM ATF DEFI
+## 💎 A ESTRELA DE GUARDIÃO E AS ESTRUTURAS AVANÇADAS
+
+Ao retornar vitorioso das quatro pontas do continente com a **Estrela de Guardião**, o Viajante não só ganha acesso ao Totem **ATF DEFI**, mas também desbloqueia três estruturas vitais no coração da ilha:
+
+1. **A Fonte Faucet (Bênção Diária)**: Jorra as águas abundantes do ecossistema, concedendo aos Guardiões 10 tokens GAMEFI por dia.
+2. **O Altar de Queima (Burn Altar)**: Permite que os jogadores sacrifiquem tokens em chamas on-chain, contribuindo para a deflação do ecossistema.
+3. **A Loja P2P (Mercado)**: Um hub descentralizado para trocas e aquisições de itens especiais com a moeda GAMEFI.
+
+Apenas aqueles que provaram seu valor nos quatro cantos da ilha têm a sabedoria e a permissão para moldar o destino do continente no centro do mapa.
 
 Ao retornar vitorioso das quatro pontas do continente, os portões de energia que impediam o acesso ao centro do templo se desintegram. O Totem **ATF DEFI** se materializa no centro, exibindo a ficha consolidada das quatro joias coletadas e outorgando o Certificado de Guardião Cósmico com assinatura do Ledger Stellar.
 

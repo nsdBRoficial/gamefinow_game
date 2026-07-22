@@ -23,6 +23,12 @@
       "description": "Mostre seu compromisso de longo prazo travando suas moedas em um cofre inteligente para se tornar um Guardião Lendário.",
       "instructions": "Entre no Portal Sul (Dourado) para ir à Câmara Secreta e fale com Bobba [NPC], o Ancião.",
       "reward": "Título de Guardião Lendário VIP Stellar Holder 🌟"
+    },
+    "all_done": {
+      "title": "NEW QUESTS COMING SOON",
+      "description": "You have completed all current onboarding quests on the Stellar network. Stay tuned for upcoming adventures!",
+      "instructions": "You have completed all current onboarding quests on the Stellar network. Stay tuned for upcoming adventures!",
+      "reward": "Legendary Title 🌟"
     }
   },
   "dialogs": {
@@ -388,6 +394,20 @@
         "O Soroswap é a exchange descentralizada (DEX) líder e formador de mercado automatizado (AMM) no ecossistema Soroban.",
         "A plataforma permite que qualquer usuário troque tokens da rede Stellar de forma incrivelmente rápida e com taxas próximas a zero.",
         "Você poderá testar as poderosas liquidações de Swap no terminal localizado no lado Oeste."
+      ]
+    },
+    "pigfi_info": {
+      "name": "PIGFI INFO",
+      "dialogs": [
+        "Small amounts, a universe of possibilities.",
+        "The childhood piggy bank has evolved. With PigFi, your family can start saving dollars starting from R$50 via Pix in a simple, visual, and fun way."
+      ]
+    },
+    "wave_info": {
+      "name": "WAVE INFO",
+      "dialogs": [
+        "Condominium administration and governance with transparency and security.",
+        "Streamlining property management, financial tracking, and community decision-making on the Stellar blockchain."
       ]
     }
   },

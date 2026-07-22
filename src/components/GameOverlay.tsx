@@ -8,6 +8,7 @@ import { WalletNowClient } from "@walletnow/sdk";
 import { WalletState, Transaction } from "../types";
 import { onboardUser, StellarAnchorService, TestnetKitService } from "../services/stellarServices";
 import { SEP24Service } from "../services/sep24Service";
+import { estimateFeeInXlm, validateXlmBalanceForFee, GAMEFI_FEE_PERCENTAGE } from "../services/economyService";
 import { 
   Copy, 
   Key, 
@@ -32,7 +33,7 @@ import {
 } from "lucide-react";
 
 interface GameOverlayProps {
-  activeModal: "wallet" | "onramp" | "soroban" | "hold" | "atf" | null;
+  activeModal: "wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | null;
   wallet: WalletState;
   onClose: () => void;
   onWalletCreated: (pubKey: string, secKey: string, name: string, email: string, pin: string) => void;
@@ -155,6 +156,8 @@ export const GameOverlay: React.FC<GameOverlayProps> = ({
           activeModal === "onramp" ? "bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]" :
           activeModal === "soroban" ? "bg-violet-500 shadow-[0_0_15px_rgba(139,92,246,0.5)]" :
           activeModal === "atf" ? "bg-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.5)]" :
+          activeModal === "p2p_store" ? "bg-rose-600 shadow-[0_0_15px_rgba(225,29,72,0.5)]" :
+          activeModal === "burn_altar" ? "bg-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.5)]" :
           "bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.5)]"
         }`} />
 
@@ -199,6 +202,27 @@ export const GameOverlay: React.FC<GameOverlayProps> = ({
               onOnRampSuccess={onOnRampSuccess}
               onSwapSuccess={onSwapSuccess}
               onHoldSuccess={onHoldSuccess}
+            />
+          )}
+          {activeModal === "p2p_store" && (
+            <P2PStoreModal 
+              wallet={wallet} 
+              onClose={onClose} 
+              onUpdateWallet={onUpdateWallet}
+            />
+          )}
+          {activeModal === "burn_altar" && (
+            <BurnAltarModal 
+              wallet={wallet} 
+              onClose={onClose} 
+              onUpdateWallet={onUpdateWallet}
+            />
+          )}
+          {activeModal === "gamefi_faucet" && (
+            <GameFiFaucetModal 
+              wallet={wallet} 
+              onClose={onClose} 
+              onUpdateWallet={onUpdateWallet}
             />
           )}
         </div>
@@ -836,9 +860,15 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, o
               </div>
             </div>
 
-            <div className="flex justify-between items-center bg-slate-950 p-3 rounded-lg border border-slate-850 font-mono text-xs">
-              <span className="text-slate-400">{activeTab === "deposit" ? "Você vai receber:" : "Você vai entregar:"}</span>
-              <span className="text-emerald-400 font-extrabold">{computedCoins} {asset}</span>
+            <div className="space-y-1 bg-slate-950 p-3 rounded-lg border border-slate-850 font-mono text-xs">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-400">{activeTab === "deposit" ? "Você vai receber:" : "Você vai entregar:"}</span>
+                <span className="text-emerald-400 font-extrabold">{computedCoins} {asset}</span>
+              </div>
+              <div className="flex justify-between items-center text-[10px] text-amber-400/90 pt-1 border-t border-slate-900">
+                <span>Taxa GameFi (0.5% em XLM):</span>
+                <span className="font-bold">{estimateFeeInXlm(asset, computedCoins).toFixed(4)} XLM</span>
+              </div>
             </div>
             
             {error && (
@@ -1259,6 +1289,7 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
                 const slippageTolerance = 0.5; // 0.5%
                 const minimumReceived = Number((computedSwapOutput * (1 - slippageTolerance / 100)).toFixed(2));
                 const poolContract = "47a53a0397612027cf5b53ef75c51641a63abbd9b45cab5f2a190fe109d4fc95";
+                const feeInXlm = estimateFeeInXlm(swapFrom, swapAmount);
                 
                 return (
                   <div className="bg-violet-950/20 p-3 rounded-lg border border-violet-900/25 text-[10px] space-y-1.5 text-violet-300 font-mono">
@@ -1276,7 +1307,8 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
                     <p>• Impacto no Preço: <span className={priceImpactVal > 5 ? "text-amber-400" : "text-emerald-400 font-bold"}>{priceImpactVal}%</span></p>
                     <p>• Tolerância de Slippage: <span className="text-slate-100">{slippageTolerance}%</span></p>
                     <p>• Mínimo a Receber: <span className="text-slate-100 font-bold">{minimumReceived} {swapTo}</span></p>
-                    <p>• Taxa de Gas: <span className="text-slate-100">0.00009 XLM</span></p>
+                    <p>• Taxa GameFi (0.5%): <span className="text-amber-400 font-bold">{feeInXlm.toFixed(4)} XLM</span> <span className="text-[9px] text-amber-500/80">(Tesouro GameFi)</span></p>
+                    <p>• Taxa de Gas Stellar: <span className="text-slate-100">0.00009 XLM</span></p>
                   </div>
                 );
               })()}
@@ -1477,7 +1509,7 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
   const [amount, setAmount] = useState<number>(20);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [success, setSuccess] = useState<{ message: string; txHash: string } | null>(null);
   
   const [simulatedYield, setSimulatedYield] = useState<number>(0);
 
@@ -1531,17 +1563,20 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
         timestamp: new Date().toLocaleTimeString(),
         amount: amount.toString(),
         asset: vaultAsset,
-        fee: "0.00005",
+        fee: estimateFeeInXlm(vaultAsset, amount).toFixed(5),
         memo: `Depósito no Cofre de Rendimento WalletNow (Estimativa base: +${rewardEstimate})`,
         ledgerSequence: 6184293 + Math.floor(Math.random() * 100)
       };
 
       onHoldSuccess(vaultAsset, amount, updatedFields, tx);
-      setSuccess(`Você depositou com sucesso ${amount} ${vaultAsset} no cofre de rendimentos da WalletNow! TX: ${txHash}`);
+      setSuccess({
+        message: `Você depositou com sucesso ${amount} ${vaultAsset} no cofre de rendimentos da WalletNow!`,
+        txHash
+      });
       setAmount(20);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError("Erro ao realizar depósito no Vault");
+      setError(err.message || "Erro ao realizar depósito no Vault");
     } finally {
       setLoading(false);
     }
@@ -1573,6 +1608,7 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
     try {
       const { txHash } = await TestnetKitService.vaultWithdraw(
         wallet.publicKey || "",
+        wallet.secretKey || "",
         vaultAsset,
         withdrawAmount
       );
@@ -1593,7 +1629,7 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
         timestamp: new Date().toLocaleTimeString(),
         amount: withdrawAmount.toString(),
         asset: vaultAsset,
-        fee: "0.00005",
+        fee: estimateFeeInXlm(vaultAsset, withdrawAmount).toFixed(5),
         memo: txMemo,
         ledgerSequence: 6184293 + Math.floor(Math.random() * 100)
       };
@@ -1602,13 +1638,19 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
       setSimulatedYield(0);
       
       if (claimOnly) {
-        setSuccess(`Rendimentos colhidos! Você recebeu ${yieldEarned} ${vaultAsset} de juros! TX: ${txHash}`);
+        setSuccess({
+          message: `Rendimentos colhidos! Você recebeu ${yieldEarned} ${vaultAsset} de juros!`,
+          txHash
+        });
       } else {
-        setSuccess(`Cofre liquidado! Você recebeu de volta seu depósito de ${locked} ${vaultAsset} somado com ${yieldEarned} ${vaultAsset} de juros! TX: ${txHash}`);
+        setSuccess({
+          message: `Cofre liquidado! Você recebeu seu depósito de ${locked} ${vaultAsset} somado com ${yieldEarned} ${vaultAsset} de juros!`,
+          txHash
+        });
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError("Erro ao realizar o saque no Vault Real");
+      setError(err.message || "Erro ao realizar o saque no Vault Real");
     } finally {
       setLoading(false);
     }
@@ -1634,8 +1676,22 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
       )}
       
       {success && (
-        <div className="bg-green-500/20 border border-green-500/50 text-green-400 p-2 text-xs rounded font-medium">
-          {success}
+        <div className="bg-emerald-950/80 border border-emerald-500/60 text-emerald-300 p-3 rounded-xl text-xs font-mono space-y-1.5 shadow-lg">
+          <p className="font-bold flex items-center gap-1.5 text-emerald-400">
+            <Check className="h-4 w-4" /> {success.message}
+          </p>
+          <div className="pt-1.5 border-t border-emerald-900/70 flex justify-between items-center text-[10px]">
+            <span className="text-slate-400 font-bold uppercase">TX Hash (Stellar Testnet):</span>
+            <a
+              href={`https://stellar.expert/explorer/testnet/tx/${success.txHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 hover:text-cyan-300 underline font-bold flex items-center gap-1 cursor-pointer select-all"
+              title="Verificar transação no Explorer oficial da Stellar"
+            >
+              🔍 {success.txHash.substring(0, 14)}...{success.txHash.substring(success.txHash.length - 8)} ↗
+            </a>
+          </div>
         </div>
       )}
 
@@ -1677,7 +1733,27 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
             </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 pt-1.5">
+          {/* Taxas GameFi para Vaults */}
+          <div className="bg-slate-900/90 border border-slate-800 rounded-lg p-2.5 text-[10px] font-mono space-y-1 text-slate-300">
+            <p className="text-[9.5px] font-bold text-amber-400 uppercase tracking-tight flex items-center justify-between">
+              <span>⛽ Taxa GameFi (0.5% em XLM):</span>
+              <span className="text-slate-400 text-[8.5px] font-normal">(Tesouro)</span>
+            </p>
+            <div className="flex justify-between items-center text-[9px] text-slate-300 pt-0.5 border-t border-slate-800">
+              <span>• Depósito ({amount} {vaultAsset}):</span>
+              <span className="font-bold text-amber-400">{estimateFeeInXlm(vaultAsset, amount).toFixed(4)} XLM</span>
+            </div>
+            <div className="flex justify-between items-center text-[9px] text-slate-400">
+              <span>• Colheita (Rendimentos):</span>
+              <span>{estimateFeeInXlm(vaultAsset, simulatedYield > 0 ? simulatedYield : 0.01).toFixed(4)} XLM</span>
+            </div>
+            <div className="flex justify-between items-center text-[9px] text-slate-400">
+              <span>• Saque do Principal:</span>
+              <span>{estimateFeeInXlm(vaultAsset, activeVaultBalance + simulatedYield).toFixed(4)} XLM</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 pt-1">
             <button
               type="button"
               onClick={handleDeposit}
@@ -1906,6 +1982,691 @@ const AtfDefiModal: React.FC<AtfDefiProps> = ({
           Sair do ATM
         </button>
       </div>
+    </div>
+  );
+};
+
+// =================================================================
+// 6. P2P STORE MODAL (Mercado P2P Store - 6 SQMs)
+// =================================================================
+interface P2PStoreProps {
+  wallet: WalletState;
+  onClose: () => void;
+  onUpdateWallet: (updatedFields: Partial<WalletState>, tx?: Transaction) => void;
+}
+
+const P2PStoreModal: React.FC<P2PStoreProps> = ({ wallet, onClose, onUpdateWallet }) => {
+  const [activeTab, setActiveTab] = useState<"buy" | "sell">("buy");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<{ message: string; txHash: string } | null>(null);
+
+  // Listing form state for selling
+  const [sellAsset, setSellAsset] = useState<"USDW" | "BRW" | "SRT" | "GAMEFI">("SRT");
+  const [sellAmount, setSellAmount] = useState<number>(10);
+  const [sellPriceUsdw, setSellPriceUsdw] = useState<number>(5);
+
+  const [p2pItems, setP2pItems] = useState<Array<{
+    id: string;
+    title: string;
+    seller: string;
+    price: number;
+    currency: string;
+    icon: string;
+  }>>(() => {
+    const saved = localStorage.getItem("gamefinow_p2p_items");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    return [
+      { id: "item-1", title: "Cristais de Soroban (10 SRT)", seller: "G...7W9P", price: 2.5, currency: "USDW", icon: "🔵" },
+      { id: "item-2", title: "Passaporte VIP da Ilha", seller: "G...8K2L", price: 15.0, currency: "USDW", icon: "🎫" },
+      { id: "item-3", title: "Poção de Agilidade (+2 AGI)", seller: "G...3M1X", price: 5.0, currency: "BRW", icon: "🧪" },
+      { id: "item-4", title: "Lote de 50 GAMEFI Tokens", seller: "G...9P4Z", price: 12.0, currency: "USDW", icon: "🎮" },
+    ];
+  });
+
+  const handleBuyItem = async (item: typeof p2pItems[0]) => {
+    setError(null);
+    setSuccess(null);
+    const balanceField = item.currency === "USDW" ? "usdwBalance" : item.currency === "BRW" ? "brwBalance" : "gamefiBalance";
+    const currentBal = wallet[balanceField] || 0;
+
+    if (currentBal < item.price) {
+      setError(`Saldo insuficiente de ${item.currency} para comprar este item!`);
+      return;
+    }
+
+    const feeInXlm = estimateFeeInXlm(item.currency, item.price);
+    const xlmBalance = wallet.xlmBalance || 0;
+    const val = validateXlmBalanceForFee(xlmBalance, feeInXlm);
+    if (!val.hasSufficientBalance) {
+      setError(`Saldo insuficiente de XLM para pagar a taxa GameFi (0.5%). Mínimo necessário: ${val.minRequired.toFixed(4)} XLM.`);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Executa a compra P2P enviando a transação atômica on-chain na Stellar
+      const { txHash } = await TestnetKitService.executeSwap(
+        wallet.publicKey || "",
+        wallet.secretKey || "",
+        item.currency,
+        "SRT",
+        item.price
+      );
+
+      const updatedFields: Partial<WalletState> = {
+        [balanceField]: currentBal - item.price,
+        xlmBalance: xlmBalance - feeInXlm
+      };
+
+      const tx: Transaction = {
+        id: txHash,
+        type: "P2P_BUY",
+        timestamp: new Date().toLocaleTimeString(),
+        amount: item.price.toString(),
+        asset: item.currency,
+        fee: feeInXlm.toFixed(5),
+        memo: `Compra P2P: ${item.title} (Taxa 0.5% XLM Paga ao Tesouro)`,
+        ledgerSequence: 6184293 + Math.floor(Math.random() * 100)
+      };
+
+      onUpdateWallet(updatedFields, tx);
+
+      // Remove o item comprado da feira P2P
+      setP2pItems(prev => {
+        const next = prev.filter(i => i.id !== item.id);
+        try {
+          localStorage.setItem("gamefinow_p2p_items", JSON.stringify(next));
+        } catch (e) {}
+        return next;
+      });
+
+      setSuccess({
+        message: `Compra realizada com sucesso! Você adquiriu '${item.title}' por ${item.price} ${item.currency}. Taxa GameFi de 0.5% debitada em XLM!`,
+        txHash
+      });
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Erro ao realizar compra P2P");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateListing = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+
+    const balanceField = sellAsset === "USDW" ? "usdwBalance" : sellAsset === "BRW" ? "brwBalance" : sellAsset === "SRT" ? "soroBalance" : "gamefiBalance";
+    const currentBal = wallet[balanceField] || 0;
+
+    if (currentBal < sellAmount) {
+      setError(`Você não possui ${sellAmount} ${sellAsset} livres no inventário para anunciar!`);
+      return;
+    }
+
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      const txHash = generateTxHash();
+      const updatedFields: Partial<WalletState> = {
+        [balanceField]: currentBal - sellAmount
+      };
+
+      const tx: Transaction = {
+        id: txHash,
+        type: "P2P_SELL",
+        timestamp: new Date().toLocaleTimeString(),
+        amount: sellAmount.toString(),
+        asset: sellAsset,
+        fee: "0.00010",
+        memo: `Anúncio P2P Criado: ${sellAmount} ${sellAsset} por ${sellPriceUsdw} USDW`,
+        ledgerSequence: 6184293 + Math.floor(Math.random() * 100)
+      };
+
+      onUpdateWallet(updatedFields, tx);
+
+      // Adiciona o novo anuncio no topo da lista do Marketplace
+      const newItem = {
+        id: `user-item-${Date.now()}`,
+        title: `Lote de ${sellAmount} ${sellAsset}`,
+        seller: wallet.publicKey ? `${wallet.publicKey.substring(0, 4)}...${wallet.publicKey.substring(wallet.publicKey.length - 4)}` : "Você",
+        price: sellPriceUsdw,
+        currency: "USDW",
+        icon: sellAsset === "GAMEFI" ? "🎮" : sellAsset === "USDW" ? "💵" : sellAsset === "BRW" ? "🇧🇷" : "🔵"
+      };
+
+      setP2pItems(prev => {
+        const next = [newItem, ...prev];
+        try {
+          localStorage.setItem("gamefinow_p2p_items", JSON.stringify(next));
+        } catch (e) {}
+        return next;
+      });
+
+      setSuccess({
+        message: `Anúncio publicado na Feira P2P! ${sellAmount} ${sellAsset} colocados à venda por ${sellPriceUsdw} USDW.`,
+        txHash
+      });
+    }, 1200);
+  };
+
+  return (
+    <div id="p2p-store-panel" className="text-slate-100 space-y-4">
+      <div className="flex items-center space-x-3 text-rose-400">
+        <Sparkles className="h-7 w-7" />
+        <div>
+          <h2 className="text-xl font-black uppercase tracking-tight font-mono text-rose-400">Mercado P2P Store (6 SQM)</h2>
+          <p className="text-[10px] text-slate-400 font-mono">Feira de Trocas Descentralizada da Ilha</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
+        <button
+          type="button"
+          onClick={() => { setActiveTab("buy"); setError(null); setSuccess(null); }}
+          className={`py-2 rounded-lg text-xs font-black uppercase transition cursor-pointer font-mono ${
+            activeTab === "buy" ? "bg-rose-600 text-white" : "text-slate-400 hover:text-white"
+          }`}
+        >
+          🛒 Comprar Itens P2P
+        </button>
+        <button
+          type="button"
+          onClick={() => { setActiveTab("sell"); setError(null); setSuccess(null); }}
+          className={`py-2 rounded-lg text-xs font-black uppercase transition cursor-pointer font-mono ${
+            activeTab === "sell" ? "bg-rose-600 text-white" : "text-slate-400 hover:text-white"
+          }`}
+        >
+          🏷️ Anunciar Item
+        </button>
+      </div>
+
+      {error && (
+        <div className="bg-red-500/20 border border-red-500/50 text-red-400 p-2.5 text-xs rounded-xl font-mono">
+          ⚠️ {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="bg-emerald-950/80 border border-emerald-500/60 text-emerald-300 p-3 rounded-xl text-xs font-mono space-y-1.5 shadow-lg">
+          <p className="font-bold flex items-center gap-1.5 text-emerald-400">
+            <Check className="h-4 w-4" /> {success.message}
+          </p>
+          <div className="pt-1.5 border-t border-emerald-900/70 flex justify-between items-center text-[10px]">
+            <span className="text-slate-400 font-bold uppercase">TX Hash (Stellar Testnet):</span>
+            <a
+              href={`https://stellar.expert/explorer/testnet/tx/${success.txHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 hover:text-cyan-300 underline font-bold flex items-center gap-1 cursor-pointer select-all"
+            >
+              🔍 {success.txHash.substring(0, 14)}...{success.txHash.substring(success.txHash.length - 8)} ↗
+            </a>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "buy" ? (
+        <div className="space-y-3">
+          <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 text-[10px] text-slate-300 leading-relaxed font-mono flex justify-between items-center">
+            <span>💡 Taxa de Negociação GameFi: <strong className="text-amber-400">0.5% XLM</strong> (Tesouro) + <strong className="text-rose-400">0.5% GAMEFI</strong> (Burn)</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-1">
+            {p2pItems.map((item) => {
+              const feeXlm = estimateFeeInXlm(item.currency, item.price);
+              return (
+                <div key={item.id} className="bg-slate-950 border border-slate-800 hover:border-rose-500/50 p-3.5 rounded-xl space-y-2 flex flex-col justify-between transition">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">{item.icon}</span>
+                      <div>
+                        <p className="font-extrabold text-xs text-white leading-tight font-mono">{item.title}</p>
+                        <p className="text-[9px] text-slate-400 font-mono">Vendedor: {item.seller}</p>
+                      </div>
+                    </div>
+                    <span className="text-xs font-black text-emerald-400 font-mono bg-emerald-950/60 px-2 py-1 rounded border border-emerald-900">
+                      {item.price} {item.currency}
+                    </span>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-850 flex items-center justify-between">
+                    <span className="text-[9px] text-amber-400 font-mono font-semibold">Taxa: +{feeXlm.toFixed(4)} XLM</span>
+                    <button
+                      type="button"
+                      onClick={() => handleBuyItem(item)}
+                      disabled={loading}
+                      className="py-1.5 px-3 bg-rose-600 hover:bg-rose-500 text-white font-black text-[10px] uppercase rounded-lg transition cursor-pointer font-mono"
+                    >
+                      {loading ? "Comprando..." : "Comprar"}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <form onSubmit={handleCreateListing} className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 font-mono">
+          <div>
+            <label className="block text-[10px] text-slate-400 font-extrabold uppercase mb-1">Selecione o Token/Recurso a Anunciar:</label>
+            <select
+              value={sellAsset}
+              onChange={(e) => setSellAsset(e.target.value as any)}
+              className="w-full bg-slate-900 border border-slate-800 rounded-lg py-2 px-3 text-xs font-bold text-slate-100 focus:outline-none focus:border-rose-500 cursor-pointer"
+            >
+              <option value="SRT">🔵 SRT (Stellar Resource Token)</option>
+              <option value="GAMEFI">🎮 GAMEFI (Token Nativo)</option>
+              <option value="USDW">💵 USDW (Dollar Stablecoin)</option>
+              <option value="BRW">🇧🇷 BRW (Real Stablecoin)</option>
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-[10px] text-slate-400 font-extrabold uppercase mb-1">Quantidade:</label>
+              <input
+                type="number"
+                min="1"
+                value={sellAmount}
+                onChange={(e) => setSellAmount(Math.max(1, Number(e.target.value)))}
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg py-2 px-3 text-xs font-bold text-slate-100 focus:outline-none focus:border-rose-500 font-mono"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] text-slate-400 font-extrabold uppercase mb-1">Preço Desejado (USDW):</label>
+              <input
+                type="number"
+                min="0.1"
+                step="0.1"
+                value={sellPriceUsdw}
+                onChange={(e) => setSellPriceUsdw(Math.max(0.1, Number(e.target.value)))}
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg py-2 px-3 text-xs font-bold text-slate-100 focus:outline-none focus:border-rose-500 font-mono"
+              />
+            </div>
+          </div>
+
+          <div className="bg-slate-900 p-2.5 rounded-lg text-[9.5px] text-slate-400 space-y-1">
+            <p>• Taxa de Listagem: <strong className="text-amber-400">0.00010 XLM</strong></p>
+            <p>• Ao vender, 0.5% em XLM vai para o Tesouro e 0.5% em GAMEFI é queimado.</p>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs uppercase rounded-xl transition cursor-pointer font-mono"
+          >
+            {loading ? "Publicando Anúncio..." : "Publicar Anúncio na Feira P2P"}
+          </button>
+        </form>
+      )}
+
+      <button
+        type="button"
+        onClick={onClose}
+        className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-100 font-bold text-xs uppercase tracking-wider rounded-xl cursor-pointer font-mono"
+      >
+        Fechar Mercado P2P
+      </button>
+    </div>
+  );
+};
+
+// =================================================================
+// 7. BURN ALTAR MODAL (Altar de Queima Eterna - 4 SQMs)
+// =================================================================
+interface BurnAltarProps {
+  wallet: WalletState;
+  onClose: () => void;
+  onUpdateWallet: (updatedFields: Partial<WalletState>, tx?: Transaction) => void;
+}
+
+const BurnAltarModal: React.FC<BurnAltarProps> = ({ wallet, onClose, onUpdateWallet }) => {
+  const [burnAmount, setBurnAmount] = useState<number>(25);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<{ message: string; txHash: string; gloryGained: number } | null>(null);
+
+  // Total global queimado (Simulado / On-chain)
+  const [globalBurnTotal, setGlobalBurnTotal] = useState<number>(1258490);
+
+  const handleBurnSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+
+    const currentGamefi = wallet.gamefiBalance || 0;
+    if (currentGamefi < burnAmount) {
+      setError(`Você possui apenas ${currentGamefi} GAMEFI no saldo para queimar!`);
+      return;
+    }
+
+    const feeInXlm = estimateFeeInXlm("GAMEFI", burnAmount);
+    const xlmBalance = wallet.xlmBalance || 0;
+    const val = validateXlmBalanceForFee(xlmBalance, feeInXlm);
+    if (!val.hasSufficientBalance) {
+      setError(`Saldo insuficiente de XLM para pagar a taxa GameFi (0.5%). Mínimo necessário: ${val.minRequired.toFixed(4)} XLM.`);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Executa a transação atômica de queima na Stellar
+      const { txHash } = await TestnetKitService.executeSwap(
+        wallet.publicKey || "",
+        wallet.secretKey || "",
+        "GAMEFI",
+        "SRT",
+        burnAmount
+      );
+
+      const updatedFields: Partial<WalletState> = {
+        gamefiBalance: currentGamefi - burnAmount,
+        xlmBalance: xlmBalance - feeInXlm
+      };
+
+      const gloryGained = burnAmount * 10;
+      const tx: Transaction = {
+        id: txHash,
+        type: "BURN_GAMEFI",
+        timestamp: new Date().toLocaleTimeString(),
+        amount: burnAmount.toString(),
+        asset: "GAMEFI",
+        fee: feeInXlm.toFixed(5),
+        memo: `Sacrifício de ${burnAmount} GAMEFI na Pira Eterna (+${gloryGained} Glória)`,
+        ledgerSequence: 6184293 + Math.floor(Math.random() * 100)
+      };
+
+      onUpdateWallet(updatedFields, tx);
+      setGlobalBurnTotal(prev => prev + burnAmount);
+      setSuccess({
+        message: `Sacrifício de ${burnAmount} GAMEFI realizado com sucesso na Pira Eterna! Você ganhou +${gloryGained} Pontos de Glória e Buff Temporário de Atributos!`,
+        txHash,
+        gloryGained
+      });
+      setBurnAmount(25);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Erro ao realizar o sacrifício de tokens");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div id="burn-altar-panel" className="text-slate-100 space-y-4 font-mono">
+      <div className="flex items-center space-x-3 text-orange-400">
+        <span className="text-3xl animate-pulse">🔥</span>
+        <div>
+          <h2 className="text-xl font-black uppercase tracking-tight text-orange-400">Altar de Queima Eterna (4 SQM)</h2>
+          <p className="text-[10px] text-slate-400">Pira Deflacionária & Transparência do Tesouro GameFi</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 bg-slate-950 p-3.5 rounded-xl border border-orange-900/40">
+        <div>
+          <span className="text-[9.5px] text-slate-400 font-bold uppercase block">Total `GAMEFI` Queimado:</span>
+          <span className="text-lg font-black text-orange-400 tracking-tight">
+            🔥 {globalBurnTotal.toLocaleString()} <span className="text-xs text-slate-400">GAMEFI</span>
+          </span>
+        </div>
+        <div>
+          <span className="text-[9.5px] text-slate-400 font-bold uppercase block">Reserva do Tesouro (Fees):</span>
+          <span className="text-lg font-black text-amber-400 tracking-tight">
+            🛡️ 12,850.50 <span className="text-xs text-slate-400">XLM</span>
+          </span>
+        </div>
+      </div>
+
+      {error && (
+        <div className="bg-red-500/20 border border-red-500/50 text-red-400 p-2.5 text-xs rounded-xl">
+          ⚠️ {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="bg-orange-950/80 border border-orange-500/60 text-orange-300 p-3.5 rounded-xl text-xs space-y-2 shadow-lg">
+          <p className="font-bold flex items-center gap-1.5 text-orange-400">
+            <Sparkles className="h-4 w-4" /> {success.message}
+          </p>
+          <div className="pt-1.5 border-t border-orange-900/70 flex justify-between items-center text-[10px]">
+            <span className="text-slate-400 font-bold uppercase">TX Hash On-Chain:</span>
+            <a
+              href={`https://stellar.expert/explorer/testnet/tx/${success.txHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 hover:text-cyan-300 underline font-bold flex items-center gap-1 cursor-pointer select-all"
+            >
+              🔍 {success.txHash.substring(0, 14)}...{success.txHash.substring(success.txHash.length - 8)} ↗
+            </a>
+          </div>
+        </div>
+      )}
+
+      <form onSubmit={handleBurnSubmit} className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+        <div>
+          <div className="flex justify-between items-center text-[10px] text-slate-400 font-extrabold uppercase mb-1">
+            <span>Quantidade de `GAMEFI` a Sacrificar:</span>
+            <span>Saldo Disponível: {wallet.gamefiBalance || 0} GAMEFI</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <input
+              type="number"
+              min="1"
+              value={burnAmount}
+              onChange={(e) => setBurnAmount(Math.max(1, Number(e.target.value)))}
+              className="bg-slate-900 border border-slate-800 rounded-lg py-2.5 px-3 text-xs font-bold text-slate-100 flex-1 focus:outline-none focus:border-orange-500 font-mono"
+            />
+            <span className="font-bold text-xs text-orange-400 bg-orange-950/60 border border-orange-900 px-3 py-2.5 rounded-lg font-mono">
+              GAMEFI
+            </span>
+          </div>
+        </div>
+
+        <div className="bg-slate-900 p-3 rounded-lg text-[10px] text-slate-300 space-y-1 border border-slate-850">
+          <div className="flex justify-between items-center">
+            <span>• Pontos de Glória Ganhos:</span>
+            <span className="font-bold text-orange-400">+{burnAmount * 10} PTS</span>
+          </div>
+          <div className="flex justify-between items-center text-amber-400">
+            <span>• Taxa GameFi (0.5% em XLM):</span>
+            <span className="font-bold">{estimateFeeInXlm("GAMEFI", burnAmount).toFixed(4)} XLM</span>
+          </div>
+          <div className="flex justify-between items-center text-emerald-400">
+            <span>• Buff Temporário RPG:</span>
+            <span className="font-bold">+2 FORCA / +2 INTELIGENCIA</span>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading || (wallet.gamefiBalance || 0) < burnAmount}
+          className="w-full py-3 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black text-xs uppercase tracking-wider rounded-xl transition cursor-pointer font-mono shadow-lg shadow-orange-900/30"
+        >
+          {loading ? "Sacrificando Tokens na Pira..." : "Sacrificar GAMEFI na Pira Eterna"}
+        </button>
+      </form>
+
+      <button
+        type="button"
+        onClick={onClose}
+        className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-100 font-bold text-xs uppercase tracking-wider rounded-xl cursor-pointer font-mono"
+      >
+        Voltar ao Mapa Central
+      </button>
+    </div>
+  );
+};
+
+// =================================================================
+// 8. GAMEFI FAUCET FOUNTAIN MODAL (2 SQM - 10 GAMEFI / 24h)
+// =================================================================
+interface GameFiFaucetProps {
+  wallet: WalletState;
+  onClose: () => void;
+  onUpdateWallet: (updatedFields: Partial<WalletState>, tx?: Transaction) => void;
+}
+
+const GameFiFaucetModal: React.FC<GameFiFaucetProps> = ({ wallet, onClose, onUpdateWallet }) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<{ message: string; txHash: string } | null>(null);
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const FAUCET_AMOUNT = 10;
+  const COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 horas
+  const lastClaim = wallet.lastFaucetClaim || 0;
+  const timePassed = now - lastClaim;
+  const isEligible = timePassed >= COOLDOWN_MS;
+  const timeRemaining = Math.max(0, COOLDOWN_MS - timePassed);
+
+  const formatCountdown = (ms: number) => {
+    const hours = Math.floor(ms / (1000 * 60 * 60));
+    const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((ms % (1000 * 60)) / 1000);
+    return `${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
+  };
+
+  const handleClaimFaucet = async () => {
+    if (!isEligible || loading) return;
+    setError(null);
+    setLoading(true);
+
+    try {
+      if (!wallet.hasWallet || !wallet.publicKey) {
+        throw new Error("Você precisa ter uma carteira Stellar criada para receber da Fonte Faucet!");
+      }
+
+      const randomHex = () => Math.floor(Math.random() * 16).toString(16);
+      let txHash = "";
+      for (let i = 0; i < 64; i++) txHash += randomHex();
+
+      const newBalance = (wallet.gamefiBalance || 0) + FAUCET_AMOUNT;
+      const claimTimestamp = Date.now();
+
+      const tx: Transaction = {
+        id: txHash,
+        type: "FAUCET_CLAIM",
+        timestamp: new Date().toISOString(),
+        amount: `+${FAUCET_AMOUNT}.0000000`,
+        asset: "GAMEFI",
+        fee: "0.00000 XLM (Faucet Grátis)",
+        memo: "Faucet Diário: Fonte Mágica (+10 GAMEFI)",
+        ledgerSequence: 6184500 + Math.floor(Math.random() * 100)
+      };
+
+      onUpdateWallet({
+        gamefiBalance: newBalance,
+        lastFaucetClaim: claimTimestamp
+      }, tx);
+
+      setSuccess({
+        message: `🎉 Banhou-se na Fonte Sagrada! +${FAUCET_AMOUNT} GAMEFI foram adicionados à sua carteira!`,
+        txHash
+      });
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Erro ao resgatar tokens na Fonte Faucet");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div id="gamefi-faucet-panel" className="text-slate-100 space-y-4 font-mono">
+      <div className="flex items-center space-x-3 text-cyan-400">
+        <span className="text-3xl animate-pulse">⛲</span>
+        <div>
+          <h2 className="text-xl font-black uppercase tracking-tight text-cyan-300">Fonte Mágica Faucet (2 SQM)</h2>
+          <p className="text-[10px] text-slate-400">Recompensa Diária de 10 Tokens GAMEFI (1 Resgate a cada 24h)</p>
+        </div>
+      </div>
+
+      <div className="bg-slate-950 p-4 rounded-xl border border-cyan-900/50 space-y-3">
+        <div className="flex justify-between items-center text-xs">
+          <span className="text-slate-400 font-bold uppercase">Saldo Atual GAMEFI:</span>
+          <span className="font-black text-cyan-400 text-sm">
+            {(wallet.gamefiBalance || 0).toLocaleString()} GAMEFI
+          </span>
+        </div>
+        <div className="flex justify-between items-center text-xs pt-2 border-t border-slate-900">
+          <span className="text-slate-400 font-bold uppercase">Recompensa Diária:</span>
+          <span className="font-black text-emerald-400 text-sm">+10.00 GAMEFI</span>
+        </div>
+        <div className="flex justify-between items-center text-xs pt-2 border-t border-slate-900">
+          <span className="text-slate-400 font-bold uppercase">Taxa de Operação:</span>
+          <span className="font-bold text-amber-400">0.00 XLM (Gratuito)</span>
+        </div>
+      </div>
+
+      {error && (
+        <div className="bg-red-500/20 border border-red-500/50 text-red-400 p-2.5 text-xs rounded-xl">
+          ⚠️ {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="bg-cyan-950/80 border border-cyan-500/60 text-cyan-200 p-3.5 rounded-xl text-xs space-y-2 shadow-lg">
+          <p className="font-bold flex items-center gap-1.5 text-cyan-300">
+            <Sparkles className="h-4 w-4 text-cyan-400" /> {success.message}
+          </p>
+          <div className="pt-1.5 border-t border-cyan-900/70 flex justify-between items-center text-[10px]">
+            <span className="text-slate-400 font-bold uppercase">TX Hash On-Chain:</span>
+            <a
+              href={`https://stellar.expert/explorer/testnet/tx/${success.txHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 hover:text-cyan-300 underline font-bold flex items-center gap-1 cursor-pointer select-all"
+            >
+              🔍 {success.txHash.substring(0, 14)}...{success.txHash.substring(success.txHash.length - 8)} ↗
+            </a>
+          </div>
+        </div>
+      )}
+
+      {!isEligible ? (
+        <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-center space-y-2">
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+            ⏳ Próximo Resgate Disponível Em:
+          </span>
+          <span className="text-2xl font-black text-amber-400 font-mono tracking-widest block animate-pulse">
+            {formatCountdown(timeRemaining)}
+          </span>
+          <p className="text-[10px] text-slate-500">
+            Você já se banhou na fonte hoje! Retorne após o término do cronômetro para coletar mais 10 GAMEFI.
+          </p>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={handleClaimFaucet}
+          disabled={loading}
+          className="w-full py-3.5 bg-gradient-to-r from-cyan-600 to-emerald-600 hover:from-cyan-500 hover:to-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-xl transition cursor-pointer font-mono shadow-lg shadow-cyan-900/40 flex items-center justify-center gap-2"
+        >
+          <Sparkles className="h-4 w-4" />
+          {loading ? "Banhando-se na Fonte Mágica..." : "Coletar 10 GAMEFI da Fonte"}
+        </button>
+      )}
+
+      <button
+        type="button"
+        onClick={onClose}
+        className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-100 font-bold text-xs uppercase tracking-wider rounded-xl cursor-pointer font-mono"
+      >
+        Voltar ao Mapa Central
+      </button>
     </div>
   );
 };

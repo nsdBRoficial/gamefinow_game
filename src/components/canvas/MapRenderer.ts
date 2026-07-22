@@ -1,6 +1,365 @@
-import { TileType } from "../../gameData";
+import { TileType, GameDecoration } from "../../gameData";
 import { getMapDecorations, MapId } from "../../maps";
 import { Player } from "../../types";
+
+export const drawPixelShop = (
+  ctx: CanvasRenderingContext2D,
+  worldX: number,
+  worldY: number,
+  dec: GameDecoration,
+  tileSize: number
+) => {
+  const w = (dec.width || 3) * tileSize;
+  const h = (dec.height || 2) * tileSize;
+
+  // 1. Shadow underneath shop
+  ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+  ctx.fillRect(worldX + 4, worldY + h - 2, w - 8, 4);
+
+  // 2. Main Building Front (Parede bege/pastel inspirada na Referencia 1)
+  const wallY = worldY + 12;
+  const wallH = h - 12;
+  ctx.fillStyle = "#f5e6d3"; // Soft pastel beige
+  ctx.fillRect(worldX, wallY, w, wallH);
+
+  // Dark border outline
+  ctx.strokeStyle = "#451a03";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(worldX, wallY, w, wallH);
+
+  // Wooden base footer
+  ctx.fillStyle = "#a16207";
+  ctx.fillRect(worldX, worldY + h - 6, w, 6);
+  ctx.fillStyle = "#78350f";
+  ctx.fillRect(worldX, worldY + h - 2, w, 2);
+
+  // 3. Shop Windows & Door
+  // Door on left side
+  const doorW = 16;
+  const doorH = 28;
+  const doorX = worldX + 12;
+  const doorY = worldY + h - doorH - 4;
+
+  ctx.fillStyle = "#7c2d12"; // Wood frame
+  ctx.fillRect(doorX - 2, doorY - 2, doorW + 4, doorH + 2);
+  ctx.fillStyle = "#38bdf8"; // Glass window on door
+  ctx.fillRect(doorX, doorY, doorW, doorH - 8);
+  ctx.fillStyle = "#9a3412"; // Wood panel lower door
+  ctx.fillRect(doorX, doorY + doorH - 8, doorW, 8);
+  // Door handle
+  ctx.fillStyle = "#fef08a";
+  ctx.fillRect(doorX + doorW - 4, doorY + doorH - 12, 2, 3);
+
+  // 4-Pane Showcase Window on right side
+  const winW = 28;
+  const winH = 22;
+  const winX = worldX + w - winW - 12;
+  const winY = worldY + h - winH - 10;
+
+  ctx.fillStyle = "#451a03"; // Window frame
+  ctx.fillRect(winX - 2, winY - 2, winW + 4, winH + 4);
+  ctx.fillStyle = "#38bdf8"; // Light sky blue glass
+  ctx.fillRect(winX, winY, winW, winH);
+
+  // Window Panes Grid
+  ctx.fillStyle = "#451a03";
+  ctx.fillRect(winX + winW / 2 - 1, winY, 2, winH); // Vertical divider
+  ctx.fillRect(winX, winY + winH / 2 - 1, winW, 2); // Horizontal divider
+
+  // Pixel glass glint/reflection
+  ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+  ctx.fillRect(winX + 2, winY + 2, 4, 4);
+  ctx.fillRect(winX + winW / 2 + 3, winY + 2, 4, 4);
+
+  // 4. Retro Striped Awning (Toldo listrado vermelho e branco)
+  const awningY = worldY + 8;
+  const awningH = 18;
+  const stripeW = 8;
+  const totalStripes = Math.ceil(w / stripeW);
+
+  for (let i = 0; i < totalStripes; i++) {
+    const sx = worldX + i * stripeW;
+    const isRed = i % 2 === 0;
+    ctx.fillStyle = isRed ? "#dc2626" : "#f8fafc";
+    ctx.fillRect(sx, awningY, Math.min(stripeW, worldX + w - sx), awningH);
+
+    // Scalloped bottom wave on awning
+    ctx.fillStyle = isRed ? "#991b1b" : "#e2e8f0";
+    ctx.fillRect(sx, awningY + awningH - 3, Math.min(stripeW, worldX + w - sx), 3);
+  }
+
+  // Awning top shadow line
+  ctx.fillStyle = "#451a03";
+  ctx.fillRect(worldX, awningY - 2, w, 2);
+
+  // 5. Top Wooden Sign ("SHOP" ou "STORE" - Referencia 1)
+  const signW = Math.min(w - 12, 64);
+  const signH = 18;
+  const signX = worldX + (w - signW) / 2;
+  const signY = worldY - 14;
+
+  // Wooden posts holding top sign
+  ctx.fillStyle = "#78350f";
+  ctx.fillRect(signX + 6, signY + signH, 4, awningY - (signY + signH));
+  ctx.fillRect(signX + signW - 10, signY + signH, 4, awningY - (signY + signH));
+
+  // Red signboard background
+  ctx.fillStyle = "#dc2626";
+  ctx.fillRect(signX, signY, signW, signH);
+  ctx.strokeStyle = "#451a03";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(signX, signY, signW, signH);
+  ctx.fillStyle = "#991b1b";
+  ctx.fillRect(signX, signY + signH - 3, signW, 3);
+
+  // Pixel Art Text "SHOP" / "STORE"
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 11px monospace";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(dec.text || "STORE", signX + signW / 2, signY + signH / 2 - 1);
+
+  // 6. Subtext Badge (Tipo de loja: "P2P STORE", "OUTFIT STORE", etc.)
+  if (dec.subText) {
+    const badgeW = 76;
+    const badgeH = 12;
+    const badgeX = worldX + (w - badgeW) / 2;
+    const badgeY = awningY + awningH + 2;
+
+    ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+    ctx.fillRect(badgeX, badgeY, badgeW, badgeH);
+    ctx.strokeStyle = "#fbbf24";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(badgeX, badgeY, badgeW, badgeH);
+
+    ctx.fillStyle = "#fef08a";
+    ctx.font = "bold 7px font-mono uppercase tracking-wider";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(dec.subText, badgeX + badgeW / 2, badgeY + badgeH / 2);
+  }
+};
+
+export const drawPixelBurnBrazier = (
+  ctx: CanvasRenderingContext2D,
+  worldX: number,
+  worldY: number,
+  dec: GameDecoration,
+  tileSize: number
+) => {
+  const w = (dec.width || 2) * tileSize;
+  const h = (dec.height || 2) * tileSize;
+  const cx = worldX + w / 2;
+  const cy = worldY + h / 2;
+
+  // 1. Ambient Radial Flame Glow on Floor
+  const pulseGlow = 22 + Math.sin(performance.now() / 150) * 4;
+  const glowGrad = ctx.createRadialGradient(cx, cy + 4, 4, cx, cy + 4, pulseGlow);
+  glowGrad.addColorStop(0, "rgba(249, 115, 22, 0.35)");
+  glowGrad.addColorStop(0.6, "rgba(239, 68, 68, 0.15)");
+  glowGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+  ctx.fillStyle = glowGrad;
+  ctx.beginPath();
+  ctx.arc(cx, cy + 4, pulseGlow, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 2. Pedestal Base & Dark Iron Torch Stand (Referencia 2)
+  // Stone Floor Base
+  ctx.fillStyle = "#1c1917";
+  ctx.fillRect(cx - 16, cy + 12, 32, 10);
+  ctx.strokeStyle = "#44403c";
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(cx - 16, cy + 12, 32, 10);
+
+  // Central Vertical Iron Shaft
+  ctx.fillStyle = "#262626";
+  ctx.fillRect(cx - 5, cy - 8, 10, 22);
+  ctx.fillStyle = "#404040";
+  ctx.fillRect(cx - 3, cy - 8, 2, 22); // Highlight line
+
+  // Brazier Bowl / Cup Top
+  ctx.fillStyle = "#171717";
+  ctx.beginPath();
+  ctx.moveTo(cx - 14, cy - 8);
+  ctx.lineTo(cx + 14, cy - 8);
+  ctx.lineTo(cx + 8, cy + 2);
+  ctx.lineTo(cx - 8, cy + 2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = "#525252";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Iron Rim top lip
+  ctx.fillStyle = "#404040";
+  ctx.fillRect(cx - 15, cy - 10, 30, 3);
+
+  // 3. Pixel Flame Animation (Multicamadas - Red, Orange, Yellow)
+  const flameTime = performance.now() / 110;
+  const flameHeight = 18 + Math.sin(flameTime) * 3;
+
+  // Outer Flame Layer (Crimson Red #ef4444)
+  ctx.fillStyle = "#ef4444";
+  ctx.beginPath();
+  ctx.moveTo(cx - 11, cy - 9);
+  ctx.quadraticCurveTo(cx - 13, cy - 9 - flameHeight * 0.6, cx - 2 + Math.sin(flameTime * 1.3) * 3, cy - 9 - flameHeight);
+  ctx.quadraticCurveTo(cx + 13, cy - 9 - flameHeight * 0.6, cx + 11, cy - 9);
+  ctx.closePath();
+  ctx.fill();
+
+  // Mid Flame Layer (Vivid Orange #f97316)
+  ctx.fillStyle = "#f97316";
+  ctx.beginPath();
+  ctx.moveTo(cx - 8, cy - 9);
+  ctx.quadraticCurveTo(cx - 9, cy - 9 - flameHeight * 0.5, cx + Math.cos(flameTime * 1.5) * 2, cy - 9 - flameHeight * 0.85);
+  ctx.quadraticCurveTo(cx + 9, cy - 9 - flameHeight * 0.5, cx + 8, cy - 9);
+  ctx.closePath();
+  ctx.fill();
+
+  // Inner Core Flame Layer (Bright Sun Yellow #fef08a)
+  ctx.fillStyle = "#fef08a";
+  ctx.beginPath();
+  ctx.arc(cx, cy - 11, 5 + Math.sin(flameTime * 2) * 1.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 4. Floating Pixel Sparks
+  ctx.fillStyle = "#fef08a";
+  const sparkY1 = cy - 20 - ((performance.now() / 8) % 16);
+  const sparkY2 = cy - 24 - ((performance.now() / 12) % 20);
+  ctx.fillRect(cx - 4 + Math.sin(flameTime) * 4, sparkY1, 2, 2);
+  ctx.fillRect(cx + 3 + Math.cos(flameTime) * 5, sparkY2, 1.5, 1.5);
+};
+
+export const drawPixelFaucet = (
+  ctx: CanvasRenderingContext2D,
+  worldX: number,
+  worldY: number,
+  dec: GameDecoration,
+  tileSize: number
+) => {
+  const w = (dec.width || 1) * tileSize;
+  const h = (dec.height || 2) * tileSize;
+  const cx = worldX + w / 2;
+  const time = performance.now();
+
+  // 1. Soft Radial Glow under the fountain (magic water aura)
+  const pulseGlow = 18 + Math.sin(time / 300) * 3;
+  const gradient = ctx.createRadialGradient(cx, worldY + h - 8, 2, cx, worldY + h - 8, pulseGlow);
+  gradient.addColorStop(0, "rgba(56, 189, 248, 0.35)");
+  gradient.addColorStop(1, "rgba(56, 189, 248, 0)");
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  ctx.arc(cx, worldY + h - 8, pulseGlow, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 2. Base Pedestal (Marble Base at y: h - 14 to h - 2)
+  ctx.fillStyle = "#334155"; // Dark border outline
+  ctx.fillRect(cx - 10, worldY + h - 14, 20, 12);
+
+  ctx.fillStyle = "#cbd5e1"; // Light slate marble
+  ctx.fillRect(cx - 8, worldY + h - 12, 16, 10);
+  ctx.fillStyle = "#94a3b8"; // Midtone marble shadow
+  ctx.fillRect(cx + 1, worldY + h - 12, 7, 10);
+
+  // Pedestal Column Lines
+  ctx.fillStyle = "#475569";
+  ctx.fillRect(cx - 6, worldY + h - 10, 2, 6);
+  ctx.fillRect(cx - 2, worldY + h - 10, 2, 6);
+  ctx.fillRect(cx + 2, worldY + h - 10, 2, 6);
+
+  // 3. Middle Basin Tier (Marble Bowl at y: h - 34 to h - 14)
+  const bowlY = worldY + h - 34;
+
+  // Bowl Rim / Body Outline
+  ctx.fillStyle = "#1e293b";
+  ctx.beginPath();
+  ctx.arc(cx, bowlY + 8, 15, 0, Math.PI);
+  ctx.fill();
+
+  // Marble Bowl Rim
+  ctx.fillStyle = "#e2e8f0";
+  ctx.beginPath();
+  ctx.arc(cx, bowlY + 6, 14, 0, Math.PI);
+  ctx.fill();
+
+  ctx.fillStyle = "#cbd5e1";
+  ctx.fillRect(cx - 14, bowlY + 4, 28, 4);
+
+  // Water inside main basin
+  ctx.fillStyle = "#0284c7"; // Deep blue water
+  ctx.fillRect(cx - 12, bowlY + 5, 24, 6);
+  ctx.fillStyle = "#38bdf8"; // Light water surface
+  ctx.fillRect(cx - 12, bowlY + 5, 24, 2);
+
+  // Animated Water Ripples in Basin
+  const rippleOffset = Math.sin(time / 200) * 3;
+  ctx.fillStyle = "#7dd3fc";
+  ctx.fillRect(cx - 8 + rippleOffset, bowlY + 6, 6, 1);
+  ctx.fillRect(cx + 2 - rippleOffset, bowlY + 8, 5, 1);
+
+  // 4. Upper Spout & Spire (Marble Spout Tier at y: h - 54 to h - 34)
+  const spoutY = worldY + h - 54;
+
+  // Upper Pillar Support
+  ctx.fillStyle = "#cbd5e1";
+  ctx.fillRect(cx - 4, spoutY + 8, 8, 14);
+  ctx.fillStyle = "#94a3b8";
+  ctx.fillRect(cx, spoutY + 8, 4, 14);
+
+  // Upper Mini Basin Cup
+  ctx.fillStyle = "#e2e8f0";
+  ctx.fillRect(cx - 8, spoutY + 6, 16, 4);
+  ctx.fillStyle = "#0284c7";
+  ctx.fillRect(cx - 6, spoutY + 6, 12, 2);
+
+  // Top Fountain Ornament (Trident / Crown Spout Tip)
+  ctx.fillStyle = "#cbd5e1";
+  ctx.fillRect(cx - 2, spoutY - 2, 4, 8);
+  ctx.fillStyle = "#e2e8f0";
+  ctx.fillRect(cx - 1, spoutY - 4, 2, 4);
+
+  // 5. ANIMATED WATERFALL & JET SPRINGS
+  const jetWave = Math.sin(time / 150) * 2;
+  
+  // Center Jet Stream
+  ctx.fillStyle = "#38bdf8";
+  ctx.fillRect(cx - 1.5, spoutY - 8 + jetWave, 3, 10);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(cx - 0.5, spoutY - 8 + jetWave, 1, 8);
+
+  // Left & Right Cascading Water Streams (Falling into lower basin)
+  const streamDrop = (Math.floor(time / 80) % 10);
+
+  // Left Water Stream
+  ctx.fillStyle = "#38bdf8";
+  ctx.fillRect(cx - 7, spoutY + 8, 2, 14);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(cx - 7, spoutY + 8 + (streamDrop % 10), 2, 3);
+
+  // Right Water Stream
+  ctx.fillStyle = "#38bdf8";
+  ctx.fillRect(cx + 5, spoutY + 8, 2, 14);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(cx + 5, spoutY + 8 + ((streamDrop + 5) % 10), 2, 3);
+
+  // Bottom Spill Streams into main bowl
+  ctx.fillStyle = "#7dd3fc";
+  ctx.fillRect(cx - 11, bowlY + 4, 3, 12);
+  ctx.fillRect(cx + 8, bowlY + 4, 3, 12);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(cx - 11, bowlY + 4 + ((streamDrop + 3) % 8), 3, 2);
+  ctx.fillRect(cx + 8, bowlY + 4 + ((streamDrop + 7) % 8), 3, 2);
+
+  // 6. Floating Magic Water Sparkles / Droplets
+  const sparkTime = time / 400;
+  for (let i = 0; i < 4; i++) {
+    const angle = sparkTime + (i * Math.PI) / 2;
+    const px = cx + Math.cos(angle) * (10 + (i % 2) * 4);
+    const py = spoutY + Math.sin(angle * 1.5) * 6 - 2;
+    ctx.fillStyle = i % 2 === 0 ? "#ffffff" : "#7dd3fc";
+    ctx.fillRect(px, py, 1.5, 1.5);
+  }
+};
 
 export const drawPortalVortex = (ctx: CanvasRenderingContext2D, wx: number, wy: number, color: string, tileSize: number) => {
   const cx = wx + tileSize / 2;
@@ -870,6 +1229,20 @@ export const drawMapDecorations = (
           ctx.fillRect(worldX + 6, worldY - 2, 3, 12);
           ctx.fillRect(worldX + w - 9, worldY - 2, 3, 12);
         }
+        break;
+
+      case "p2p_store":
+      case "pixel_shop":
+        drawPixelShop(ctx, worldX, worldY, dec, tileSize);
+        break;
+
+      case "burn_altar":
+      case "pixel_burn_brazier":
+        drawPixelBurnBrazier(ctx, worldX, worldY, dec, tileSize);
+        break;
+
+      case "pixel_faucet":
+        drawPixelFaucet(ctx, worldX, worldY, dec, tileSize);
         break;
     }
   });

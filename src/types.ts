@@ -34,6 +34,8 @@ export interface WalletState {
   vaultBrw?: number;    // WalletNow BRW Yield Vault
   poolXlmUsdw?: number; // WalletNow Liquidity Pool (XLM-USDW)
   poolUsdwBrw?: number; // WalletNow Liquidity Pool (USDW-BRW)
+  gamefiBalance?: number; // GameFiNow Native Token (GAMEFI)
+  lastFaucetClaim?: number; // Timestamp (ms) do ultimo resgate na Fonte Faucet
 }
 
 export type QuestId = "wallet" | "onramp" | "soroban" | "hold";
@@ -95,6 +97,6 @@ export interface GameState {
     currentStep: number;
     npcId: string;
   } | null;
-  activeModal: "wallet" | "onramp" | "soroban" | "hold" | "atf" | null;
+  activeModal: "wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | null;
   currentLedger: number;
 }

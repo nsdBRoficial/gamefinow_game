@@ -127,14 +127,40 @@ export function generateCentralMap(): number[][] {
   grid[GRID_ROWS - 2][30] = TileType.PORTAL_SOUTH;
 
   // Stands Collisions
-  grid[28][21] = TileType.BLOCK; grid[28][22] = TileType.BLOCK; grid[28][23] = TileType.BLOCK; // GAMEFINOW
+  grid[27][21] = TileType.BLOCK; grid[27][22] = TileType.BLOCK; grid[27][23] = TileType.BLOCK; // LOJA P2P STORE
+  grid[28][21] = TileType.BLOCK; grid[28][22] = TileType.BLOCK; grid[28][23] = TileType.BLOCK; // LOJA P2P STORE
+  grid[32][21] = TileType.BLOCK; grid[32][22] = TileType.BLOCK; grid[32][23] = TileType.BLOCK; // GAMEFINOW baixado para y=32
+  grid[32][37] = TileType.BLOCK; grid[32][38] = TileType.BLOCK; grid[32][39] = TileType.BLOCK; // PIGFI baixado para y=32
+  grid[32][16] = TileType.BLOCK; grid[32][17] = TileType.BLOCK; grid[32][18] = TileType.BLOCK; // WAVE baixado para y=32
   grid[28][16] = TileType.BLOCK; grid[28][17] = TileType.BLOCK; grid[28][18] = TileType.BLOCK; // DEFINDEX
   grid[28][37] = TileType.BLOCK; grid[28][38] = TileType.BLOCK; grid[28][39] = TileType.BLOCK; // WALLETNOW
   grid[18][31] = TileType.BLOCK; grid[18][32] = TileType.BLOCK; grid[18][33] = TileType.BLOCK; // SOROSWAP
   grid[45][26] = TileType.BLOCK; grid[45][27] = TileType.BLOCK; grid[45][28] = TileType.BLOCK; // NEARX
 
+  // Altar de Queima Eterna (4 sqms: x=41,42 / y=27,28)
+  grid[27][41] = TileType.BLOCK; grid[27][42] = TileType.BLOCK;
+  grid[28][41] = TileType.BLOCK; grid[28][42] = TileType.BLOCK;
+
+  // Fonte Faucet (2 sqms: x=28 / y=25,26)
+  grid[25][28] = TileType.BLOCK;
+  grid[26][28] = TileType.BLOCK;
+
   // ATM Collision
   grid[28][33] = TileType.BLOCK;
+
+  // Rua Branca Esquerda (West Path Extension: x=4 ate x=25 na y=33 e x=4 nas y=31,32)
+  for (let c = 4; c <= 25; c++) {
+    grid[33][c] = TileType.STONE_PATH;
+  }
+  grid[31][4] = TileType.STONE_PATH;
+  grid[32][4] = TileType.STONE_PATH;
+
+  // Rua Branca Direita (East Path Extension: x=34 ate x=55 na y=33 e x=55 nas y=31,32)
+  for (let c = 34; c <= 55; c++) {
+    grid[33][c] = TileType.STONE_PATH;
+  }
+  grid[31][55] = TileType.STONE_PATH;
+  grid[32][55] = TileType.STONE_PATH;
 
   return grid;
 }
@@ -167,22 +193,35 @@ export const CENTRAL_DECORATIONS: GameDecoration[] = [
   { x: 28, y: 40, type: "flower_pot" },
   { x: 32, y: 40, type: "flower_pot" },
   { x: 20, y: 28, type: "flower_pot" },
-  { x: 20, y: 32, type: "flower_pot" },
   { x: 40, y: 28, type: "flower_pot" },
-  { x: 40, y: 32, type: "flower_pot" },
 
-  // GAMEFINOW Stand
-  { x: 21, y: 28, type: "stand", text: "GAMEFINOW", width: 3, color: "#f59e0b" },
+  // LOJA P2P STORE (6 sqms no norte da rua: x=21..23, y=27..28)
+  { x: 21, y: 27, type: "pixel_shop", text: "SHOP", subText: "P2P STORE", width: 3, height: 2, color: "#ef4444" },
   
+  // GAMEFINOW Stand (baixado para y=32: x=21..23, y=32)
+  { x: 21, y: 32, type: "stand", text: "GAMEFINOW", width: 3, color: "#f59e0b" },
+
   // DEFINDEX Stand
   { x: 16, y: 28, type: "stand", text: "DEFINDEX", width: 3, color: "#3b82f6" },
 
+  // WAVE Stand (x=16..18, y=32)
+  { x: 16, y: 32, type: "stand", text: "WAVE", width: 3, color: "#06b6d4" },
+
   // WALLETNOW Stand
   { x: 37, y: 28, type: "stand", text: "WALLETNOW", width: 3, color: "#10b981" },
+
+  // PIGFI Stand (x=37..39, y=32)
+  { x: 37, y: 32, type: "stand", text: "PIGFI", width: 3, color: "#ec4899" },
 
   // SOROSWAP Stand
   { x: 31, y: 18, type: "stand", text: "SOROSWAP", width: 3, color: "#ec4899" },
 
   // NEARX Stand
   { x: 26, y: 45, type: "stand", text: "NEARX", width: 3, color: "#9333ea" },
+
+  // ALTAR DE QUEIMA ETERNA (4 sqms: x=41..42, y=27..28, sem texto na tela)
+  { x: 41, y: 27, type: "pixel_burn_brazier", width: 2, height: 2, color: "#f97316" },
+
+  // FONTE FAUCET (2 sqms: x=28, y=25..26)
+  { x: 28, y: 25, type: "pixel_faucet", width: 1, height: 2, color: "#38bdf8" },
 ];

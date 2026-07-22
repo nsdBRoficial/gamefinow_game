@@ -156,7 +156,7 @@ export default function App() {
   };
 
   // Is the player near any smart terminal?
-  const [isNearTerminal, setIsNearTerminal] = useState<"wallet" | "onramp" | "soroban" | "hold" | "atf" | null>(null);
+  const [isNearTerminal, setIsNearTerminal] = useState<"wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | null>(null);
 
   // Simulate periodic Stellar Ledger sequence increments (Consensus in 5 seconds)
   // And fetch real on-chain balances from testnet!
@@ -314,12 +314,26 @@ export default function App() {
       }
     }
 
-    const dialogueLines: string[] = t(dialogKey, { returnObjects: true }) as string[];
+    const res = t(dialogKey, { returnObjects: true });
+    let dialogueLines: string[] = [];
+
+    if (Array.isArray(res)) {
+      dialogueLines = res as string[];
+    } else if (npc.dialogs && npc.dialogs.length > 0) {
+      dialogueLines = npc.dialogs;
+    } else if (typeof res === "string" && !(res as string).startsWith("npcs.")) {
+      dialogueLines = [res as string];
+    } else {
+      dialogueLines = npc.dialogs || ["Welcome!"];
+    }
+
+    const resName = t(`npcs.${npc.id}.name`);
+    const npcName = (typeof resName === "string" && !resName.startsWith("npcs.")) ? resName : (npc.name || "INFO");
 
     setGameState((prev) => ({
       ...prev,
       activeDialog: {
-        npcName: t(`npcs.${npc.id}.name`),
+        npcName: npcName,
         text: dialogueLines,
         currentStep: 0,
         npcId: npc.id,
@@ -330,16 +344,43 @@ export default function App() {
   const handleTriggerModal = () => {
     playSynthSound("beep");
     if (isNearTerminal) {
+      // Trava de Acesso: Apenas para quem tem a Estrela de Guardião (Carteira Stellar forjada / Missão concluída)
+      const hasStar = gameState.wallet.hasWallet || gameState.quests.wallet.status === "completed";
+
+      if (isNearTerminal === "atf" || isNearTerminal === "gamefi_faucet" || isNearTerminal === "burn_altar" || isNearTerminal === "p2p_store") {
+        if (!hasStar) {
+          let terminalName = "Special Feature";
+          if (isNearTerminal === "gamefi_faucet") terminalName = "Magic Faucet Fountain";
+          else if (isNearTerminal === "burn_altar") terminalName = "Eternal Burn Altar";
+          else if (isNearTerminal === "p2p_store") terminalName = "P2P Store Market";
+          else if (isNearTerminal === "atf") terminalName = "ATM DeFi System";
+
+          setGameState((prev) => ({
+            ...prev,
+            activeDialog: {
+              npcName: terminalName,
+              text: [
+                "🔒 Access Denied!",
+                "You must obtain the Guardian Star (Forge your Stellar Wallet with Blacksmith Kael at the East Portal) to access this feature in the Central Map!"
+              ],
+              currentStep: 0,
+              npcId: "system",
+            },
+          }));
+          return;
+        }
+      }
+
       if (isNearTerminal === "atf") {
         const isCompletedAll = gameState.quests.hold.status === "completed";
         if (!isCompletedAll) {
           setGameState((prev) => ({
             ...prev,
             activeDialog: {
-              npcName: "Sistema ATM DeFi",
+              npcName: "ATM DeFi System",
               text: [
-                "Acesso Negado.",
-                "Você precisa concluir todas as 4 missões (Obter a Estrela) para utilizar o terminal consolidado."
+                "🔒 Access Denied.",
+                "You must complete all 4 onboarding quests to unlock the consolidated ATM DeFi terminal."
               ],
               currentStep: 0,
               npcId: "system",
@@ -574,10 +615,10 @@ export default function App() {
   if (!currentActiveQuest && isCompletedAll) {
     currentActiveQuest = {
       id: "all_done" as any,
-      title: t("quests.all_done.title"),
-      description: t("quests.all_done.description"),
-      instructions: "",
-      reward: "",
+      title: "NEW QUESTS COMING SOON",
+      description: "You have completed all current onboarding quests on the Stellar network. Stay tuned for upcoming adventures!",
+      instructions: "You have completed all current onboarding quests on the Stellar network. Stay tuned for upcoming adventures!",
+      reward: "Legendary Title 🌟",
       status: "completed"
     };
   } else if (!currentActiveQuest) {
@@ -788,6 +829,13 @@ export default function App() {
               >
                 🇧🇷 <span className="font-mono text-[11.5px] md:text-[12.5px]">{gameState.wallet.brwBalance}</span> <span className="text-[9.5px] font-sans font-black opacity-85">BRW</span>
               </span>
+              {/* GAMEFI COIN Balance (Separated in HUD) */}
+              <span 
+                className="bg-gradient-to-r from-amber-400 to-yellow-400 border-2 border-black px-2 py-1 md:px-2 md:py-1 rounded-lg flex items-center gap-1 font-black text-slate-950 text-[11.5px] md:text-[12px] shadow-[1.5px_1.5px_0px_#000] cursor-pointer hover:scale-105 transition-transform"
+                title="Moeda Oficial GameFiNow (GAMEFI)"
+              >
+                🎮 <span className="font-mono text-[11.5px] md:text-[12.5px]">{gameState.wallet.gamefiBalance || 0}</span> <span className="text-[9.5px] font-sans font-black opacity-90">GAMEFI</span>
+              </span>
             </div>
             
             {/* Day and real-time clock */}
@@ -861,8 +909,18 @@ export default function App() {
         </div>
 
         {/* 3. RIGHT SIDEBARHUD - MINIMAP COMPASS & TAB CONTROLS */}
-        <div className="absolute top-26 md:top-20 right-2.5 z-10 flex flex-col items-end gap-2.5 select-none">
+        <div className="absolute top-26 md:top-20 right-2.5 z-10 flex flex-col items-end gap-2 select-none">
           
+          {/* STANDALONE GAMEFI COIN BADGE DIRECTLY ABOVE THE MINIMAP */}
+          <div 
+            className="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 border-2 border-black rounded-xl px-2.5 py-1 flex items-center gap-1.5 font-mono font-black text-slate-950 text-xs shadow-[2px_2px_0px_#000] cursor-pointer hover:scale-105 transition-transform"
+            title="Saldo da Moeda Oficial GameFiNow (GAMEFI)"
+          >
+            <span className="text-sm animate-bounce">🪙</span>
+            <span className="text-xs font-black font-mono">{gameState.wallet.gamefiBalance || 0}</span>
+            <span className="text-[9px] font-sans font-black uppercase opacity-90 tracking-wider">GAMEFI</span>
+          </div>
+
           {/* Authentic Mini Map Compass Circle */}
           <div className="w-24 h-24 md:w-[84px] md:h-[84px] rounded-full bg-[#1c2c16] border-[3px] border-[#8b5a2b] shadow-lg flex flex-col items-center justify-center relative select-none">
             {/* cardinal markers */}
@@ -952,10 +1010,10 @@ export default function App() {
           </div>
           <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2 mt-0.5">
             <span className="text-black font-black block leading-tight text-[11.5px] md:text-[10.5px] uppercase shrink-0">
-              {currentActiveQuest ? t(`quests.${currentActiveQuest.id}.title`) : t("ui.noActiveQuestTitle", { defaultValue: "NEW QUESTS COMING SOON" })}
+              {currentActiveQuest ? ((currentActiveQuest.id as string) === "all_done" ? currentActiveQuest.title : t(`quests.${currentActiveQuest.id}.title`)) : "NEW QUESTS COMING SOON"}
             </span>
             <span className="text-slate-600 text-[10px] md:text-[9px] block leading-snug sm:border-l sm:border-black/15 sm:pl-2">
-              {currentActiveQuest ? t(`quests.${currentActiveQuest.id}.instructions`) : t("ui.noActiveQuestDesc", { defaultValue: "You have completed all available quests!" })}
+              {currentActiveQuest ? ((currentActiveQuest.id as string) === "all_done" ? currentActiveQuest.instructions : t(`quests.${currentActiveQuest.id}.instructions`)) : "You have completed all current onboarding quests on the Stellar network. Stay tuned for upcoming adventures!"}
             </span>
           </div>
         </div>

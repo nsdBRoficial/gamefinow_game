@@ -23,6 +23,12 @@
       "description": "Show your long-term commitment by locking your coins in a smart vault to become a Legendary Guardian.",
       "instructions": "Enter the South Portal (Golden) to the Secret Chamber and talk to Bobba [NPC], the Elder.",
       "reward": "Legendary VIP Stellar Holder Title 🌟"
+    },
+    "all_done": {
+      "title": "NEW QUESTS COMING SOON",
+      "description": "You have completed all current onboarding quests on the Stellar network. Stay tuned for upcoming adventures!",
+      "instructions": "You have completed all current onboarding quests on the Stellar network. Stay tuned for upcoming adventures!",
+      "reward": "Legendary Title 🌟"
     }
   },
   "dialogs": {
@@ -388,6 +394,20 @@
         "Soroswap is the leading decentralized exchange (DEX) and automated market maker (AMM) in the Soroban ecosystem.",
         "The platform allows any user to swap Stellar network tokens incredibly fast with near-zero fees.",
         "You can test the powerful Swap settlements at the terminal located on the West side."
+      ]
+    },
+    "pigfi_info": {
+      "name": "PIGFI INFO",
+      "dialogs": [
+        "Small amounts, a universe of possibilities.",
+        "The childhood piggy bank has evolved. With PigFi, your family can start saving dollars starting from R$50 via Pix in a simple, visual, and fun way."
+      ]
+    },
+    "wave_info": {
+      "name": "WAVE INFO",
+      "dialogs": [
+        "Condominium administration and governance with transparency and security.",
+        "Streamlining property management, financial tracking, and community decision-making on the Stellar blockchain."
       ]
     }
   },

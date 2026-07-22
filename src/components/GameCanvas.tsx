@@ -19,7 +19,7 @@ interface GameCanvasProps {
   setPlayerPos: React.Dispatch<React.SetStateAction<Player>>;
   npcs: NPC[];
   onTalkToNPC: (npc: NPC) => void;
-  onNearTerminal: (terminalType: "wallet" | "onramp" | "soroban" | "hold" | "atf" | null) => void;
+  onNearTerminal: (terminalType: "wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | null) => void;
   isMovementBlocked?: boolean;
 }
 
@@ -349,12 +349,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     }
     
     // Interact with notebook on the GAMEFINOW stand
-    if (playerPos.mapId === "center" && checkX === 22 && checkY === 28) {
+    if (playerPos.mapId === "center" && checkX === 22 && checkY === 32) {
       onTalkToNPC({
         id: "gamefinow_info",
         name: "GAMEFINOW INFO",
         x: 22,
-        y: 28,
+        y: 32,
         dir: "down",
         dialogs: [
           "Bem-vindo ao GameFiNow!",
@@ -394,6 +394,38 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           "Bem-vindo ao WALLETNOW!",
           "A solução definitiva para o rastreamento e análise da sua carteira DeFi.",
           "Acompanhe seus ativos e rendimentos com segurança e inteligência através dos nossos painéis."
+        ]
+      });
+      return;
+    }
+
+    // Interact with notebook on the PIGFI stand
+    if (playerPos.mapId === "center" && checkX === 38 && checkY === 32) {
+      onTalkToNPC({
+        id: "pigfi_info",
+        name: "PIGFI INFO",
+        x: 38,
+        y: 32,
+        dir: "down",
+        dialogs: [
+          "Small amounts, a universe of possibilities.",
+          "The childhood piggy bank has evolved. With PigFi, your family can start saving dollars starting from R$50 via Pix in a simple, visual, and fun way."
+        ]
+      });
+      return;
+    }
+
+    // Interact with notebook on the WAVE stand
+    if (playerPos.mapId === "center" && checkX === 17 && checkY === 32) {
+      onTalkToNPC({
+        id: "wave_info",
+        name: "WAVE INFO",
+        x: 17,
+        y: 32,
+        dir: "down",
+        dialogs: [
+          "Condominium administration and governance with transparency and security.",
+          "Streamlining property management, financial tracking, and community decision-making on the Stellar blockchain."
         ]
       });
       return;
@@ -443,6 +475,21 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     if (currentMapId === "center") {
       if (Math.abs(x - 33) <= 2 && Math.abs(y - 28) <= 2) {
         onNearTerminal("atf");
+        return;
+      }
+      // Loja P2P Store (6 sqms no norte da rua: x=21..23, y=27..28)
+      if (x >= 20 && x <= 24 && y >= 26 && y <= 30) {
+        onNearTerminal("p2p_store");
+        return;
+      }
+      // Altar de Queima Eterna (4 sqms: x=41..42, y=27..28)
+      if (x >= 40 && x <= 43 && y >= 26 && y <= 29) {
+        onNearTerminal("burn_altar");
+        return;
+      }
+      // Fonte Faucet (2 sqms: x=28, y=25..26)
+      if (Math.abs(x - 28) <= 2 && y >= 24 && y <= 27) {
+        onNearTerminal("gamefi_faucet");
         return;
       }
     } else if (currentMapId === "east") {

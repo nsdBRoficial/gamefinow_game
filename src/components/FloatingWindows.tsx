@@ -150,7 +150,7 @@ export const FloatingWindows: React.FC<FloatingWindowsProps> = ({
               {/* Balances detailed list */}
               <div className="space-y-3">
                 <span className="text-[10px] text-slate-500 font-extrabold uppercase font-mono block">{t("huds.available_balances")}</span>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
                   <div className="bg-white border-2 border-black p-3 rounded-lg flex items-center justify-between shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
                     <div className="space-y-0.5">
                       <span className="text-[9px] text-slate-500 font-bold block uppercase">{t("huds.crystal_coins")}</span>
@@ -171,6 +171,13 @@ export const FloatingWindows: React.FC<FloatingWindowsProps> = ({
                       <span className="text-sm font-black text-[#6366f1] font-mono">{wallet.brwBalance || 0} BRW</span>
                     </div>
                     <div className="w-8 h-8 bg-[#6366f1] text-white border-2 border-black rounded flex items-center justify-center font-black font-mono text-xs shadow-[1.5px_1.5px_0_#000]">🇧🇷</div>
+                  </div>
+                  <div className="bg-white border-2 border-black p-3 rounded-lg flex items-center justify-between shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
+                    <div className="space-y-0.5">
+                      <span className="text-[9px] text-slate-500 font-bold block uppercase">Token GameFi</span>
+                      <span className="text-sm font-black text-[#ec4899] font-mono">{wallet.gamefiBalance || 0} GAMEFI</span>
+                    </div>
+                    <div className="w-8 h-8 bg-[#ec4899] text-white border-2 border-black rounded flex items-center justify-center font-black font-mono text-xs shadow-[1.5px_1.5px_0_#000]">🎮</div>
                   </div>
                 </div>
 

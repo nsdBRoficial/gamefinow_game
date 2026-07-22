@@ -74,9 +74,6 @@ export const BAZAAR_DECORATIONS: GameDecoration[] = [
   { x: 28, y: 32, type: "lamp" },
   { x: 32, y: 32, type: "lamp" },
 
-  // ATM Cyberpunk
-  { x: 47, y: 28, type: "atm_cyberpunk" },
-
   // Market stalls, barrels, and flower pots
   { x: 10, y: 25, type: "barrel" },
   { x: 11, y: 25, type: "box" },
