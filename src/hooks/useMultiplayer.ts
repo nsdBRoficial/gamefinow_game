@@ -123,7 +123,17 @@ export function useMultiplayer({
   // ─── Publicação de posição ────────────────────────────────────────────────
   useEffect(() => {
     if (!MULTIPLAYER_ENABLED || !playerId) return;
+    
+    // Publish immediately on pos change
     publishPosition(playerPos, playerId);
+
+    // Heartbeat every 10 seconds to keep presence active even if not moving
+    const heartbeatTimer = setInterval(() => {
+      // Force an update to updated_at in the DB
+      publishPosition(playerPos, playerId, true); 
+    }, 10000);
+
+    return () => clearInterval(heartbeatTimer);
   }, [playerPos, playerId]);
 
   // ─── Atualização de aparência (debounce 2s para não spam) ─────────────────

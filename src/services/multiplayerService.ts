@@ -154,11 +154,11 @@ export async function upsertPlayer(
 /**
  * Publica a posição do jogador local com throttle + Broadcast instantâneo via WebSocket.
  */
-export function publishPosition(player: Player, playerId: string): void {
+export function publishPosition(player: Player, playerId: string, forceUpdate: boolean = false): void {
   if (!MULTIPLAYER_ENABLED || !supabase || !playerId) return;
 
   // Transmite via WebSocket Broadcast instantaneamente (latência de milissegundos)
-  if (presenceChannel) {
+  if (presenceChannel && !forceUpdate) {
     presenceChannel.send({
       type: "broadcast",
       event: "player_move",
@@ -188,7 +188,7 @@ export function publishPosition(player: Player, playerId: string): void {
   }
 
   // Se a posição no banco não mudou significativamente, evita salvar no banco a cada micro-movimento
-  if (Math.round(player.x) === lastPublishedX && Math.round(player.y) === lastPublishedY) return;
+  if (!forceUpdate && Math.round(player.x) === lastPublishedX && Math.round(player.y) === lastPublishedY) return;
 
   if (positionThrottleTimer) return;
 
@@ -312,6 +312,7 @@ export function subscribeToMap(
     .subscribe((status) => {
       if (status === "SUBSCRIBED") {
         console.log(`[Multiplayer] ✅ Conectado com sucesso ao canal Realtime do mapa ${mapId}`);
+        presenceChannel?.track({ player_id: playerId, map_id: mapId });
         fetchPlayersInMap(mapId).then((players) => {
           players.forEach((p) => mapLivePlayers.set(p.player_id, p));
           onPlayersUpdate(Array.from(mapLivePlayers.values()));

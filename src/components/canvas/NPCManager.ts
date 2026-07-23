@@ -89,11 +89,18 @@ export const drawOtherPlayers = (
 ) => {
   otherPlayers.forEach((p) => {
     let drawPlayerOk = false;
-    if (p.id === "mmo1" && currentRegion === "center") drawPlayerOk = true;
-    else if (p.id === "mmo2" && currentRegion === "west") drawPlayerOk = true;
-    else if (p.id === "mmo3" && currentRegion === "east") drawPlayerOk = true;
-    else if (p.id === "mmo4" && currentRegion === "north") drawPlayerOk = true;
-    else if (p.id === "mmo5" && currentRegion === "south") drawPlayerOk = true;
+    
+    // Check if it's a bot
+    if (p.id?.startsWith("mmo")) {
+      if (p.id === "mmo1" && currentRegion === "center") drawPlayerOk = true;
+      else if (p.id === "mmo2" && currentRegion === "west") drawPlayerOk = true;
+      else if (p.id === "mmo3" && currentRegion === "east") drawPlayerOk = true;
+      else if (p.id === "mmo4" && currentRegion === "north") drawPlayerOk = true;
+      else if (p.id === "mmo5" && currentRegion === "south") drawPlayerOk = true;
+    } else {
+      // Real players are pre-filtered by region in GameCanvas, so we can always draw them
+      drawPlayerOk = true;
+    }
 
     if (!drawPlayerOk) {
       return;
