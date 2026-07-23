@@ -1655,11 +1655,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     let borderStyle = "rgba(255, 198, 0, 0.75)";
 
     if (activeTitle === "Herói Lendário de Stellar" || (!activeTitle && hasHold)) {
-      // Verde Neon Supremo for Legendary Hero (Quest 4 / Vault)
-      tagColor = "#22c55e";
+      // Verde Elétrico Neon (#39ff14) for Legendary Hero (Quest 4 / Vault)
+      tagColor = "#39ff14";
       tagShadowColor = "#10b981";
-      tagShadowBlur = 6;
-      borderStyle = "#22c55e";
+      tagShadowBlur = 8;
+      borderStyle = "#39ff14";
     } else if (activeTitle === "Alquimista do Soroban" || (!activeTitle && hasSoroban)) {
       // Roxo Místico for Soroban Alchemist (Quest 3 / Soroban)
       tagColor = "#e879f9";
