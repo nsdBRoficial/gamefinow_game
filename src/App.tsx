@@ -36,11 +36,12 @@ import { LandingPage } from "./components/LandingPage";
 import { MapModal } from "./components/MapModal";
 import { PassportModal } from "./components/PassportModal";
 import { DialogSystem } from "./components/DialogSystem";
+import { OutfitShopModal } from "./components/OutfitShopModal";
 import ReactNipple from "react-nipple";
 import { useTranslation } from "react-i18next";
 import { GameState, Player, NPC, Transaction, QuestId, Quest, WalletState } from "./types";
-import { INITIAL_QUESTS, INITIAL_NPCS } from "./gameData";
-import { getNpcsForMap } from "./maps";
+import { INITIAL_QUESTS, INITIAL_NPCS, GRID_COLS, GRID_ROWS, isCollidable, isBridgeBlocked } from "./gameData";
+import { getNpcsForMap, getMapGrid, MapId } from "./maps";
 import { useGameStore } from "./store/gameStore";
 import { fetchOnChainBalances } from "./services/stellarServices";
 import { 
@@ -156,7 +157,7 @@ export default function App() {
   };
 
   // Is the player near any smart terminal?
-  const [isNearTerminal, setIsNearTerminal] = useState<"wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | null>(null);
+  const [isNearTerminal, setIsNearTerminal] = useState<"wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | "outfit_shop" | null>(null);
 
   // Simulate periodic Stellar Ledger sequence increments (Consensus in 5 seconds)
   // And fetch real on-chain balances from testnet!
@@ -347,12 +348,13 @@ export default function App() {
       // Trava de Acesso: Apenas para quem tem a Estrela de Guardião (Carteira Stellar forjada / Missão concluída)
       const hasStar = gameState.wallet.hasWallet || gameState.quests.wallet.status === "completed";
 
-      if (isNearTerminal === "atf" || isNearTerminal === "gamefi_faucet" || isNearTerminal === "burn_altar" || isNearTerminal === "p2p_store") {
+      if (isNearTerminal === "atf" || isNearTerminal === "gamefi_faucet" || isNearTerminal === "burn_altar" || isNearTerminal === "p2p_store" || isNearTerminal === "outfit_shop") {
         if (!hasStar) {
           let terminalName = "Special Feature";
           if (isNearTerminal === "gamefi_faucet") terminalName = "Magic Faucet Fountain";
           else if (isNearTerminal === "burn_altar") terminalName = "Eternal Burn Altar";
           else if (isNearTerminal === "p2p_store") terminalName = "P2P Store Market";
+          else if (isNearTerminal === "outfit_shop") terminalName = "Outfit Store Market";
           else if (isNearTerminal === "atf") terminalName = "ATM DeFi System";
 
           setGameState((prev) => ({
@@ -555,6 +557,37 @@ export default function App() {
       if (dir === "down") nextTargetY += 1;
       if (dir === "left") nextTargetX -= 1;
       if (dir === "right") nextTargetX += 1;
+
+      // 1. Boundary check
+      if (
+        nextTargetX < 0 ||
+        nextTargetX >= GRID_COLS ||
+        nextTargetY < 0 ||
+        nextTargetY >= GRID_ROWS
+      ) {
+        return { ...prev, dir };
+      }
+
+      // 2. Tile Collision check
+      const currentMapId = (prev.mapId || "center") as MapId;
+      const grid = getMapGrid(currentMapId);
+      const targetTile = grid[nextTargetY][nextTargetX];
+      if (isCollidable(targetTile)) {
+        return { ...prev, dir };
+      }
+
+      // 3. Bridge / Gate block check
+      const bridgeBlock = isBridgeBlocked(nextTargetX, nextTargetY, gameState.quests);
+      if (bridgeBlock.blocked) {
+        return { ...prev, dir };
+      }
+
+      // 4. NPC Collision check
+      const npcs = getNpcsForMap(currentMapId);
+      const hitsNPC = npcs.some((n) => n.x === nextTargetX && n.y === nextTargetY);
+      if (hitsNPC) {
+        return { ...prev, dir };
+      }
 
       return {
         ...prev,
@@ -1179,6 +1212,18 @@ export default function App() {
         onUpdateWallet={handleUpdateWallet}
         playerName={getFormattedName()}
       />
+
+      {/* 4. OUTFIT STORE MODAL */}
+      {gameState.activeModal === "outfit_shop" && (
+        <OutfitShopModal
+          gameState={gameState}
+          setGameState={setGameState}
+          playerPos={playerPos}
+          setPlayerPos={setPlayerPos}
+          onClose={() => setGameState((prev) => ({ ...prev, activeModal: null }))}
+          playSynthSound={playSynthSound}
+        />
+      )}
 
       {/* SUBTLE IMMERSIVE CREDITS TEXT IN OUTER SPACE */}
       {/* (Moved to bottom HUD) */}
