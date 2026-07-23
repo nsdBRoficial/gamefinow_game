@@ -58,16 +58,19 @@ export interface Player {
   isMoving: boolean;
   frame: number;
   // Character Customization parameters (quadrado personalizável: cabeça, tronco, pernas, sapatos)
+  gender?: "male" | "female";
+  activeOutfit?: string;
+  ownedOutfits?: string[];
   headColor: string;
   torsoColor: string;
   legsColor: string;
   shoesColor: string;
-  headType: "square" | "beanie" | "helmet" | "horns";
-  torsoType: "plain" | "striped" | "suit" | "hoodie";
+  headType: "square" | "topete" | "militar" | "beanie" | "helmet" | "horns" | "pirate" | "long_hair" | "ponytail" | "ribbon" | "bob" | "witch" | "elf_ears" | "flower_crown";
+  torsoType: "plain" | "striped" | "suit" | "hoodie" | "dress" | "cyber" | "samurai" | "pirate" | "valkyrie" | "royal" | "plate_armor" | "witch_robe" | "golden_armor";
   shoesType: "sneakers" | "boots" | "flippers";
   skinColor: string;
-  faceType: "none" | "glasses" | "beard" | "eyepatch" | "smile";
-  accessoryType: "none" | "backpack" | "cape" | "sword";
+  faceType: "none" | "glasses" | "beard" | "elder_beard" | "mustache" | "eyepatch" | "smile" | "eyelashes" | "makeup" | "visor";
+  accessoryType: "none" | "backpack" | "cape" | "sword" | "wings" | "katana" | "viking_axe" | "magic_wand";
   name: string;
   mapId?: "center" | "east" | "west" | "north" | "south";
 }
@@ -97,6 +100,6 @@ export interface GameState {
     currentStep: number;
     npcId: string;
   } | null;
-  activeModal: "wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | null;
+  activeModal: "wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | "outfit_shop" | null;
   currentLedger: number;
 }

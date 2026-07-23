@@ -33,7 +33,7 @@ import {
 } from "lucide-react";
 
 interface GameOverlayProps {
-  activeModal: "wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | null;
+  activeModal: "wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | "outfit_shop" | null;
   wallet: WalletState;
   onClose: () => void;
   onWalletCreated: (pubKey: string, secKey: string, name: string, email: string, pin: string) => void;
