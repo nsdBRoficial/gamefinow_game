@@ -136,6 +136,9 @@ export function generateCentralMap(): number[][] {
   grid[28][37] = TileType.BLOCK; grid[28][38] = TileType.BLOCK; grid[28][39] = TileType.BLOCK; // WALLETNOW
   grid[18][31] = TileType.BLOCK; grid[18][32] = TileType.BLOCK; grid[18][33] = TileType.BLOCK; // SOROSWAP
   grid[45][26] = TileType.BLOCK; grid[45][27] = TileType.BLOCK; grid[45][28] = TileType.BLOCK; // NEARX
+  grid[32][42] = TileType.BLOCK; grid[32][43] = TileType.BLOCK; grid[32][44] = TileType.BLOCK; // AUTOFIN (x=42,43,44 y=32)
+  grid[27][46] = TileType.BLOCK; grid[27][47] = TileType.BLOCK; grid[27][48] = TileType.BLOCK; // LOJA OUTFIT STORE
+  grid[28][46] = TileType.BLOCK; grid[28][47] = TileType.BLOCK; grid[28][48] = TileType.BLOCK; // LOJA OUTFIT STORE
 
   // Altar de Queima Eterna (4 sqms: x=41,42 / y=27,28)
   grid[27][41] = TileType.BLOCK; grid[27][42] = TileType.BLOCK;
@@ -198,6 +201,9 @@ export const CENTRAL_DECORATIONS: GameDecoration[] = [
   // LOJA P2P STORE (6 sqms no norte da rua: x=21..23, y=27..28)
   { x: 21, y: 27, type: "pixel_shop", text: "SHOP", subText: "P2P STORE", width: 3, height: 2, color: "#ef4444" },
   
+  // LOJA OUTFIT STORE (6 sqms: x=46..48, y=27..28)
+  { x: 46, y: 27, type: "pixel_shop", text: "SHOP", subText: "OUTFIT STORE", width: 3, height: 2, color: "#8b5cf6" },
+  
   // GAMEFINOW Stand (baixado para y=32: x=21..23, y=32)
   { x: 21, y: 32, type: "stand", text: "GAMEFINOW", width: 3, color: "#f59e0b" },
 
@@ -218,6 +224,9 @@ export const CENTRAL_DECORATIONS: GameDecoration[] = [
 
   // NEARX Stand
   { x: 26, y: 45, type: "stand", text: "NEARX", width: 3, color: "#9333ea" },
+
+  // AUTOFIN Stand (x=42..44, y=32)
+  { x: 42, y: 32, type: "stand", text: "AUTOFIN", width: 3, color: "#6366f1" },
 
   // ALTAR DE QUEIMA ETERNA (4 sqms: x=41..42, y=27..28, sem texto na tela)
   { x: 41, y: 27, type: "pixel_burn_brazier", width: 2, height: 2, color: "#f97316" },

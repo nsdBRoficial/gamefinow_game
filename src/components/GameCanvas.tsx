@@ -19,7 +19,7 @@ interface GameCanvasProps {
   setPlayerPos: React.Dispatch<React.SetStateAction<Player>>;
   npcs: NPC[];
   onTalkToNPC: (npc: NPC) => void;
-  onNearTerminal: (terminalType: "wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | null) => void;
+  onNearTerminal: (terminalType: "wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | "outfit_shop" | null) => void;
   isMovementBlocked?: boolean;
 }
 
@@ -465,6 +465,24 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       return;
     }
 
+    // Interact with notebook on the AUTOFIN stand
+    if (playerPos.mapId === "center" && checkX === 43 && checkY === 32) {
+      onTalkToNPC({
+        id: "autofin_info",
+        name: "AUTOFIN INFO",
+        x: 43,
+        y: 32,
+        dir: "down",
+        dialogs: [
+          "Welcome to AUTOFIN!",
+          "Automate your financial infrastructure. Connect banking APIs, DeFi protocols, and wallets in a single visual workflow.",
+          "Visit https://automated.finance for more information."
+        ]
+      });
+      return;
+    }
+
+
     checkTerminalProximity(targetX, targetY, playerPos.mapId || "center");
   };
 
@@ -480,6 +498,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       // Loja P2P Store (6 sqms no norte da rua: x=21..23, y=27..28)
       if (x >= 20 && x <= 24 && y >= 26 && y <= 30) {
         onNearTerminal("p2p_store");
+        return;
+      }
+      // Loja OUTFIT STORE (6 sqms no norte da rua: x=46..48, y=27..28)
+      if (x >= 45 && x <= 49 && y >= 26 && y <= 30) {
+        onNearTerminal("outfit_shop");
         return;
       }
       // Altar de Queima Eterna (4 sqms: x=41..42, y=27..28)
