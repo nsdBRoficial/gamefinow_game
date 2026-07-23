@@ -165,7 +165,17 @@ export const drawPixelCharacter = (
 
   // Torso Main
   const torsoY = cy + 12 + walkBob;
-  drawPixelRect(cx + 8, torsoY, 16, 10, char.torsoColor || "#ef4444");
+  const isFemale = char.gender === "female";
+
+  if (isFemale) {
+    // Hourglass female waist silhouette (16px shoulders -> 14px waist -> 16px hips)
+    drawPixelRect(cx + 8, torsoY, 16, 3, char.torsoColor || "#ef4444"); // Shoulders
+    drawPixelRect(cx + 9, torsoY + 3, 14, 4, char.torsoColor || "#ef4444"); // Slimmed Waist
+    drawPixelRect(cx + 8, torsoY + 7, 16, 3, char.torsoColor || "#ef4444"); // Hips / Hem
+  } else {
+    // Solid retro male block torso (16x10px)
+    drawPixelRect(cx + 8, torsoY, 16, 10, char.torsoColor || "#ef4444");
+  }
 
   // Torso texture details
   if (direction === "up") {
@@ -308,8 +318,6 @@ export const drawPixelCharacter = (
   drawPixelRect(cx + 8, headY, 16, 11, headFill);
 
   // Hats, Ribbons, and Hair
-  const isFemale = char.gender === "female";
-
   if (char.headType === "topete") {
     drawPixelRect(cx + 8, headY - 5, 16, 5, hairCol); // Raised pompadour topete
     drawPixelRect(cx + 6, headY - 2, 4, 3, hairCol);
