@@ -95,7 +95,7 @@ export const FloatingWindows: React.FC<FloatingWindowsProps> = ({
           {/* A. CUSTOMIZER WINDOW */}
           {activeWindow === "customizer" && (
             <div className="space-y-4">
-              <CharacterCustomizer playerPos={playerPos} setPlayerPos={setPlayerPos} />
+              <CharacterCustomizer playerPos={playerPos} setPlayerPos={setPlayerPos} gameState={gameState} />
             </div>
           )}
 

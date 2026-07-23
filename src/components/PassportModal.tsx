@@ -122,7 +122,7 @@ export function PassportModal({
                       : playerTitle === "Operador On-Ramp" || (gameState.quests.onramp.status === "completed" && !playerTitle)
                       ? "text-amber-600 drop-shadow-[0_0_3px_rgba(217,119,6,0.4)]"
                       : playerTitle === "Iniciado de Stellar" || (gameState.quests.wallet.status === "completed" && !playerTitle)
-                      ? "text-cyan-600 drop-shadow-[0_0_3px_rgba(8,145,178,0.4)]"
+                      ? "text-yellow-600 font-extrabold"
                       : "text-slate-800"
                   }`}>
                     {getFormattedName()}

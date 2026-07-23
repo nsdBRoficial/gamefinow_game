@@ -1648,43 +1648,53 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     ctx.fillRect(playerScreenX + 16 - playerNameW / 2, playerNameY - 2, playerNameW, playerNameH);
 
     // Determine active title / style tier for overhead tag
+    const completedCount = [hasWallet, hasOnramp, hasSoroban, hasHold].filter(Boolean).length;
     let currentTitle = playerPosVal.activeTitle;
-    if (!currentTitle || currentTitle === "Náufrago Recém-Chegado") {
+
+    // Force automatic progression if player hasn't completed all 4 quests OR if activeTitle was auto-assigned earlier
+    if (completedCount < 4 || !currentTitle || currentTitle === "Náufrago Recém-Chegado" || (hasHold && currentTitle === "Iniciado de Stellar")) {
       if (hasHold) currentTitle = "Herói Lendário de Stellar";
       else if (hasSoroban) currentTitle = "Alquimista do Soroban";
       else if (hasOnramp) currentTitle = "Operador On-Ramp";
       else if (hasWallet) currentTitle = "Iniciado de Stellar";
+      else currentTitle = "Náufrago Recém-Chegado";
     }
 
-    let tagColor = "#cbd5e1";
+    let tagColor = "#ffffff";
     let tagShadowColor = "";
     let tagShadowBlur = 0;
-    let borderStyle = "rgba(255, 198, 0, 0.75)";
+    let borderStyle = "#cbd5e1";
 
     if (currentTitle === "Herói Lendário de Stellar") {
-      // Verde Elétrico Matrix (#00ff66) for Legendary Hero (Quest 4 / Vault)
+      // 5. Herói Lendário: Verde Matrix (#00ff66)
       tagColor = "#00ff66";
       tagShadowColor = "#00e676";
-      tagShadowBlur = 10;
+      tagShadowBlur = 8;
       borderStyle = "#00ff66";
     } else if (currentTitle === "Alquimista do Soroban") {
-      // Roxo Místico for Soroban Alchemist (Quest 3 / Soroban)
+      // 4. Alquimista Soroban: Roxo Místico (#e879f9)
       tagColor = "#e879f9";
       tagShadowColor = "#d946ef";
       tagShadowBlur = 6;
       borderStyle = "#e879f9";
     } else if (currentTitle === "Operador On-Ramp") {
-      // Dourado Nobre for On-Ramp Operator (Quest 2 / On-Ramp)
+      // 3. Operador On-Ramp: Dourado Nobre (#fbbf24)
       tagColor = "#fbbf24";
       tagShadowColor = "#f59e0b";
       tagShadowBlur = 6;
       borderStyle = "#fbbf24";
     } else if (currentTitle === "Iniciado de Stellar") {
-      // Ciano Reluzente for Stellar Initiate (Quest 1 / Wallet)
-      tagColor = "#38bdf8";
-      tagShadowColor = "#0284c7";
-      tagShadowBlur = 4;
-      borderStyle = "#38bdf8";
+      // 2. Iniciado de Stellar: Amarelo Padrão (#ffc600)
+      tagColor = "#ffc600";
+      tagShadowColor = "";
+      tagShadowBlur = 0;
+      borderStyle = "#facc15";
+    } else {
+      // 1. Náufrago: Branco NPC (#ffffff)
+      tagColor = "#ffffff";
+      tagShadowColor = "";
+      tagShadowBlur = 0;
+      borderStyle = "#cbd5e1";
     }
 
     // Apply global shadow for border drawing

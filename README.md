@@ -1,9 +1,9 @@
 <div align="center">
   <img src="https://stellar.org/images/stellar-logo.svg" alt="Stellar Logo" width="100"/>
-  <h1>GameFiNow — v0.7.5</h1>
+  <h1>GameFiNow — v0.7.7</h1>
   <p><strong>A Gamified On-Boarding Experience for the Stellar Ecosystem</strong></p>
   <p>
-    <img src="https://img.shields.io/badge/version-v0.7.5-cyan?style=flat-square" alt="version"/>
+    <img src="https://img.shields.io/badge/version-v0.7.7-cyan?style=flat-square" alt="version"/>
     <img src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square" alt="license"/>
     <img src="https://img.shields.io/badge/network-Stellar_Testnet-yellow?style=flat-square" alt="network"/>
     <img src="https://img.shields.io/badge/i18n-EN_|_PT_|_ES-green?style=flat-square" alt="languages"/>
@@ -17,6 +17,28 @@
 **GameFiNow** is a retro-style MMO RPG built on Web3, designed to educate and onboard new users into the Stellar network in an intuitive, fun, and engaging way. Players complete interactive quests that simulate real on-chain interactions — from generating a cryptographic keypair, to depositing funds via an Anchor (On-Ramp), to swapping tokens using Soroban smart contracts and locking assets in a hold vault.
 
 The game runs entirely in the browser, using a 60 FPS HTML5 Canvas engine, and communicates with the **Stellar Testnet** via **WalletNow SDK** and the **Horizon API**.
+
+---
+
+## ✨ What's New in v0.7.7 — Real XLM Outfits, On-Chain Character Rename & Customization Engine
+
+### 👗 Real Stellar On-Chain XLM Outfit Purchases
+- **On-Chain Outfit Shop**: Integrated real XLM transaction execution directly to the project treasury wallet (`GAMEFI_TREASURY_PUBLIC_KEY`: `GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B`).
+- **High-Fidelity Pixel Art Outfits**: Added 10 rich retro pixel outfits (Cyber Armor, Samurai, Valkyrie, Royal Suit, Golden Armor, Dress, etc.) and legendary weapons (Viking Axe, Magic Wand, Katana, Wings).
+- **Female Hourglass Waist Silhouette**: Female character sprites (`gender: "female"`) now render with a smooth 16px shoulder ➔ 14px waist ➔ 16px hips curve.
+
+### 💳 On-Chain Character Rename (5 XLM)
+- **Stellar Name Change Fee**: Replacing player names in the Outfit customizer now charges **5 XLM** sent directly to the GameFi treasury.
+- **Horizon & Explorer Validation**: Generates a 64-character transaction hash with a direct link to **Stellar Expert Explorer** upon successful payment confirmation.
+
+### 🎨 5-Tier Quest Overhead Name Tag Colors & Matrix Green
+- **Automatic Quest Progress Colors**: Overhead name tags on the 2D map update automatically as quests are completed:
+  1. 🌊 **Náufrago Recém-Chegado** (0 Quests): White NPC (`#ffffff`)
+  2. 📜 **Iniciado de Stellar** (Quest 1 Wallet): Yellow (`#ffc600`)
+  3. 💳 **Operador On-Ramp** (Quest 2 On-Ramp): Noble Gold (`#fbbf24` with `#f59e0b` glow)
+  4. 🧪 **Alquimista do Soroban** (Quest 3 Soroban): Mystic Purple (`#e879f9` with `#d946ef` glow)
+  5. 👑 **Herói Lendário de Stellar** (Quest 4 Holder Vault): **Electric Matrix Green (`#00ff66` with `#00e676` neon glow)**
+- **Unlocked Color Selector**: Completing all 4 quests unlocks manual selection in the Customizer between the 3 advanced quest colors (Gold, Purple, Matrix Green).
 
 ---
 
