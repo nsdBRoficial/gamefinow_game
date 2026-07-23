@@ -170,51 +170,128 @@ export const drawPixelCharacter = (
   // Torso texture details
   if (direction === "up") {
     // Back of the torso details
-    if (char.torsoType === "striped") {
-      ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
-      ctx.fillRect(cx + 9, torsoY + 2, 14, 2);
-      ctx.fillRect(cx + 9, torsoY + 6, 14, 2);
+    if (char.torsoType === "cyber") {
+      drawPixelRect(cx + 10, torsoY + 2, 12, 3, "#06b6d4"); // Glowing cyber spine
+    } else if (char.torsoType === "samurai") {
+      drawPixelRect(cx + 9, torsoY + 6, 14, 2, "#eab308"); // Gold obi sash back
+    } else if (char.torsoType === "royal" || char.torsoType === "golden_armor") {
+      drawPixelRect(cx + 8, torsoY + 1, 16, 9, "#ca8a04"); // Gold cape trim back
     } else if (char.torsoType === "hoodie") {
-      // Render a cool hood on the back of the hoodie
       drawPixelRect(cx + 10, torsoY + 1, 12, 6, "rgba(0, 0, 0, 0.2)");
     }
+
     // Back accessories drawn ON TOP of the torso because we are looking at their back
-    if (char.accessoryType === "cape") {
-      drawPixelRect(cx + 6, torsoY + 1, 20, 10, char.headColor);
+    if (char.accessoryType === "wings") {
+      drawPixelRect(cx - 4, torsoY - 2, 12, 14, "#e0e7ff", "#6366f1"); // Left Wing
+      drawPixelRect(cx + 24, torsoY - 2, 12, 14, "#e0e7ff", "#6366f1"); // Right Wing
+      drawPixelRect(cx + 2, torsoY + 1, 4, 10, "#fbbf24"); // Wing feathers glow
+      drawPixelRect(cx + 26, torsoY + 1, 4, 10, "#fbbf24");
+    } else if (char.accessoryType === "cape") {
+      drawPixelRect(cx + 6, torsoY + 1, 20, 11, char.headColor);
     } else if (char.accessoryType === "backpack") {
-      // Draw the backpack
       drawPixelRect(cx + 8, torsoY + 1, 16, 9, "#78350f");
-      // Draw backpack straps over shoulders
       ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
       ctx.fillRect(cx + 10, torsoY, 2, 2);
       ctx.fillRect(cx + 20, torsoY, 2, 2);
     }
   } else {
-    // Front details
-    if (char.torsoType === "striped") {
+    // Front Torso Pixel Art Details
+    if (char.torsoType === "cyber") {
+      // Cyberpunk glowing chest reactor & shoulder pads
+      drawPixelRect(cx + 6, torsoY, 3, 4, "#06b6d4"); // Left Cyber Shoulder
+      drawPixelRect(cx + 23, torsoY, 3, 4, "#06b6d4"); // Right Cyber Shoulder
+      drawPixelRect(cx + 14, torsoY + 3, 4, 4, "#38bdf8", "#0284c7"); // Glowing Core Reactor
+      drawPixelRect(cx + 10, torsoY + 8, 12, 1, "#06b6d4"); // Circuit line
+    } else if (char.torsoType === "samurai") {
+      // Samurai overlapping armor plates & Gold Obi Sash
+      drawPixelRect(cx + 6, torsoY + 1, 3, 5, "#dc2626"); // Left armor pad
+      drawPixelRect(cx + 23, torsoY + 1, 3, 5, "#dc2626"); // Right armor pad
+      drawPixelRect(cx + 9, torsoY + 6, 14, 3, "#eab308", "#854d0e"); // Gold Obi Sash
+      drawPixelRect(cx + 15, torsoY + 1, 2, 5, "#fef08a"); // Crest line
+    } else if (char.torsoType === "valkyrie") {
+      // Valkyrie silver chestplate & winged shoulders
+      drawPixelRect(cx + 5, torsoY - 1, 4, 5, "#f472b6"); // Left Winged shoulder
+      drawPixelRect(cx + 23, torsoY - 1, 4, 5, "#f472b6"); // Right Winged shoulder
+      drawPixelRect(cx + 10, torsoY + 2, 12, 5, "#e2e8f0", "#94a3b8"); // Silver Chestplate
+      drawPixelRect(cx + 15, torsoY + 4, 2, 2, "#ec4899"); // Magenta Heart Gem
+    } else if (char.torsoType === "golden_armor") {
+      // 24k Gold Knight Armor with Ruby Gem
+      drawPixelRect(cx + 5, torsoY, 4, 6, "#facc15", "#854d0e"); // Gold Left Shoulder
+      drawPixelRect(cx + 23, torsoY, 4, 6, "#facc15", "#854d0e"); // Gold Right Shoulder
+      drawPixelRect(cx + 10, torsoY + 2, 12, 6, "#eab308", "#ca8a04"); // Gold Chestplate
+      drawPixelRect(cx + 15, torsoY + 3, 2, 3, "#ef4444"); // Ruby Gem
+    } else if (char.torsoType === "royal") {
+      // Velvet Royal Robe with Gold Trim
+      drawPixelRect(cx + 9, torsoY, 14, 2, "#facc15"); // Gold Collar
+      drawPixelRect(cx + 15, torsoY + 2, 2, 7, "#fbbf24"); // Center Gold Trim
+      drawPixelRect(cx + 15, torsoY + 3, 2, 2, "#38bdf8"); // Sapphire brooch
+    } else if (char.torsoType === "dress") {
+      // Flowing Gown overlay extending down over waist
+      drawPixelRect(cx + 7, torsoY + 7, 18, 5, char.torsoColor || "#ec4899", "#831843"); // Skirt flare
+      drawPixelRect(cx + 12, torsoY + 3, 8, 4, "rgba(255, 255, 255, 0.3)");
+    } else if (char.torsoType === "pirate") {
+      // Leather vest over ruffled shirt & red sash
+      drawPixelRect(cx + 14, torsoY, 4, 5, "#f8fafc"); // White ruffled shirt V-neck
+      drawPixelRect(cx + 9, torsoY + 7, 14, 2, "#dc2626"); // Red pirate sash
+      drawPixelRect(cx + 15, torsoY + 6, 2, 3, "#facc15"); // Gold belt buckle
+    } else if (char.torsoType === "witch_robe") {
+      // Mystic robe with glowing runes & potion belt
+      drawPixelRect(cx + 10, torsoY + 2, 12, 2, "#a855f7"); // Mystic Collar
+      drawPixelRect(cx + 12, torsoY + 4, 8, 2, "#38bdf8"); // Glowing Rune Symbol
+      drawPixelRect(cx + 9, torsoY + 7, 14, 2, "#581c87"); // Potion Belt
+      drawPixelRect(cx + 11, torsoY + 7, 2, 2, "#22c55e"); // Green Potion vial
+      drawPixelRect(cx + 19, torsoY + 7, 2, 2, "#ef4444"); // Red Potion vial
+    } else if (char.torsoType === "suit") {
+      // Tuxedo jacket, shirt & bowtie
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(cx + 14, torsoY, 4, 5); // White Shirt
+      ctx.fillStyle = "#ef4444";
+      ctx.fillRect(cx + 14, torsoY + 1, 4, 1.5); // Bowtie
+      ctx.fillStyle = "#facc15";
+      ctx.fillRect(cx + 15, torsoY + 4, 2, 1.5); // Gold Button 1
+      ctx.fillRect(cx + 15, torsoY + 6, 2, 1.5); // Gold Button 2
+    } else if (char.torsoType === "striped") {
       ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
       ctx.fillRect(cx + 9, torsoY + 2, 14, 2);
       ctx.fillRect(cx + 9, torsoY + 6, 14, 2);
-    } else if (char.torsoType === "suit") {
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(cx + 15, torsoY, 2, 3);
-      ctx.fillStyle = "#ea580c";
-      ctx.fillRect(cx + 15, torsoY + 3, 2, 4);
     } else if (char.torsoType === "hoodie") {
       ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
       ctx.fillRect(cx + 11, torsoY + 5, 10, 4);
     }
   }
 
-  // Right Arm (Weapon holding / Regular)
+  // Right Arm & Weapon / Accessory Poses
   const rightArmX = cx + 24;
   const rightArmY = cy + 12 + walkBob + rightArmYOffset;
 
-  if (char.accessoryType === "sword" && direction !== "up") {
-    // Raised sword pose!
+  if (char.accessoryType === "viking_axe" && direction !== "up") {
+    // Raised Viking Battleaxe Pose
     drawPixelRect(rightArmX, rightArmY - 4, 4, 7, char.torsoColor || "#ef4444");
     drawPixelRect(rightArmX, rightArmY - 7, 4, 3, char.skinColor || "#ffdbac");
-    
+    // Wooden Shaft & Double Steel Axe Head
+    drawPixelRect(rightArmX + 1, rightArmY - 22, 2, 18, "#78350f"); // Handle
+    drawPixelRect(rightArmX - 4, rightArmY - 20, 12, 5, "#94a3b8", "#334155"); // Double Blade
+    drawPixelRect(rightArmX - 5, rightArmY - 22, 3, 9, "#cbd5e1"); // Left Blade Tip
+    drawPixelRect(rightArmX + 6, rightArmY - 22, 3, 9, "#cbd5e1"); // Right Blade Tip
+  } else if (char.accessoryType === "magic_wand" && direction !== "up") {
+    // Sorceress Wand Pose
+    drawPixelRect(rightArmX, rightArmY - 4, 4, 7, char.torsoColor || "#ef4444");
+    drawPixelRect(rightArmX, rightArmY - 7, 4, 3, char.skinColor || "#ffdbac");
+    // Wand Shaft & Glowing Mana Crystal Tip
+    drawPixelRect(rightArmX + 1, rightArmY - 18, 2, 14, "#581c87"); // Wand shaft
+    drawPixelRect(rightArmX - 1, rightArmY - 22, 6, 6, "#38bdf8", "#0284c7"); // Glowing Crystal Tip
+    drawPixelRect(rightArmX, rightArmY - 21, 4, 4, "#e0f2fe"); // Crystal Core
+  } else if (char.accessoryType === "katana" && direction !== "up") {
+    // Cyber Katana Pose
+    drawPixelRect(rightArmX, rightArmY - 4, 4, 7, char.torsoColor || "#ef4444");
+    drawPixelRect(rightArmX, rightArmY - 7, 4, 3, char.skinColor || "#ffdbac");
+    // Cyber Blade
+    drawPixelRect(rightArmX - 3, rightArmY - 8, 10, 2, "#06b6d4"); // Cyber Guard
+    drawPixelRect(rightArmX, rightArmY - 24, 3, 16, "#38bdf8", "#0284c7"); // Cyan Blade
+  } else if (char.accessoryType === "sword" && direction !== "up") {
+    // Raised Steel Sword Pose
+    drawPixelRect(rightArmX, rightArmY - 4, 4, 7, char.torsoColor || "#ef4444");
+    drawPixelRect(rightArmX, rightArmY - 7, 4, 3, char.skinColor || "#ffdbac");
     // Sword details
     drawPixelRect(rightArmX - 4, rightArmY - 10, 12, 2, "#d97706"); // Guard
     drawPixelRect(rightArmX, rightArmY - 24, 4, 14, "#f1f5f9", "#475569"); // Blade
