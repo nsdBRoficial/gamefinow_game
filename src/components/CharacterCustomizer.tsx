@@ -58,6 +58,35 @@ export const CharacterCustomizer: React.FC<CharacterCustomizerProps> = ({
         Monte o estilo do seu herói quadrado! Escolha a cabeça, olhos, tronco, pernas e sapatos. As alterações aparecem no mapa na hora.
       </p>
 
+      {/* Sexo / Gênero do Personagem */}
+      <div className="bg-slate-950 p-3.5 rounded-lg border border-slate-800 space-y-2">
+        <label className="text-[10px] font-black text-pink-400 block uppercase font-mono tracking-wider">
+          👥 Gênero / Sexo do Personagem
+        </label>
+        <div className="grid grid-cols-2 gap-2 text-xs font-bold font-mono">
+          <button
+            onClick={() => updateCustomization("gender", "male")}
+            className={`py-2 px-3 rounded-lg border flex items-center justify-center gap-2 cursor-pointer transition ${
+              (playerPos.gender || "male") === "male"
+                ? "bg-cyan-950/60 border-cyan-500 text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.3)] font-black"
+                : "bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-850"
+            }`}
+          >
+            <span className="text-base">👦</span> Masculino
+          </button>
+          <button
+            onClick={() => updateCustomization("gender", "female")}
+            className={`py-2 px-3 rounded-lg border flex items-center justify-center gap-2 cursor-pointer transition ${
+              playerPos.gender === "female"
+                ? "bg-pink-950/60 border-pink-500 text-pink-300 shadow-[0_0_10px_rgba(236,72,153,0.3)] font-black"
+                : "bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-850"
+            }`}
+          >
+            <span className="text-base">👧</span> Feminino
+          </button>
+        </div>
+      </div>
+
       {/* Nome do Personagem */}
       <div className="bg-slate-950 p-3.5 rounded-lg border border-slate-800 space-y-2">
         <label className="text-[10px] font-black text-cyan-400 block uppercase font-mono tracking-wider">
@@ -112,7 +141,7 @@ export const CharacterCustomizer: React.FC<CharacterCustomizerProps> = ({
 
           {/* Hair/Helmet Color */}
           <div className="space-y-1">
-            <span className="text-[9px] text-slate-500 uppercase font-mono">Cor do Chapéu / Detalhe</span>
+            <span className="text-[9px] text-slate-500 uppercase font-mono">Cor do Cabelo / Chapéu</span>
             <div className="flex flex-wrap gap-1.5">
               {PRESET_COLORS.map((color) => (
                 <button
@@ -128,16 +157,33 @@ export const CharacterCustomizer: React.FC<CharacterCustomizerProps> = ({
             </div>
           </div>
 
-          {/* Head Style Type */}
+          {/* Head Style Type (Gender Specific) */}
           <div className="space-y-1">
-            <span className="text-[9px] text-slate-500 uppercase font-mono">Tipo de Cabeça</span>
+            <span className="text-[9px] text-slate-500 uppercase font-mono">
+              Tipo de Cabelo / Chapéu ({playerPos.gender === "female" ? "Feminino 👧" : "Masculino 👦"})
+            </span>
             <div className="grid grid-cols-2 gap-1 text-[10px]">
-              {[
-                { id: "square", name: "Quadrado 🔲" },
-                { id: "beanie", name: "Gorro 🏮" },
-                { id: "helmet", name: "Capacete 🪖" },
-                { id: "horns", name: "Chifres 😈" },
-              ].map((style) => (
+              {(playerPos.gender === "female"
+                ? [
+                    { id: "long_hair", name: "Longo Cascata 👱‍♀️" },
+                    { id: "ponytail", name: "Rabo de Cavalo 👧" },
+                    { id: "ribbon", name: "Laço & Tiara 🎀" },
+                    { id: "bob", name: "Corte Bob/Chanel 💇‍♀️" },
+                    { id: "witch", name: "Chapéu de Maga 🔮" },
+                    { id: "flower_crown", name: "Coroa de Flores 🌸" },
+                    { id: "elf_ears", name: "Orelhas de Elfa 🧝‍♀️" },
+                    { id: "helmet", name: "Capacete 🪖" },
+                  ]
+                : [
+                    { id: "topete", name: "Topete Pompadour 💇‍♂️" },
+                    { id: "square", name: "Curto Padrão 🔲" },
+                    { id: "militar", name: "Militar / Raspado 🪖" },
+                    { id: "beanie", name: "Gorro Street 🏮" },
+                    { id: "pirate", name: "Pirata Bandana 🏴‍☠️" },
+                    { id: "helmet", name: "Capacete Cavaleiro 🛡️" },
+                    { id: "horns", name: "Chifres Viking 😈" },
+                  ]
+              ).map((style) => (
                 <button
                   key={`head-type-${style.id}`}
                   onClick={() => updateCustomization("headType", style.id)}
@@ -158,20 +204,32 @@ export const CharacterCustomizer: React.FC<CharacterCustomizerProps> = ({
         <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-2.5">
           <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200">
             <Eye className="h-3.5 w-3.5 text-pink-400" />
-            <span>Rosto & Acessórios</span>
+            <span>Rosto & Traços ({playerPos.gender === "female" ? "Femininos" : "Masculinos"})</span>
           </div>
 
-          {/* Face style (Glasses, Eyepatch, Beard, Smile) */}
+          {/* Face style (Gender Specific) */}
           <div className="space-y-1">
             <span className="text-[9px] text-slate-500 uppercase font-mono">Estilo Facial</span>
             <div className="grid grid-cols-2 gap-1 text-[10px]">
-              {[
-                { id: "smile", name: "Sorriso 🙂" },
-                { id: "glasses", name: "Óculos 👓" },
-                { id: "beard", name: "Barba 🧔" },
-                { id: "eyepatch", name: "Tapa-Olho 🏴‍☠️" },
-                { id: "none", name: "Neutro 😶" },
-              ].map((face) => (
+              {(playerPos.gender === "female"
+                ? [
+                    { id: "eyelashes", name: "Cílios & Blush ✨" },
+                    { id: "makeup", name: "Batom / Make 💄" },
+                    { id: "smile", name: "Sorriso 🌸" },
+                    { id: "glasses", name: "Óculos Elegante 👓" },
+                    { id: "visor", name: "Visor Cyber 🥽" },
+                    { id: "none", name: "Neutro 😶" },
+                  ]
+                : [
+                    { id: "beard", name: "Barba Curta 🧔" },
+                    { id: "elder_beard", name: "Barba Longa Mago 🧙‍♂️" },
+                    { id: "mustache", name: "Bigode Pirata 🥸" },
+                    { id: "eyepatch", name: "Tapa-Olho 🏴‍☠️" },
+                    { id: "glasses", name: "Óculos 👓" },
+                    { id: "visor", name: "Visor Cyber 🥽" },
+                    { id: "none", name: "Neutro 😶" },
+                  ]
+              ).map((face) => (
                 <button
                   key={`face-type-${face.id}`}
                   onClick={() => updateCustomization("faceType", face.id)}
@@ -187,16 +245,28 @@ export const CharacterCustomizer: React.FC<CharacterCustomizerProps> = ({
             </div>
           </div>
 
-          {/* Back Accessories */}
+          {/* Back Accessories (Gender Specific) */}
           <div className="space-y-1">
             <span className="text-[9px] text-slate-500 uppercase font-mono">Acessório Costas / Mão</span>
             <div className="grid grid-cols-2 gap-1 text-[10px]">
-              {[
-                { id: "backpack", name: "Mochila 🎒" },
-                { id: "cape", name: "Capa RPG 🧥" },
-                { id: "sword", name: "Espada ⚔️" },
-                { id: "none", name: "Nenhum 📭" },
-              ].map((acc) => (
+              {(playerPos.gender === "female"
+                ? [
+                    { id: "wings", name: "Asas de Valquíria 🪽" },
+                    { id: "magic_wand", name: "Varinha Mágica 🪄" },
+                    { id: "backpack", name: "Mochila Fofa 🎒" },
+                    { id: "cape", name: "Capa Mística 🧥" },
+                    { id: "katana", name: "Katana Cyber ⚔️" },
+                    { id: "none", name: "Nenhum 📭" },
+                  ]
+                : [
+                    { id: "sword", name: "Espada de Aço ⚔️" },
+                    { id: "viking_axe", name: "Katana / Machado 🪓" },
+                    { id: "backpack", name: "Mochila Explorer 🎒" },
+                    { id: "cape", name: "Capa RPG 🧥" },
+                    { id: "wings", name: "Asas 🪽" },
+                    { id: "none", name: "Nenhum 📭" },
+                  ]
+              ).map((acc) => (
                 <button
                   key={`acc-type-${acc.id}`}
                   onClick={() => updateCustomization("accessoryType", acc.id)}
@@ -217,12 +287,12 @@ export const CharacterCustomizer: React.FC<CharacterCustomizerProps> = ({
         <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-2.5">
           <div className="flex items-center gap-1.5 text-xs font-bold text-slate-200">
             <Shirt className="h-3.5 w-3.5 text-red-400" />
-            <span>Roupa / Tronco</span>
+            <span>Roupa / Vestuário ({playerPos.gender === "female" ? "Feminino" : "Masculino"})</span>
           </div>
 
           {/* Color Selection */}
           <div className="space-y-1">
-            <span className="text-[9px] text-slate-500 uppercase font-mono">Cor da Camisa</span>
+            <span className="text-[9px] text-slate-500 uppercase font-mono">Cor da Roupa</span>
             <div className="flex flex-wrap gap-1.5">
               {PRESET_COLORS.map((color) => (
                 <button
@@ -242,12 +312,22 @@ export const CharacterCustomizer: React.FC<CharacterCustomizerProps> = ({
           <div className="space-y-1">
             <span className="text-[9px] text-slate-500 uppercase font-mono">Estilo da Roupa</span>
             <div className="grid grid-cols-2 gap-1 text-[10px]">
-              {[
-                { id: "plain", name: "Liso 👕" },
-                { id: "striped", name: "Listrado 🦓" },
-                { id: "suit", name: "Terno 👔" },
-                { id: "hoodie", name: "Moletom 🧥" },
-              ].map((style) => (
+              {(playerPos.gender === "female"
+                ? [
+                    { id: "dress", name: "Vestido de Gala 👗" },
+                    { id: "valkyrie", name: "Traje de Valquíria 🛡️" },
+                    { id: "cyber", name: "Jaqueta Cyber 🧥" },
+                    { id: "hoodie", name: "Moletom 👚" },
+                    { id: "plain", name: "Blusa Simples 👕" },
+                  ]
+                : [
+                    { id: "suit", name: "Terno Executive 👔" },
+                    { id: "samurai", name: "Kimono Samurai 🥋" },
+                    { id: "plate_armor", name: "Armadura Placa 🛡️" },
+                    { id: "hoodie", name: "Moletom Hoodie 🧥" },
+                    { id: "plain", name: "Camisa Simples 👕" },
+                  ]
+              ).map((style) => (
                 <button
                   key={`torso-type-${style.id}`}
                   onClick={() => updateCustomization("torsoType", style.id)}

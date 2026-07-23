@@ -1,6 +1,5 @@
-import { Player } from "../../types";
-
 export interface PixelCharData {
+  gender?: "male" | "female";
   skinColor: string;
   headColor: string;
   headType: string;
@@ -231,11 +230,72 @@ export const drawPixelCharacter = (
   const headFill = (direction === "up" && char.headType !== "helmet") ? hairCol : (char.skinColor || "#ffdbac");
   drawPixelRect(cx + 8, headY, 16, 11, headFill);
 
-  // Hats and Hair
-  if (char.headType === "square") {
+  // Hats, Ribbons, and Hair
+  const isFemale = char.gender === "female";
+
+  if (char.headType === "topete") {
+    drawPixelRect(cx + 8, headY - 5, 16, 5, hairCol); // Raised pompadour topete
+    drawPixelRect(cx + 6, headY - 2, 4, 3, hairCol);
+  } else if (char.headType === "militar") {
+    drawPixelRect(cx + 8, headY - 1, 16, 2, hairCol); // Very short military crop
+  } else if (char.headType === "ponytail") {
+    drawPixelRect(cx + 6, headY - 3, 20, 4, hairCol);
+    drawPixelRect(cx + 4, headY + 1, 4, 12, hairCol);
+    drawPixelRect(cx + 24, headY + 1, 4, 12, hairCol);
+    // Ponytail on the side
+    drawPixelRect(cx + 25, headY + 4, 5, 10, hairCol);
+  } else if (char.headType === "bob") {
+    drawPixelRect(cx + 6, headY - 3, 20, 5, hairCol); // Cute bob / chanel cut
+    drawPixelRect(cx + 5, headY + 1, 4, 9, hairCol);
+    drawPixelRect(cx + 23, headY + 1, 4, 9, hairCol);
+  } else if (char.headType === "witch") {
+    // Pointed witch / sorceress hat
+    ctx.fillStyle = char.headColor || "#4c1d95";
+    ctx.beginPath();
+    ctx.moveTo(cx + 4, headY + 1);
+    ctx.lineTo(cx + 16, headY - 10);
+    ctx.lineTo(cx + 28, headY + 1);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = "#000000";
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    drawPixelRect(cx + 3, headY, 26, 2, "#6d28d9"); // Brim
+  } else if (char.headType === "elf_ears") {
+    drawPixelRect(cx + 7, headY - 2, 18, 4, hairCol);
+    // Elven ears
+    drawPixelRect(cx + 4, headY + 2, 4, 3, char.skinColor);
+    drawPixelRect(cx + 24, headY + 2, 4, 3, char.skinColor);
+  } else if (char.headType === "flower_crown") {
+    drawPixelRect(cx + 6, headY - 3, 20, 5, hairCol);
+    // Flowers on head
+    drawPixelRect(cx + 8, headY - 4, 3, 3, "#f472b6");
+    drawPixelRect(cx + 14, headY - 4, 3, 3, "#fbbf24");
+    drawPixelRect(cx + 20, headY - 4, 3, 3, "#38bdf8");
+  } else if (char.headType === "pirate") {
+    drawPixelRect(cx + 5, headY - 4, 22, 5, "#0f172a"); // Pirate bandana/hat
+    drawPixelRect(cx + 14, headY - 3, 4, 3, "#ef4444"); // Skull or accent
+  } else if (char.headType === "square") {
     drawPixelRect(cx + 7, headY - 3, 18, 4, hairCol); // Hair top
     drawPixelRect(cx + 7, headY + 1, 3, 6, hairCol);   // Left side
     drawPixelRect(cx + 22, headY + 1, 3, 6, hairCol);  // Right side
+    if (isFemale) {
+      // Long cascading hair strands for female
+      drawPixelRect(cx + 5, headY + 2, 4, 12, hairCol);
+      drawPixelRect(cx + 23, headY + 2, 4, 12, hairCol);
+    }
+  } else if (char.headType === "ribbon" || (isFemale && char.headType === "long_hair")) {
+    drawPixelRect(cx + 6, headY - 3, 20, 5, hairCol); // Top hair
+    drawPixelRect(cx + 4, headY + 1, 4, 14, hairCol); // Long left hair
+    drawPixelRect(cx + 24, headY + 1, 4, 14, hairCol); // Long right hair
+    // Red Hair Ribbon Bow
+    drawPixelRect(cx + 14, headY - 6, 4, 3, "#ec4899");
+    drawPixelRect(cx + 11, headY - 5, 3, 2, "#f472b6");
+    drawPixelRect(cx + 18, headY - 5, 3, 2, "#f472b6");
+  } else if (char.headType === "long_hair") {
+    drawPixelRect(cx + 6, headY - 3, 20, 5, hairCol);
+    drawPixelRect(cx + 4, headY + 1, 4, 15, hairCol);
+    drawPixelRect(cx + 24, headY + 1, 4, 15, hairCol);
   } else if (char.headType === "beanie") {
     if (char.headColor === "#1d4ed8") {
       // High pointy magical wizard hat!
@@ -291,21 +351,43 @@ export const drawPixelCharacter = (
     drawPixelRect(cx + 18, headY + 3, 3, 3, "#ffffff", "");
     drawPixelRect(cx + 18.5 + pupilShiftX, headY + 4, 1.5, 1.5, "#000000", "");
 
+    // Eyelashes & Cute Blush for Female
+    if (isFemale || char.faceType === "eyelashes" || char.faceType === "makeup") {
+      // Top Eyelashes
+      drawPixelRect(cx + 9, headY + 2, 4, 1, "#000000", "");
+      drawPixelRect(cx + 18, headY + 2, 4, 1, "#000000", "");
+      // Pink Blush Cheeks
+      drawPixelRect(cx + 8.5, headY + 6, 3, 2, "#fda4af", "");
+      drawPixelRect(cx + 19.5, headY + 6, 3, 2, "#fda4af", "");
+    }
+
     // Custom face traits
-    if (char.faceType === "glasses") {
-      ctx.strokeStyle = "#000000";
-      ctx.lineWidth = 1.2;
-      ctx.strokeRect(cx + 9, headY + 2.5, 5, 4);
-      ctx.strokeRect(cx + 17, headY + 2.5, 5, 4);
-      ctx.beginPath();
-      ctx.moveTo(cx + 14, headY + 4.5);
-      ctx.lineTo(cx + 17, headY + 4.5);
-      ctx.stroke();
+    if (char.faceType === "glasses" || char.faceType === "visor") {
+      if (char.faceType === "visor") {
+        drawPixelRect(cx + 8, headY + 2, 15, 4, "#06b6d4", "#0891b2");
+      } else {
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 1.2;
+        ctx.strokeRect(cx + 9, headY + 2.5, 5, 4);
+        ctx.strokeRect(cx + 17, headY + 2.5, 5, 4);
+        ctx.beginPath();
+        ctx.moveTo(cx + 14, headY + 4.5);
+        ctx.lineTo(cx + 17, headY + 4.5);
+        ctx.stroke();
+      }
+    } else if (char.faceType === "elder_beard") {
+      drawPixelRect(cx + 7, headY + 6, 18, 7, "#f8fafc"); // Long elder white beard
+      ctx.fillStyle = char.skinColor;
+      ctx.fillRect(cx + 14, headY + 7, 4, 1.5);
     } else if (char.faceType === "beard") {
       const beardCol = char.hairColor || "#78350f";
       drawPixelRect(cx + 8, headY + 7, 16, 4, beardCol);
       ctx.fillStyle = char.skinColor;
       ctx.fillRect(cx + 14, headY + 8, 4, 1.5); // Mouth cutout
+    } else if (char.faceType === "mustache") {
+      drawPixelRect(cx + 10, headY + 7, 12, 2, "#451a03"); // Pirate handlebar mustache
+    } else if (char.faceType === "makeup") {
+      drawPixelRect(cx + 14, headY + 8, 4, 1.5, "#e11d48"); // Red lipstick
     } else if (char.faceType === "eyepatch") {
       drawPixelRect(cx + 10, headY + 2.5, 3.5, 3.5, "#111111", "");
       ctx.strokeStyle = "#111111";
@@ -314,18 +396,9 @@ export const drawPixelCharacter = (
       ctx.moveTo(cx + 8, headY + 1.5);
       ctx.lineTo(cx + 23, headY + 5.5);
       ctx.stroke();
-    } else if (char.faceType === "smile") {
-      ctx.fillStyle = "rgba(244, 63, 94, 0.5)";
-      ctx.fillRect(cx + 9, headY + 6, 2, 1.5);
-      ctx.fillRect(cx + 20, headY + 6, 2, 1.5);
-      
-      ctx.strokeStyle = "#000000";
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(cx + 13, headY + 7.5);
-      ctx.lineTo(cx + 15, headY + 9);
-      ctx.lineTo(cx + 17, headY + 7.5);
-      ctx.stroke();
+    } else if (char.faceType === "smile" || isFemale) {
+      ctx.fillStyle = "rgba(244, 63, 94, 0.7)";
+      ctx.fillRect(cx + 14.5, headY + 7.5, 3, 1.5);
     } else {
       // Simple pixel mouth
       ctx.fillStyle = "#854d0e";
@@ -333,9 +406,14 @@ export const drawPixelCharacter = (
     }
   }
 
-  // Back accessories if facing up
+  // Back accessories (Wings, Katana, Cape, Backpack) if facing up
   if (direction === "up") {
-    if (char.accessoryType === "cape") {
+    if (char.accessoryType === "wings") {
+      drawPixelRect(cx - 2, cy + 8 + walkBob, 10, 14, "#e0e7ff", "#6366f1");
+      drawPixelRect(cx + 24, cy + 8 + walkBob, 10, 14, "#e0e7ff", "#6366f1");
+    } else if (char.accessoryType === "katana") {
+      drawPixelRect(cx + 22, cy + 6 + walkBob, 3, 20, "#e2e8f0", "#334155");
+    } else if (char.accessoryType === "cape") {
       drawPixelRect(cx + 6, cy + 13 + walkBob, 20, 11, char.headColor);
     } else if (char.accessoryType === "backpack") {
       drawPixelRect(cx + 8, cy + 12 + walkBob, 16, 9, "#78350f");
