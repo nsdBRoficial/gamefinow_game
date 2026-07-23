@@ -690,12 +690,14 @@ export default function App() {
 
   const currentRegion = getRegionName(playerPos.mapId || "center");
 
-  // Dynamic Title based on completed quests
-  let playerTitle = "Náufrago Recém-Chegado";
-  if (completedCount === 1) playerTitle = "Iniciado de Stellar";
-  else if (completedCount === 2) playerTitle = "Operador On-Ramp";
-  else if (completedCount === 3) playerTitle = "Alquimista do Soroban";
-  else if (completedCount >= 4) playerTitle = "Herói Lendário de Stellar";
+  // Dynamic Title (Prioritizes playerPos.activeTitle if set)
+  let defaultTitle = "Náufrago Recém-Chegado";
+  if (completedCount === 1) defaultTitle = "Iniciado de Stellar";
+  else if (completedCount === 2) defaultTitle = "Operador On-Ramp";
+  else if (completedCount === 3) defaultTitle = "Alquimista do Soroban";
+  else if (completedCount >= 4) defaultTitle = "Herói Lendário de Stellar";
+
+  const playerTitle = playerPos.activeTitle || defaultTitle;
 
   // RPG stats calculations
   const attrStr = 12 + completedCount * 3;

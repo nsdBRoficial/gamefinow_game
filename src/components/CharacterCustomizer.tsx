@@ -387,11 +387,82 @@ export const CharacterCustomizer: React.FC<CharacterCustomizerProps> = ({
             </div>
           </div>
         </div>
+
+        {/* SECTION 5: Titles & Name Style */}
+        <div className="bg-slate-900/60 p-3 rounded-lg border border-amber-900/40 space-y-3">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-amber-400">
+            <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+            <span>TÍTULO E EXIBIÇÃO DE NOME 🏷️</span>
+          </div>
+
+          {/* Active Title Picker */}
+          <div className="space-y-1">
+            <span className="text-[9px] text-slate-400 uppercase font-mono">Título Ativo</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-32 overflow-y-auto pr-1">
+              {[
+                { id: "naufrago", title: "Náufrago Recém-Chegado", icon: "🌊" },
+                { id: "iniciado_stellar", title: "Iniciado de Stellar", icon: "📜" },
+                { id: "operador_onramp", title: "Operador On-Ramp", icon: "💳" },
+                { id: "alquimista_soroban", title: "Alquimista do Soroban", icon: "🧪" },
+                { id: "heroi_stellar", title: "Herói Lendário de Stellar", icon: "👑" },
+                { id: "cyber_ninja_title", title: "Cyber Ninja ⚡", icon: "🥷" },
+                { id: "archmage_title", title: "Arquimago Soroban 🔮", icon: "🔮" },
+                { id: "valkyrie_title", title: "Rainha Valquíria 🪽", icon: "🪽" },
+                { id: "ceo_title", title: "CEO da Blockchain 💼", icon: "💼" },
+                { id: "gold_knight_title", title: "Cavaleiro de Ouro 🌟", icon: "🌟" },
+                { id: "pirate_title", title: "Capitão dos Mares 🏴‍☠️", icon: "🏴‍☠️" },
+              ].map((t) => {
+                const isSelected = (playerPos.activeTitle || "Náufrago Recém-Chegado") === t.title;
+                return (
+                  <button
+                    key={`title-btn-${t.id}`}
+                    onClick={() => updateCustomization("activeTitle", t.title)}
+                    className={`px-2.5 py-1.5 rounded-lg border text-left text-[10px] font-mono transition flex items-center gap-1.5 cursor-pointer ${
+                      isSelected
+                        ? "bg-amber-950/80 border-amber-500 text-amber-300 font-bold shadow-[0_0_8px_rgba(245,158,11,0.3)]"
+                        : "bg-slate-950/60 border-slate-800 text-slate-400 hover:bg-slate-900"
+                    }`}
+                  >
+                    <span>{t.icon}</span>
+                    <span className="truncate">{t.title}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Name Formatting Style Picker */}
+          <div className="space-y-1">
+            <span className="text-[9px] text-slate-400 uppercase font-mono">Estilo de Nome no Mapa</span>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 text-[10px] font-mono">
+              {[
+                { id: "badge", label: "Emblema 👑", example: `👑 ${playerPos.name || "Hero"} | ${playerPos.activeTitle || "Iniciado"}` },
+                { id: "prefix", label: "Prefixo []", example: `[${playerPos.activeTitle || "Iniciado"}] ${playerPos.name || "Hero"}` },
+                { id: "suffix", label: "Sufixo , o", example: `${playerPos.name || "Hero"}, o ${playerPos.activeTitle || "Iniciado"}` },
+                { id: "plain", label: "Apenas Nome", example: playerPos.name || "Hero" },
+              ].map((style) => (
+                <button
+                  key={`style-btn-${style.id}`}
+                  onClick={() => updateCustomization("nameStyle", style.id)}
+                  className={`p-1.5 rounded border text-center transition cursor-pointer ${
+                    (playerPos.nameStyle || "badge") === style.id
+                      ? "bg-purple-950 border-purple-500 text-purple-300 font-bold"
+                      : "bg-slate-950 border-slate-800 text-slate-400 hover:bg-slate-900"
+                  }`}
+                  title={style.example}
+                >
+                  <div className="font-bold">{style.label}</div>
+                  <div className="text-[8px] text-slate-500 truncate mt-0.5">{style.example}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="text-[10px] text-slate-500 text-center border-t border-slate-850 pt-2 flex items-center justify-center gap-1">
         <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
-        <span>Seu visual de herói está salvo e ativo! Use WASD ou Teclas de Direção para explorar o mapa 60x60.</span>
+        <span>Seu visual de herói e título estão salvos e ativos no mapa e passaporte!</span>
       </div>
     </div>
   );

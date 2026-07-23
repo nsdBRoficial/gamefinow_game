@@ -61,6 +61,9 @@ export interface Player {
   gender?: "male" | "female";
   activeOutfit?: string;
   ownedOutfits?: string[];
+  activeTitle?: string;
+  unlockedTitles?: string[];
+  nameStyle?: "prefix" | "suffix" | "badge" | "plain";
   headColor: string;
   torsoColor: string;
   legsColor: string;
