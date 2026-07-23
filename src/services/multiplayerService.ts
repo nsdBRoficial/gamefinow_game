@@ -82,20 +82,19 @@ const MAX_PLAYERS_PER_MAP = parseInt(
 
 /**
  * Gera ou recupera um ID de sessão único para este jogador.
- * Usa o publicKey da Stellar se disponível, caso contrário gera um UUID local.
+ * Usa o publicKey da Stellar se disponível; caso contrário, gera um ID único por aba de navegador (sessionStorage).
  */
 export function getOrCreatePlayerId(stellarPublicKey?: string): string {
   if (stellarPublicKey && stellarPublicKey.length > 10) {
-    // Usa o endereço Stellar como identificador primário
     return stellarPublicKey;
   }
 
-  // Fallback: UUID gerado e salvo em localStorage
-  const stored = localStorage.getItem("gfn_player_session_id");
+  // Usa sessionStorage em vez de localStorage para que cada guia/aba do navegador tenha um ID único de jogador
+  let stored = sessionStorage.getItem("gfn_player_session_id");
   if (stored) return stored;
 
-  const uuid = crypto.randomUUID();
-  localStorage.setItem("gfn_player_session_id", uuid);
+  const uuid = `anon_${Math.random().toString(36).substring(2, 9)}_${Date.now().toString(36)}`;
+  sessionStorage.setItem("gfn_player_session_id", uuid);
   return uuid;
 }
 
@@ -220,7 +219,7 @@ async function fetchPlayersInMap(mapId: string): Promise<OnlinePlayer[]> {
 }
 
 /**
- * Assina o canal Realtime do mapa atual.
+ * Assina o canal Realtime do mapa atual usando Presença + Broadcast via WebSockets.
  * Chama onPlayersUpdate com a lista de jogadores online toda vez que há mudança.
  * Chama onChatMessage para novas mensagens de chat.
  */
@@ -238,9 +237,30 @@ export function subscribeToMap(
   currentMapId = mapId;
   currentPlayerId = playerId;
 
-  // Canal de presença (posições)
+  console.log(`[Multiplayer] Conectando ao mapa: ${mapId} como ${playerId}`);
+
+  // Canal Realtime unificado (Presença + Postgres Changes + Broadcast)
   presenceChannel = supabase
-    .channel(`presence-map-${mapId}`)
+    .channel(`map-room-${mapId}`, {
+      config: {
+        presence: { key: playerId },
+        broadcast: { ack: false, self: false },
+      },
+    })
+    // 1. Escuta presença nativa WebSocket do Supabase Realtime
+    .on("presence", { event: "sync" }, () => {
+      const state = presenceChannel?.presenceState<OnlinePlayer>();
+      if (state) {
+        const playersList: OnlinePlayer[] = [];
+        Object.keys(state).forEach((key) => {
+          if (key !== playerId && state[key].length > 0) {
+            playersList.push(state[key][0]);
+          }
+        });
+        onPlayersUpdate(playersList);
+      }
+    })
+    // 2. Escuta mudanças na tabela do banco como fallback
     .on(
       "postgres_changes" as any,
       {
@@ -255,8 +275,7 @@ export function subscribeToMap(
     )
     .subscribe((status) => {
       if (status === "SUBSCRIBED") {
-        console.log(`[Multiplayer] Inscrito no mapa: ${mapId}`);
-        // Carrega a lista inicial
+        console.log(`[Multiplayer] ✅ Inscrito com sucesso no mapa ${mapId}`);
         fetchPlayersInMap(mapId).then(onPlayersUpdate);
       }
     });

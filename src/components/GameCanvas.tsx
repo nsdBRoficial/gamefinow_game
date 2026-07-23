@@ -1607,38 +1607,39 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
 
     // 6.5. Render MMO Other Players on the map
-    // Se temos jogadores reais do Supabase, usamos eles; senão, usamos os bots demo
-    const realPlayers = realOnlinePlayersRef.current;
-    if (realPlayers.length > 0) {
-      // Converte OnlinePlayer (snake_case) para o formato que drawOtherPlayers espera
-      const mappedReal = realPlayers
-        .filter((rp) => rp.map_id === (currentRegion || "center"))
-        .map((rp) => ({
-          id: rp.player_id,
-          name: rp.name,
-          x: rp.x,
-          y: rp.y,
-          targetX: rp.x,
-          targetY: rp.y,
-          dir: rp.dir,
-          isMoving: rp.is_moving,
-          frame: 0,
-          headColor: rp.head_color,
-          torsoColor: rp.torso_color,
-          legsColor: rp.legs_color,
-          shoesColor: rp.shoes_color,
-          skinColor: rp.skin_color,
-          headType: rp.head_type,
-          torsoType: rp.torso_type,
-          shoesType: rp.shoes_type,
-          faceType: rp.face_type,
-          accessoryType: rp.accessory_type,
-          bubbleText: rp.bubbleText,
-          bubbleTimer: rp.bubbleTimer,
-        }));
-      drawOtherPlayers(ctx, mappedReal, currentRegion as MapId);
+    // Quando realOnlinePlayers esta definido (multiplayer ativo), desenha jogadores reais do Supabase
+    if (realOnlinePlayers !== undefined) {
+      const realPlayers = realOnlinePlayersRef.current;
+      if (realPlayers.length > 0) {
+        const mappedReal = realPlayers
+          .filter((rp) => rp.map_id === (currentRegion || "center"))
+          .map((rp) => ({
+            id: rp.player_id,
+            name: rp.name,
+            x: rp.x,
+            y: rp.y,
+            targetX: rp.x,
+            targetY: rp.y,
+            dir: rp.dir,
+            isMoving: rp.is_moving,
+            frame: 0,
+            headColor: rp.head_color,
+            torsoColor: rp.torso_color,
+            legsColor: rp.legs_color,
+            shoesColor: rp.shoes_color,
+            skinColor: rp.skin_color,
+            headType: rp.head_type,
+            torsoType: rp.torso_type,
+            shoesType: rp.shoes_type,
+            faceType: rp.face_type,
+            accessoryType: rp.accessory_type,
+            bubbleText: rp.bubbleText,
+            bubbleTimer: rp.bubbleTimer,
+          }));
+        drawOtherPlayers(ctx, mappedReal, currentRegion as MapId);
+      }
     } else {
-      // Fallback: bots demo enquanto não há jogadores reais
+      // Fallback: bots demo apenas se o multiplayer estiver desativado por flag
       drawOtherPlayers(ctx, otherPlayersRef.current, currentRegion as MapId);
     }
 
