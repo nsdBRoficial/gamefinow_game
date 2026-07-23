@@ -517,3 +517,68 @@ export const fetchOnChainBalances = async (publicKey: string) => {
     return null;
   }
 };
+
+/**
+ * Executes a real on-chain Stellar payment in XLM to the GameFi Treasury account.
+ */
+export const executeOutfitPurchaseOnChain = async (
+  playerPublicKey: string,
+  playerSecretKey: string,
+  priceXlm: number,
+  outfitId: string
+): Promise<{ success: boolean; txHash: string; ledger?: number; error?: string }> => {
+  try {
+    console.log(`[Stellar] Executando compra de outfit ${outfitId} por ${priceXlm} XLM...`);
+
+    let signingKeypair: Keypair | null = null;
+    if (playerSecretKey) {
+      try {
+        signingKeypair = Keypair.fromSecret(playerSecretKey);
+      } catch (e) {
+        console.warn("[Stellar] Chave secreta do jogador inválida, usando Vault fallback.");
+      }
+    }
+
+    const sourceAddress = signingKeypair ? signingKeypair.publicKey() : (playerPublicKey && playerPublicKey.startsWith("G") ? playerPublicKey : VAULT_ADDRESS);
+    const signer = signingKeypair || VAULT_KEYPAIR;
+
+    // Load source account from Stellar Horizon Testnet
+    const sourceAccount = await server.loadAccount(sourceAddress);
+
+    // Build real Stellar payment operation to GAMEFI_TREASURY_PUBLIC_KEY
+    const tx = new TransactionBuilder(sourceAccount, {
+      fee: "1000",
+      networkPassphrase: Networks.TESTNET
+    })
+      .addOperation(
+        Operation.payment({
+          destination: GAMEFI_TREASURY_PUBLIC_KEY,
+          asset: Asset.native(),
+          amount: priceXlm.toFixed(7)
+        })
+      )
+      .addMemo(Memo.text(`BUY_${outfitId.slice(0, 19).toUpperCase()}`))
+      .setTimeout(30)
+      .build();
+
+    tx.sign(signer);
+
+    console.log(`[Stellar] Enviando transação de compra para a carteira ${GAMEFI_TREASURY_PUBLIC_KEY}...`);
+    const response = await server.submitTransaction(tx);
+    console.log(`[Stellar] ✓ Transação confirmada no ledger! Hash: ${response.hash}`);
+
+    return {
+      success: true,
+      txHash: response.hash,
+      ledger: response.ledger
+    };
+  } catch (err: any) {
+    console.error("[Stellar] Erro na transação on-chain de compra:", err);
+    return {
+      success: false,
+      txHash: "",
+      error: err?.message || "Falha na transação Stellar"
+    };
+  }
+};
+
