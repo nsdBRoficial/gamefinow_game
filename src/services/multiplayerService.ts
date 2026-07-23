@@ -152,27 +152,55 @@ export async function upsertPlayer(
 }
 
 /**
- * Publica a posição do jogador local com throttle.
- * Só envia se a posição mudou ou se foi muito tempo desde o último envio.
+ * Publica a posição do jogador local com throttle + Broadcast instantâneo via WebSocket.
  */
 export function publishPosition(player: Player, playerId: string): void {
   if (!MULTIPLAYER_ENABLED || !supabase || !playerId) return;
 
-  // Se a posição não mudou, não republica
-  if (player.x === lastPublishedX && player.y === lastPublishedY) return;
+  // Transmite via WebSocket Broadcast instantaneamente (latência de milissegundos)
+  if (presenceChannel) {
+    presenceChannel.send({
+      type: "broadcast",
+      event: "player_move",
+      payload: {
+        player_id: playerId,
+        name: player.name || "Anonymo",
+        map_id: player.mapId || "center",
+        x: player.x,
+        y: player.y,
+        dir: player.dir,
+        is_moving: player.isMoving,
+        updated_at: new Date().toISOString(),
+        head_color: player.headColor,
+        torso_color: player.torsoColor,
+        legs_color: player.legsColor,
+        shoes_color: player.shoesColor,
+        skin_color: player.skinColor,
+        head_type: player.headType,
+        torso_type: player.torsoType,
+        shoes_type: player.shoesType,
+        face_type: player.faceType,
+        accessory_type: player.accessoryType,
+        gender: player.gender || "male",
+        active_outfit: player.activeOutfit || null,
+      },
+    });
+  }
+
+  // Se a posição no banco não mudou significativamente, evita salvar no banco a cada micro-movimento
+  if (Math.round(player.x) === lastPublishedX && Math.round(player.y) === lastPublishedY) return;
 
   if (positionThrottleTimer) return;
 
   positionThrottleTimer = setTimeout(async () => {
     positionThrottleTimer = null;
-
     if (!supabase) return;
 
-    lastPublishedX = player.x;
-    lastPublishedY = player.y;
+    lastPublishedX = Math.round(player.x);
+    lastPublishedY = Math.round(player.y);
 
     try {
-      const { error } = await supabase.from("players_presence").upsert(
+      await supabase.from("players_presence").upsert(
         {
           player_id: playerId,
           map_id: player.mapId || "center",
@@ -184,10 +212,8 @@ export function publishPosition(player: Player, playerId: string): void {
         },
         { onConflict: "player_id" }
       );
-
-      if (error) console.warn("[Multiplayer] Erro ao publicar posição:", error);
     } catch (err) {
-      console.warn("[Multiplayer] Falha ao publicar posição:", err);
+      console.warn("[Multiplayer] Falha ao persistir posição:", err);
     }
   }, POSITION_THROTTLE_MS);
 }
@@ -218,10 +244,11 @@ async function fetchPlayersInMap(mapId: string): Promise<OnlinePlayer[]> {
   }
 }
 
+// Map local em memória para atualizar jogadores em tempo real sem latência
+const mapLivePlayers = new Map<string, OnlinePlayer>();
+
 /**
  * Assina o canal Realtime do mapa atual usando Presença + Broadcast via WebSockets.
- * Chama onPlayersUpdate com a lista de jogadores online toda vez que há mudança.
- * Chama onChatMessage para novas mensagens de chat.
  */
 export function subscribeToMap(
   mapId: string,
@@ -231,15 +258,14 @@ export function subscribeToMap(
 ): void {
   if (!MULTIPLAYER_ENABLED || !supabase) return;
 
-  // Desinscreve do mapa anterior
   unsubscribeFromCurrentMap();
 
   currentMapId = mapId;
   currentPlayerId = playerId;
+  mapLivePlayers.clear();
 
   console.log(`[Multiplayer] Conectando ao mapa: ${mapId} como ${playerId}`);
 
-  // Canal Realtime unificado (Presença + Postgres Changes + Broadcast)
   presenceChannel = supabase
     .channel(`map-room-${mapId}`, {
       config: {
@@ -247,20 +273,27 @@ export function subscribeToMap(
         broadcast: { ack: false, self: false },
       },
     })
-    // 1. Escuta presença nativa WebSocket do Supabase Realtime
+    // Escuta evento de transmissão instantânea de movimento (Broadcast WebSocket)
+    .on("broadcast", { event: "player_move" }, (payload: { payload: OnlinePlayer }) => {
+      const p = payload.payload;
+      if (p && p.player_id !== playerId && p.map_id === mapId) {
+        mapLivePlayers.set(p.player_id, p);
+        onPlayersUpdate(Array.from(mapLivePlayers.values()));
+      }
+    })
+    // Escuta presença nativa Supabase Realtime
     .on("presence", { event: "sync" }, () => {
       const state = presenceChannel?.presenceState<OnlinePlayer>();
       if (state) {
-        const playersList: OnlinePlayer[] = [];
         Object.keys(state).forEach((key) => {
           if (key !== playerId && state[key].length > 0) {
-            playersList.push(state[key][0]);
+            mapLivePlayers.set(key, state[key][0]);
           }
         });
-        onPlayersUpdate(playersList);
+        onPlayersUpdate(Array.from(mapLivePlayers.values()));
       }
     })
-    // 2. Escuta mudanças na tabela do banco como fallback
+    // Escuta mudanças de banco de dados como fallback
     .on(
       "postgres_changes" as any,
       {
@@ -270,13 +303,19 @@ export function subscribeToMap(
         filter: `map_id=eq.${mapId}`,
       },
       () => {
-        fetchPlayersInMap(mapId).then(onPlayersUpdate);
+        fetchPlayersInMap(mapId).then((players) => {
+          players.forEach((p) => mapLivePlayers.set(p.player_id, p));
+          onPlayersUpdate(Array.from(mapLivePlayers.values()));
+        });
       }
     )
     .subscribe((status) => {
       if (status === "SUBSCRIBED") {
-        console.log(`[Multiplayer] ✅ Inscrito com sucesso no mapa ${mapId}`);
-        fetchPlayersInMap(mapId).then(onPlayersUpdate);
+        console.log(`[Multiplayer] ✅ Conectado com sucesso ao canal Realtime do mapa ${mapId}`);
+        fetchPlayersInMap(mapId).then((players) => {
+          players.forEach((p) => mapLivePlayers.set(p.player_id, p));
+          onPlayersUpdate(Array.from(mapLivePlayers.values()));
+        });
       }
     });
 
