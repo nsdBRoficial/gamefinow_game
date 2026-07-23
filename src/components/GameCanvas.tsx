@@ -1647,31 +1647,43 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
     ctx.fillRect(playerScreenX + 16 - playerNameW / 2, playerNameY - 2, playerNameW, playerNameH);
 
-    // Determine highest style tier for border and glow
+    // Determine active title / style tier for overhead tag
+    const activeTitle = playerPosVal.activeTitle;
+    let tagColor = "#cbd5e1";
+    let tagShadowColor = "";
+    let tagShadowBlur = 0;
     let borderStyle = "rgba(255, 198, 0, 0.75)";
-    let shadowColor = "";
-    let shadowBlurVal = 0;
-    let hasBorderNeon = false;
 
-    if (hasHold) {
-      borderStyle = "#fbbf24";
-      shadowColor = "#f59e0b";
-      shadowBlurVal = 6;
-      hasBorderNeon = true;
-    } else if (hasSoroban) {
+    if (activeTitle === "Herói Lendário de Stellar" || (!activeTitle && hasHold)) {
+      // Verde Neon Supremo for Legendary Hero (Quest 4 / Vault)
+      tagColor = "#22c55e";
+      tagShadowColor = "#10b981";
+      tagShadowBlur = 6;
+      borderStyle = "#22c55e";
+    } else if (activeTitle === "Alquimista do Soroban" || (!activeTitle && hasSoroban)) {
+      // Roxo Místico for Soroban Alchemist (Quest 3 / Soroban)
+      tagColor = "#e879f9";
+      tagShadowColor = "#d946ef";
+      tagShadowBlur = 6;
       borderStyle = "#e879f9";
-      shadowColor = "#d946ef";
-      shadowBlurVal = 6;
-      hasBorderNeon = true;
-    } else if (hasOnramp) {
-      // "o efeito neon no nome deve ser somente no nome dele" (não na borda ainda)
-      // O neon da borda vai para as próximas missões
+    } else if (activeTitle === "Operador On-Ramp" || (!activeTitle && hasOnramp)) {
+      // Dourado Nobre for On-Ramp Operator (Quest 2 / On-Ramp)
+      tagColor = "#fbbf24";
+      tagShadowColor = "#f59e0b";
+      tagShadowBlur = 6;
+      borderStyle = "#fbbf24";
+    } else if (activeTitle === "Iniciado de Stellar" || (!activeTitle && hasWallet)) {
+      // Ciano Reluzente for Stellar Initiate (Quest 1 / Wallet)
+      tagColor = "#38bdf8";
+      tagShadowColor = "#0284c7";
+      tagShadowBlur = 4;
+      borderStyle = "#38bdf8";
     }
 
     // Apply global shadow for border drawing
-    if (hasBorderNeon && shadowBlurVal > 0 && shadowColor) {
-      ctx.shadowColor = shadowColor;
-      ctx.shadowBlur = shadowBlurVal;
+    if (tagShadowBlur > 0 && tagShadowColor) {
+      ctx.shadowColor = tagShadowColor;
+      ctx.shadowBlur = tagShadowBlur;
     }
     ctx.strokeStyle = borderStyle;
     ctx.lineWidth = 1;
@@ -1686,58 +1698,25 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     ctx.textAlign = "left";
 
     // Draw Part 1 (Prefix + Name)
-    let p1Color = "#ffc600";
-    let p1ShadowColor = "";
-    let p1ShadowBlur = 0;
-
-    if (hasHold) {
-      p1Color = "#fbbf24";
-      p1ShadowColor = "#f59e0b";
-      p1ShadowBlur = 6;
-    } else if (hasSoroban) {
-      p1Color = "#e879f9";
-      p1ShadowColor = "#d946ef";
-      p1ShadowBlur = 6;
-    } else if (hasOnramp) {
-      p1Color = "#39ff14";
-      p1ShadowColor = "#10b981";
-      p1ShadowBlur = 6;
-    }
-
-    if (p1ShadowBlur > 0 && p1ShadowColor) {
-      ctx.shadowColor = p1ShadowColor;
-      ctx.shadowBlur = p1ShadowBlur;
+    if (tagShadowBlur > 0 && tagShadowColor) {
+      ctx.shadowColor = tagShadowColor;
+      ctx.shadowBlur = tagShadowBlur;
     } else {
       ctx.shadowBlur = 0;
     }
-    ctx.fillStyle = p1Color;
+    ctx.fillStyle = tagColor;
     ctx.fillText(part1, startX, drawY);
     ctx.shadowBlur = 0;
 
     // Draw Part 2 (Wallet last4 Suffix)
     if (part2) {
-      let p2Color = "#ffc600"; // yellow default same as name when first created
-      let p2ShadowColor = "";
-      let p2ShadowBlur = 0;
-
-      if (hasHold) {
-        p2Color = "#fbbf24";
-        p2ShadowColor = "#f59e0b";
-        p2ShadowBlur = 6;
-      } else if (hasSoroban) {
-        // "ao oeste os 4 digitos agora ficam neon"
-        p2Color = "#e879f9";
-        p2ShadowColor = "#d946ef";
-        p2ShadowBlur = 6;
-      }
-
-      if (p2ShadowBlur > 0 && p2ShadowColor) {
-        ctx.shadowColor = p2ShadowColor;
-        ctx.shadowBlur = p2ShadowBlur;
+      if (tagShadowBlur > 0 && tagShadowColor) {
+        ctx.shadowColor = tagShadowColor;
+        ctx.shadowBlur = tagShadowBlur;
       } else {
         ctx.shadowBlur = 0;
       }
-      ctx.fillStyle = p2Color;
+      ctx.fillStyle = tagColor;
       ctx.fillText(part2, startX + part1Width, drawY);
       ctx.shadowBlur = 0;
     }
