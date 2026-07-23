@@ -188,22 +188,31 @@ export const OnlineIndicator: React.FC<OnlineIndicatorProps> = ({
   count,
   isConnected,
 }) => {
-  if (!isConnected) return null;
-
   return (
     <div
-      className="fixed top-12 right-2 z-50 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] font-bold"
+      className="fixed top-12 right-2 z-50 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] font-bold shadow-lg transition-all"
       style={{
-        background: "rgba(10, 12, 20, 0.85)",
-        border: "1px solid rgba(255,255,255,0.1)",
+        background: "rgba(10, 12, 20, 0.88)",
+        border: isConnected
+          ? "1px solid rgba(74, 222, 128, 0.4)"
+          : "1px solid rgba(251, 191, 36, 0.4)",
         backdropFilter: "blur(8px)",
-        color: "#4ade80",
+        color: isConnected ? "#4ade80" : "#fbbf24",
       }}
-      title="Jogadores online agora"
+      title={isConnected ? "Multiplayer Supabase Ativo" : "Conectando ao Supabase MMO..."}
     >
-      <Users className="w-3 h-3" />
-      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-      <span>{count} online</span>
+      <Users className="w-3.5 h-3.5" />
+      <span
+        className={`w-2 h-2 rounded-full ${
+          isConnected ? "bg-emerald-400 animate-pulse" : "bg-amber-400 animate-ping"
+        }`}
+      />
+      <span>
+        {isConnected
+          ? `${count + 1} herói(s) online`
+          : "Conectando MMO..."}
+      </span>
     </div>
   );
 };
+

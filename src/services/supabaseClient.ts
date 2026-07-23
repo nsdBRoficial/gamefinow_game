@@ -12,10 +12,9 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undef
 
 export const MULTIPLAYER_ENABLED =
   Boolean(import.meta.env.VITE_MULTIPLAYER_ENABLED === "true") &&
-  Boolean(supabaseUrl) &&
-  Boolean(supabaseAnonKey);
+  Boolean(supabaseUrl && supabaseUrl.startsWith("http")) &&
+  Boolean(supabaseAnonKey && supabaseAnonKey.length > 20);
 
-// Cliente pode ser null se as variáveis de ambiente não estiverem configuradas
 let _supabase: SupabaseClient | null = null;
 
 if (MULTIPLAYER_ENABLED && supabaseUrl && supabaseAnonKey) {
@@ -26,8 +25,14 @@ if (MULTIPLAYER_ENABLED && supabaseUrl && supabaseAnonKey) {
       },
     },
   });
+  console.log(`[Supabase] ✅ Cliente MMO Conectado: ${supabaseUrl}`);
+} else {
+  console.warn(
+    "[Supabase] ⚠️ Multiplayer Desativado: Verifique se VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY estao definidas no arquivo .env"
+  );
 }
 
 export const supabase = _supabase;
 
 export default supabase;
+
