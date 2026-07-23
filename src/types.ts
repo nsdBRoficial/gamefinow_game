@@ -76,6 +76,12 @@ export interface Player {
   accessoryType: "none" | "backpack" | "cape" | "sword" | "wings" | "katana" | "viking_axe" | "magic_wand";
   name: string;
   mapId?: "center" | "east" | "west" | "north" | "south";
+  // Campos extras usados pelo CharacterCustomizer (estilo visual avançado)
+  headStyle?: string;    // Ex: "default" | "mohawk" | "cap" | "long" | "afro" | "helmet" | "crown" | "bald"
+  eyeStyle?: string;     // Ex: "dots" | "sunglasses" | "vr_headset" | "visor" | "cyborg" | "anime" | "wink" | "classic"
+  eyeColor?: string;     // Cor hex dos olhos
+  torsoStyle?: string;   // Ex: "tshirt" | "suit" | "hoodie" | "jacket" | "cyber" | "robe" | "royal" | "dress"
+  walletAddress?: string; // Alias para publicKey quando usado fora do gameState
 }
 
 export interface NPC {

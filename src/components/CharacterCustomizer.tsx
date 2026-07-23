@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from "react";
-import { GameState, Player } from "../types";
+import { GameState, Player, Quest } from "../types";
 import { 
   Sparkles, 
   Palette, 
@@ -57,7 +57,7 @@ export const CharacterCustomizer: React.FC<CharacterCustomizerProps> = ({
   gameState,
 }) => {
   const completedCount = gameState?.quests
-    ? Object.values(gameState.quests).filter((q) => q.status === "completed").length
+    ? (Object.values(gameState.quests) as Quest[]).filter((q) => q.status === "completed").length
     : 0;
 
   const [tempName, setTempName] = useState(playerPos.name || "Hero");

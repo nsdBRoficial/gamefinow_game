@@ -109,6 +109,11 @@ const getInitialPlayerPos = (): Player => {
     accessoryType: "backpack",
     name: "Anonymo",
     mapId: "center",
+    // Campos de estilo avançado (CharacterCustomizer)
+    headStyle: "default",
+    eyeStyle: "dots",
+    eyeColor: "#1e293b",
+    torsoStyle: "tshirt",
   };
 };
 
