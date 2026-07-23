@@ -37,6 +37,9 @@ import { MapModal } from "./components/MapModal";
 import { PassportModal } from "./components/PassportModal";
 import { DialogSystem } from "./components/DialogSystem";
 import { OutfitShopModal } from "./components/OutfitShopModal";
+import { ChatBox, OnlineIndicator } from "./components/ChatBox";
+import { useMultiplayer } from "./hooks/useMultiplayer";
+import { getOrCreatePlayerId } from "./services/multiplayerService";
 import ReactNipple from "react-nipple";
 import { useTranslation } from "react-i18next";
 import { GameState, Player, NPC, Transaction, QuestId, Quest, WalletState } from "./types";
@@ -74,7 +77,23 @@ export default function App() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
-  
+
+  // ─── MULTIPLAYER: ID do jogador baseado na wallet Stellar (ou UUID fallback) ───
+  const playerId = getOrCreatePlayerId(gameState.wallet.publicKey || undefined);
+
+  // ─── MULTIPLAYER: Hook de sincronização em tempo real ────────────────────────
+  const {
+    onlinePlayers,
+    onlineCount,
+    chatMessages,
+    sendChat,
+    isConnected,
+    isMultiplayerEnabled,
+  } = useMultiplayer({
+    playerId,
+    playerPos,
+  });
+
   // Handle active retro floating window overlays: "customizer" | "backpack" | "ledger" | "guide" | null
   const [activeWindow, setActiveWindow] = useState<"customizer" | "backpack" | "ledger" | "guide" | null>(null);
   const [showPassport, setShowPassport] = useState(false);
@@ -1073,8 +1092,25 @@ export default function App() {
               playSynthSound("beep");
             }}
             isMovementBlocked={isMovementBlocked}
+            realOnlinePlayers={isMultiplayerEnabled ? onlinePlayers : undefined}
           />
         </div>
+
+        {/* MULTIPLAYER: Indicador de jogadores online */}
+        {isMultiplayerEnabled && (
+          <OnlineIndicator count={onlineCount} isConnected={isConnected} />
+        )}
+
+        {/* MULTIPLAYER: Chat MMO por mapa */}
+        {isMultiplayerEnabled && (
+          <ChatBox
+            messages={chatMessages}
+            onSend={sendChat}
+            onlineCount={onlineCount}
+            currentPlayerName={playerPos.name || "Anonymo"}
+            isConnected={isConnected}
+          />
+        )}
 
         <DialogSystem
           activeDialog={gameState.activeDialog}

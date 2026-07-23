@@ -12,6 +12,7 @@ import { Compass, MapPin, Sparkles } from "lucide-react";
 import { drawPixelCharacter, getNPCPixelChar } from "./canvas/PlayerSprite";
 import { drawMapTiles, drawSpecialTerminals, drawMapDecorations } from "./canvas/MapRenderer";
 import { drawNPCs, drawOtherPlayers } from "./canvas/NPCManager";
+import { OnlinePlayer } from "../services/multiplayerService";
 
 interface GameCanvasProps {
   gameState: GameState;
@@ -21,6 +22,8 @@ interface GameCanvasProps {
   onTalkToNPC: (npc: NPC) => void;
   onNearTerminal: (terminalType: "wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | "outfit_shop" | null) => void;
   isMovementBlocked?: boolean;
+  /** Jogadores reais do Supabase (substitui os bots quando presente) */
+  realOnlinePlayers?: OnlinePlayer[];
 }
 
 export const GameCanvas: React.FC<GameCanvasProps> = ({
@@ -31,6 +34,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   onTalkToNPC,
   onNearTerminal,
   isMovementBlocked = false,
+  realOnlinePlayers,
 }) => {
   const { t } = useTranslation();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -68,6 +72,14 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       mmoPhrasesRef.current = phrases;
     }
   }, [t]);
+
+  // Ref para jogadores reais do Supabase (atualizada via prop)
+  const realOnlinePlayersRef = useRef<OnlinePlayer[]>([]);
+  useEffect(() => {
+    if (realOnlinePlayers) {
+      realOnlinePlayersRef.current = realOnlinePlayers;
+    }
+  }, [realOnlinePlayers]);
 
   useEffect(() => {
     latestNpcs.current = npcs;
@@ -1595,7 +1607,40 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
 
     // 6.5. Render MMO Other Players on the map
-    drawOtherPlayers(ctx, otherPlayersRef.current, currentRegion as MapId);
+    // Se temos jogadores reais do Supabase, usamos eles; senão, usamos os bots demo
+    const realPlayers = realOnlinePlayersRef.current;
+    if (realPlayers.length > 0) {
+      // Converte OnlinePlayer (snake_case) para o formato que drawOtherPlayers espera
+      const mappedReal = realPlayers
+        .filter((rp) => rp.map_id === (currentRegion || "center"))
+        .map((rp) => ({
+          id: rp.player_id,
+          name: rp.name,
+          x: rp.x,
+          y: rp.y,
+          targetX: rp.x,
+          targetY: rp.y,
+          dir: rp.dir,
+          isMoving: rp.is_moving,
+          frame: 0,
+          headColor: rp.head_color,
+          torsoColor: rp.torso_color,
+          legsColor: rp.legs_color,
+          shoesColor: rp.shoes_color,
+          skinColor: rp.skin_color,
+          headType: rp.head_type,
+          torsoType: rp.torso_type,
+          shoesType: rp.shoes_type,
+          faceType: rp.face_type,
+          accessoryType: rp.accessory_type,
+          bubbleText: rp.bubbleText,
+          bubbleTimer: rp.bubbleTimer,
+        }));
+      drawOtherPlayers(ctx, mappedReal, currentRegion as MapId);
+    } else {
+      // Fallback: bots demo enquanto não há jogadores reais
+      drawOtherPlayers(ctx, otherPlayersRef.current, currentRegion as MapId);
+    }
 
     // 7. Render Player using the character engine
     const playerScreenX = playerPosVal.x * TILE_SIZE;
