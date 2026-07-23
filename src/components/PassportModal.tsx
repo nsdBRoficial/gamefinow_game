@@ -115,14 +115,14 @@ export function PassportModal({
                 {/* Name and class info */}
                 <div className="space-y-0.5 flex-1 min-w-0">
                   <span className={`text-[10px] font-black uppercase tracking-tight leading-none block ${
-                    gameState.quests.hold.status === "completed"
-                      ? "text-amber-600 drop-shadow-[0_0_2px_rgba(217,119,6,0.3)]"
-                      : gameState.quests.soroban.status === "completed"
-                      ? "text-purple-600 drop-shadow-[0_0_2px_rgba(147,51,234,0.3)]"
-                      : gameState.quests.onramp.status === "completed"
-                      ? "text-green-600 drop-shadow-[0_0_2px_rgba(22,163,74,0.3)]"
-                      : gameState.quests.wallet.status === "completed"
-                      ? "text-cyan-600 drop-shadow-[0_0_2px_rgba(8,145,178,0.3)]"
+                    playerTitle === "Herói Lendário de Stellar" || (gameState.quests.hold.status === "completed" && !playerTitle)
+                      ? "text-emerald-600 drop-shadow-[0_0_3px_rgba(16,185,129,0.4)]"
+                      : playerTitle === "Alquimista do Soroban" || (gameState.quests.soroban.status === "completed" && !playerTitle)
+                      ? "text-purple-600 drop-shadow-[0_0_3px_rgba(147,51,234,0.4)]"
+                      : playerTitle === "Operador On-Ramp" || (gameState.quests.onramp.status === "completed" && !playerTitle)
+                      ? "text-amber-600 drop-shadow-[0_0_3px_rgba(217,119,6,0.4)]"
+                      : playerTitle === "Iniciado de Stellar" || (gameState.quests.wallet.status === "completed" && !playerTitle)
+                      ? "text-cyan-600 drop-shadow-[0_0_3px_rgba(8,145,178,0.4)]"
                       : "text-slate-800"
                   }`}>
                     {getFormattedName()}

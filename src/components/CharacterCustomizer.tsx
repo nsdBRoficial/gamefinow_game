@@ -392,39 +392,38 @@ export const CharacterCustomizer: React.FC<CharacterCustomizerProps> = ({
         <div className="bg-slate-900/60 p-3 rounded-lg border border-amber-900/40 space-y-3">
           <div className="flex items-center gap-1.5 text-xs font-bold text-amber-400">
             <Sparkles className="h-3.5 w-3.5 text-amber-400" />
-            <span>TÍTULO E EXIBIÇÃO DE NOME 🏷️</span>
+            <span>ESTILO DE NOME DA MISSÃO 🏷️</span>
           </div>
 
           {/* Active Title Picker */}
           <div className="space-y-1">
-            <span className="text-[9px] text-slate-400 uppercase font-mono">Título Ativo</span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-32 overflow-y-auto pr-1">
+            <span className="text-[9px] text-slate-400 uppercase font-mono">Escolha o Estilo / Título Desbloqueado</span>
+            <div className="grid grid-cols-1 gap-1.5 font-mono">
               {[
-                { id: "naufrago", title: "Náufrago Recém-Chegado", icon: "🌊" },
-                { id: "iniciado_stellar", title: "Iniciado de Stellar", icon: "📜" },
-                { id: "operador_onramp", title: "Operador On-Ramp", icon: "💳" },
-                { id: "alquimista_soroban", title: "Alquimista do Soroban", icon: "🧪" },
-                { id: "heroi_stellar", title: "Herói Lendário de Stellar", icon: "👑" },
-                { id: "cyber_ninja_title", title: "Cyber Ninja ⚡", icon: "🥷" },
-                { id: "archmage_title", title: "Arquimago Soroban 🔮", icon: "🔮" },
-                { id: "valkyrie_title", title: "Rainha Valquíria 🪽", icon: "🪽" },
-                { id: "ceo_title", title: "CEO da Blockchain 💼", icon: "💼" },
-                { id: "gold_knight_title", title: "Cavaleiro de Ouro 🌟", icon: "🌟" },
-                { id: "pirate_title", title: "Capitão dos Mares 🏴‍☠️", icon: "🏴‍☠️" },
+                { id: "naufrago", title: "Náufrago Recém-Chegado", icon: "🌊", badge: "Cinza Slate", colorClass: "text-slate-300 border-slate-700 bg-slate-900/80" },
+                { id: "iniciado_stellar", title: "Iniciado de Stellar", icon: "📜", badge: "Ciano Reluzente", colorClass: "text-cyan-400 border-cyan-500 bg-cyan-950/80" },
+                { id: "operador_onramp", title: "Operador On-Ramp", icon: "💳", badge: "Dourado Nobre", colorClass: "text-amber-400 border-amber-500 bg-amber-950/80" },
+                { id: "alquimista_soroban", title: "Alquimista do Soroban", icon: "🧪", badge: "Roxo Místico", colorClass: "text-purple-400 border-purple-500 bg-purple-950/80" },
+                { id: "heroi_stellar", title: "Herói Lendário de Stellar", icon: "👑", badge: "Verde Neon Supremo", colorClass: "text-emerald-400 border-emerald-500 bg-emerald-950/80" },
               ].map((t) => {
                 const isSelected = (playerPos.activeTitle || "Náufrago Recém-Chegado") === t.title;
                 return (
                   <button
                     key={`title-btn-${t.id}`}
                     onClick={() => updateCustomization("activeTitle", t.title)}
-                    className={`px-2.5 py-1.5 rounded-lg border text-left text-[10px] font-mono transition flex items-center gap-1.5 cursor-pointer ${
+                    className={`p-2 rounded-lg border text-left text-xs transition flex items-center justify-between cursor-pointer ${
                       isSelected
-                        ? "bg-amber-950/80 border-amber-500 text-amber-300 font-bold shadow-[0_0_8px_rgba(245,158,11,0.3)]"
+                        ? `${t.colorClass} font-black shadow-[0_0_12px_rgba(255,255,255,0.2)] ring-1 ring-white/50 scale-[1.01]`
                         : "bg-slate-950/60 border-slate-800 text-slate-400 hover:bg-slate-900"
                     }`}
                   >
-                    <span>{t.icon}</span>
-                    <span className="truncate">{t.title}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">{t.icon}</span>
+                      <span className="font-bold">{t.title}</span>
+                    </div>
+                    <span className={`text-[9px] px-2 py-0.5 rounded border uppercase font-extrabold ${t.colorClass}`}>
+                      {t.badge}
+                    </span>
                   </button>
                 );
               })}
