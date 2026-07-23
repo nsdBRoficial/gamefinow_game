@@ -116,7 +116,7 @@ export function PassportModal({
                 <div className="space-y-0.5 flex-1 min-w-0">
                   <span className={`text-[10px] font-black uppercase tracking-tight leading-none block ${
                     playerTitle === "Herói Lendário de Stellar" || (gameState.quests.hold.status === "completed" && !playerTitle)
-                      ? "text-[#39ff14] drop-shadow-[0_0_3px_rgba(57,255,20,0.5)]"
+                      ? "text-[#00ff66] drop-shadow-[0_0_3px_rgba(0,255,102,0.5)]"
                       : playerTitle === "Alquimista do Soroban" || (gameState.quests.soroban.status === "completed" && !playerTitle)
                       ? "text-purple-600 drop-shadow-[0_0_3px_rgba(147,51,234,0.4)]"
                       : playerTitle === "Operador On-Ramp" || (gameState.quests.onramp.status === "completed" && !playerTitle)

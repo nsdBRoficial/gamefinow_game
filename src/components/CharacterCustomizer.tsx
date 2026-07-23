@@ -404,7 +404,7 @@ export const CharacterCustomizer: React.FC<CharacterCustomizerProps> = ({
                 { id: "iniciado_stellar", title: "Iniciado de Stellar", icon: "📜", badge: "Ciano Reluzente", colorClass: "text-cyan-400 border-cyan-500 bg-cyan-950/80" },
                 { id: "operador_onramp", title: "Operador On-Ramp", icon: "💳", badge: "Dourado Nobre", colorClass: "text-amber-400 border-amber-500 bg-amber-950/80" },
                 { id: "alquimista_soroban", title: "Alquimista do Soroban", icon: "🧪", badge: "Roxo Místico", colorClass: "text-purple-400 border-purple-500 bg-purple-950/80" },
-                { id: "heroi_stellar", title: "Herói Lendário de Stellar", icon: "👑", badge: "Verde Elétrico Neon", colorClass: "text-[#39ff14] border-[#39ff14] bg-emerald-950/80" },
+                { id: "heroi_stellar", title: "Herói Lendário de Stellar", icon: "👑", badge: "Verde Elétrico Matrix", colorClass: "text-[#00ff66] border-[#00ff66] bg-emerald-950/80" },
               ].map((t) => {
                 const isSelected = (playerPos.activeTitle || "Náufrago Recém-Chegado") === t.title;
                 return (

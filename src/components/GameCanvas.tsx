@@ -1648,31 +1648,38 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     ctx.fillRect(playerScreenX + 16 - playerNameW / 2, playerNameY - 2, playerNameW, playerNameH);
 
     // Determine active title / style tier for overhead tag
-    const activeTitle = playerPosVal.activeTitle;
+    let currentTitle = playerPosVal.activeTitle;
+    if (!currentTitle || currentTitle === "Náufrago Recém-Chegado") {
+      if (hasHold) currentTitle = "Herói Lendário de Stellar";
+      else if (hasSoroban) currentTitle = "Alquimista do Soroban";
+      else if (hasOnramp) currentTitle = "Operador On-Ramp";
+      else if (hasWallet) currentTitle = "Iniciado de Stellar";
+    }
+
     let tagColor = "#cbd5e1";
     let tagShadowColor = "";
     let tagShadowBlur = 0;
     let borderStyle = "rgba(255, 198, 0, 0.75)";
 
-    if (activeTitle === "Herói Lendário de Stellar" || (!activeTitle && hasHold)) {
-      // Verde Elétrico Neon (#39ff14) for Legendary Hero (Quest 4 / Vault)
-      tagColor = "#39ff14";
-      tagShadowColor = "#10b981";
-      tagShadowBlur = 8;
-      borderStyle = "#39ff14";
-    } else if (activeTitle === "Alquimista do Soroban" || (!activeTitle && hasSoroban)) {
+    if (currentTitle === "Herói Lendário de Stellar") {
+      // Verde Elétrico Matrix (#00ff66) for Legendary Hero (Quest 4 / Vault)
+      tagColor = "#00ff66";
+      tagShadowColor = "#00e676";
+      tagShadowBlur = 10;
+      borderStyle = "#00ff66";
+    } else if (currentTitle === "Alquimista do Soroban") {
       // Roxo Místico for Soroban Alchemist (Quest 3 / Soroban)
       tagColor = "#e879f9";
       tagShadowColor = "#d946ef";
       tagShadowBlur = 6;
       borderStyle = "#e879f9";
-    } else if (activeTitle === "Operador On-Ramp" || (!activeTitle && hasOnramp)) {
+    } else if (currentTitle === "Operador On-Ramp") {
       // Dourado Nobre for On-Ramp Operator (Quest 2 / On-Ramp)
       tagColor = "#fbbf24";
       tagShadowColor = "#f59e0b";
       tagShadowBlur = 6;
       borderStyle = "#fbbf24";
-    } else if (activeTitle === "Iniciado de Stellar" || (!activeTitle && hasWallet)) {
+    } else if (currentTitle === "Iniciado de Stellar") {
       // Ciano Reluzente for Stellar Initiate (Quest 1 / Wallet)
       tagColor = "#38bdf8";
       tagShadowColor = "#0284c7";
