@@ -2,16 +2,14 @@
  * QuestArrowRenderer.ts
  * Renderizador da Seta Magnética de Missões (Quest Arrow / Compass) do GameFiNow.
  *
- * Recursos:
- *   1. Identifica o objetivo ativo (James [NPC], Portais, Terminais ou NPCs de Quest)
- *      com base nas missões e diálogos concluídos.
- *   2. Se o objetivo estiver no mapa atual e dentro do Viewport:
- *      - Gruda a seta magneticamente sobre a cabeça do NPC/Terminal/Portal.
- *      - Desenha seta retro Pixel-Art apontada para BAIXO com animação de levitação (bounce).
- *   3. Se o objetivo estiver em outro mapa ou fora do Viewport:
- *      - Trava a seta na borda visível da tela (Screen Clamp).
- *      - Rotaciona a seta apontando com precisão matemática na direção do objetivo.
- *      - Exibe rótulo e distância até o alvo.
+ * Ajustes v2:
+ *   - Reduzida para ~10% do tamanho anterior (p = 0.35, discreta, graciosa e proporcional)
+ *   - Sem nenhum texto / label (apenas a seta puramente magnética em Pixel Art)
+ *   - Coordenadas exatas dos portais corrigidas:
+ *       • Portal Leste: x = 58, y = 29.5 (extremidade da rua leste)
+ *       • Portal Oeste: x = 1, y = 29.5
+ *       • Portal Norte: x = 29.5, y = 1
+ *       • Portal Sul: x = 29.5, y = 58
  */
 
 import { GameState, Player } from "../../types";
@@ -25,7 +23,6 @@ export interface QuestTarget {
   mapId: "center" | "east" | "north" | "west" | "south";
   type: "npc" | "portal" | "terminal";
   color: string;
-  subtext?: string;
 }
 
 /**
@@ -47,7 +44,6 @@ export function getCurrentQuestTarget(
       if (currentMap === "center") {
         return {
           name: "James [NPC]",
-          subtext: "Fale com o Mestre do Templo",
           x: 27,
           y: 28,
           mapId: "center",
@@ -56,8 +52,7 @@ export function getCurrentQuestTarget(
         };
       } else {
         return {
-          name: "Portal para a Praça Central",
-          subtext: "Retorne ao Centro",
+          name: "Portal para o Centro",
           x: getReturnPortalCoord(currentMap).x,
           y: getReturnPortalCoord(currentMap).y,
           mapId: currentMap,
@@ -66,13 +61,12 @@ export function getCurrentQuestTarget(
         };
       }
     } else {
-      // Passo 2: Ir ao Leste / Forja
+      // Passo 2: Ir ao Portal Leste (x = 58, y = 29.5 no mapa Central)
       if (currentMap === "center") {
         return {
-          name: "Portal Leste (Ciano)",
-          subtext: "Vá para a Forja do Destino",
-          x: 42,
-          y: 29,
+          name: "Portal Leste",
+          x: 58,
+          y: 29.5,
           mapId: "center",
           type: "portal",
           color: "#06b6d4",
@@ -81,8 +75,7 @@ export function getCurrentQuestTarget(
         // No Leste: Se não tem carteira, aponta pro Terminal/Kael
         if (!gameState.wallet.hasWallet) {
           return {
-            name: "Terminal de Carteira Stellar",
-            subtext: "Forje sua Carteira com Kael",
+            name: "Terminal Wallet",
             x: 35,
             y: 28,
             mapId: "east",
@@ -93,7 +86,6 @@ export function getCurrentQuestTarget(
       } else {
         return {
           name: "Portal para o Centro",
-          subtext: "Vá para a Praça Central",
           x: getReturnPortalCoord(currentMap).x,
           y: getReturnPortalCoord(currentMap).y,
           mapId: currentMap,
@@ -112,8 +104,7 @@ export function getCurrentQuestTarget(
       if (currentMap === "east") {
         return {
           name: "Portal de Retorno (Centro)",
-          subtext: "Volte ao Saguão Principal",
-          x: 48,
+          x: 4,
           y: 29,
           mapId: "east",
           type: "portal",
@@ -122,7 +113,6 @@ export function getCurrentQuestTarget(
       } else if (currentMap === "center") {
         return {
           name: "James [NPC]",
-          subtext: "Confirme a Missão 1",
           x: 27,
           y: 28,
           mapId: "center",
@@ -132,7 +122,6 @@ export function getCurrentQuestTarget(
       } else {
         return {
           name: "Portal para o Centro",
-          subtext: "Volte ao Saguão Principal",
           x: getReturnPortalCoord(currentMap).x,
           y: getReturnPortalCoord(currentMap).y,
           mapId: currentMap,
@@ -141,21 +130,19 @@ export function getCurrentQuestTarget(
         };
       }
     } else {
-      // Já falou com James -> Ir ao Norte (OnRamp)
+      // Já falou com James -> Ir ao Portal Norte (x = 29.5, y = 1 no mapa Central)
       if (currentMap === "center") {
         return {
-          name: "Portal Norte (Verde)",
-          subtext: "Vá para o Porto de Câmbio",
-          x: 29,
-          y: 18,
+          name: "Portal Norte",
+          x: 29.5,
+          y: 1,
           mapId: "center",
           type: "portal",
           color: "#22c55e",
         };
       } else if (currentMap === "north") {
         return {
-          name: "Terminal On-Ramp (Capitão HC)",
-          subtext: "Adquira moedas XLM",
+          name: "Terminal On-Ramp",
           x: 31,
           y: 24,
           mapId: "north",
@@ -165,7 +152,6 @@ export function getCurrentQuestTarget(
       } else {
         return {
           name: "Portal de Retorno (Centro)",
-          subtext: "Volte para a Praça Central",
           x: getReturnPortalCoord(currentMap).x,
           y: getReturnPortalCoord(currentMap).y,
           mapId: currentMap,
@@ -184,7 +170,6 @@ export function getCurrentQuestTarget(
       if (currentMap === "north") {
         return {
           name: "Portal de Retorno (Centro)",
-          subtext: "Volte ao Saguão Principal",
           x: 29,
           y: 55,
           mapId: "north",
@@ -194,7 +179,6 @@ export function getCurrentQuestTarget(
       } else if (currentMap === "center") {
         return {
           name: "James [NPC]",
-          subtext: "Confirme a Missão 2",
           x: 27,
           y: 28,
           mapId: "center",
@@ -204,7 +188,6 @@ export function getCurrentQuestTarget(
       } else {
         return {
           name: "Portal para o Centro",
-          subtext: "Volte para a Praça Central",
           x: getReturnPortalCoord(currentMap).x,
           y: getReturnPortalCoord(currentMap).y,
           mapId: currentMap,
@@ -213,13 +196,12 @@ export function getCurrentQuestTarget(
         };
       }
     } else {
-      // Ir ao Oeste (Soroban)
+      // Ir ao Portal Oeste (x = 1, y = 29.5 no mapa Central)
       if (currentMap === "center") {
         return {
-          name: "Portal Oeste (Roxo)",
-          subtext: "Vá para o Mercado Soroban",
-          x: 18,
-          y: 29,
+          name: "Portal Oeste",
+          x: 1,
+          y: 29.5,
           mapId: "center",
           type: "portal",
           color: "#a855f7",
@@ -227,7 +209,6 @@ export function getCurrentQuestTarget(
       } else if (currentMap === "west") {
         return {
           name: "Terminal Soroban Swap",
-          subtext: "Negocie com a Alquimista",
           x: 31,
           y: 27,
           mapId: "west",
@@ -237,7 +218,6 @@ export function getCurrentQuestTarget(
       } else {
         return {
           name: "Portal de Retorno (Centro)",
-          subtext: "Volte para a Praça Central",
           x: getReturnPortalCoord(currentMap).x,
           y: getReturnPortalCoord(currentMap).y,
           mapId: currentMap,
@@ -256,7 +236,6 @@ export function getCurrentQuestTarget(
       if (currentMap === "west") {
         return {
           name: "Portal de Retorno (Centro)",
-          subtext: "Volte ao Saguão Principal",
           x: 55,
           y: 29,
           mapId: "west",
@@ -266,7 +245,6 @@ export function getCurrentQuestTarget(
       } else if (currentMap === "center") {
         return {
           name: "James [NPC]",
-          subtext: "Confirme a Missão 3",
           x: 27,
           y: 28,
           mapId: "center",
@@ -276,7 +254,6 @@ export function getCurrentQuestTarget(
       } else {
         return {
           name: "Portal para o Centro",
-          subtext: "Volte para a Praça Central",
           x: getReturnPortalCoord(currentMap).x,
           y: getReturnPortalCoord(currentMap).y,
           mapId: currentMap,
@@ -285,21 +262,19 @@ export function getCurrentQuestTarget(
         };
       }
     } else {
-      // Ir ao Sul (Hold Chamber)
+      // Ir ao Portal Sul (x = 29.5, y = 58 no mapa Central)
       if (currentMap === "center") {
         return {
-          name: "Portal Sul (Dourado)",
-          subtext: "Vá para a Câmara de Hold",
-          x: 29,
-          y: 42,
+          name: "Portal Sul",
+          x: 29.5,
+          y: 58,
           mapId: "center",
           type: "portal",
           color: "#eab308",
         };
       } else if (currentMap === "south") {
         return {
-          name: "Terminal Cofre VIP Hold",
-          subtext: "Trave suas moedas com Bobba",
+          name: "Terminal Hold",
           x: 33,
           y: 24,
           mapId: "south",
@@ -309,7 +284,6 @@ export function getCurrentQuestTarget(
       } else {
         return {
           name: "Portal de Retorno (Centro)",
-          subtext: "Volte para a Praça Central",
           x: getReturnPortalCoord(currentMap).x,
           y: getReturnPortalCoord(currentMap).y,
           mapId: currentMap,
@@ -322,11 +296,9 @@ export function getCurrentQuestTarget(
 
   // ─── 5. TODAS AS MISSÕES CONCLUÍDAS ──────────────────────────────────────
   if (quests.hold.status === "completed") {
-    // Aponta para o James para congratulação final ou retorna null
     if (currentMap === "center") {
       return {
         name: "James [NPC]",
-        subtext: "🌟 Guardião Lendário Stellar",
         x: 27,
         y: 28,
         mapId: "center",
@@ -335,8 +307,7 @@ export function getCurrentQuestTarget(
       };
     } else {
       return {
-        name: "Portal de Retorno (Centro)",
-        subtext: "Comemore na Praça Central!",
+        name: "Portal para o Centro",
         x: getReturnPortalCoord(currentMap).x,
         y: getReturnPortalCoord(currentMap).y,
         mapId: currentMap,
@@ -379,8 +350,6 @@ export function drawQuestArrow(
 ) {
   const currentRegion = (playerPos.mapId || "center") as MapId;
 
-  // Se o alvo pertence a outro mapa, o target retornado por getCurrentQuestTarget
-  // já é o Portal de Saída do mapa atual!
   const targetWorldX = target.x * TILE_SIZE + TILE_SIZE / 2;
   const targetWorldY = target.y * TILE_SIZE + TILE_SIZE / 2;
 
@@ -403,16 +372,16 @@ export function drawQuestArrow(
     target.mapId === currentRegion;
 
   const time = performance.now();
-  const bounce = Math.sin(time / 140) * 5; // Animação de flutuação suave
+  const bounce = Math.sin(time / 140) * 3; // Flutuação sutil de levitação
 
   if (isVisibleInScreen) {
     // ─── 1. GRUDADA MAGNETICAMENTE NO ALVO (Dentro do Viewport) ──────────────
     // A seta se fixa exatamente no topo do alvo (cabeça do NPC / topo do portal / topo do terminal)
     // Apontando para BAIXO!
     const arrowX = targetWorldX;
-    const arrowY = targetWorldY - 34 + bounce; // Flutua sobre a cabeça/terminal
+    const arrowY = targetWorldY - 26 + bounce; // Flutua graciosamente acima do topo
 
-    drawPixelArrowSprite(ctx, arrowX, arrowY, 0, true, target);
+    drawPixelArrowSprite(ctx, arrowX, arrowY, 0, true);
   } else {
     // ─── 2. BORDA DA TELA / APONTANDO DIREÇÃO (Fora do Viewport) ──────────────
     // Calculamos o ângulo entre o jogador e o objetivo
@@ -420,9 +389,9 @@ export function drawQuestArrow(
     const dy = targetWorldY - playerWorldY;
     const angleRad = Math.atan2(dy, dx);
 
-    // Margem interna para a seta na borda
-    const marginX = halfW - 32;
-    const marginY = halfH - 32;
+    // Margem interna para a seta na borda da tela
+    const marginX = halfW - 20;
+    const marginY = halfH - 20;
 
     let clampedX = dx;
     let clampedY = dy;
@@ -440,25 +409,20 @@ export function drawQuestArrow(
     const arrowScreenX = playerWorldX + clampedX;
     const arrowScreenY = playerWorldY + clampedY;
 
-    // Distância aproximada em "passos/tiles"
-    const distTiles = Math.round(Math.hypot(target.x - playerPos.x, target.y - playerPos.y));
-
-    drawPixelArrowSprite(ctx, arrowScreenX, arrowScreenY, angleRad + Math.PI / 2, false, target, distTiles);
+    drawPixelArrowSprite(ctx, arrowScreenX, arrowScreenY, angleRad + Math.PI / 2, false);
   }
 }
 
 /**
  * Desenha a sprite retro de Seta Pixel Art no Canvas.
- * Amarela/dourada com borda escura reluzente (idêntica à referência).
+ * Amarela/dourada com borda escura reluzente (reduzida para ~10% do tamanho anterior, sem textos).
  */
 function drawPixelArrowSprite(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
   rotationRad: number,
-  isMagneticOnTarget: boolean,
-  target: QuestTarget,
-  distTiles?: number
+  isMagneticOnTarget: boolean
 ) {
   ctx.save();
   ctx.translate(x, y);
@@ -467,19 +431,16 @@ function drawPixelArrowSprite(
     ctx.rotate(rotationRad);
   }
 
-  // Pixel size scaling
-  const p = 1.6; // tamanho dos pixels do desenho
+  // Pixel size scaling super delicado (10% do tamanho anterior)
+  const p = 0.35;
 
   // ── Sombra projetada sob a seta ──
-  ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+  ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
   ctx.beginPath();
-  ctx.ellipse(0, 16 * p, 8 * p, 3 * p, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 16 * p, 6 * p, 2.5 * p, 0, 0, Math.PI * 2);
   ctx.fill();
 
   // ── Sprite Pixel-Art da Seta Apontando para Baixo ──
-  // Desenho em grid de pixels de alta definição (estilo SNES/Retro RPG)
-  // Cores: Ouro (#facc15), Amarelo claro (#fef08a), Laranja (#f97316), Borda escura (#3b0764 / #1e293b)
-  
   const outerBorder = "#2e1065";  // Borda escura roxa/vinho retro
   const mainYellow = "#facc15";   // Amarelo vibrante
   const lightYellow = "#fefef0";  // Brilho/Highlight
@@ -530,43 +491,6 @@ function drawPixelArrowSprite(
   // Ponto reluzente central (Ponto rosa/vermelho da referência)
   ctx.fillStyle = "#ec4899";
   ctx.fillRect(-1 * p, 5 * p, 2 * p, 2 * p);
-
-  ctx.restore();
-
-  // ── ETICUTA DE RÓTULO DA MISSÃO / DISTÂNCIA ──
-  ctx.save();
-  ctx.translate(x, y);
-
-  const time = performance.now();
-  const pulseAlpha = 0.85 + Math.sin(time / 200) * 0.15;
-
-  ctx.font = "bold 8px 'JetBrains Mono', monospace";
-  const labelText = isMagneticOnTarget ? `📍 ${target.name}` : `➔ ${target.name} (${distTiles || 0}m)`;
-  const subText = target.subtext;
-
-  const textW = ctx.measureText(labelText).width;
-  const labelW = textW + 12;
-  const labelH = subText ? 20 : 13;
-  const labelY = isMagneticOnTarget ? -32 : 18;
-
-  // Background da tag com borda brilhante
-  ctx.fillStyle = `rgba(15, 23, 42, ${pulseAlpha})`;
-  ctx.fillRect(-labelW / 2, labelY - labelH / 2, labelW, labelH);
-  ctx.strokeStyle = target.color || "#f59e0b";
-  ctx.lineWidth = 1;
-  ctx.strokeRect(-labelW / 2, labelY - labelH / 2, labelW, labelH);
-
-  // Texto
-  ctx.fillStyle = "#ffffff";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(labelText, 0, subText ? labelY - 4 : labelY + 0.5);
-
-  if (subText) {
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = "7px sans-serif";
-    ctx.fillText(subText, 0, labelY + 5);
-  }
 
   ctx.restore();
 }
