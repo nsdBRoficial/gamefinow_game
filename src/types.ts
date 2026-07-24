@@ -111,4 +111,5 @@ export interface GameState {
   } | null;
   activeModal: "wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | "outfit_shop" | null;
   currentLedger: number;
+  jamesDialogsDone?: string[];
 }

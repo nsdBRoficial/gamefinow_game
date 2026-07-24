@@ -156,6 +156,7 @@ export default function App() {
       activeDialog: null,
       activeModal: null,
       currentLedger: 6184293,
+      jamesDialogsDone: [],
     });
     
     setIsLoggedIn(false);
@@ -301,14 +302,28 @@ export default function App() {
     } else {
       setGameState((prev) => {
         let nextModal = prev.activeModal;
-        
-        // NPCs now only teach and direct the player to the nearby terminals.
-        // The terminals are responsible for opening the modals.
+        const currentDialog = prev.activeDialog;
+        const jamesList = prev.jamesDialogsDone || [];
+
+        // Se o diálogo concluído foi com o James [NPC] (id "guide"), registra o avanço do diálogo
+        let updatedJamesList = [...jamesList];
+        if (currentDialog && currentDialog.npcId === "guide") {
+          if (prev.quests.wallet.status === "active" && !updatedJamesList.includes("guide_initial")) {
+            updatedJamesList.push("guide_initial");
+          } else if (prev.quests.wallet.status === "completed" && prev.quests.onramp.status === "active" && !updatedJamesList.includes("guide_wallet_done")) {
+            updatedJamesList.push("guide_wallet_done");
+          } else if (prev.quests.onramp.status === "completed" && prev.quests.soroban.status === "active" && !updatedJamesList.includes("guide_onramp_done")) {
+            updatedJamesList.push("guide_onramp_done");
+          } else if (prev.quests.soroban.status === "completed" && prev.quests.hold.status === "active" && !updatedJamesList.includes("guide_soroban_done")) {
+            updatedJamesList.push("guide_soroban_done");
+          }
+        }
 
         return {
           ...prev,
           activeDialog: null,
           activeModal: nextModal,
+          jamesDialogsDone: updatedJamesList,
         };
       });
     }

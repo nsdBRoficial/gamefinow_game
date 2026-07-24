@@ -36,6 +36,7 @@ const getInitialGameState = (): GameState => {
           },
           activeDialog: null,
           activeModal: null,
+          jamesDialogsDone: parsed.jamesDialogsDone || [],
         };
       }
     }
@@ -68,6 +69,7 @@ const getInitialGameState = (): GameState => {
     activeDialog: null,
     activeModal: null,
     currentLedger: 6184293,
+    jamesDialogsDone: [],
   };
 };
 

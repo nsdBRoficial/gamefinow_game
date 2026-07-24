@@ -13,6 +13,7 @@ import { drawPixelCharacter, getNPCPixelChar } from "./canvas/PlayerSprite";
 import { drawMapTiles, drawSpecialTerminals, drawMapDecorations } from "./canvas/MapRenderer";
 import { drawNPCs, drawOtherPlayers, cleanupRenderStates } from "./canvas/NPCManager";
 import { OnlinePlayer } from "../services/multiplayerService";
+import { getCurrentQuestTarget, drawQuestArrow } from "./canvas/QuestArrowRenderer";
 
 interface GameCanvasProps {
   gameState: GameState;
@@ -1787,6 +1788,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       ctx.fillStyle = tagColor;
       ctx.fillText(part2, startX + part1Width, drawY);
       ctx.shadowBlur = 0;
+    }
+
+    // 7.5. Render Magnetic Quest Arrow (Seta Magnética de Missões)
+    const currentQuestTarget = getCurrentQuestTarget(latestGameState.current, playerPosVal);
+    if (currentQuestTarget && !latestGameState.current.activeDialog) {
+      drawQuestArrow(ctx, currentQuestTarget, playerPosVal, dims, currentZoomLevel);
     }
 
     ctx.restore();
