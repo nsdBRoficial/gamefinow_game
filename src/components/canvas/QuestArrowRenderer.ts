@@ -15,7 +15,8 @@
  */
 
 import { GameState, Player } from "../../types";
-import { TILE_SIZE, MapId } from "../../maps";
+import { TILE_SIZE } from "../../gameData";
+import { MapId } from "../../maps";
 
 export interface QuestTarget {
   name: string;
