@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import { Compass, MapPin, Sparkles } from "lucide-react";
 import { drawPixelCharacter, getNPCPixelChar } from "./canvas/PlayerSprite";
 import { drawMapTiles, drawSpecialTerminals, drawMapDecorations } from "./canvas/MapRenderer";
-import { drawNPCs, drawOtherPlayers } from "./canvas/NPCManager";
+import { drawNPCs, drawOtherPlayers, cleanupRenderStates } from "./canvas/NPCManager";
 import { OnlinePlayer } from "../services/multiplayerService";
 
 interface GameCanvasProps {
@@ -1615,6 +1615,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           .filter((rp) => rp.map_id === (currentRegion || "center"))
           .map((rp) => ({
             id: rp.player_id,
+            // player_id explícito para o stateKey do lerp em NPCManager
+            player_id: rp.player_id,
             name: rp.name,
             x: rp.x,
             y: rp.y,
@@ -1623,6 +1625,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             dir: rp.dir,
             isMoving: rp.is_moving,
             frame: 0,
+            updated_at: rp.updated_at,
             headColor: rp.head_color,
             torsoColor: rp.torso_color,
             legsColor: rp.legs_color,
@@ -1636,6 +1639,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             bubbleText: rp.bubbleText,
             bubbleTimer: rp.bubbleTimer,
           }));
+        // Limpa estados de interpolação de players que saíram do mapa
+        cleanupRenderStates(mappedReal);
         drawOtherPlayers(ctx, mappedReal, currentRegion as MapId);
       }
     } else {

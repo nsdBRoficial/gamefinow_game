@@ -3,6 +3,38 @@ import { MapId } from "../../maps";
 import { TILE_SIZE } from "../../gameData";
 import { drawPixelCharacter, getNPCPixelChar } from "./PlayerSprite";
 
+// ─── Interpolação de Posição (Client-Side Prediction) ────────────────────────
+// Mantém o estado de renderização suavizado separado da posição real recebida da rede.
+// Isso elimina o efeito de "teleport" a cada pacote de posição recebido.
+// LERP_SPEED: 0 = nunca chega, 1 = teleporta instantaneamente.
+// 0.18 = suave com latência 100-300ms (ideal para MMO casual via Supabase Realtime)
+const LERP_SPEED = 0.18;
+
+// Tempo de timeout de player inativo (deve ser igual ao PLAYER_TIMEOUT_MS do service)
+const PLAYER_TIMEOUT_MS = 30_000;
+// Início do fade-out (5s antes do timeout)
+const FADE_START_MS = 25_000;
+
+interface PlayerRenderState {
+  x: number;
+  y: number;
+  frame: number;
+}
+
+// Map persistente entre frames — chave: player_id
+const playerRenderStates = new Map<string, PlayerRenderState>();
+
+/**
+ * Remove do estado de interpolação jogadores que não estão mais na lista ativa.
+ * Evita crescimento indefinido do Map em sessões longas.
+ */
+export function cleanupRenderStates(activePlayers: any[]): void {
+  const activeIds = new Set(activePlayers.map((p) => p.player_id || p.id));
+  playerRenderStates.forEach((_, id) => {
+    if (!activeIds.has(id)) playerRenderStates.delete(id);
+  });
+}
+
 export const drawNPCs = (
   ctx: CanvasRenderingContext2D,
   npcs: NPC[],
@@ -82,45 +114,96 @@ export const drawNPCs = (
   });
 };
 
+
 export const drawOtherPlayers = (
   ctx: CanvasRenderingContext2D,
   otherPlayers: any[],
   currentRegion: MapId
 ) => {
+  // Fase 4.3 — Ocultar bots quando players reais estão no mapa
+  // Conta quantos players reais (não-bots) existem na lista
+  const hasRealPlayers = otherPlayers.some((p) => !p.id?.startsWith("mmo"));
+
   otherPlayers.forEach((p) => {
+    const isBot = p.id?.startsWith("mmo");
+
+    // Fase 4.3 — Se há players reais, pula bots
+    if (isBot && hasRealPlayers) return;
+
     let drawPlayerOk = false;
-    
-    // Check if it's a bot
-    if (p.id?.startsWith("mmo")) {
+
+    if (isBot) {
+      // Bots só aparecem no mapa correspondente
       if (p.id === "mmo1" && currentRegion === "center") drawPlayerOk = true;
       else if (p.id === "mmo2" && currentRegion === "west") drawPlayerOk = true;
       else if (p.id === "mmo3" && currentRegion === "east") drawPlayerOk = true;
       else if (p.id === "mmo4" && currentRegion === "north") drawPlayerOk = true;
       else if (p.id === "mmo5" && currentRegion === "south") drawPlayerOk = true;
     } else {
-      // Real players are pre-filtered by region in GameCanvas, so we can always draw them
+      // Players reais são pré-filtrados por mapa no GameCanvas
       drawPlayerOk = true;
     }
 
-    if (!drawPlayerOk) {
-      return;
+    if (!drawPlayerOk) return;
+
+    // ── Fase 1.1: Interpolação de Posição (Client-Side Lerp) ─────────────────
+    // Usa player_id para players reais, id para bots
+    const stateKey = p.player_id ?? p.id;
+    const targetX = typeof p.x === "number" ? p.x : 0;
+    const targetY = typeof p.y === "number" ? p.y : 0;
+
+    let render = playerRenderStates.get(stateKey);
+    if (!render) {
+      // Primeira vez que vemos este player — inicializa na posição atual (sem slide)
+      render = { x: targetX, y: targetY, frame: 0 };
+      playerRenderStates.set(stateKey, render);
     }
 
-    const screenX = p.x * TILE_SIZE;
-    const screenY = p.y * TILE_SIZE;
+    // Lerp: avança suavemente em direção à posição alvo recebida da rede
+    const dx = targetX - render.x;
+    const dy = targetY - render.y;
+    render.x += dx * LERP_SPEED;
+    render.y += dy * LERP_SPEED;
+
+    // Animação de caminhada baseada no deslocamento interpolado (não no booleano da rede)
+    const isActuallyMoving = Math.abs(dx) > 0.05 || Math.abs(dy) > 0.05;
+    if (isActuallyMoving) {
+      render.frame = (render.frame + 0.15) % 4;
+    } else {
+      render.frame = 0;
+    }
+
+    const screenX = render.x * TILE_SIZE;
+    const screenY = render.y * TILE_SIZE;
+
+    // ── Fase 4.2: Fade-out de Players Desconectando ──────────────────────────
+    // Players reais têm updated_at; bots não têm (sempre alpha 1)
+    let alpha = 1;
+    if (!isBot && p.updated_at) {
+      const age = Date.now() - new Date(p.updated_at).getTime();
+      if (age > FADE_START_MS) {
+        // Fade linear de 1 → 0 nos últimos 5s antes do timeout
+        alpha = Math.max(0, 1 - (age - FADE_START_MS) / (PLAYER_TIMEOUT_MS - FADE_START_MS));
+      }
+      // Se já deu timeout, não renderiza
+      if (age >= PLAYER_TIMEOUT_MS) return;
+    }
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
 
     drawPixelCharacter(
       ctx,
       screenX,
       screenY,
       p,
-      p.isMoving,
-      p.frame,
+      isActuallyMoving,
+      render.frame,
       p.dir,
       false
     );
 
-    // Other Player name tag over their head
+    // ── Name tag do player ────────────────────────────────────────────────────
     const pNameY = screenY - 19;
     ctx.font = "bold 9px 'JetBrains Mono', 'Ubuntu', sans-serif";
     const textWidth = ctx.measureText(p.name).width;
@@ -128,7 +211,8 @@ export const drawOtherPlayers = (
     const pNameH = 13;
     ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
     ctx.fillRect(screenX + 16 - pNameW / 2, pNameY - 2, pNameW, pNameH);
-    ctx.strokeStyle = "rgba(255, 198, 0, 0.4)"; // Subtle orange/gold border for online MMO players
+    // Bots: borda branca sutil | Players reais: borda dourada
+    ctx.strokeStyle = isBot ? "rgba(255,255,255,0.2)" : "rgba(255, 198, 0, 0.55)";
     ctx.lineWidth = 1;
     ctx.strokeRect(screenX + 16 - pNameW / 2, pNameY - 2, pNameW, pNameH);
 
@@ -137,7 +221,7 @@ export const drawOtherPlayers = (
     ctx.textBaseline = "middle";
     ctx.fillText(p.name, screenX + 16, pNameY + pNameH / 2 - 2 + 0.5);
 
-    // Draw their speech bubble if active
+    // ── Speech bubble ─────────────────────────────────────────────────────────
     if (p.bubbleText) {
       const bubbleY = screenY - 24;
       ctx.font = "bold 9px 'JetBrains Mono', monospace";
@@ -147,7 +231,7 @@ export const drawOtherPlayers = (
       const bx = screenX + 16 - bW / 2;
       const by = bubbleY - bH - 4;
 
-      // Draw bubble background with soft shadow
+      // Background da bolha
       ctx.fillStyle = "#ffffff";
       ctx.beginPath();
       ctx.roundRect(bx, by, bW, bH, 4);
@@ -156,7 +240,7 @@ export const drawOtherPlayers = (
       ctx.lineWidth = 1.2;
       ctx.stroke();
 
-      // Triangle pointer pointing down
+      // Ponteiro triangular para baixo
       ctx.beginPath();
       ctx.moveTo(screenX + 16 - 4, by + bH);
       ctx.lineTo(screenX + 16, by + bH + 4);
@@ -172,11 +256,12 @@ export const drawOtherPlayers = (
       ctx.lineWidth = 1.2;
       ctx.stroke();
 
-      // Draw text
       ctx.fillStyle = "#0f172a";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(p.bubbleText, screenX + 16, by + bH / 2 + 0.5);
     }
+
+    ctx.restore();
   });
 };

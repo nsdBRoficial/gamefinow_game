@@ -21,7 +21,7 @@ if (MULTIPLAYER_ENABLED && supabaseUrl && supabaseAnonKey) {
   _supabase = createClient(supabaseUrl, supabaseAnonKey, {
     realtime: {
       params: {
-        eventsPerSecond: 20,
+        eventsPerSecond: 40, // Aumentado de 20 → 40 para broadcasts mais fluidos (Fase 2.3)
       },
     },
   });

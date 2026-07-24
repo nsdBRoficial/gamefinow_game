@@ -249,16 +249,27 @@ const mapLivePlayers = new Map<string, OnlinePlayer>();
 
 /**
  * Assina o canal Realtime do mapa atual usando Presença + Broadcast via WebSockets.
+ * 
+ * @param mapId - ID do mapa a ser assinado
+ * @param playerId - ID único do jogador
+ * @param onPlayersUpdate - Callback chamado quando a lista de jogadores muda
+ * @param onChatMessage - Callback opcional para mensagens de chat
+ * @param playerData - Dados completos do player para o track() de presença (Fase 3.1)
  */
 export function subscribeToMap(
   mapId: string,
   playerId: string,
   onPlayersUpdate: (players: OnlinePlayer[]) => void,
-  onChatMessage?: (msg: ChatMessage) => void
+  onChatMessage?: (msg: ChatMessage) => void,
+  playerData?: Player
 ): void {
   if (!MULTIPLAYER_ENABLED || !supabase) return;
 
-  unsubscribeFromCurrentMap();
+  // Fase 3.2: Grace Period — guarda referência do canal anterior
+  // O canal novo é criado e conectado ANTES de desconectar o antigo.
+  // Isso elimina o flash de ausência que outros jogadores veem durante teleports.
+  const previousPresenceChannel = presenceChannel;
+  const previousChatChannel = chatChannel;
 
   currentMapId = mapId;
   currentPlayerId = playerId;
@@ -312,10 +323,54 @@ export function subscribeToMap(
     .subscribe((status) => {
       if (status === "SUBSCRIBED") {
         console.log(`[Multiplayer] ✅ Conectado com sucesso ao canal Realtime do mapa ${mapId}`);
-        presenceChannel?.track({ player_id: playerId, map_id: mapId });
+
+        // Fase 3.2: Grace Period — remove o canal ANTERIOR somente após o novo estar pronto
+        if (previousPresenceChannel && previousPresenceChannel !== presenceChannel) {
+          supabase!.removeChannel(previousPresenceChannel);
+        }
+        if (previousChatChannel) {
+          supabase!.removeChannel(previousChatChannel);
+        }
+        if (cleanupTimer) {
+          clearInterval(cleanupTimer);
+          cleanupTimer = null;
+        }
+
+        // Fase 3.1: track() com dados completos do player (não apenas player_id + map_id)
+        const trackPayload: Record<string, any> = {
+          player_id: playerId,
+          map_id: mapId,
+        };
+        if (playerData) {
+          trackPayload.name = playerData.name || "Anonymo";
+          trackPayload.x = playerData.x;
+          trackPayload.y = playerData.y;
+          trackPayload.dir = playerData.dir;
+          trackPayload.is_moving = playerData.isMoving;
+          trackPayload.head_color = playerData.headColor;
+          trackPayload.torso_color = playerData.torsoColor;
+          trackPayload.legs_color = playerData.legsColor;
+          trackPayload.shoes_color = playerData.shoesColor;
+          trackPayload.skin_color = playerData.skinColor;
+          trackPayload.head_type = playerData.headType;
+          trackPayload.torso_type = playerData.torsoType;
+          trackPayload.shoes_type = playerData.shoesType;
+          trackPayload.face_type = playerData.faceType;
+          trackPayload.accessory_type = playerData.accessoryType;
+          trackPayload.gender = playerData.gender || "male";
+          trackPayload.active_outfit = playerData.activeOutfit || null;
+          trackPayload.updated_at = new Date().toISOString();
+        }
+        presenceChannel?.track(trackPayload);
+
         fetchPlayersInMap(mapId).then((players) => {
           players.forEach((p) => mapLivePlayers.set(p.player_id, p));
           onPlayersUpdate(Array.from(mapLivePlayers.values()));
+
+          // Reinicia o cleanup timer após subscribe confirmado
+          cleanupTimer = setInterval(() => {
+            fetchPlayersInMap(mapId).then(onPlayersUpdate);
+          }, 60_000);
         });
       }
     });
@@ -339,11 +394,6 @@ export function subscribeToMap(
       .subscribe();
   }
 
-  // Cleanup periódico de jogadores inativos (a cada 15s)
-  if (cleanupTimer) clearInterval(cleanupTimer);
-  cleanupTimer = setInterval(() => {
-    fetchPlayersInMap(mapId).then(onPlayersUpdate);
-  }, 15_000);
 }
 
 /**

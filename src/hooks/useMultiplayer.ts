@@ -100,13 +100,15 @@ export function useMultiplayer({
     // Busca contagem de online
     getOnlineCount().then(setOnlineCount);
 
-    // Assina canal Realtime do mapa
+    // Assina canal Realtime do mapa com dados completos do player (Fase 3.1)
     subscribeToMap(
       mapId,
       playerId,
       (players) => {
         setOnlinePlayers(players);
-        getOnlineCount().then(setOnlineCount);
+        // Fase 2.1: Deriva a contagem dos dados já recebidos (+1 para incluir o próprio jogador)
+        // Evita centenas de requests HTTP extras por minuto ao Supabase
+        setOnlineCount(players.length + 1);
       },
       (msg) => {
         setChatMessages((prev) => {
@@ -116,7 +118,8 @@ export function useMultiplayer({
           // Mantém apenas as últimas 50 mensagens
           return next.slice(-50);
         });
-      }
+      },
+      playerPos // Fase 3.1: dados completos para o track() de presença
     );
   }, [playerId, playerPos.mapId]);
 
@@ -127,11 +130,22 @@ export function useMultiplayer({
     // Publish immediately on pos change
     publishPosition(playerPos, playerId);
 
-    // Heartbeat every 10 seconds to keep presence active even if not moving
-    const heartbeatTimer = setInterval(() => {
-      // Force an update to updated_at in the DB
-      publishPosition(playerPos, playerId, true); 
-    }, 10000);
+    // Heartbeat silencioso a cada 10s: atualiza apenas updated_at no banco
+    // SEM re-transmitir via Broadcast (não polui o canal com eventos falsos de movimento)
+    const heartbeatTimer = setInterval(async () => {
+      if (!MULTIPLAYER_ENABLED || !playerId || !playerPos.mapId) return;
+      try {
+        const { supabase } = await import("../services/supabaseClient");
+        if (supabase) {
+          await supabase
+            .from("players_presence")
+            .update({ updated_at: new Date().toISOString() })
+            .eq("player_id", playerId);
+        }
+      } catch {
+        // silently ignore heartbeat failures
+      }
+    }, 10_000);
 
     return () => clearInterval(heartbeatTimer);
   }, [playerPos, playerId]);
