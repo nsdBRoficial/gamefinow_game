@@ -35,17 +35,56 @@
     "guide": {
       "main": [
         "Hello, young hero! Welcome to the main hall of the Stellar Temple!",
-        "I am James [NPC], the Temple Master. My job is to ensure you are not defeated by trolls and learn everything about the Stellar network!",
-        "To start your journey and be able to trade Rare Runes, you need a Stellar account/wallet to store your battle assets.",
-        "Head East (right) across the bridge and speak with Kael [NPC], the Rare Blacksmith, to forge your magic keys!"
+        "I am James [NPC], the Temple Master. I am here to guide you through the Stellar network!",
+        "To begin your journey, you need to forge your Stellar Wallet with Kael [NPC].",
+        "The yellow magnetic arrow on your screen will guide your path. Head East (Cyan Portal) and forge your magic keys!"
+      ],
+      "q1_initial": [
+        "Hello, young hero! Welcome to the main hall of the Stellar Temple!",
+        "I am James [NPC], the Temple Master. I am here to guide you through the Stellar network!",
+        "To begin your journey, you need to forge your Stellar Wallet with Kael [NPC].",
+        "The yellow magnetic arrow on your screen will guide your path. Head East (Cyan Portal) and forge your magic keys!"
+      ],
+      "q1_active": [
+        "Still don't have a wallet? Follow the magnetic arrow to the East Portal (Cyan) and speak with Blacksmith Kael [NPC]!"
+      ],
+      "q1_done_q2_start": [
+        "Sensational, hero! You have successfully forged your Stellar wallet! View your address on the top panel.",
+        "Now that you have a blockchain identity, you need your first XLM coins.",
+        "Your next quest is Quest 2: On-Ramp at the Exchange Port to the North with Captain HC [NPC].",
+        "I have unlocked the North Portal (Green) for you! Follow the magnetic arrow North and acquire your coins!"
+      ],
+      "q2_active": [
+        "Follow the magnetic arrow to the North Portal (Green) and speak with Captain HC [NPC] at the Exchange Terminal!"
+      ],
+      "q2_done_q3_start": [
+        "Excellent work! Your XLM coins were successfully credited by Captain HC's Anchor!",
+        "Now that you have balance, it's time to learn how to use Soroban Smart Contracts!",
+        "Your next quest is Quest 3: Soroban Bazaar at the West Portal (Purple) with the Alchemist [NPC].",
+        "I have unlocked the West Portal! Follow the magnetic arrow and perform a Swap for USDC stable dollars or SORO tokens!"
+      ],
+      "q3_active": [
+        "Follow the magnetic arrow to the West Portal (Purple) and speak with the Alchemist [NPC] at the swap terminal!"
+      ],
+      "q3_done_q4_start": [
+        "Magnificent! You executed a Soroban smart contract in seconds with negligible fees!",
+        "You learned how to create a wallet, fund it, and trade assets. Only the final Holder test remains!",
+        "Your final quest is Quest 4: VIP Vault at the South Portal (Golden) with Elder Bobba [NPC].",
+        "I have unlocked the South Portal! Follow the magnetic arrow to the Hold chamber to lock a deposit and earn the Legendary Guardian title!"
+      ],
+      "q4_active": [
+        "Follow the magnetic arrow to the South Portal (Golden) and interact with Elder Bobba [NPC] in the Hold Chamber!"
+      ],
+      "all_completed": [
+        "🌟 GLORY AND HONOR! You completed all onboarding quests of the Stellar Temple!",
+        "You are officially a Stellar Holder Legendary Guardian! Your title shines across the realm.",
+        "Feel free to explore the island and interact with other hero players in online multiplayer!"
       ],
       "active": [
-        "Still don't have an account? Go East and speak with Kael [NPC] to forge your cryptographic key pair!"
+        "Follow the magnetic arrow to the active quest portal!"
       ],
       "completed": [
-        "Amazing! You have registered your Stellar wallet. View your secure address on the HUD in the top bar!",
-        "Your next mission is to acquire your first XLM coins. The North corridor has been unlocked!",
-        "Enter the North Portal and speak with the legendary Captain HC [NPC] at the exchange booth to perform your first On-Ramp!"
+        "Sensational! You have registered your Stellar wallet. View your secure address on the top HUD bar!"
       ]
     },
     "keymaster": {

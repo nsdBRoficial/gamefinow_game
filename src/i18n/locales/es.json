@@ -34,18 +34,57 @@
   "dialogs": {
     "guide": {
       "main": [
-        "¡Hola, joven héroe! ¡Bienvenido al salón principal del Templo Stellar!",
-        "Soy James [NPC], el Maestro del Templo. ¡Mi trabajo es asegurarme de que no seas derrotado por trolls y aprendas todo sobre la red Stellar!",
-        "Para comenzar tu viaje y poder negociar Runas Raras, necesitas una cuenta/billetera Stellar para guardar tus activos de batalla.",
-        "Ve al Este (derecha) cruzando el puente y habla con Kael [NPC], el Herrero de Raros, ¡para forjar tus claves mágicas!"
+        "¡Hola, joven héroe! ¡Bienvenido al vestíbulo principal del Templo Stellar!",
+        "Soy James [NPC], el Maestro del Templo. ¡Estoy aquí para guiarte por la red Stellar!",
+        "Para comenzar tu viaje, necesitas forjar tu Billetera Stellar con Kael [NPC].",
+        "La flecha amarilla magnética en tu pantalla indicará exactamente el camino. ¡Sigue hacia el Este (Portal Cian) y forja tus llaves mágicas!"
+      ],
+      "q1_initial": [
+        "¡Hola, joven héroe! ¡Bienvenido al vestíbulo principal del Templo Stellar!",
+        "Soy James [NPC], el Maestro del Templo. ¡Estoy aquí para guiarte por la red Stellar!",
+        "Para comenzar tu viaje, necesitas forjar tu Billetera Stellar con Kael [NPC].",
+        "La flecha amarilla magnética en tu pantalla indicará exactamente el camino. ¡Sigue hacia el Este (Portal Cian) y forja tus llaves mágicas!"
+      ],
+      "q1_active": [
+        "¿Aún no tienes billetera? ¡Sigue la flecha magnética hasta el Portal Este (Cian) y habla con el Herrero Kael [NPC]!"
+      ],
+      "q1_done_q2_start": [
+        "¡Sensacional, héroe! ¡Has forjado tu billetera Stellar con éxito! Mira tu dirección en el panel superior.",
+        "Ahora que tienes una identidad en la blockchain, necesitas adquirir tus primeras monedas XLM.",
+        "Tu próxima misión es la Misión 2: On-Ramp en el Puerto de Cambio al Norte con el Capitán HC [NPC].",
+        "¡He desbloqueado el Portal Norte (Verde) para ti! Sigue la flecha magnética hacia el norte y adquiere tus monedas."
+      ],
+      "q2_active": [
+        "¡Sigue la flecha magnética hasta el Portal Norte (Verde) y habla con el Capitán HC [NPC] en el Terminal de Cambio!"
+      ],
+      "q2_done_q3_start": [
+        "¡Excelente trabajo! ¡Tus monedas XLM fueron acreditadas con éxito por el Ancla del Capitán HC!",
+        "¡Ahora que tienes saldo, es hora de aprender a usar Contratos Inteligentes Soroban!",
+        "Tu próxima misión es la Misión 3: Mercado Soroban en el Portal Oeste (Púrpura) con la Alquimista [NPC].",
+        "¡He desbloqueado el Portal Oeste! Sigue la flecha magnética y realiza un intercambio (Swap) por dólares estables USDC o tokens SORO."
+      ],
+      "q3_active": [
+        "¡Sigue la flecha magnética hasta el Portal Oeste (Púrpura) y habla con la Alquimista [NPC] en el terminal de intercambio!"
+      ],
+      "q3_done_q4_start": [
+        "¡Magnífico! ¡Ejecutaste un contrato inteligente Soroban en segundos con comisiones insignificantes!",
+        "Aprendiste a crear una billetera, financiarla y comerciar activos. ¡Solo queda la prueba final del Holder!",
+        "Tu última misión es la Misión 4: Bóveda VIP en el Portal Sur (Dorado) con el Anciano Bobba [NPC].",
+        "¡He desbloqueado el Portal Sur! Sigue la flecha magnética hasta la cámara de Hold para bloquear un depósito y ganar el título de Guardián Legendario."
+      ],
+      "q4_active": [
+        "¡Sigue la flecha magnética hasta el Portal Sur (Dorado) e interactúa con el Anciano Bobba [NPC] en la Cámara de Hold!"
+      ],
+      "all_completed": [
+        "🌟 ¡GLORIA Y HONOR! ¡Completaste todas las misiones de Onboarding del Templo Stellar!",
+        "¡Eres oficialmente un Guardián Legendario Stellar Holder! Tu título brilla en todo el reino.",
+        "¡Disfruta explorando la isla e interactuando con otros jugadores en el multijugador en línea!"
       ],
       "active": [
-        "¿Aún sin una cuenta? ¡Ve al Este y habla con Kael [NPC] para forjar tu par de claves criptográficas!"
+        "¡Sigue la flecha magnética hasta el portal de la misión activa!"
       ],
       "completed": [
-        "¡Sensacional! Has registrado tu billetera Stellar. ¡Mira tu dirección segura en el HUD en la barra superior!",
-        "Tu próxima misión es adquirir tus primeras monedas XLM. ¡El corredor hacia el Norte ha sido desbloqueado!",
-        "¡Entra por el Portal Norte y habla con el legendario Capitán HC [NPC] en la cabina de cambio para realizar tu primer On-Ramp!"
+        "¡Sensacional! Has registrado tu billetera Stellar. Mira tu dirección segura en la barra superior."
       ]
     },
     "keymaster": {

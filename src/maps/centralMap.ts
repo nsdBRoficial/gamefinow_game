@@ -23,12 +23,17 @@ export function generateCentralMap(): number[][] {
         tile = TileType.STONE_PATH;
       }
 
-      // 3. Central Plaza flooring
-      if (c >= 27 && c <= 33 && r >= 27 && r <= 33) {
+      // 3. Central Plaza flooring (4 quadrantes pretos de 2 fileiras conforme imagem de referência)
+      const isTopLeftPlaza = c >= 26 && c <= 28 && r >= 27 && r <= 28;
+      const isTopRightPlaza = c >= 31 && c <= 33 && r >= 27 && r <= 28;
+      const isBottomLeftPlaza = c >= 26 && c <= 28 && r >= 31 && r <= 32;
+      const isBottomRightPlaza = c >= 31 && c <= 33 && r >= 31 && r <= 32;
+
+      if (isTopLeftPlaza || isTopRightPlaza || isBottomLeftPlaza || isBottomRightPlaza) {
         tile = TileType.TEMPLE_FLOOR;
       }
 
-      // 4. Central Cross paths over the Temple floor
+      // 4. Central Cross paths
       if ((c === 29 || c === 30) || (r === 29 || r === 30)) {
         tile = TileType.STONE_PATH;
       }
@@ -106,12 +111,7 @@ export function generateCentralMap(): number[][] {
   grid[45][27] = TileType.BLOCK;
   grid[45][28] = TileType.BLOCK;
 
-  // Add the extra black flooring on the left
-  grid[27][26] = TileType.TEMPLE_FLOOR;
-  grid[28][26] = TileType.TEMPLE_FLOOR;
-  grid[31][26] = TileType.TEMPLE_FLOOR;
-  grid[32][26] = TileType.TEMPLE_FLOOR;
-  grid[33][26] = TileType.TEMPLE_FLOOR;
+
 
   // Inject Portals at the far edges
   grid[29][1] = TileType.PORTAL_WEST;
@@ -144,24 +144,19 @@ export function generateCentralMap(): number[][] {
   grid[27][41] = TileType.BLOCK; grid[27][42] = TileType.BLOCK;
   grid[28][41] = TileType.BLOCK; grid[28][42] = TileType.BLOCK;
 
-  // Fonte Faucet (2 sqms: x=28 / y=25,26)
+  // Fonte Faucet (2 sqms: x=28 / y=24,25 -> pé no y=25)
+  grid[24][28] = TileType.BLOCK;
   grid[25][28] = TileType.BLOCK;
-  grid[26][28] = TileType.BLOCK;
 
   // ATM Collision
   grid[28][33] = TileType.BLOCK;
 
-  // Rua Branca Esquerda (West Path Extension: x=4 ate x=25 na y=33 e x=4 nas y=31,32)
-  for (let c = 4; c <= 25; c++) {
+  // Rua Branca Horizontal conectando no y=33 (x=4 ate x=55, incluindo x=26,27,28 e x=31,32,33)
+  for (let c = 4; c <= 55; c++) {
     grid[33][c] = TileType.STONE_PATH;
   }
   grid[31][4] = TileType.STONE_PATH;
   grid[32][4] = TileType.STONE_PATH;
-
-  // Rua Branca Direita (East Path Extension: x=34 ate x=55 na y=33 e x=55 nas y=31,32)
-  for (let c = 34; c <= 55; c++) {
-    grid[33][c] = TileType.STONE_PATH;
-  }
   grid[31][55] = TileType.STONE_PATH;
   grid[32][55] = TileType.STONE_PATH;
 
@@ -231,6 +226,6 @@ export const CENTRAL_DECORATIONS: GameDecoration[] = [
   // ALTAR DE QUEIMA ETERNA (4 sqms: x=41..42, y=27..28, sem texto na tela)
   { x: 41, y: 27, type: "pixel_burn_brazier", width: 2, height: 2, color: "#f97316" },
 
-  // FONTE FAUCET (2 sqms: x=28, y=25..26)
-  { x: 28, y: 25, type: "pixel_faucet", width: 1, height: 2, color: "#38bdf8" },
+  // FONTE FAUCET (2 sqms: x=28, y=24..25 -> pé no y=25)
+  { x: 28, y: 24, type: "pixel_faucet", width: 1, height: 2, color: "#38bdf8" },
 ];

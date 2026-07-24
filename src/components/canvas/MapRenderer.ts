@@ -398,199 +398,7 @@ export const drawPortalVortex = (ctx: CanvasRenderingContext2D, wx: number, wy: 
   ctx.fillRect(px2 - 1.5, py2 - 1.5, 3, 3);
 };
 
-export const drawInteractiveTerminal = (
-  ctx: CanvasRenderingContext2D,
-  tx: number,
-  ty: number,
-  label: string,
-  color: string,
-  tileSize: number,
-  playerPos: Player
-) => {
-  const wx = tx * tileSize;
-  const wy = ty * tileSize;
 
-  // Glowing base footprint
-  ctx.fillStyle = color + "20";
-  ctx.fillRect(wx + 2, wy + 2, tileSize - 4, tileSize - 4);
-
-  // Pedestal column
-  ctx.fillStyle = "#1e293b";
-  ctx.fillRect(wx + 8, wy + 12, 16, 16);
-  ctx.strokeStyle = "#475569";
-  ctx.lineWidth = 1;
-  ctx.strokeRect(wx + 8, wy + 12, 16, 16);
-
-  // Terminal Screen
-  ctx.fillStyle = color;
-  ctx.fillRect(wx + 10, wy + 6, 12, 6);
-  ctx.strokeStyle = "#ffffff";
-  ctx.lineWidth = 0.5;
-  ctx.strokeRect(wx + 10, wy + 6, 12, 6);
-
-  // Screen display detail
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(wx + 12, wy + 8, 8, 1);
-
-  // Prompt if player is adjacent
-  const dx = Math.abs(playerPos.x - tx);
-  const dy = Math.abs(playerPos.y - ty);
-  if (dx <= 1 && dy <= 1) {
-    const cx = wx + tileSize / 2;
-    const cy = wy - 10 + Math.sin(performance.now() / 150) * 2;
-
-    ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
-    ctx.fillRect(cx - 30, cy - 8, 60, 14);
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1;
-    ctx.strokeRect(cx - 30, cy - 8, 60, 14);
-
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 7px monospace";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("USAR [ESPAÇO]", cx, cy - 1);
-  }
-};
-
-export const drawClassicAtm = (ctx: CanvasRenderingContext2D, tx: number, ty: number, tileSize: number, playerPos: Player) => {
-  const wx = tx * tileSize;
-  const wy = ty * tileSize;
-
-  // Base and body
-  ctx.fillStyle = "#94a3b8"; // Light slate gray
-  ctx.fillRect(wx + 4, wy + 2, 24, 30);
-  ctx.fillStyle = "#cbd5e1"; // Highlight
-  ctx.fillRect(wx + 6, wy + 4, 20, 28);
-  ctx.strokeStyle = "#475569";
-  ctx.lineWidth = 1;
-  ctx.strokeRect(wx + 4, wy + 2, 24, 30);
-
-  // Screen
-  ctx.fillStyle = "#1e293b";
-  ctx.fillRect(wx + 8, wy + 8, 16, 10);
-  ctx.fillStyle = "#10b981"; // Bright green screen
-  ctx.fillRect(wx + 9, wy + 9, 14, 8);
-  
-  // Card Slot
-  ctx.fillStyle = "#0f172a";
-  ctx.fillRect(wx + 20, wy + 20, 6, 2);
-  
-  // Keypad
-  ctx.fillStyle = "#64748b";
-  ctx.fillRect(wx + 8, wy + 20, 10, 6);
-  ctx.fillStyle = "#cbd5e1";
-  ctx.fillRect(wx + 9, wy + 21, 2, 1);
-  ctx.fillRect(wx + 12, wy + 21, 2, 1);
-  ctx.fillRect(wx + 15, wy + 21, 2, 1);
-
-  // Sign: "ATM DEFI"
-  ctx.fillStyle = "#1e40af"; // Blue sign
-  ctx.fillRect(wx + 4, wy - 8, 24, 8);
-  ctx.strokeStyle = "#ffffff";
-  ctx.strokeRect(wx + 4, wy - 8, 24, 8);
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 5px sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("ATM DeFi", wx + 16, wy - 4);
-
-  // Prompt if player is adjacent
-  const dx = Math.abs(playerPos.x - tx);
-  const dy = Math.abs(playerPos.y - ty);
-  if (dx <= 1 && dy <= 1) {
-    const cx = wx + tileSize / 2;
-    const cy = wy - 16 + Math.sin(performance.now() / 150) * 2;
-
-    ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
-    ctx.fillRect(cx - 30, cy - 8, 60, 14);
-    ctx.strokeStyle = "#10b981";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(cx - 30, cy - 8, 60, 14);
-
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 7px monospace";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("USAR [ESPAÇO]", cx, cy - 1);
-  }
-};
-
-export const drawCyberpunkAtm = (ctx: CanvasRenderingContext2D, tx: number, ty: number, tileSize: number, playerPos: Player) => {
-  const wx = tx * tileSize;
-  const wy = ty * tileSize;
-
-  // Holographic projection base
-  ctx.fillStyle = "#0f172a";
-  ctx.beginPath();
-  ctx.ellipse(wx + 16, wy + 28, 14, 4, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.strokeStyle = "#a855f7";
-  ctx.lineWidth = 2;
-  ctx.stroke();
-
-  // Floating Cyber Body
-  const floatY = Math.sin(performance.now() / 200) * 2;
-  
-  ctx.fillStyle = "#1e1b4b"; // Deep violet
-  ctx.fillRect(wx + 6, wy + 4 + floatY, 20, 20);
-  ctx.strokeStyle = "#d946ef"; // Fuchsia neon outline
-  ctx.lineWidth = 1.5;
-  ctx.strokeRect(wx + 6, wy + 4 + floatY, 20, 20);
-
-  // Cyber Screen
-  ctx.fillStyle = "#000000";
-  ctx.fillRect(wx + 8, wy + 6 + floatY, 16, 10);
-  
-  // Glitching text/data stream on screen
-  ctx.fillStyle = "#22d3ee"; // Cyan
-  if (Math.random() > 0.1) {
-    ctx.fillRect(wx + 10, wy + 8 + floatY, 12, 1);
-    ctx.fillRect(wx + 10, wy + 11 + floatY, 8, 1);
-    ctx.fillRect(wx + 10, wy + 14 + floatY, 10, 1);
-  }
-
-  // Neon cables
-  ctx.strokeStyle = "#06b6d4";
-  ctx.beginPath();
-  ctx.moveTo(wx + 10, wy + 24 + floatY);
-  ctx.lineTo(wx + 14, wy + 28);
-  ctx.stroke();
-
-  ctx.strokeStyle = "#ec4899";
-  ctx.beginPath();
-  ctx.moveTo(wx + 22, wy + 24 + floatY);
-  ctx.lineTo(wx + 18, wy + 28);
-  ctx.stroke();
-
-  // Floating Holographic Sign
-  ctx.fillStyle = "rgba(217, 70, 239, 0.8)";
-  ctx.font = "bold 6px monospace";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText("CYBER ATM", wx + 16, wy - 2 + floatY);
-
-  // Prompt if player is adjacent
-  const dx = Math.abs(playerPos.x - tx);
-  const dy = Math.abs(playerPos.y - ty);
-  if (dx <= 1 && dy <= 1) {
-    const cx = wx + tileSize / 2;
-    const cy = wy - 12 + floatY;
-
-    ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
-    ctx.fillRect(cx - 30, cy - 8, 60, 14);
-    ctx.strokeStyle = "#d946ef";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(cx - 30, cy - 8, 60, 14);
-
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 7px monospace";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("USAR [ESPAÇO]", cx, cy - 1);
-  }
-};
 
 export const drawEnergyGate = (ctx: CanvasRenderingContext2D, tx: number, ty: number, color: string, tileSize: number) => {
   const wx = tx * tileSize;
@@ -960,20 +768,339 @@ export const drawMapTiles = (
   }
 };
 
+/**
+ * Renderiza os Terminais Magnéticos das Missões (Altar Obelisco de Pedra 1 sqm no chão, 2 sqms de altura vertical)
+ * com Cristal Levitante Reluzente em Pixel Art inspirado fielmente na imagem de referência.
+ */
+export const drawInteractiveTerminal = (
+  ctx: CanvasRenderingContext2D,
+  gridX: number,
+  gridY: number,
+  title: string,
+  themeColor: string,
+  tileSize: number,
+  playerPos: Player
+) => {
+  const worldX = gridX * tileSize;
+  const worldY = gridY * tileSize;
+  const cx = worldX + tileSize / 2;
+  const cy = worldY + tileSize / 2;
+
+  const time = performance.now();
+
+  // Distância do jogador para iluminação tátil
+  const playerWorldX = playerPos.x * tileSize + tileSize / 2;
+  const playerWorldY = playerPos.y * tileSize + tileSize / 2;
+  const dist = Math.hypot(playerWorldX - cx, playerWorldY - cy);
+  const isNear = dist < tileSize * 2.5;
+
+  // Paleta de cores dinâmica do cristal por tema
+  let mainColor = themeColor;
+  let lightColor = "#ffffff";
+  let shadowColor = "#1e1b4b";
+  let glowColor = "rgba(167, 139, 250, 0.4)";
+
+  if (themeColor.includes("06b6d4") || themeColor.includes("22d3ee") || themeColor.includes("cyan")) {
+    // Leste / Forja (Safira Ciano)
+    mainColor = "#06b6d4";
+    lightColor = "#cffafe";
+    shadowColor = "#083344";
+    glowColor = "rgba(6, 182, 212, 0.45)";
+  } else if (themeColor.includes("10b981") || themeColor.includes("34d399") || themeColor.includes("green")) {
+    // Norte / OnRamp (Esmeralda Verde)
+    mainColor = "#10b981";
+    lightColor = "#d1fae5";
+    shadowColor = "#064e3b";
+    glowColor = "rgba(16, 185, 129, 0.45)";
+  } else if (themeColor.includes("9333ea") || themeColor.includes("a78bfa") || themeColor.includes("purple")) {
+    // Oeste / Soroban (Ametista Roxo/Magenta - Fiel à Referência)
+    mainColor = "#9333ea";
+    lightColor = "#f3e8ff";
+    shadowColor = "#3b0764";
+    glowColor = "rgba(147, 51, 234, 0.45)";
+  } else if (themeColor.includes("eab308") || themeColor.includes("fbbf24") || themeColor.includes("gold")) {
+    // Sul / Hold (Topázio Dourado)
+    mainColor = "#eab308";
+    lightColor = "#fef9c3";
+    shadowColor = "#451a03";
+    glowColor = "rgba(234, 179, 8, 0.45)";
+  }
+
+  ctx.save();
+
+  // ── 1. Sombra Projetada sob o Pedestal (1 sqm) ──
+  ctx.fillStyle = "rgba(0, 0, 0, 0.45)";
+  ctx.beginPath();
+  ctx.ellipse(cx, cy + 12, 14, 5, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // ── 2. Aura de Brilho Radial no Chão ──
+  const pulseRadius = (isNear ? 24 : 18) + Math.sin(time / 200) * 3;
+  const glowGrad = ctx.createRadialGradient(cx, cy + 4, 2, cx, cy + 4, pulseRadius);
+  glowGrad.addColorStop(0, glowColor);
+  glowGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+  ctx.fillStyle = glowGrad;
+  ctx.beginPath();
+  ctx.arc(cx, cy + 4, pulseRadius, 0, Math.PI * 2);
+  ctx.fill();
+
+  // ── 3. Obelisco de Pedra Vertical (1 sqm de base x 2 sqms de elevação vertical Y) ──
+  // Degrau inferior de pedra
+  ctx.fillStyle = "#1c1917";
+  ctx.fillRect(cx - 15, cy + 4, 30, 10);
+  ctx.strokeStyle = "#44403c";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(cx - 15, cy + 4, 30, 10);
+
+  // Pilar de pedra esculpida (Coluna alta subindo verticalmente)
+  ctx.fillStyle = "#292524";
+  ctx.fillRect(cx - 12, cy - 16, 24, 20);
+  ctx.fillStyle = "#44403c";
+  ctx.fillRect(cx - 12, cy - 16, 4, 20); // Highlight esquerdo
+  ctx.fillRect(cx + 8, cy - 16, 4, 20); // Sombra direita
+
+  // Cantoneiras e ferragens rústicas
+  ctx.fillStyle = "#78350f";
+  ctx.fillRect(cx - 13, cy - 14, 3, 20);
+  ctx.fillRect(cx + 10, cy - 14, 3, 20);
+  ctx.fillStyle = "#451a03";
+  ctx.fillRect(cx - 13, cy + 4, 3, 3);
+  ctx.fillRect(cx + 10, cy + 4, 3, 3);
+
+  // Coroa / Ameia no topo do Obelisco
+  ctx.fillStyle = "#1c1917";
+  ctx.fillRect(cx - 14, cy - 20, 28, 5);
+  ctx.fillStyle = "#57534e";
+  ctx.fillRect(cx - 14, cy - 20, 28, 1.5);
+
+  // Abertura central do Altar
+  ctx.fillStyle = shadowColor;
+  ctx.fillRect(cx - 9, cy - 20, 18, 3);
+
+  // ── 4. Cristal de Energia Levitante em Pixel Art (Igual à Referência!) ──
+  const crystalLevitate = Math.sin(time / 180) * 4; // Animação de flutuação
+  const crystalY = cy - 32 + crystalLevitate;
+
+  // Sombra do cristal no topo da pedra
+  ctx.fillStyle = "rgba(0,0,0,0.3)";
+  ctx.beginPath();
+  ctx.ellipse(cx, cy - 19, 6, 2, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Desenho Lapidado do Cristal (Fiel à Imagem de Referência)
+  // Faceta Principal (Corpo do Cristal)
+  ctx.fillStyle = mainColor;
+  ctx.beginPath();
+  ctx.moveTo(cx, crystalY - 16); // Ponta superior
+  ctx.lineTo(cx + 9, crystalY - 2); // Canto direito
+  ctx.lineTo(cx, crystalY + 9); // Ponta inferior
+  ctx.lineTo(cx - 9, crystalY - 2); // Canto esquerdo
+  ctx.closePath();
+  ctx.fill();
+
+  // Faceta Lateral Esquerda (Luz Reluzente)
+  ctx.fillStyle = lightColor;
+  ctx.beginPath();
+  ctx.moveTo(cx, crystalY - 16);
+  ctx.lineTo(cx - 9, crystalY - 2);
+  ctx.lineTo(cx, crystalY + 9);
+  ctx.closePath();
+  ctx.fill();
+
+  // Faceta Lateral Direita (Sombra Criptográfica)
+  ctx.fillStyle = shadowColor;
+  ctx.beginPath();
+  ctx.moveTo(cx, crystalY - 16);
+  ctx.lineTo(cx + 4, crystalY - 2);
+  ctx.lineTo(cx, crystalY + 9);
+  ctx.closePath();
+  ctx.fill();
+
+  // Ponto reluzente central
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(cx - 2, crystalY - 7, 2, 4);
+
+  // ── 5. Partículas Mágicas Flutuando em Volta do Cristal ──
+  const sparkTime = time / 100;
+  ctx.fillStyle = lightColor;
+  for (let i = 0; i < 3; i++) {
+    const sparkAngle = sparkTime * 0.8 + (i * Math.PI * 2) / 3;
+    const sparkR = 11 + Math.sin(sparkTime + i) * 3;
+    const sx = cx + Math.cos(sparkAngle) * sparkR;
+    const sy = crystalY - 3 + Math.sin(sparkAngle * 1.5) * 6;
+    ctx.fillRect(sx, sy, 1.5, 1.5);
+  }
+
+  // ── 6. Pequeno Indicador Neon quando o Jogador Aproxima ──
+  if (isNear) {
+    const pulseAlpha = 0.85 + Math.sin(time / 150) * 0.15;
+    ctx.font = "bold 8px 'JetBrains Mono', monospace";
+    const tagText = "ESPAÇO";
+    const tagW = ctx.measureText(tagText).width + 8;
+
+    ctx.fillStyle = `rgba(15, 23, 42, ${pulseAlpha})`;
+    ctx.fillRect(cx - tagW / 2, crystalY - 26, tagW, 11);
+    ctx.strokeStyle = mainColor;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(cx - tagW / 2, crystalY - 26, tagW, 11);
+
+    ctx.fillStyle = lightColor;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(tagText, cx, crystalY - 21);
+  }
+
+  ctx.restore();
+};
+
+/**
+ * Restaurado o Banco DeFi ATM Tradicional na Praça Central
+ */
+export const drawClassicAtm = (ctx: CanvasRenderingContext2D, gridX: number, gridY: number, tileSize: number, playerPos: Player) => {
+  const wx = gridX * tileSize;
+  const wy = gridY * tileSize;
+
+  ctx.save();
+  // Base e corpo do Caixa Eletrônico
+  ctx.fillStyle = "#94a3b8"; // Slate gray
+  ctx.fillRect(wx + 4, wy + 2, 24, 30);
+  ctx.fillStyle = "#cbd5e1";
+  ctx.fillRect(wx + 6, wy + 4, 20, 28);
+  ctx.strokeStyle = "#475569";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(wx + 4, wy + 2, 24, 30);
+
+  // Tela Verde Câmbio
+  ctx.fillStyle = "#1e293b";
+  ctx.fillRect(wx + 8, wy + 8, 16, 10);
+  ctx.fillStyle = "#10b981";
+  ctx.fillRect(wx + 9, wy + 9, 14, 8);
+
+  // Leitor de Cartão e Teclado
+  ctx.fillStyle = "#0f172a";
+  ctx.fillRect(wx + 20, wy + 20, 6, 2);
+  ctx.fillStyle = "#64748b";
+  ctx.fillRect(wx + 8, wy + 20, 10, 6);
+
+  // Placa "ATM DEFI"
+  ctx.fillStyle = "#1e40af";
+  ctx.fillRect(wx + 4, wy - 8, 24, 8);
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 1;
+  ctx.strokeRect(wx + 4, wy - 8, 24, 8);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 6px sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("ATM DeFi", wx + 16, wy - 4);
+
+  ctx.restore();
+};
+
+/**
+ * Restaurado o Cyberpunk ATM original na Ilha Oeste
+ */
+export const drawCyberpunkAtm = (
+  ctx: CanvasRenderingContext2D,
+  tx: number,
+  ty: number,
+  tileSize: number,
+  playerPos: Player
+) => {
+  const wx = tx * tileSize;
+  const wy = ty * tileSize;
+
+  ctx.save();
+
+  // Holographic projection base
+  ctx.fillStyle = "#0f172a";
+  ctx.beginPath();
+  ctx.ellipse(wx + 16, wy + 28, 14, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = "#a855f7";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Floating Cyber Body
+  const floatY = Math.sin(performance.now() / 200) * 2;
+
+  ctx.fillStyle = "#1e1b4b"; // Deep violet
+  ctx.fillRect(wx + 6, wy + 4 + floatY, 20, 20);
+  ctx.strokeStyle = "#d946ef"; // Fuchsia neon outline
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(wx + 6, wy + 4 + floatY, 20, 20);
+
+  // Cyber Screen
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(wx + 8, wy + 6 + floatY, 16, 10);
+
+  // Glitching text/data stream on screen
+  ctx.fillStyle = "#22d3ee"; // Cyan
+  if (Math.random() > 0.1) {
+    ctx.fillRect(wx + 10, wy + 8 + floatY, 12, 1);
+    ctx.fillRect(wx + 10, wy + 11 + floatY, 8, 1);
+    ctx.fillRect(wx + 10, wy + 14 + floatY, 10, 1);
+  }
+
+  // Neon cables
+  ctx.strokeStyle = "#06b6d4";
+  ctx.beginPath();
+  ctx.moveTo(wx + 10, wy + 24 + floatY);
+  ctx.lineTo(wx + 14, wy + 28);
+  ctx.stroke();
+
+  ctx.strokeStyle = "#ec4899";
+  ctx.beginPath();
+  ctx.moveTo(wx + 22, wy + 24 + floatY);
+  ctx.lineTo(wx + 18, wy + 28);
+  ctx.stroke();
+
+  // Floating Holographic Sign
+  ctx.fillStyle = "rgba(217, 70, 239, 0.8)";
+  ctx.font = "bold 6px monospace";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("CYBER ATM", wx + 16, wy - 2 + floatY);
+
+  // Prompt if player is adjacent
+  const dx = Math.abs(playerPos.x - tx);
+  const dy = Math.abs(playerPos.y - ty);
+  if (dx <= 1 && dy <= 1) {
+    const cx = wx + tileSize / 2;
+    const cy = wy - 12 + floatY;
+
+    ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+    ctx.fillRect(cx - 30, cy - 8, 60, 14);
+    ctx.strokeStyle = "#d946ef";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(cx - 30, cy - 8, 60, 14);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 7px monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("USAR [ESPAÇO]", cx, cy - 1);
+  }
+
+  ctx.restore();
+};
+
 export const drawSpecialTerminals = (ctx: CanvasRenderingContext2D, currentRegion: MapId, playerPos: Player, tileSize: number) => {
   if (currentRegion === "center") {
     drawClassicAtm(ctx, 33, 28, tileSize, playerPos);
   } else if (currentRegion === "east") {
-    drawInteractiveTerminal(ctx, 35, 28, "FORJA CHAVE", "#22d3ee", tileSize, playerPos);
+    drawInteractiveTerminal(ctx, 35, 28, "ALTAR DA WALLET", "#06b6d4", tileSize, playerPos);
   } else if (currentRegion === "north") {
-    drawInteractiveTerminal(ctx, 31, 24, "ON RAMP PORT", "#34d399", tileSize, playerPos);
+    drawInteractiveTerminal(ctx, 31, 24, "ALTAR DO ON-RAMP", "#10b981", tileSize, playerPos);
   } else if (currentRegion === "west") {
-    drawInteractiveTerminal(ctx, 31, 27, "SOROBAN SWAP", "#a78bfa", tileSize, playerPos);
+    drawInteractiveTerminal(ctx, 31, 27, "ALTAR DE SOROBAN", "#9333ea", tileSize, playerPos);
     drawCyberpunkAtm(ctx, 47, 28, tileSize, playerPos);
   } else if (currentRegion === "south") {
-    drawInteractiveTerminal(ctx, 33, 24, "GOLD ESCROW", "#fbbf24", tileSize, playerPos);
+    drawInteractiveTerminal(ctx, 33, 24, "ALTAR DO VIP HOLD", "#eab308", tileSize, playerPos);
   }
 };
+
 
 export const drawMapDecorations = (
   ctx: CanvasRenderingContext2D,

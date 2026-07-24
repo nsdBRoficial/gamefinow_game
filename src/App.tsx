@@ -316,6 +316,8 @@ export default function App() {
             updatedJamesList.push("guide_onramp_done");
           } else if (prev.quests.soroban.status === "completed" && prev.quests.hold.status === "active" && !updatedJamesList.includes("guide_soroban_done")) {
             updatedJamesList.push("guide_soroban_done");
+          } else if (prev.quests.hold.status === "completed" && !updatedJamesList.includes("guide_all_completed")) {
+            updatedJamesList.push("guide_all_completed");
           }
         }
 
@@ -341,11 +343,38 @@ export default function App() {
         dialogKey = `npcs.${npc.id}.completedDialogs`;
       }
     } else if (npc.id === "guide") {
+      const jamesList = gameState.jamesDialogsDone || [];
       const walletStatus = gameState.quests.wallet.status;
-      if (walletStatus === "completed") {
-        dialogKey = `npcs.${npc.id}.completedDialogs`;
-      } else if (walletStatus === "active") {
-        dialogKey = `npcs.${npc.id}.activeQuestDialogs`;
+      const onrampStatus = gameState.quests.onramp.status;
+      const sorobanStatus = gameState.quests.soroban.status;
+      const holdStatus = gameState.quests.hold.status;
+
+      if (walletStatus === "active") {
+        if (!jamesList.includes("guide_initial")) {
+          dialogKey = "dialogs.guide.q1_initial";
+        } else {
+          dialogKey = "dialogs.guide.q1_active";
+        }
+      } else if (walletStatus === "completed" && onrampStatus === "active") {
+        if (!jamesList.includes("guide_wallet_done")) {
+          dialogKey = "dialogs.guide.q1_done_q2_start";
+        } else {
+          dialogKey = "dialogs.guide.q2_active";
+        }
+      } else if (onrampStatus === "completed" && sorobanStatus === "active") {
+        if (!jamesList.includes("guide_onramp_done")) {
+          dialogKey = "dialogs.guide.q2_done_q3_start";
+        } else {
+          dialogKey = "dialogs.guide.q3_active";
+        }
+      } else if (sorobanStatus === "completed" && holdStatus === "active") {
+        if (!jamesList.includes("guide_soroban_done")) {
+          dialogKey = "dialogs.guide.q3_done_q4_start";
+        } else {
+          dialogKey = "dialogs.guide.q4_active";
+        }
+      } else if (holdStatus === "completed") {
+        dialogKey = "dialogs.guide.all_completed";
       }
     }
 
@@ -1163,20 +1192,20 @@ export default function App() {
 
         {/* MOBILE JOYSTICK TOUCH PAD AND ACTION BUTTON */}
         {!gameState.activeDialog && (
-          <div className="absolute bottom-10 left-0 right-0 z-10 flex justify-between items-end px-6 pointer-events-none md:hidden">
+          <div className="absolute bottom-14 left-0 right-0 z-10 flex justify-between items-end px-6 pointer-events-none md:hidden">
             
-            {/* Joystick no lado esquerdo */}
-            <div className="pointer-events-auto bg-[#ece9df] border-2 border-black rounded-full p-2 shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] opacity-80">
+            {/* Joystick no lado esquerdo — elevado e posicionado com excelente ergonomia */}
+            <div className="pointer-events-auto bg-[#ece9df]/90 border-2 border-black rounded-full p-2.5 shadow-[3px_3px_0px_rgba(0,0,0,1)] backdrop-blur-sm ml-2 mb-3">
               <ReactNipple
                 options={{
                   mode: "static",
                   position: { top: "50%", left: "50%" },
-                  size: 90,
-                  color: "black",
+                  size: 96,
+                  color: "#1e293b",
                 }}
                 style={{
-                  width: 90,
-                  height: 90,
+                  width: 96,
+                  height: 96,
                   position: "relative",
                 }}
                 onMove={(evt: any, data: any) => {
@@ -1195,7 +1224,7 @@ export default function App() {
             </div>
 
             {/* Action button no lado direito */}
-            <div className="pointer-events-auto bg-[#ece9df] border-2 border-black rounded-full p-1.5 shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] opacity-80 mb-2">
+            <div className="pointer-events-auto bg-[#ece9df]/90 border-2 border-black rounded-full p-2 shadow-[3px_3px_0px_rgba(0,0,0,1)] backdrop-blur-sm mr-2 mb-4">
               <button 
                 id="btn-action"
                 onClick={(e) => {
@@ -1206,7 +1235,7 @@ export default function App() {
                     window.dispatchEvent(new KeyboardEvent('keyup', { key: ' ' }));
                   }, 50);
                 }}
-                className="w-16 h-16 bg-[#ffc600] hover:bg-[#e6b300] text-black rounded-full border-2 border-black cursor-pointer text-sm font-bold active:translate-y-1 flex items-center justify-center shadow-[0_4px_0_#000] active:shadow-none"
+                className="w-16 h-16 bg-[#ffbf00] active:bg-[#e6ab00] text-black rounded-full border-2 border-black cursor-pointer text-sm font-black active:translate-y-1 flex items-center justify-center shadow-[0_4px_0_#000] active:shadow-none"
               >
                 {t("ui.action")}
               </button>

@@ -35,17 +35,56 @@
     "guide": {
       "main": [
         "Olá, jovem herói! Bem-vindo ao saguão principal do Templo Stellar!",
-        "Eu sou James [NPC], o Mestre do Templo. Meu trabalho é garantir que você não seja derrotado por trolls e aprenda tudo sobre a rede Stellar!",
+        "Eu sou James [NPC], o Mestre do Templo. Estou aqui para guiar você pela rede Stellar!",
         "Para começar a sua jornada e poder negociar Runas Raras, você precisa de uma conta/carteira Stellar para guardar seus ativos de batalha.",
         "Siga para o Leste (direita) cruzando a ponte e fale com Kael [NPC], o Ferreiro de Raros, para forjar suas chaves mágicas!"
       ],
+      "q1_initial": [
+        "Olá, jovem herói! Bem-vindo ao saguão principal do Templo Stellar!",
+        "Eu sou James [NPC], o Mestre do Templo. Estou aqui para guiar você pela rede Stellar!",
+        "Para começar a sua jornada, você precisa forjar sua Carteira Stellar com Kael [NPC].",
+        "A seta amarela magnética na sua tela indicará exatamente o caminho. Siga para o Leste (Portal Ciano) e forje suas chaves mágicas!"
+      ],
+      "q1_active": [
+        "Ainda sem uma carteira? Siga a seta magnética até o Portal Leste (Ciano) e fale com o Ferreiro Kael [NPC]!"
+      ],
+      "q1_done_q2_start": [
+        "Sensacional, herói! Você forjou sua carteira Stellar com sucesso! Veja seu endereço no topo superior da tela.",
+        "Agora que possui uma identidade na rede, você precisa adquirir suas primeiras moedas XLM.",
+        "Sua próxima missão é a Missão 2: On-Ramp no Porto de Câmbio ao Norte com o Capitão HC [NPC].",
+        "Liberei o Portal Norte (Verde) para você! Siga a seta magnética até o norte e adquira suas moedas!"
+      ],
+      "q2_active": [
+        "Siga a seta magnética até o Portal Norte (Verde) e converse com o Capitão HC [NPC] no Terminal de Câmbio!"
+      ],
+      "q2_done_q3_start": [
+        "Excelente trabalho! Suas moedas XLM foram creditadas com sucesso pela Âncora do Capitão HC!",
+        "Agora que tem saldo, é hora de aprender a usar Smart Contracts (Contratos Inteligentes) Soroban!",
+        "Sua próxima missão é a Missão 3: Mercado Soroban no Portal Oeste (Roxo) com a Alquimista [NPC].",
+        "Liberei o Portal Oeste! Siga a seta magnética e faça uma troca (Swap) por dólares estáveis USDC ou tokens SORO!"
+      ],
+      "q3_active": [
+        "Siga a seta magnética até o Portal Oeste (Roxo) e fale com a Alquimista [NPC] no terminal de troca!"
+      ],
+      "q3_done_q4_start": [
+        "Magnífico! Você executou um contrato inteligente Soroban em segundos e com taxas insignificantes!",
+        "Você aprendeu a criar uma carteira, colocar recursos e negociar ativos. Falta apenas o teste final do Holder!",
+        "Sua última missão é a Missão 4: Cofre VIP no Portal Sul (Dourado) com o Ancião Bobba [NPC].",
+        "Liberei o Portal Sul! Siga a seta magnética até a câmara de Hold para travar uma quantia e conquistar o título de Guardião Lendário!"
+      ],
+      "q4_active": [
+        "Siga a seta magnética até o Portal Sul (Dourado) e interaja com o Ancião Bobba [NPC] na Câmara de Hold!"
+      ],
+      "all_completed": [
+        "🌟 GLÓRIA E HONRA! Você completou todas as missões de Onboarding do Templo Stellar!",
+        "Você é oficialmente um Guardião Lendário Stellar Holder! Seu título e conquistas brilham em todo o reino.",
+        "Aproveite para explorar a ilha e interagir com outros jogadores heróis no multiplayer online!"
+      ],
       "active": [
-        "Ainda sem uma conta? Vá para o Leste e fale com o Kael [NPC] para forjar seu par de chaves criptográficas!"
+        "Siga a seta magnética até o portal da missão ativa!"
       ],
       "completed": [
-        "Sensacional! Você já registrou sua carteira Stellar. Veja seu endereço seguro no HUD na barra superior!",
-        "Sua próxima missão é adquirir suas primeiras moedas XLM. O corredor ao Norte foi liberado!",
-        "Entre no Portal Norte e fale com o lendário Capitão HC [NPC] na guarita de câmbio para realizar seu primeiro On-Ramp!"
+        "Sensacional! Você já registrou sua carteira Stellar. Veja seu endereço seguro no HUD na barra superior!"
       ]
     },
     "keymaster": {

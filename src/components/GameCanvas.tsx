@@ -523,8 +523,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         onNearTerminal("burn_altar");
         return;
       }
-      // Fonte Faucet (2 sqms: x=28, y=25..26)
-      if (Math.abs(x - 28) <= 2 && y >= 24 && y <= 27) {
+      // Fonte Faucet (2 sqms: x=28, y=24..25 -> pé no y=25)
+      if (Math.abs(x - 28) <= 1 && y >= 23 && y <= 25) {
         onNearTerminal("gamefi_faucet");
         return;
       }

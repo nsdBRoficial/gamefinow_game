@@ -104,8 +104,8 @@ export function getCurrentQuestTarget(
       if (currentMap === "east") {
         return {
           name: "Portal de Retorno (Centro)",
-          x: 4,
-          y: 29,
+          x: getReturnPortalCoord("east").x,
+          y: getReturnPortalCoord("east").y,
           mapId: "east",
           type: "portal",
           color: "#38bdf8",
@@ -170,8 +170,8 @@ export function getCurrentQuestTarget(
       if (currentMap === "north") {
         return {
           name: "Portal de Retorno (Centro)",
-          x: 29,
-          y: 55,
+          x: getReturnPortalCoord("north").x,
+          y: getReturnPortalCoord("north").y,
           mapId: "north",
           type: "portal",
           color: "#38bdf8",
@@ -236,8 +236,8 @@ export function getCurrentQuestTarget(
       if (currentMap === "west") {
         return {
           name: "Portal de Retorno (Centro)",
-          x: 55,
-          y: 29,
+          x: getReturnPortalCoord("west").x,
+          y: getReturnPortalCoord("west").y,
           mapId: "west",
           type: "portal",
           color: "#38bdf8",
@@ -296,43 +296,51 @@ export function getCurrentQuestTarget(
 
   // ─── 5. TODAS AS MISSÕES CONCLUÍDAS ──────────────────────────────────────
   if (quests.hold.status === "completed") {
-    if (currentMap === "center") {
-      return {
-        name: "James [NPC]",
-        x: 27,
-        y: 28,
-        mapId: "center",
-        type: "npc",
-        color: "#22c55e",
-      };
-    } else {
-      return {
-        name: "Portal para o Centro",
-        x: getReturnPortalCoord(currentMap).x,
-        y: getReturnPortalCoord(currentMap).y,
-        mapId: currentMap,
-        type: "portal",
-        color: "#38bdf8",
-      };
+    const talkedAllCompletedJames = jamesDialogsDone.includes("guide_all_completed");
+
+    // Se ainda não recebeu os parabéns do James no Centro, aponta pro James [NPC]
+    if (!talkedAllCompletedJames) {
+      if (currentMap === "center") {
+        return {
+          name: "James [NPC]",
+          x: 27,
+          y: 28,
+          mapId: "center",
+          type: "npc",
+          color: "#22c55e",
+        };
+      } else {
+        return {
+          name: "Portal para o Centro",
+          x: getReturnPortalCoord(currentMap).x,
+          y: getReturnPortalCoord(currentMap).y,
+          mapId: currentMap,
+          type: "portal",
+          color: "#38bdf8",
+        };
+      }
     }
+    
+    // Após receber os parabéns finais do James: a seta DESAPARECE completamente!
+    return null;
   }
 
   return null;
 }
 
 /**
- * Retorna as coordenadas do portal de retorno para o centro em cada mapa.
+ * Retorna as coordenadas exatas do portal de retorno para o centro em cada mapa.
  */
 function getReturnPortalCoord(mapId: MapId): { x: number; y: number } {
   switch (mapId) {
     case "east":
-      return { x: 4, y: 29 };
+      return { x: 1, y: 29 };
     case "west":
-      return { x: 55, y: 29 };
+      return { x: 58, y: 29 };
     case "north":
-      return { x: 29, y: 55 };
+      return { x: 30, y: 58 };
     case "south":
-      return { x: 29, y: 4 };
+      return { x: 30, y: 1 };
     default:
       return { x: 29, y: 29 };
   }
@@ -409,20 +417,25 @@ export function drawQuestArrow(
     const arrowScreenX = playerWorldX + clampedX;
     const arrowScreenY = playerWorldY + clampedY;
 
-    drawPixelArrowSprite(ctx, arrowScreenX, arrowScreenY, angleRad + Math.PI / 2, false);
+    // Distância aproximada em "passos/metros"
+    const distTiles = Math.round(Math.hypot(target.x - playerPos.x, target.y - playerPos.y));
+
+    drawPixelArrowSprite(ctx, arrowScreenX, arrowScreenY, angleRad + Math.PI / 2, false, distTiles);
   }
 }
 
 /**
  * Desenha a sprite retro de Seta Pixel Art no Canvas.
- * Amarela/dourada com borda escura reluzente (reduzida para ~10% do tamanho anterior, sem textos).
+ * Amarela/dourada com borda escura reluzente (reduzida para ~10% do tamanho anterior).
+ * Se fora do alvo, exibe a distância em metros abaixo da seta.
  */
 function drawPixelArrowSprite(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
   rotationRad: number,
-  isMagneticOnTarget: boolean
+  isMagneticOnTarget: boolean,
+  distTiles?: number
 ) {
   ctx.save();
   ctx.translate(x, y);
@@ -493,4 +506,18 @@ function drawPixelArrowSprite(
   ctx.fillRect(-1 * p, 5 * p, 2 * p, 2 * p);
 
   ctx.restore();
+
+  // ── INDICADOR DISCRETO DE DISTÂNCIA EM METROS (Apenas quando fora da tela) ──
+  if (!isMagneticOnTarget && typeof distTiles === "number") {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.font = "bold 8px 'JetBrains Mono', monospace";
+    ctx.fillStyle = "#ffffff";
+    ctx.shadowColor = "#000000";
+    ctx.shadowBlur = 3;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(`${distTiles}m`, 0, 12);
+    ctx.restore();
+  }
 }
