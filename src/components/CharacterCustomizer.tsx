@@ -30,15 +30,24 @@ interface CharacterCustomizerProps {
 }
 
 const PRESET_COLORS = [
-  { name: "Amarelo", value: "#fcd34d" },
-  { name: "Ciano", value: "#38bdf8" },
-  { name: "Verde", value: "#10b981" },
-  { name: "Vermelho", value: "#ef4444" },
-  { name: "Rosa", value: "#ec4899" },
-  { name: "Roxo", value: "#8b5cf6" },
-  { name: "Laranja", value: "#f97316" },
-  { name: "Grafite", value: "#1e293b" },
-  { name: "Branco", value: "#f8fafc" },
+  { name: "Amarelo Dourado", value: "#fcd34d" },
+  { name: "Ciano Neon", value: "#06b6d4" },
+  { name: "Verde Esmeralda", value: "#10b981" },
+  { name: "Vermelho Rubino", value: "#ef4444" },
+  { name: "Rosa Chiclete", value: "#ec4899" },
+  { name: "Roxo Místico", value: "#8b5cf6" },
+  { name: "Laranja Solar", value: "#f97316" },
+  { name: "Grafite Escuro", value: "#1e293b" },
+  { name: "Branco Neve", value: "#f8fafc" },
+  { name: "Azul Marinho", value: "#1e3a8a" },
+  { name: "Magenta Cyber", value: "#d946ef" },
+  { name: "Turquesa", value: "#22d3ee" },
+  { name: "Castanho", value: "#78350f" },
+  { name: "Preto Ônix", value: "#09090b" },
+  { name: "Ouro 24k", value: "#eab308" },
+  { name: "Verde Menta", value: "#6ee7b7" },
+  { name: "Violeta Profundo", value: "#4c1d95" },
+  { name: "Bronze Rústico", value: "#9a3412" },
 ];
 
 const SKIN_COLORS = [
@@ -262,20 +271,27 @@ export const CharacterCustomizer: React.FC<CharacterCustomizerProps> = ({
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 font-mono">
           {[
-            { id: "default", name: "Curto Padrão" },
-            { id: "mohawk", name: "Mohawk Cyber" },
-            { id: "cap", name: "Boné Gamer" },
-            { id: "long", name: "Longo Retrô" },
-            { id: "afro", name: "Afro Power" },
-            { id: "helmet", name: "Capacete Space" },
-            { id: "crown", name: "Coroa VIP" },
-            { id: "bald", name: "Careca" },
+            { id: "topete", name: "Topete Retrô ♂" },
+            { id: "ribbon", name: "Laço & Cabelo 👧" },
+            { id: "bob", name: "Corte Bob Chanel 👧" },
+            { id: "ponytail", name: "Rabo de Cavalo 👧" },
+            { id: "long_hair", name: "Cabelo Longo ♀" },
+            { id: "flower_crown", name: "Coroa de Flores 🌸" },
+            { id: "witch", name: "Chapéu Místico 🧙‍♀️" },
+            { id: "horns", name: "Chifres/Orelhas 😈" },
+            { id: "square", name: "Quadrado Clássico" },
+            { id: "beanie", name: "Touca Gamer 🎮" },
+            { id: "helmet", name: "Capacete Espacial 🚀" },
+            { id: "pirate", name: "Bandana Pirata 🏴‍☠️" },
           ].map((style) => (
             <button
               key={style.id}
-              onClick={() => updateCustomization("headStyle", style.id)}
+              onClick={() => {
+                updateCustomization("headType", style.id);
+                updateCustomization("headStyle", style.id);
+              }}
               className={`p-1.5 rounded border text-[10px] text-center transition cursor-pointer ${
-                (playerPos.headStyle || "default") === style.id
+                (playerPos.headType || playerPos.headStyle || "topete") === style.id
                   ? "bg-cyan-950 border-cyan-500 text-cyan-300 font-bold"
                   : "bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-850"
               }`}
@@ -286,14 +302,17 @@ export const CharacterCustomizer: React.FC<CharacterCustomizerProps> = ({
         </div>
 
         <div className="pt-2">
-          <span className="text-[9px] text-slate-400 block mb-1 font-mono">Cor do Cabelo:</span>
+          <span className="text-[9px] text-slate-400 block mb-1 font-mono">Cor do Cabelo & Chapéu:</span>
           <div className="flex flex-wrap gap-1.5">
             {PRESET_COLORS.map((color) => (
               <button
                 key={`head-${color.value}`}
-                onClick={() => updateCustomization("headColor", color.value)}
+                onClick={() => {
+                  updateCustomization("headColor", color.value);
+                  updateCustomization("hairColor", color.value);
+                }}
                 className={`w-5 h-5 rounded cursor-pointer transition border-2 ${
-                  playerPos.headColor === color.value ? "border-white scale-110 shadow-md" : "border-transparent opacity-80 hover:opacity-100"
+                  (playerPos.hairColor === color.value || playerPos.headColor === color.value) ? "border-white scale-110 shadow-md" : "border-transparent opacity-80 hover:opacity-100"
                 }`}
                 style={{ backgroundColor: color.value }}
                 title={color.name}
@@ -354,24 +373,31 @@ export const CharacterCustomizer: React.FC<CharacterCustomizerProps> = ({
       {/* Tronco / Roupas */}
       <div className="bg-slate-950 p-3 rounded-lg border border-slate-800 space-y-2">
         <label className="text-[10px] font-bold text-indigo-400 flex items-center gap-1.5 uppercase font-mono">
-          <Shirt className="h-3.5 w-3.5" /> Roupa / Tronco
+          <Shirt className="h-3.5 w-3.5" /> Estilo de Roupa / Traje
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 font-mono">
           {[
-            { id: "tshirt", name: "Camiseta Basic" },
-            { id: "suit", name: "Terno Cryptogamer" },
-            { id: "hoodie", name: "Moletom Dev" },
-            { id: "jacket", name: "Jaqueta de Couro" },
-            { id: "cyber", name: "Armadura Cyber" },
-            { id: "robe", name: "Manto Soroban" },
-            { id: "royal", name: "Capa Imperial" },
-            { id: "dress", name: "Vestido Nobre" },
+            { id: "classic", name: "Camiseta Clássica" },
+            { id: "dress", name: "Vestido Elegante 👗" },
+            { id: "suit", name: "Terno Executive 👔" },
+            { id: "cyber", name: "Armadura Cyberpunk ⚡" },
+            { id: "valkyrie", name: "Armadura Valquíria 🛡️" },
+            { id: "golden_armor", name: "Armadura de Ouro 🌟" },
+            { id: "samurai", name: "Traje Samurai ⚔️" },
+            { id: "witch_robe", name: "Manto de Feiticeira 🧪" },
+            { id: "royal", name: "Manto Imperial 👑" },
+            { id: "pirate", name: "Traje Pirata 🏴‍☠️" },
+            { id: "hoodie", name: "Moletom Dev 💻" },
+            { id: "striped", name: "Túnica Listrada" },
           ].map((style) => (
             <button
               key={style.id}
-              onClick={() => updateCustomization("torsoStyle", style.id)}
+              onClick={() => {
+                updateCustomization("torsoType", style.id);
+                updateCustomization("torsoStyle", style.id);
+              }}
               className={`p-1.5 rounded border text-[10px] text-center transition cursor-pointer ${
-                (playerPos.torsoStyle || "tshirt") === style.id
+                (playerPos.torsoType || playerPos.torsoStyle || "classic") === style.id
                   ? "bg-indigo-950 border-indigo-500 text-indigo-300 font-bold"
                   : "bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-850"
               }`}

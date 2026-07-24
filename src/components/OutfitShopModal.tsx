@@ -123,6 +123,7 @@ export const OutfitShopModal: React.FC<OutfitShopModalProps> = ({
       gender: outfit.charData.gender || prev.gender,
       headType: outfit.charData.headType as any,
       headColor: outfit.charData.headColor,
+      hairColor: outfit.charData.hairColor || outfit.charData.headColor,
       torsoType: outfit.charData.torsoType as any,
       torsoColor: outfit.charData.torsoColor,
       legsColor: outfit.charData.legsColor,

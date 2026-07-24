@@ -785,8 +785,22 @@ export default function App() {
       <LoginScreen
         existingWallet={gameState.wallet}
         existingPlayerName={playerPos.name}
-        onLogin={(name) => {
-          setPlayerPos((prev) => ({ ...prev, name }));
+        existingGender={playerPos.gender || "male"}
+        onLogin={(name, gender) => {
+          const isFemale = gender === "female";
+          setPlayerPos((prev) => ({
+            ...prev,
+            name,
+            gender,
+            headType: isFemale ? "ribbon" : (prev.headType || "topete"),
+            headColor: isFemale ? "#ec4899" : (prev.headColor || "#3b82f6"),
+            torsoType: isFemale ? "dress" : (prev.torsoType || "classic"),
+            torsoColor: isFemale ? "#ec4899" : (prev.torsoColor || "#ef4444"),
+            legsColor: isFemale ? "#1e293b" : (prev.legsColor || "#2563eb"),
+            shoesColor: isFemale ? "#ec4899" : (prev.shoesColor || "#1e293b"),
+            faceType: isFemale ? "eyelashes" : (prev.faceType || "none"),
+            hairColor: isFemale ? "#ec4899" : (prev.hairColor || "#78350f"),
+          }));
           playSynthSound("success");
           setIsLoggedIn(true);
         }}

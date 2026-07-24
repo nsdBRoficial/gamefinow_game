@@ -111,6 +111,7 @@ const getInitialPlayerPos = (): Player => {
     accessoryType: "backpack",
     name: "Anonymo",
     mapId: "center",
+    gender: "male",
     // Campos de estilo avançado (CharacterCustomizer)
     headStyle: "default",
     eyeStyle: "dots",

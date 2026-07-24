@@ -65,11 +65,12 @@ export interface Player {
   unlockedTitles?: string[];
   nameStyle?: "prefix" | "suffix" | "badge" | "plain";
   headColor: string;
+  hairColor?: string;
   torsoColor: string;
   legsColor: string;
   shoesColor: string;
   headType: "square" | "topete" | "militar" | "beanie" | "helmet" | "horns" | "pirate" | "long_hair" | "ponytail" | "ribbon" | "bob" | "witch" | "elf_ears" | "flower_crown";
-  torsoType: "plain" | "striped" | "suit" | "hoodie" | "dress" | "cyber" | "samurai" | "pirate" | "valkyrie" | "royal" | "plate_armor" | "witch_robe" | "golden_armor";
+  torsoType: "plain" | "striped" | "suit" | "hoodie" | "dress" | "cyber" | "samurai" | "pirate" | "valkyrie" | "royal" | "plate_armor" | "witch_robe" | "golden_armor" | "classic" | "tshirt";
   shoesType: "sneakers" | "boots" | "flippers";
   skinColor: string;
   faceType: "none" | "glasses" | "beard" | "elder_beard" | "mustache" | "eyepatch" | "smile" | "eyelashes" | "makeup" | "visor";

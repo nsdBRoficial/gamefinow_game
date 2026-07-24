@@ -25,15 +25,79 @@ interface LoginScreenProps {
     publicKey?: string;
   };
   existingPlayerName: string;
-  onLogin: (name: string) => void;
+  existingGender?: "male" | "female";
+  onLogin: (name: string, gender: "male" | "female") => void;
   onPasskeyLogin: () => void;
   onResetCharacter: () => void;
   playSynthSound: (type: "beep" | "success" | "coin" | "unlock") => void;
 }
 
+// Subcomponente de Prévia do Personagem no Login
+const LoginCharacterPreview: React.FC<{ gender: "male" | "female"; name: string }> = ({ gender, name }) => {
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animId: number;
+    let frameCounter = 0;
+
+    const render = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      frameCounter += 0.05;
+
+      const isFemale = gender === "female";
+      const charData = {
+        gender,
+        skinColor: "#ffdbac",
+        headColor: isFemale ? "#ec4899" : "#3b82f6",
+        headType: isFemale ? "ribbon" : "topete",
+        torsoColor: isFemale ? "#ec4899" : "#ef4444",
+        torsoType: isFemale ? "dress" : "classic",
+        legsColor: isFemale ? "#1e293b" : "#2563eb",
+        shoesColor: isFemale ? "#ec4899" : "#1e293b",
+        faceType: isFemale ? "eyelashes" : "none",
+        accessoryType: "none",
+        hairColor: isFemale ? "#ec4899" : "#78350f",
+      };
+
+      // Import dynamic draw logic
+      import("./canvas/PlayerSprite").then(({ drawPixelCharacter }) => {
+        drawPixelCharacter(ctx, 16, 12, charData as any, true, frameCounter, "down", false);
+      });
+
+      animId = requestAnimationFrame(render);
+    };
+
+    render();
+    return () => cancelAnimationFrame(animId);
+  }, [gender]);
+
+  return (
+    <div className="flex items-center gap-3 bg-black/60 border border-slate-800 p-2.5 rounded-xl">
+      <div className="w-16 h-16 bg-slate-950 border border-cyan-500/30 rounded-lg flex items-center justify-center relative overflow-hidden shadow-inner">
+        <canvas ref={canvasRef} width={64} height={64} className="w-12 h-12 image-render-pixel" />
+      </div>
+      <div className="space-y-0.5 font-mono">
+        <span className="text-[9px] text-cyan-400 font-bold uppercase tracking-wider block">Prévia do Herói</span>
+        <h4 className="text-xs font-black text-white truncate max-w-[150px]">{name || "Anonymo"}</h4>
+        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase inline-block ${
+          gender === "female" ? "bg-pink-950 text-pink-300 border-pink-800" : "bg-cyan-950 text-cyan-300 border-cyan-800"
+        }`}>
+          {gender === "female" ? "👧 Feminino" : "👦 Masculino (Padrão)"}
+        </span>
+      </div>
+    </div>
+  );
+};
+
 export const LoginScreen: React.FC<LoginScreenProps> = ({
   existingWallet,
   existingPlayerName,
+  existingGender = "male",
   onLogin,
   onPasskeyLogin,
   onResetCharacter,
@@ -41,6 +105,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 }) => {
   const { t, i18n } = useTranslation();
   const [name, setName] = useState(existingPlayerName || "Anonymo");
+  const [gender, setGender] = useState<"male" | "female">("male");
   const [showPasskeyModal, setShowPasskeyModal] = useState(false);
   const [passkeyStep, setPasskeyStep] = useState<"idle" | "scanning" | "success">("idle");
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -65,7 +130,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   // Handle Frictionless Play
   const handleFrictionlessPlay = (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin(name.trim() || "Anonymo");
+    onLogin(name.trim() || "Anonymo", gender);
   };
 
   // Start Simulated Biometric Passkey Login
@@ -273,6 +338,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                   </p>
                 </div>
 
+                {/* PRÉVIA DO PERSONAGEM EM PIXEL-ART */}
+                <LoginCharacterPreview gender={gender} name={name} />
+
+                {/* NOME DO PERSONAGEM */}
                 <div className="space-y-1.5">
                   <label className="block text-[10px] text-slate-400 font-extrabold uppercase tracking-wide flex items-center gap-1.5">
                     <User className="h-3 w-3 text-cyan-400" /> {t('ui.login.characterName')}
@@ -290,9 +359,43 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                       EDITÁVEL
                     </span>
                   </div>
-                  <span className="text-[9px] text-slate-500 block font-medium">
-                    {t('ui.login.nameHint')}
-                  </span>
+                </div>
+
+                {/* SELETOR DE SEXO DO PERSONAGEM (MASCULINO DEFAULT / FEMININO) */}
+                <div className="space-y-1.5">
+                  <label className="block text-[10px] text-slate-400 font-extrabold uppercase tracking-wide flex items-center gap-1.5">
+                    👥 Sexo do Personagem
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        playSynthSound("beep");
+                        setGender("male");
+                      }}
+                      className={`py-2 px-3 rounded-xl border text-xs font-mono font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
+                        gender === "male"
+                          ? "bg-cyan-950/80 border-cyan-500 text-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.3)]"
+                          : "bg-black/40 border-slate-800 text-slate-400 hover:bg-slate-850"
+                      }`}
+                    >
+                      <span>👦</span> Masculino (Padrão)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        playSynthSound("beep");
+                        setGender("female");
+                      }}
+                      className={`py-2 px-3 rounded-xl border text-xs font-mono font-bold flex items-center justify-center gap-2 transition cursor-pointer ${
+                        gender === "female"
+                          ? "bg-pink-950/80 border-pink-500 text-pink-300 shadow-[0_0_12px_rgba(236,72,153,0.3)]"
+                          : "bg-black/40 border-slate-800 text-slate-400 hover:bg-slate-850"
+                      }`}
+                    >
+                      <span>👧</span> Feminino
+                    </button>
+                  </div>
                 </div>
 
                 <button
