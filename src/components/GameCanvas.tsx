@@ -378,6 +378,22 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       return;
     }
 
+    // Interact with notebook on the DUPPLY stand
+    if (playerPos.mapId === "center" && checkX === 12 && checkY === 32) {
+      onTalkToNPC({
+        id: "dupply_info",
+        name: "DUPPLY INFO",
+        x: 12,
+        y: 32,
+        dir: "down",
+        dialogs: [
+          "Digitizes invoice financing from end to end.",
+          "We connect businesses seeking working capital with liquidity providers through automated workflows, risk analysis, traceability, and greater transparency at every stage of the transaction."
+        ]
+      });
+      return;
+    }
+
     // Interact with notebook on the DEFINDEX stand
     if (playerPos.mapId === "center" && checkX === 17 && checkY === 28) {
       onTalkToNPC({

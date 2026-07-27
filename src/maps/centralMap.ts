@@ -132,6 +132,7 @@ export function generateCentralMap(): number[][] {
   grid[32][21] = TileType.BLOCK; grid[32][22] = TileType.BLOCK; grid[32][23] = TileType.BLOCK; // GAMEFINOW baixado para y=32
   grid[32][37] = TileType.BLOCK; grid[32][38] = TileType.BLOCK; grid[32][39] = TileType.BLOCK; // PIGFI baixado para y=32
   grid[32][16] = TileType.BLOCK; grid[32][17] = TileType.BLOCK; grid[32][18] = TileType.BLOCK; // WAVE baixado para y=32
+  grid[32][11] = TileType.BLOCK; grid[32][12] = TileType.BLOCK; grid[32][13] = TileType.BLOCK; // DUPPLY
   grid[28][16] = TileType.BLOCK; grid[28][17] = TileType.BLOCK; grid[28][18] = TileType.BLOCK; // DEFINDEX
   grid[28][37] = TileType.BLOCK; grid[28][38] = TileType.BLOCK; grid[28][39] = TileType.BLOCK; // WALLETNOW
   grid[18][31] = TileType.BLOCK; grid[18][32] = TileType.BLOCK; grid[18][33] = TileType.BLOCK; // SOROSWAP
@@ -204,6 +205,9 @@ export const CENTRAL_DECORATIONS: GameDecoration[] = [
 
   // DEFINDEX Stand
   { x: 16, y: 28, type: "stand", text: "DEFINDEX", width: 3, color: "#3b82f6" },
+
+  // DUPPLY Stand (x=11..13, y=32)
+  { x: 11, y: 32, type: "stand", text: "DUPPLY", width: 3, color: "#14b8a6" },
 
   // WAVE Stand (x=16..18, y=32)
   { x: 16, y: 32, type: "stand", text: "WAVE", width: 3, color: "#06b6d4" },
