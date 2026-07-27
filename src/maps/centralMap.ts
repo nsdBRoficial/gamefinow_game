@@ -138,6 +138,7 @@ export function generateCentralMap(): number[][] {
   grid[18][31] = TileType.BLOCK; grid[18][32] = TileType.BLOCK; grid[18][33] = TileType.BLOCK; // SOROSWAP
   grid[45][26] = TileType.BLOCK; grid[45][27] = TileType.BLOCK; grid[45][28] = TileType.BLOCK; // NEARX
   grid[32][42] = TileType.BLOCK; grid[32][43] = TileType.BLOCK; grid[32][44] = TileType.BLOCK; // AUTOFIN (x=42,43,44 y=32)
+  grid[32][47] = TileType.BLOCK; grid[32][48] = TileType.BLOCK; grid[32][49] = TileType.BLOCK; // NIDO (x=47,48,49 y=32)
   grid[27][46] = TileType.BLOCK; grid[27][47] = TileType.BLOCK; grid[27][48] = TileType.BLOCK; // LOJA OUTFIT STORE
   grid[28][46] = TileType.BLOCK; grid[28][47] = TileType.BLOCK; grid[28][48] = TileType.BLOCK; // LOJA OUTFIT STORE
 
@@ -226,6 +227,9 @@ export const CENTRAL_DECORATIONS: GameDecoration[] = [
 
   // AUTOFIN Stand (x=42..44, y=32)
   { x: 42, y: 32, type: "stand", text: "AUTOFIN", width: 3, color: "#6366f1" },
+
+  // NIDO Stand (x=47..49, y=32)
+  { x: 47, y: 32, type: "stand", text: "NIDO", width: 3, color: "#eab308" },
 
   // ALTAR DE QUEIMA ETERNA (4 sqms: x=41..42, y=27..28, sem texto na tela)
   { x: 41, y: 27, type: "pixel_burn_brazier", width: 2, height: 2, color: "#f97316" },

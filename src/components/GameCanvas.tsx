@@ -511,6 +511,23 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       return;
     }
 
+    // Interact with notebook on the NIDO stand
+    if (playerPos.mapId === "center" && checkX === 48 && checkY === 32) {
+      onTalkToNPC({
+        id: "nido_info",
+        name: "NIDO INFO",
+        x: 48,
+        y: 32,
+        dir: "down",
+        dialogs: [
+          "NIDO: Creator infrastructure. Pay for results, not promises.",
+          "Your brand only releases payment when the campaign delivers. No agency in the middle, no red tape.",
+          "Scale and win users in the era of influencer marketing."
+        ]
+      });
+      return;
+    }
+
 
     checkTerminalProximity(targetX, targetY, playerPos.mapId || "center");
   };
