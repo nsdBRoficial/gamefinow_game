@@ -139,19 +139,19 @@ export const GameOverlay: React.FC<GameOverlayProps> = ({
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
-      <div className="relative w-full max-w-lg overflow-hidden rounded-2xl border-2 shadow-2xl transition-all duration-300 bg-slate-900 border-slate-700">
+      <div className="relative w-full max-w-lg flex flex-col max-h-[90vh] overflow-hidden rounded-2xl border-2 shadow-2xl transition-all duration-300 bg-slate-900 border-slate-700">
         
         {/* Close button X */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 w-7 h-7 bg-slate-800 hover:bg-red-600 border border-slate-700 hover:border-black rounded-lg text-slate-300 hover:text-white font-black text-sm flex items-center justify-center cursor-pointer shadow-[1px_1.5px_0_#000] active:translate-y-0.5 transition-all font-mono"
+          className="absolute top-4 right-4 z-50 w-7 h-7 bg-slate-800 hover:bg-red-600 border border-slate-700 hover:border-black rounded-lg text-slate-300 hover:text-white font-black text-sm flex items-center justify-center cursor-pointer shadow-[1px_1.5px_0_#000] active:translate-y-0.5 transition-all font-mono"
           title="Fechar e Voltar ao Jogo"
         >
           ×
         </button>
 
         {/* Top glow decor based on active modal type */}
-        <div className={`h-1.5 w-full ${
+        <div className={`h-1.5 w-full shrink-0 ${
           activeModal === "wallet" ? "bg-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.5)]" :
           activeModal === "onramp" ? "bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]" :
           activeModal === "soroban" ? "bg-violet-500 shadow-[0_0_15px_rgba(139,92,246,0.5)]" :
@@ -161,7 +161,7 @@ export const GameOverlay: React.FC<GameOverlayProps> = ({
           "bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.5)]"
         }`} />
 
-        <div className="p-6">
+        <div className="p-6 overflow-y-auto flex-1">
           {activeModal === "wallet" && (
             <WalletForgeModal 
               onClose={onClose} 

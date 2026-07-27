@@ -1056,6 +1056,35 @@ export default function App() {
           {/* Spacer to push buttons nicely down below map */}
           <div className="h-1" />
 
+          {/* Map Zoom Controls */}
+          <div className="flex gap-1 bg-[#1c2c16] border-[2px] border-[#8b5a2b] rounded p-0.5 shadow-[2px_2px_0px_#000]">
+            <button 
+              onClick={() => {
+                const isMobile = window.innerWidth < 768;
+                const currentZ = gameState.mapZoomLevel ?? (isMobile ? 1.5 : 3.5);
+                setGameState({...gameState, mapZoomLevel: Math.max(0.5, currentZ - (isMobile ? 0.25 : 0.5))});
+                playSynthSound("beep");
+              }}
+              className="w-6 h-6 md:w-5 md:h-5 bg-[#8b5a2b] hover:bg-[#a6713c] rounded text-white text-[12px] flex items-center justify-center font-bold active:bg-amber-600"
+            >
+              -
+            </button>
+            <div className="text-[10px] md:text-[9px] font-mono text-amber-200 px-1 flex items-center font-black">
+              ZOOM
+            </div>
+            <button 
+              onClick={() => {
+                const isMobile = window.innerWidth < 768;
+                const currentZ = gameState.mapZoomLevel ?? (isMobile ? 1.5 : 3.5);
+                setGameState({...gameState, mapZoomLevel: Math.min(isMobile ? 2.5 : 5.0, currentZ + (isMobile ? 0.25 : 0.5))});
+                playSynthSound("beep");
+              }}
+              className="w-6 h-6 md:w-5 md:h-5 bg-[#8b5a2b] hover:bg-[#a6713c] rounded text-white text-[12px] flex items-center justify-center font-bold active:bg-amber-600"
+            >
+              +
+            </button>
+          </div>
+
           {/* Backpack Window Trigger */}
           <button
             onClick={() => {
@@ -1206,10 +1235,10 @@ export default function App() {
 
         {/* MOBILE JOYSTICK TOUCH PAD AND ACTION BUTTON */}
         {!gameState.activeDialog && (
-          <div className="absolute bottom-14 left-0 right-0 z-10 flex justify-between items-end px-6 pointer-events-none md:hidden">
+          <div className="absolute bottom-14 left-0 right-0 z-50 flex justify-between items-end px-6 pointer-events-none md:hidden">
             
             {/* Joystick no lado esquerdo — elevado e posicionado com excelente ergonomia */}
-            <div className="pointer-events-auto bg-[#ece9df]/90 border-2 border-black rounded-full p-2.5 shadow-[3px_3px_0px_rgba(0,0,0,1)] backdrop-blur-sm ml-2 mb-3">
+            <div className="pointer-events-auto bg-[#ece9df]/90 border-2 border-black rounded-full p-2.5 shadow-[3px_3px_0px_rgba(0,0,0,1)] backdrop-blur-sm ml-8 mb-8">
               <ReactNipple
                 options={{
                   mode: "static",
@@ -1238,7 +1267,7 @@ export default function App() {
             </div>
 
             {/* Action button no lado direito */}
-            <div className="pointer-events-auto bg-[#ece9df]/90 border-2 border-black rounded-full p-2 shadow-[3px_3px_0px_rgba(0,0,0,1)] backdrop-blur-sm mr-2 mb-4">
+            <div className="pointer-events-auto bg-[#ece9df]/90 border-2 border-black rounded-full p-2 shadow-[3px_3px_0px_rgba(0,0,0,1)] backdrop-blur-sm mr-8 mb-8">
               <button 
                 id="btn-action"
                 onClick={(e) => {

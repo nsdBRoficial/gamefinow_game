@@ -204,10 +204,10 @@ export const OutfitShopModal: React.FC<OutfitShopModalProps> = ({
         </div>
 
         {/* Content Layout */}
-        <div className="grid md:grid-cols-12 flex-1 overflow-hidden p-5 gap-6">
+        <div className="grid md:grid-cols-12 flex-1 overflow-y-auto p-5 gap-6">
           
           {/* Left Column: Catalog List */}
-          <div className="md:col-span-7 space-y-3 overflow-y-auto max-h-[58vh] pr-2">
+          <div className="md:col-span-7 space-y-3 overflow-y-auto max-h-[58vh] md:max-h-[58vh] pr-2">
             <span className="text-[10px] text-purple-400 font-black uppercase tracking-widest block">
               CATÁLOGO DE TRAJES ({filteredCatalog.length})
             </span>
