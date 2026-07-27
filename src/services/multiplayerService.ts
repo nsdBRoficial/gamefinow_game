@@ -276,10 +276,14 @@ export async function sendChatMessage(
 export async function fetchRecentChat(mapId: string, limit = 20): Promise<ChatMessage[]> {
   if (!authSupabase) return [];
   try {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
     const { data, error } = await authSupabase
       .from("chat_messages")
       .select("*")
       .eq("map_id", mapId)
+      .gte("created_at", startOfDay.toISOString())
       .order("created_at", { ascending: false })
       .limit(limit);
 

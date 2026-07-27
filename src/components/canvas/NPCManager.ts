@@ -206,20 +206,61 @@ export const drawOtherPlayers = (
     // ── Name tag do player ────────────────────────────────────────────────────
     const pNameY = screenY - 19;
     ctx.font = "bold 9px 'JetBrains Mono', 'Ubuntu', sans-serif";
-    const textWidth = ctx.measureText(p.name).width;
+
+    let currentTitle = p.activeTitle;
+    let tagColor = "#ffffff";
+    let tagShadowColor = "";
+    let tagShadowBlur = 0;
+    let borderStyle = isBot ? "rgba(255,255,255,0.2)" : "rgba(255, 198, 0, 0.55)";
+
+    if (currentTitle === "Herói Lendário de Stellar") {
+      tagColor = "#00ff66";
+      tagShadowColor = "#00e676";
+      tagShadowBlur = 8;
+      borderStyle = "#00ff66";
+    } else if (currentTitle === "Alquimista do Soroban") {
+      tagColor = "#e879f9";
+      tagShadowColor = "#d946ef";
+      tagShadowBlur = 6;
+      borderStyle = "#e879f9";
+    } else if (currentTitle === "Operador On-Ramp") {
+      tagColor = "#fbbf24";
+      tagShadowColor = "#f59e0b";
+      tagShadowBlur = 6;
+      borderStyle = "#fbbf24";
+    } else if (currentTitle === "Iniciado de Stellar") {
+      tagColor = "#ffc600";
+      borderStyle = "#facc15";
+    }
+
+    let prefix = currentTitle === "Herói Lendário de Stellar" ? "⭐ " : "";
+    let namePart = p.name || "Anonymo";
+    const part1 = prefix + namePart;
+    const textWidth = ctx.measureText(part1).width;
     const pNameW = textWidth + 8;
     const pNameH = 13;
+
     ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
     ctx.fillRect(screenX + 16 - pNameW / 2, pNameY - 2, pNameW, pNameH);
-    // Bots: borda branca sutil | Players reais: borda dourada
-    ctx.strokeStyle = isBot ? "rgba(255,255,255,0.2)" : "rgba(255, 198, 0, 0.55)";
+
+    if (tagShadowBlur > 0 && tagShadowColor) {
+      ctx.shadowColor = tagShadowColor;
+      ctx.shadowBlur = tagShadowBlur;
+    }
+    ctx.strokeStyle = borderStyle;
     ctx.lineWidth = 1;
     ctx.strokeRect(screenX + 16 - pNameW / 2, pNameY - 2, pNameW, pNameH);
+    ctx.shadowBlur = 0;
 
-    ctx.fillStyle = "#ffffff";
+    if (tagShadowBlur > 0 && tagShadowColor) {
+      ctx.shadowColor = tagShadowColor;
+      ctx.shadowBlur = tagShadowBlur;
+    }
+    ctx.fillStyle = tagColor;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillText(p.name, screenX + 16, pNameY + pNameH / 2 - 2 + 0.5);
+    ctx.fillText(part1, screenX + 16, pNameY + pNameH / 2 - 2 + 0.5);
+    ctx.shadowBlur = 0;
 
     // ── Speech bubble ─────────────────────────────────────────────────────────
     if (p.bubbleText) {

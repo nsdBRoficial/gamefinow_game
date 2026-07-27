@@ -397,9 +397,13 @@ export function drawQuestArrow(
     const dy = targetWorldY - playerWorldY;
     const angleRad = Math.atan2(dy, dx);
 
-    // Margem interna para a seta na borda da tela
-    const marginX = halfW - 20;
-    const marginY = halfH - 20;
+    // Margem interna para a seta na borda da tela (em unidades de mundo)
+    // Ajustada pelo nível de zoom para ter aprox 100px na tela, evitando ficar escondida sob o HUD.
+    const worldMarginX = 100 / zoomLevel;
+    const worldMarginY = 100 / zoomLevel;
+    
+    const marginX = Math.max(10, halfW - worldMarginX);
+    const marginY = Math.max(10, halfH - worldMarginY);
 
     let clampedX = dx;
     let clampedY = dy;

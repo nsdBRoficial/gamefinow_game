@@ -1672,6 +1672,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             shoesType: rp.shoes_type,
             faceType: rp.face_type,
             accessoryType: rp.accessory_type,
+            activeTitle: rp.active_title,
             bubbleText: rp.bubbleText,
             bubbleTimer: rp.bubbleTimer,
           }));
