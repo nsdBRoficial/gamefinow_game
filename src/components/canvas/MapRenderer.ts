@@ -984,10 +984,10 @@ export const drawClassicAtm = (ctx: CanvasRenderingContext2D, gridX: number, gri
 
   // Placa "ATM DEFI"
   ctx.fillStyle = "#1e40af";
-  ctx.fillRect(wx + 4, wy - 8, 24, 8);
+  ctx.fillRect(wx + 1, wy - 9, 30, 9);
   ctx.strokeStyle = "#ffffff";
   ctx.lineWidth = 1;
-  ctx.strokeRect(wx + 4, wy - 8, 24, 8);
+  ctx.strokeRect(wx + 1, wy - 9, 30, 9);
   ctx.fillStyle = "#ffffff";
   ctx.font = "bold 6px sans-serif";
   ctx.textAlign = "center";

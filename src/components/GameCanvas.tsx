@@ -1186,7 +1186,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     // Dynamic zoom level: 3.5 for desktop (close-up retro zoom), 1.5 for mobile (looks perfect/roomy)
     // If gameState.mapZoomLevel is defined, we use it directly, scaling appropriately depending on device.
     const defaultZoom = dims.width < 768 ? 1.5 : 3.5;
-    const currentZoomLevel = gameState.mapZoomLevel !== undefined ? gameState.mapZoomLevel : defaultZoom;
+    const currentZoomLevel = latestGameState.current.mapZoomLevel !== undefined ? latestGameState.current.mapZoomLevel : defaultZoom;
 
     // Background base
     ctx.fillStyle = "#0f172a"; // Deep rich dark background
