@@ -98,13 +98,115 @@ export function generateCentralMap(): number[][] {
   grid[18][32] = TileType.BLOCK;
   grid[18][33] = TileType.BLOCK;
 
-  // Add the white street
-  grid[19][31] = TileType.STONE_PATH;
-  grid[19][32] = TileType.STONE_PATH;
-  grid[19][33] = TileType.STONE_PATH;
+  // Caminho especifico sob e ao redor da Soroswap
+  // y=19: x=31..39
+  for (let c = 31; c <= 39; c++) {
+    grid[19][c] = TileType.STONE_PATH;
+  }
+  // x=39: y=20,21,22
+  grid[20][39] = TileType.STONE_PATH;
+  grid[21][39] = TileType.STONE_PATH;
+  grid[22][39] = TileType.STONE_PATH;
+  // y=22: x=31..39
+  for (let c = 31; c <= 39; c++) {
+    grid[22][c] = TileType.STONE_PATH;
+  }
+
+  // Caminho especifico simetrico do lado esquerdo
+  // y=19: x=21..28
+  for (let c = 21; c <= 28; c++) {
+    grid[19][c] = TileType.STONE_PATH;
+  }
+  // x=21: y=20,21,22
+  grid[20][21] = TileType.STONE_PATH;
+  grid[21][21] = TileType.STONE_PATH;
+  grid[22][21] = TileType.STONE_PATH;
+  // y=22: x=21..28
+  for (let c = 21; c <= 28; c++) {
+    grid[22][c] = TileType.STONE_PATH;
+  }
+
+  // Novos caminhos superiores (y=16 e y=13)
+  for (let c = 31; c <= 39; c++) {
+    grid[16][c] = TileType.STONE_PATH;
+    grid[13][c] = TileType.STONE_PATH;
+  }
+  for (let c = 21; c <= 28; c++) {
+    grid[16][c] = TileType.STONE_PATH;
+    grid[13][c] = TileType.STONE_PATH;
+  }
+
+  // Mais caminhos superiores (y=10 e y=7)
+  // Lado Direito
+  for (let c = 31; c <= 39; c++) {
+    grid[10][c] = TileType.STONE_PATH;
+    grid[7][c] = TileType.STONE_PATH;
+  }
+  // Lado Esquerdo
+  for (let c = 21; c <= 28; c++) {
+    grid[10][c] = TileType.STONE_PATH;
+    grid[7][c] = TileType.STONE_PATH;
+  }
+  // Conexoes verticais do y=7 ate y=19
+  for (let r = 7; r <= 19; r++) {
+    grid[r][21] = TileType.STONE_PATH; // Esquerda
+    grid[r][39] = TileType.STONE_PATH; // Direita
+  }
   grid[46][26] = TileType.STONE_PATH;
   grid[46][27] = TileType.STONE_PATH;
   grid[46][28] = TileType.STONE_PATH;
+
+  // y=46: x=21..25
+  for (let c = 21; c <= 25; c++) {
+    grid[46][c] = TileType.STONE_PATH;
+  }
+  // y=43: x=21..28
+  for (let c = 21; c <= 28; c++) {
+    grid[43][c] = TileType.STONE_PATH;
+  }
+  // y=40: x=21..28
+  for (let c = 21; c <= 28; c++) {
+    grid[40][c] = TileType.STONE_PATH;
+  }
+  // x=21: y=40..46
+  for (let r = 40; r <= 46; r++) {
+    grid[r][21] = TileType.STONE_PATH;
+  }
+
+  // Right side bottom paths (symmetrical)
+  // y=46: x=31..39
+  for (let c = 31; c <= 39; c++) {
+    grid[46][c] = TileType.STONE_PATH;
+  }
+  // y=43: x=31..39
+  for (let c = 31; c <= 39; c++) {
+    grid[43][c] = TileType.STONE_PATH;
+  }
+  // y=40: x=31..39
+  for (let c = 31; c <= 39; c++) {
+    grid[40][c] = TileType.STONE_PATH;
+  }
+  // x=39: y=40..46
+  for (let r = 40; r <= 46; r++) {
+    grid[r][39] = TileType.STONE_PATH;
+  }
+
+  // Mais caminhos inferiores (y=49 e y=52)
+  // Lado Esquerdo
+  for (let c = 21; c <= 28; c++) {
+    grid[49][c] = TileType.STONE_PATH;
+    grid[52][c] = TileType.STONE_PATH;
+  }
+  // Lado Direito
+  for (let c = 31; c <= 39; c++) {
+    grid[49][c] = TileType.STONE_PATH;
+    grid[52][c] = TileType.STONE_PATH;
+  }
+  // Conexoes verticais inferiores (y=46 ate y=52)
+  for (let r = 46; r <= 52; r++) {
+    grid[r][21] = TileType.STONE_PATH; // Esquerda
+    grid[r][39] = TileType.STONE_PATH; // Direita
+  }
 
   // Add the NEARX stand blocks
   grid[45][26] = TileType.BLOCK;
