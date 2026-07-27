@@ -1072,7 +1072,7 @@ export default function App() {
             <button 
               onClick={() => {
                 const isMobile = window.innerWidth < 768;
-                const currentZ = gameState.mapZoomLevel ?? (isMobile ? 2.5 : 6.5);
+                const currentZ = gameState.mapZoomLevel ?? (isMobile ? 2.5 : 3.5);
                 setGameState({...gameState, mapZoomLevel: Math.max(isMobile ? 1.0 : 2.0, currentZ - (isMobile ? 0.25 : 0.5))});
                 playSynthSound("beep");
               }}
@@ -1086,7 +1086,7 @@ export default function App() {
             <button 
               onClick={() => {
                 const isMobile = window.innerWidth < 768;
-                const currentZ = gameState.mapZoomLevel ?? (isMobile ? 2.5 : 6.5);
+                const currentZ = gameState.mapZoomLevel ?? (isMobile ? 2.5 : 3.5);
                 setGameState({...gameState, mapZoomLevel: Math.min(isMobile ? 5.0 : 10.0, currentZ + (isMobile ? 0.25 : 0.5))});
                 playSynthSound("beep");
               }}

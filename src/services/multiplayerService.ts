@@ -203,6 +203,22 @@ export function subscribeToMap(
     }
   });
 
+  socket.off("sync_players");
+  socket.on("sync_players", (players: OnlinePlayer[]) => {
+    players.forEach(p => {
+      if (p.player_id !== playerId && p.map_id === mapId) {
+        mapLivePlayers.set(p.player_id, p);
+      }
+    });
+    onPlayersUpdate(Array.from(mapLivePlayers.values()));
+  });
+
+  socket.off("player_leave");
+  socket.on("player_leave", (data: { playerId: string }) => {
+    mapLivePlayers.delete(data.playerId);
+    onPlayersUpdate(Array.from(mapLivePlayers.values()));
+  });
+
   if (onChatMessage) {
     socket.off("chat_message");
     socket.on("chat_message", (payload: ChatMessage) => {
@@ -215,6 +231,8 @@ export function unsubscribeFromCurrentMap(): void {
   // Limpar os listeners não é estritamente necessário no SPA mas ajuda a prevenir memory leaks
   if (socket) {
     socket.off("player_move");
+    socket.off("sync_players");
+    socket.off("player_leave");
     socket.off("chat_message");
   }
 }

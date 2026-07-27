@@ -182,6 +182,14 @@ app.post("/api/vault/withdraw", async (req, res) => {
 
 // ─── Socket.io Multiplayer ───────────────────────────────────────────────
 
+interface PlayerState {
+  socketId: string;
+  mapId: string;
+  playerId: string;
+  payload: any;
+}
+const playersState = new Map<string, PlayerState>();
+
 io.on("connection", (socket) => {
   console.log(`[Socket] Conexão recebida: ${socket.id}`);
 
@@ -197,12 +205,34 @@ io.on("connection", (socket) => {
     socket.join(roomName);
     console.log(`[Socket] ${data.playerId} entrou no mapa ${data.mapId}`);
 
+    // Guarda estado do jogador
+    playersState.set(socket.id, {
+      socketId: socket.id,
+      mapId: data.mapId,
+      playerId: data.playerId,
+      payload: data.playerPayload
+    });
+
+    // Envia aos recém-chegados os jogadores que já estão no mapa
+    const existingPlayers: any[] = [];
+    playersState.forEach((state, sId) => {
+      if (sId !== socket.id && state.mapId === data.mapId) {
+        existingPlayers.push(state.payload);
+      }
+    });
+    socket.emit("sync_players", existingPlayers);
+
     // Avisa aos outros que ele chegou com as infos completas
     socket.to(roomName).emit("player_move", data.playerPayload);
   });
 
   // Quando o jogador se move ou altera a aparência
   socket.on("player_move", (data: { mapId: string, payload: any }) => {
+    // Atualiza o estado
+    const state = playersState.get(socket.id);
+    if (state) {
+      state.payload = data.payload;
+    }
     // Repassa a informação exata para os outros jogadores na mesma sala (menos para ele mesmo)
     socket.to(`map:${data.mapId}`).emit("player_move", data.payload);
   });
@@ -213,6 +243,11 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
+    const state = playersState.get(socket.id);
+    if (state) {
+      socket.to(`map:${state.mapId}`).emit("player_leave", { playerId: state.playerId });
+      playersState.delete(socket.id);
+    }
     console.log(`[Socket] Desconectado: ${socket.id}`);
   });
 });
