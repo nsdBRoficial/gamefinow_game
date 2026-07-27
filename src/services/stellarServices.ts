@@ -19,10 +19,7 @@ export const ISSUER_GAMEFI = GAMEFI_TOKEN_ISSUER;
 
 const server = new Horizon.Server("https://horizon-testnet.stellar.org");
 
-const vaultSeed = new Uint8Array(32);
-vaultSeed.set([119, 97, 108, 108, 101, 116, 110, 111, 119, 45, 118, 97, 117, 108, 116]); // "walletnow-vault"
-export const VAULT_KEYPAIR = Keypair.fromRawEd25519Seed(Buffer.from(vaultSeed) as any);
-export const VAULT_ADDRESS = VAULT_KEYPAIR.publicKey();
+export const VAULT_ADDRESS = "GBTR4BH2TMOEELCVYBAZ46TKGFGGQGUJK5LI3C32XYGIM475MFRSMVLO";
 
 let wnClient: WalletNowClient | null = null;
 let initPromise: Promise<WalletNowClient> | null = null;
@@ -274,16 +271,26 @@ export class TestnetKitService {
       .build();
 
     tx.sign(sourceKeys);
-    console.log("Enviando transação...");
+    console.log("[TestnetKitService] Enviando Swap para o Relayer Backend...");
+    
     let response;
     try {
-      response = await server.submitTransaction(tx);
-    } catch (error: any) {
-      if (error.response && error.response.data && error.response.data.extras) {
-        console.error("Horizon Erro Detalhado:", JSON.stringify(error.response.data.extras.result_codes));
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
+      const res = await fetch(`${BACKEND_URL}/api/relayer/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ signedXdr: tx.toXDR() })
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Erro no Relayer");
       }
+      response = await res.json();
+    } catch (error: any) {
+      console.error("Erro no Swap via Relayer:", error);
       throw error;
     }
+    
     const rates: Record<string, Record<string, number>> = {
       XLM: { XLM: 1, USDW: 0.909, BRW: 0.65 },
       USDW: { XLM: 1.1, USDW: 1, BRW: 5.40 },
@@ -385,17 +392,27 @@ export class TestnetKitService {
       .build();
 
     tx.sign(sourceKeys);
-    console.log("Enviando depósito do vault com taxa atômica...");
+    console.log("Enviando depósito do vault via Relayer Backend...");
     let response;
     try {
-      response = await server.submitTransaction(tx);
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
+      const res = await fetch(`${BACKEND_URL}/api/relayer/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ signedXdr: tx.toXDR() })
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Erro no Relayer ao validar taxa");
+      }
+      response = await res.json();
     } catch (error: any) {
-      console.error("Erro no Vault Stake:", error);
+      console.error("Erro no Vault Stake via Relayer:", error);
       throw error;
     }
     
     return {
-      txHash: response.hash,
+      txHash: response.txHash,
       rewardEstimate: Number((amount * 0.12).toFixed(2))
     };
   }
@@ -426,26 +443,17 @@ export class TestnetKitService {
       }
     }
     
-    // Assegura que a conta do Vault existe.
-    const vaultAcc = await server.loadAccount(VAULT_ADDRESS);
-    
-    const tx = new TransactionBuilder(vaultAcc, {
-      fee: "1000",
-      networkPassphrase: Networks.TESTNET
-    })
-      .addOperation(
-        Operation.payment({
-          destination: walletAddress,
-          asset: assetObj,
-          amount: amount.toFixed(7)
-        })
-      )
-      .setTimeout(30)
-      .build();
-
-    tx.sign(VAULT_KEYPAIR);
-    console.log("Enviando saque/colheita do vault...");
-    let response = await server.submitTransaction(tx);
+    // Fetch the withdrawal from the backend relayer
+    console.log("Enviando saque/colheita para o backend relayer...");
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
+    const responseData = await fetch(`${BACKEND_URL}/api/vault/withdraw`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ walletAddress, asset, amount })
+    }).then(res => {
+      if (!res.ok) throw new Error("Erro no backend relayer");
+      return res.json();
+    });
 
     // Se o usuário forneceu a chave secreta, cobra a taxa de 0.5% em XLM para o Tesouro
     if (sourceKeys) {
@@ -535,12 +543,16 @@ export const executeOutfitPurchaseOnChain = async (
       try {
         signingKeypair = Keypair.fromSecret(playerSecretKey);
       } catch (e) {
-        console.warn("[Stellar] Chave secreta do jogador inválida, usando Vault fallback.");
+        console.warn("[Stellar] Erro ao carregar chave secreta:", e);
       }
     }
 
-    const sourceAddress = signingKeypair ? signingKeypair.publicKey() : (playerPublicKey && playerPublicKey.startsWith("G") ? playerPublicKey : VAULT_ADDRESS);
-    const signer = signingKeypair || VAULT_KEYPAIR;
+    if (!signingKeypair) {
+      throw new Error("Chave secreta inválida. Compra abortada.");
+    }
+
+    const sourceAddress = signingKeypair.publicKey();
+    const signer = signingKeypair;
 
     // Load source account from Stellar Horizon Testnet
     const sourceAccount = await server.loadAccount(sourceAddress);

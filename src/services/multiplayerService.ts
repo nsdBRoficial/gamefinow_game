@@ -15,7 +15,7 @@
 
 import { supabase, MULTIPLAYER_ENABLED } from "./supabaseClient";
 import { Player } from "../types";
-import type { RealtimeChannel } from "@supabase/supabase-js";
+import { createClient, type RealtimeChannel } from "@supabase/supabase-js";
 
 // Re-exporta para que hooks possam importar apenas deste módulo
 export { MULTIPLAYER_ENABLED };
@@ -61,6 +61,7 @@ export interface ChatMessage {
 
 // ─── Estado interno do serviço ───────────────────────────────────────────────
 
+let authSupabase = supabase;
 let currentPlayerId: string | null = null;
 let currentMapId: string | null = null;
 let presenceChannel: RealtimeChannel | null = null;
@@ -71,7 +72,7 @@ let lastPublishedY = -1;
 let cleanupTimer: ReturnType<typeof setInterval> | null = null;
 
 const POSITION_THROTTLE_MS = parseInt(
-  import.meta.env.VITE_POSITION_THROTTLE_MS || "100"
+  import.meta.env.VITE_POSITION_THROTTLE_MS || "5000"
 );
 const PLAYER_TIMEOUT_MS = 30_000;
 const MAX_PLAYERS_PER_MAP = parseInt(
@@ -118,7 +119,33 @@ export async function upsertPlayer(
   currentPlayerId = playerId;
 
   try {
-    const { error } = await supabase.from("players").upsert(
+    // ─── Autenticação JWT (RLS) ──────────────────────────────────────
+    try {
+      const authRes = await fetch("http://localhost:3001/api/auth/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ publicKey: playerId })
+      });
+      if (authRes.ok) {
+        const { token } = await authRes.json();
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+        const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+        
+        authSupabase = createClient(supabaseUrl, supabaseAnonKey, {
+          global: { headers: { Authorization: `Bearer ${token}` } }
+        });
+        
+        if (supabase) {
+          supabase.realtime.setAuth(token);
+        }
+        
+        console.log("[Multiplayer] Autenticado com sucesso via JWT Customizado.");
+      }
+    } catch (authE) {
+      console.warn("[Multiplayer] Servidor backend indisponível para gerar token JWT. Fallback para anon:", authE);
+    }
+
+    const { error } = await authSupabase!.from("players").upsert(
       {
         id: playerId,
         stellar_address: playerId,
@@ -200,7 +227,7 @@ export function publishPosition(player: Player, playerId: string, forceUpdate: b
     lastPublishedY = Math.round(player.y);
 
     try {
-      await supabase.from("players_presence").upsert(
+      await authSupabase!.from("players_presence").upsert(
         {
           player_id: playerId,
           map_id: player.mapId || "center",
@@ -222,10 +249,10 @@ export function publishPosition(player: Player, playerId: string, forceUpdate: b
  * Busca todos os jogadores ativos em um determinado mapa.
  */
 async function fetchPlayersInMap(mapId: string): Promise<OnlinePlayer[]> {
-  if (!supabase) return [];
+  if (!authSupabase) return [];
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await authSupabase
       .from("players_presence_with_info")
       .select("*")
       .eq("map_id", mapId)
@@ -420,10 +447,12 @@ export function unsubscribeFromCurrentMap(): void {
  * Remove o jogador do mapa ao desconectar.
  */
 export async function removePlayerFromPresence(playerId: string): Promise<void> {
-  if (!MULTIPLAYER_ENABLED || !supabase || !playerId) return;
-
+  if (!MULTIPLAYER_ENABLED || !authSupabase || !playerId) return;
   try {
-    await supabase.from("players_presence").delete().eq("player_id", playerId);
+    await authSupabase
+      .from("players_presence")
+      .delete()
+      .eq("player_id", currentPlayerId);
   } catch (err) {
     console.warn("[Multiplayer] Erro ao remover jogador:", err);
   }
@@ -438,20 +467,21 @@ export async function sendChatMessage(
   playerName: string,
   message: string
 ): Promise<void> {
-  if (!MULTIPLAYER_ENABLED || !supabase) return;
+  if (!MULTIPLAYER_ENABLED || !authSupabase) return;
 
   const trimmed = message.trim().slice(0, 200);
   if (!trimmed) return;
 
-  try {
-    const { error } = await supabase.from("chat_messages").insert({
-      player_id: playerId,
-      player_name: playerName,
-      map_id: mapId,
-      message: trimmed,
-    });
+  const messageData = {
+    player_id: playerId,
+    player_name: playerName,
+    map_id: mapId,
+    message: trimmed,
+    created_at: new Date().toISOString(),
+  };
 
-    if (error) console.warn("[Multiplayer] Erro ao enviar chat:", error);
+  try {
+    await authSupabase!.from("chat_messages").insert([messageData]);
   } catch (err) {
     console.warn("[Multiplayer] Falha ao enviar chat:", err);
   }
@@ -464,10 +494,10 @@ export async function fetchRecentChat(
   mapId: string,
   limit = 20
 ): Promise<ChatMessage[]> {
-  if (!MULTIPLAYER_ENABLED || !supabase) return [];
+  if (!authSupabase) return [];
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await authSupabase
       .from("chat_messages")
       .select("*")
       .eq("map_id", mapId)

@@ -1074,7 +1074,7 @@ export default function App() {
                 const isMobile = window.innerWidth < 768;
                 const currentZ = gameState.mapZoomLevel ?? (isMobile ? 2.5 : 6.5);
                 setGameState({...gameState, mapZoomLevel: Math.max(isMobile ? 1.0 : 2.0, currentZ - (isMobile ? 0.25 : 0.5))});
-                playSynthSound("click");
+                playSynthSound("beep");
               }}
               className="w-6 h-6 md:w-5 md:h-5 bg-[#8b5a2b] hover:bg-[#a6713c] rounded text-white text-[12px] flex items-center justify-center font-bold active:bg-amber-600"
             >
@@ -1088,7 +1088,7 @@ export default function App() {
                 const isMobile = window.innerWidth < 768;
                 const currentZ = gameState.mapZoomLevel ?? (isMobile ? 2.5 : 6.5);
                 setGameState({...gameState, mapZoomLevel: Math.min(isMobile ? 5.0 : 10.0, currentZ + (isMobile ? 0.25 : 0.5))});
-                playSynthSound("click");
+                playSynthSound("beep");
               }}
               className="w-6 h-6 md:w-5 md:h-5 bg-[#8b5a2b] hover:bg-[#a6713c] rounded text-white text-[12px] flex items-center justify-center font-bold active:bg-amber-600"
             >

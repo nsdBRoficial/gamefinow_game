@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { GameState, Player, NPC, Quest, QuestId, WalletState, Transaction } from "../types";
 import { INITIAL_QUESTS } from "../gameData";
+import { encryptAES, decryptAES } from "../utils/cryptoUtils";
 
 interface GameStore extends GameState {
   playerPos: Player;
@@ -19,6 +20,15 @@ const getInitialGameState = (): GameState => {
     if (saved) {
       const parsed = JSON.parse(saved);
       if (parsed && parsed.quests && parsed.wallet) {
+        // Decrypt secretKey if present
+        if (parsed.wallet.secretKey) {
+          try {
+            parsed.wallet.secretKey = decryptAES(parsed.wallet.secretKey, parsed.wallet.pin);
+          } catch (e) {
+            console.error("Failed to decrypt secretKey on load", e);
+          }
+        }
+        
         return {
           ...parsed,
           wallet: {
@@ -130,6 +140,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
     
     // Extract only GameState properties for localStorage
     const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, ...gameStateToSave } = newState;
+    
+    // Encrypt secretKey before saving
+    if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
+      const safeWallet = { ...gameStateToSave.wallet };
+      safeWallet.secretKey = encryptAES(safeWallet.secretKey, safeWallet.pin);
+      gameStateToSave.wallet = safeWallet;
+    }
+    
     localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
     
     return nextState;
@@ -149,6 +167,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newState = { ...state, wallet: newWallet };
     
     const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, ...gameStateToSave } = newState;
+    
+    // Encrypt secretKey before saving
+    if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
+      const safeWallet = { ...gameStateToSave.wallet };
+      safeWallet.secretKey = encryptAES(safeWallet.secretKey, safeWallet.pin);
+      gameStateToSave.wallet = safeWallet;
+    }
+    
     localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
     
     return { wallet: newWallet };
@@ -159,6 +185,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newState = { ...state, transactions: newTxList, currentLedger: state.currentLedger + 1 };
     
     const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, ...gameStateToSave } = newState;
+    
+    // Encrypt secretKey before saving
+    if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
+      const safeWallet = { ...gameStateToSave.wallet };
+      safeWallet.secretKey = encryptAES(safeWallet.secretKey, safeWallet.pin);
+      gameStateToSave.wallet = safeWallet;
+    }
+    
     localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
     
     return { transactions: newTxList, currentLedger: newState.currentLedger };
@@ -183,6 +217,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newState = { ...state, quests: newQuests };
     
     const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, ...gameStateToSave } = newState;
+    
+    // Encrypt secretKey before saving
+    if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
+      const { encryptAES } = require("../utils/cryptoUtils");
+      const safeWallet = { ...gameStateToSave.wallet };
+      safeWallet.secretKey = encryptAES(safeWallet.secretKey, safeWallet.pin);
+      gameStateToSave.wallet = safeWallet;
+    }
+    
     localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
     
     return { quests: newQuests };

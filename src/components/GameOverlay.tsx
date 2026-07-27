@@ -7,6 +7,7 @@ import React, { useState, useEffect } from "react";
 import { WalletNowClient } from "@walletnow/sdk";
 import { WalletState, Transaction } from "../types";
 import { onboardUser, StellarAnchorService, TestnetKitService } from "../services/stellarServices";
+import { Keypair } from "@stellar/stellar-sdk";
 import { SEP24Service } from "../services/sep24Service";
 import { estimateFeeInXlm, validateXlmBalanceForFee, GAMEFI_FEE_PERCENTAGE } from "../services/economyService";
 import { 
@@ -44,70 +45,9 @@ interface GameOverlayProps {
   playerName: string;
 }
 
-// Pure TypeScript implementation of standard Stellar Keypair Generation (ED25519 structure, CRC16, Base32)
-const crc16 = (data: Uint8Array): number => {
-  let crc = 0x0000;
-  for (let i = 0; i < data.length; i++) {
-    crc ^= (data[i] << 8);
-    for (let j = 0; j < 8; j++) {
-      if ((crc & 0x8000) !== 0) {
-        crc = ((crc << 1) ^ 0x1021) & 0xFFFF;
-      } else {
-        crc = (crc << 1) & 0xFFFF;
-      }
-    }
-  }
-  return crc;
-};
-
-const encodeBase32 = (data: Uint8Array): string => {
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-  let result = "";
-  let bits = 0;
-  let value = 0;
-  for (let i = 0; i < data.length; i++) {
-    value = (value << 8) | data[i];
-    bits += 8;
-    while (bits >= 5) {
-      bits -= 5;
-      result += alphabet[(value >>> bits) & 31];
-    }
-  }
-  if (bits > 0) {
-    result += alphabet[(value << (5 - bits)) & 31];
-  }
-  return result;
-};
-
 const generateRealStellarKeypair = (): { publicKey: string; secretKey: string } => {
-  const seed = new Uint8Array(32);
-  if (typeof window !== "undefined" && window.crypto && window.crypto.getRandomValues) {
-    window.crypto.getRandomValues(seed);
-  } else {
-    for (let i = 0; i < 32; i++) {
-      seed[i] = Math.floor(Math.random() * 256);
-    }
-  }
-
-  // Public Key (starts with G)
-  const pubBytes = new Uint8Array(35);
-  pubBytes[0] = 0x30; // Version byte for 'G'
-  pubBytes.set(seed, 1);
-  const pubCrc = crc16(pubBytes.subarray(0, 33));
-  pubBytes[33] = pubCrc & 0xFF;
-  pubBytes[34] = (pubCrc >> 8) & 0xFF;
-  const publicKey = encodeBase32(pubBytes);
-
-  // Secret Key (starts with S)
-  const secBytes = new Uint8Array(35);
-  secBytes[0] = 0x90; // Version byte for 'S'
-  secBytes.set(seed, 1);
-  const secCrc = crc16(secBytes.subarray(0, 33));
-  secBytes[33] = secCrc & 0xFF;
-  secBytes[34] = (secCrc >> 8) & 0xFF;
-  const secretKey = encodeBase32(secBytes);
-
-  return { publicKey, secretKey };
+  const kp = Keypair.random();
+  return { publicKey: kp.publicKey(), secretKey: kp.secret() };
 };
 
 // Removed inline StellarAnchorService (moved to stellarServices.ts)

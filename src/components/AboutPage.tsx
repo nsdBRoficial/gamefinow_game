@@ -156,7 +156,7 @@ function SectionTitle({ icon, title, subtitle, color = "#06b6d4" }: { icon: Reac
 }
 
 // ─── FADE CARD ────────────────────────────────────────────────────────────────
-function FadeCard({ children, delay = 0, color = "#06b6d4", className = "" }: { children: React.ReactNode; delay?: number; color?: string; className?: string }) {
+function FadeCard({ children, delay = 0, color = "#06b6d4", className = "" }: { children: React.ReactNode; delay?: number; color?: string; className?: string; key?: string | number }) {
   const { ref, visible } = useIntersection();
   return (
     <div ref={ref} className={`rounded-2xl p-6 transition-all hover:scale-[1.02] ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"} ${className}`}
