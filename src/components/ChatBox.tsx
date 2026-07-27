@@ -27,6 +27,34 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Global Enter shortcut
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Ignorar se já houver algum input focado
+      if (
+        document.activeElement?.tagName === "INPUT" ||
+        document.activeElement?.tagName === "TEXTAREA"
+      ) {
+        return;
+      }
+      if (e.key === "Enter" && !isExpanded && isConnected) {
+        e.preventDefault();
+        setIsExpanded(true);
+      }
+    };
+
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+  }, [isExpanded, isConnected]);
+
+  // Auto-focus no input quando expandir
+  useEffect(() => {
+    if (isExpanded) {
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
+  }, [isExpanded]);
 
   // Auto-scroll para a última mensagem
   useEffect(() => {
@@ -53,7 +81,14 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") handleSend();
+    if (e.key === "Enter") {
+      if (inputValue.trim()) {
+        handleSend();
+      } else {
+        // Se estiver vazio e apertar Enter de novo, apenas fecha o chat
+        setIsExpanded(false);
+      }
+    }
     if (e.key === "Escape") setIsExpanded(false);
   };
 
@@ -128,6 +163,7 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
           {/* Input */}
           <div className="flex items-center gap-1 px-2 py-2 border-t border-white/10">
             <input
+              ref={inputRef}
               className="flex-1 bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 text-[11px] text-white placeholder-slate-500 outline-none focus:border-cyan-500/50 transition font-mono"
               placeholder={isConnected ? "Digite e pressione Enter..." : "Conectando..."}
               value={inputValue}

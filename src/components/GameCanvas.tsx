@@ -290,13 +290,13 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
       const key = e.key.toLowerCase();
       if (
-        ["w", "s", "a", "d", "arrowup", "arrowdown", "arrowleft", "arrowright", " ", "enter"].includes(key)
+        ["w", "s", "a", "d", "arrowup", "arrowdown", "arrowleft", "arrowright", " "].includes(key)
       ) {
         e.preventDefault();
       }
       keysPressed.current[key] = true;
 
-      if (key === " " || key === "enter") {
+      if (key === " ") {
         triggerInteraction();
       }
     };
