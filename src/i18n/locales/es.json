@@ -465,5 +465,140 @@
       "¡La Clave Secreta nunca debe compartirse!",
       "¡Hola! ¿Alguien quiere intercambiar monedas?"
     ]
+  },
+  "about": {
+    "hero": {
+      "subtitle": "✦ Aprende. Juega. Crece. ✦",
+      "description": "El primer MMO donde cada acción es una transacción real on-chain. Carteras reales, tokens reales, DeFi real — disfrazado de diversión.",
+      "explore": "Explorar",
+      "districts": "Distritos",
+      "partners": "Socios",
+      "fee": "Comisión del Protocolo",
+      "finality": "Finalidad"
+    },
+    "nav": {
+      "home": "Inicio",
+      "what": "Qué es",
+      "howtoplay": "Cómo Jugar",
+      "tokenomics": "Tokenomics",
+      "onchain": "On-Chain",
+      "economy": "Economía",
+      "world": "Mundo",
+      "partners": "Ecosistema",
+      "livestats": "Stats en Vivo",
+      "roadmap": "Roadmap",
+      "language": "Idioma",
+      "live": "EN VIVO • Testnet",
+      "connecting": "Conectando...",
+      "updated": "Actualizado"
+    },
+    "what": {
+      "title": "¿Qué es GameFiNow?",
+      "subtitle": "Una revolución en la intersección entre juegos y finanzas descentralizadas — construida en Stellar.",
+      "vision_title": "La Visión",
+      "vision_text": "GameFiNow es un juego en línea masivo multijugador donde toda la economía vive en la blockchain Stellar. Cada acción del jugador — crear una cartera, intercambiar tokens, comerciar — es una transacción real on-chain.",
+      "stellar_title": "Construido en Stellar",
+      "stellar_text": "Stellar ofrece finalidad en 5 segundos, comisiones de 0.00001 XLM por transacción y soporte nativo multi-activo. Con contratos inteligentes Soroban, GameFiNow ofrece primitivos DeFi programables directamente dentro del juego.",
+      "defi_title": "DeFi a Través del Juego",
+      "defi_text": "Quest 1 = creación de cartera. Quest 2 = on-ramp. Quest 3 = intercambio de tokens. Quest 4 = bóvedas de rendimiento. Al terminar el onboarding, los jugadores son usuarios reales de DeFi.",
+      "ecosystem_title": "El Ecosistema",
+      "ecosystem_text": "GameFiNow es una plataforma para el ecosistema DeFi de Stellar. 9 protocolos socios — Soroswap, WalletNow, DefIndex, PigFi, Dupply, NIDO, AutoFin, NEARX y WAVE — tienen stands dedicados dentro del mundo."
+    },
+    "howtoplay": {
+      "title": "Cómo Jugar",
+      "subtitle": "4 quests que te convierten en un nativo DeFi — en menos de 10 minutos.",
+      "quest": "Quest"
+    },
+    "tokenomics": {
+      "title": "Tokenomics",
+      "subtitle": "Economía multi-activo impulsada por activos reales on-chain en Stellar.",
+      "fee_title": "Estructura de Comisiones",
+      "protocol_fee": "Comisión del Protocolo",
+      "protocol_fee_sub": "En P2P y swaps",
+      "stellar_fee": "Comisión Base Stellar",
+      "stellar_fee_sub": "Por operación",
+      "vault_min": "Mínimo Bóveda VIP",
+      "vault_min_sub": "Bloqueo 24h para rendimiento",
+      "view": "Ver"
+    },
+    "onchain": {
+      "title": "Datos On-Chain",
+      "subtitle": "Todos los contratos y direcciones son públicos. Verifica todo directamente en Stellar.",
+      "gamefi_issuer": "Emisor del Token GAMEFI",
+      "treasury": "Tesorería GameFiNow",
+      "usdw_issuer": "Emisor USDW — WalletNow",
+      "brw_issuer": "Emisor BRW — WalletNow",
+      "usdc_issuer": "Emisor USDC — Circle",
+      "testnet": "Testnet",
+      "protocol_fees": "Comisiones del protocolo",
+      "usd_stable": "Stablecoin USD",
+      "brl_stable": "Stablecoin BRL",
+      "testnet_usdc": "USDC Testnet",
+      "explorer": "Explorador",
+      "asset": "Activo",
+      "copy": "Copiar",
+      "copied": "¡Copiado!"
+    },
+    "economy": {
+      "title": "Economía",
+      "subtitle": "Una economía DeFi completamente funcional dentro del mundo del juego.",
+      "p2p_title": "Tienda P2P",
+      "p2p_text": "Lista e intercambia objetos del juego por GAMEFI. Cada operación se liquida on-chain con 0.5% de comisión. Procedencia completa de todos los objetos.",
+      "faucet_title": "Fuente",
+      "faucet_text": "XLM gratis vía Friendbot de Stellar para nuevos jugadores. Cooldown de 24h — gamificado como una fuente real en el mundo del juego.",
+      "vault_title": "Bóveda/Rendimiento",
+      "vault_text": "Bloquea 100+ GAMEFI por 24h. Aplicado vía Soroban. Gana rendimiento, desbloquea cosméticos y poder de gobernanza.",
+      "dex_title": "Swap DEX",
+      "dex_text": "Integración SoroSwap. Intercambia USDW ↔ GAMEFI ↔ XLM en el juego. Mismo contrato Soroban de producción."
+    },
+    "world": {
+      "title": "Mapa del Mundo",
+      "subtitle": "5 distritos interconectados — cada uno con experiencias únicas, socios y mecánicas DeFi.",
+      "center_name": "Plaza Central",
+      "center_desc": "El corazón pulsante de GameFiNow. Aquí comienza cada viaje. La Plaza Central alberga el terminal ATM DeFi on-chain, la tienda P2P, la tienda de cosméticos con atuendos exclusivos, la Fuente de XLM gratis y todos los stands de los socios: Soroswap, WalletNow, DefIndex, PigFi, Dupply, NIDO, AutoFin, NEARX y WAVE. 9 protocolos activos, 5 NPCs e innumerables interacciones on-chain — todo en un solo lugar.",
+      "east_name": "Distrito Este",
+      "east_desc": "Accesible por el Portal Este en la Plaza Central, el Distrito Este es la zona avanzada para jugadores experimentados en DeFi. Aquí encontrarás mecánicas más profundas de liquidez, acceso a bóvedas de rendimiento y futuras quests nativas de Soroban para usuarios que ya dominan Web3.",
+      "west_name": "Distrito Oeste",
+      "west_desc": "El hub social del universo GameFiNow. El Distrito Oeste conecta jugadores a través de eventos comunitarios, mecánicas de gremio y gameplay competitivo. Accesible por el Portal Oeste y diseñado para quienes quieren más que DeFi — quieren comunidad.",
+      "north_name": "Distrito Norte",
+      "north_desc": "Reservado para la futura capa de gobernanza DAO de GameFiNow. Los titulares de tokens accederán al Distrito Norte para votar decisiones clave: ajustes de comisiones, incorporación de nuevos socios, reglas de emisión y expansiones del mundo.",
+      "south_name": "Distrito Sur",
+      "south_desc": "Un paraíso para coleccionistas y hub estacional. El Distrito Sur es para jugadores que aman los objetos raros, drops limitados y quests cosméticas exclusivas. Futuro hogar del gateway de la app móvil y eventos estacionales con recompensas on-chain."
+    },
+    "partners": {
+      "title": "Socios del Ecosistema",
+      "subtitle": "Protocolos DeFi con stands dedicados dentro del mundo GameFiNow."
+    },
+    "livestats": {
+      "title": "Stats en Vivo",
+      "subtitle": "Datos en tiempo real de Stellar Horizon Testnet y CoinGecko.",
+      "xlm_usd": "XLM / USD",
+      "xlm_brl": "XLM / BRL",
+      "ledger": "Último Ledger",
+      "coingecko": "CoinGecko • En Vivo",
+      "connecting": "Conectando...",
+      "treasury": "Cuenta del Tesoro",
+      "address": "Dirección Pública",
+      "sequence": "Secuencia",
+      "subentries": "Sub-entradas",
+      "balances": "Saldos On-Chain",
+      "live_txns": "Transacciones En Vivo",
+      "all_txns": "Todas las txns",
+      "fetching": "Obteniendo datos de Stellar Horizon...",
+      "explorer": "Explorador",
+      "fee": "Comisión",
+      "stroops": "stroops",
+      "ops": "ops",
+      "op": "op"
+    },
+    "roadmap": {
+      "title": "Roadmap",
+      "subtitle": "Del genesis a una economía de juego totalmente descentralizada.",
+      "phase": "Fase",
+      "done": "✓ Completado",
+      "current": "🔥 En Progreso",
+      "soon": "⏳ Próximamente",
+      "future": "🌌 Planificado"
+    }
   }
 }

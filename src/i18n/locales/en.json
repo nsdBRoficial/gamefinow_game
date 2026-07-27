@@ -465,5 +465,140 @@
       "The Secret Key must never be shared!",
       "Hello! Anyone want to trade coins?"
     ]
+  },
+  "about": {
+    "hero": {
+      "subtitle": "✦ Learn. Play. Grow. ✦",
+      "description": "The first MMO where every action is a real on-chain transaction. Real wallets, real tokens, real DeFi — disguised as fun.",
+      "explore": "Explore",
+      "districts": "Districts",
+      "partners": "Partners",
+      "fee": "Protocol Fee",
+      "finality": "Finality"
+    },
+    "nav": {
+      "home": "Home",
+      "what": "What is",
+      "howtoplay": "How to Play",
+      "tokenomics": "Tokenomics",
+      "onchain": "On-Chain",
+      "economy": "Economy",
+      "world": "World",
+      "partners": "Ecosystem",
+      "livestats": "Live Stats",
+      "roadmap": "Roadmap",
+      "language": "Language",
+      "live": "LIVE • Testnet",
+      "connecting": "Connecting...",
+      "updated": "Updated"
+    },
+    "what": {
+      "title": "What is GameFiNow?",
+      "subtitle": "A revolution at the intersection of gaming and decentralized finance — built on Stellar.",
+      "vision_title": "The Vision",
+      "vision_text": "GameFiNow is a massively multiplayer online game where the entire economy lives on the Stellar blockchain. Every player action — creating a wallet, swapping tokens, trading items — is a real on-chain transaction.",
+      "stellar_title": "Built on Stellar",
+      "stellar_text": "Stellar provides 5-second finality, fees of 0.00001 XLM per transaction, and native multi-asset support. With Soroban smart contracts, GameFiNow offers programmable DeFi primitives directly inside the game world.",
+      "defi_title": "DeFi Through Gameplay",
+      "defi_text": "Quest 1 = wallet creation. Quest 2 = on-ramp. Quest 3 = token swaps. Quest 4 = yield vaults. By finishing onboarding, players are real DeFi users — without knowing it was that complex.",
+      "ecosystem_title": "The Ecosystem",
+      "ecosystem_text": "GameFiNow is a platform for the Stellar DeFi ecosystem. 9 partner protocols — Soroswap, WalletNow, DefIndex, PigFi, Dupply, NIDO, AutoFin, NEARX, and WAVE — have dedicated stands inside the world."
+    },
+    "howtoplay": {
+      "title": "How to Play",
+      "subtitle": "4 quests that turn you into a DeFi native — in under 10 minutes.",
+      "quest": "Quest"
+    },
+    "tokenomics": {
+      "title": "Tokenomics",
+      "subtitle": "Multi-asset economy powered by real Stellar on-chain assets.",
+      "fee_title": "Fee Structure",
+      "protocol_fee": "Protocol Fee",
+      "protocol_fee_sub": "On P2P & swaps",
+      "stellar_fee": "Stellar Base Fee",
+      "stellar_fee_sub": "Per operation",
+      "vault_min": "VIP Vault Minimum",
+      "vault_min_sub": "24h lock for yield",
+      "view": "View"
+    },
+    "onchain": {
+      "title": "On-Chain Data",
+      "subtitle": "All contracts and addresses are public. Verify everything directly on Stellar.",
+      "gamefi_issuer": "GAMEFI Token Issuer",
+      "treasury": "GameFiNow Treasury",
+      "usdw_issuer": "USDW Issuer — WalletNow",
+      "brw_issuer": "BRW Issuer — WalletNow",
+      "usdc_issuer": "USDC Issuer — Circle",
+      "testnet": "Testnet",
+      "protocol_fees": "Protocol fees",
+      "usd_stable": "USD Stablecoin",
+      "brl_stable": "BRL Stablecoin",
+      "testnet_usdc": "Testnet USDC",
+      "explorer": "Explorer",
+      "asset": "Asset",
+      "copy": "Copy",
+      "copied": "Copied!"
+    },
+    "economy": {
+      "title": "Economy",
+      "subtitle": "A fully functional DeFi economy running inside the game world.",
+      "p2p_title": "P2P Store",
+      "p2p_text": "List and trade in-game items for GAMEFI. Every trade settles on-chain with 0.5% fee to the treasury. Full provenance for all items.",
+      "faucet_title": "Faucet",
+      "faucet_text": "Free XLM from Stellar Friendbot for new players. 24h cooldown — gamified as a real fountain in the game world.",
+      "vault_title": "Vault/Yield",
+      "vault_text": "Lock 100+ GAMEFI for 24h. Soroban-enforced. Earn yield, unlock cosmetics, gain governance power.",
+      "dex_title": "DEX Swap",
+      "dex_text": "SoroSwap integration. Trade USDW ↔ GAMEFI ↔ XLM in-game. Same Soroban contract used on production."
+    },
+    "world": {
+      "title": "World Map",
+      "subtitle": "5 interconnected districts — each with unique experiences, partners and DeFi mechanics.",
+      "center_name": "Central Plaza",
+      "center_desc": "The beating heart of GameFiNow. This is where every journey begins. The Central Plaza hosts the on-chain ATM DeFi terminal, the P2P trading store, the cosmetics shop with exclusive outfits, the Faucet fountain for free XLM, and all partner stands from Soroswap, WalletNow, DefIndex, PigFi, Dupply, NIDO, AutoFin, NEARX and WAVE. 9 active protocols, 5 NPCs, and countless on-chain interactions — all in one place.",
+      "east_name": "East District",
+      "east_desc": "Accessible via the East Portal in the Central Plaza, the East District is the advanced zone for experienced DeFi players. Here you'll find deeper liquidity mechanics, yield vault access and future Soroban-native quests designed for users who already know their way around Web3.",
+      "west_name": "West District",
+      "west_desc": "The social hub of the GameFiNow universe. The West District connects players through community-driven events, guild mechanics and competitive gameplay. Accessible via the West Portal and designed for players who want more than just DeFi — they want community.",
+      "north_name": "North District",
+      "north_desc": "Reserved for the future DAO governance layer of GameFiNow. As the protocol matures, token holders will access the North District to vote on key decisions: fee adjustments, new partner onboarding, token emission rules, and world expansions.",
+      "south_name": "South District",
+      "south_desc": "A collector's paradise and seasonal hub. The South District is designed for players who love rare items, limited drops, and exclusive cosmetic quests. Future home of the mobile companion app gateway and seasonal in-game events with on-chain rewards."
+    },
+    "partners": {
+      "title": "Ecosystem Partners",
+      "subtitle": "DeFi protocols with dedicated stands inside the GameFiNow world."
+    },
+    "livestats": {
+      "title": "Live Stats",
+      "subtitle": "Real-time data from Stellar Horizon Testnet and CoinGecko.",
+      "xlm_usd": "XLM / USD",
+      "xlm_brl": "XLM / BRL",
+      "ledger": "Latest Ledger",
+      "coingecko": "CoinGecko • Live",
+      "connecting": "Connecting...",
+      "treasury": "Treasury Account",
+      "address": "Public Address",
+      "sequence": "Sequence",
+      "subentries": "Sub-entries",
+      "balances": "On-Chain Balances",
+      "live_txns": "Live Transactions",
+      "all_txns": "All txns",
+      "fetching": "Fetching from Stellar Horizon...",
+      "explorer": "Explorer",
+      "fee": "Fee",
+      "stroops": "stroops",
+      "ops": "ops",
+      "op": "op"
+    },
+    "roadmap": {
+      "title": "Roadmap",
+      "subtitle": "From genesis to a fully decentralized gaming economy.",
+      "phase": "Phase",
+      "done": "✓ Complete",
+      "current": "🔥 In Progress",
+      "soon": "⏳ Coming Soon",
+      "future": "🌌 Planned"
+    }
   }
 }
