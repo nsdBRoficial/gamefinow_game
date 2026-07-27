@@ -760,6 +760,12 @@ export default function App() {
   else if (completedCount === 3) defaultTitle = "Alquimista do Soroban";
   else if (completedCount >= 4) defaultTitle = "Herói Lendário de Stellar";
 
+  useEffect(() => {
+    if (playerPos.activeTitle !== defaultTitle) {
+      setPlayerPos((prev) => ({ ...prev, activeTitle: defaultTitle }));
+    }
+  }, [defaultTitle, playerPos.activeTitle]);
+
   const playerTitle = playerPos.activeTitle || defaultTitle;
 
   // RPG stats calculations
