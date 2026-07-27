@@ -486,7 +486,7 @@ export class TestnetKitService {
     }
     
     return {
-      txHash: response.hash
+      txHash: responseData.txHash
     };
   }
 }

@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import { createServer } from "http";
+import { Server } from "socket.io";
 import { Keypair, Horizon, Networks, TransactionBuilder, Operation, Asset, Transaction } from "@stellar/stellar-sdk";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
@@ -8,6 +10,11 @@ import crypto from "crypto";
 dotenv.config();
 
 const app = express();
+const server = createServer(app);
+const io = new Server(server, {
+  cors: { origin: "*" }
+});
+
 app.use(cors());
 app.use(express.json());
 
@@ -173,8 +180,45 @@ app.post("/api/vault/withdraw", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 GameFiNow Backend Relayer rodando na porta ${PORT}`);
+// ─── Socket.io Multiplayer ───────────────────────────────────────────────
+
+io.on("connection", (socket) => {
+  console.log(`[Socket] Conexão recebida: ${socket.id}`);
+
+  // Quando o jogador entra em um mapa
+  socket.on("join_map", (data: { mapId: string, playerId: string, playerPayload: any }) => {
+    const roomName = `map:${data.mapId}`;
+    
+    // Sai de salas antigas (mapas antigos) para não receber eventos fantasmas
+    socket.rooms.forEach(room => {
+      if (room !== socket.id) socket.leave(room);
+    });
+
+    socket.join(roomName);
+    console.log(`[Socket] ${data.playerId} entrou no mapa ${data.mapId}`);
+
+    // Avisa aos outros que ele chegou com as infos completas
+    socket.to(roomName).emit("player_move", data.playerPayload);
+  });
+
+  // Quando o jogador se move ou altera a aparência
+  socket.on("player_move", (data: { mapId: string, payload: any }) => {
+    // Repassa a informação exata para os outros jogadores na mesma sala (menos para ele mesmo)
+    socket.to(`map:${data.mapId}`).emit("player_move", data.payload);
+  });
+
+  // Chat local do mapa
+  socket.on("chat_message", (data: { mapId: string, payload: any }) => {
+    socket.to(`map:${data.mapId}`).emit("chat_message", data.payload);
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`[Socket] Desconectado: ${socket.id}`);
+  });
+});
+
+server.listen(PORT, () => {
+  console.log(`🚀 GameFiNow Backend Relayer & WebSocket rodando na porta ${PORT}`);
   console.log(`🔒 Vault Public Key: ${VAULT_KEYPAIR.publicKey()}`);
   
   // ─── Sistema Anti-Pause (Keep-Alive) ──────────────────────────────────
