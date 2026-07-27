@@ -1018,6 +1018,17 @@ export default function App() {
             </span>
           </button>
 
+          {/* MULTIPLAYER: Chat MMO por mapa */}
+          {isMultiplayerEnabled && (
+            <ChatBox
+              messages={chatMessages}
+              onSend={sendChat}
+              onlineCount={onlineCount}
+              currentPlayerName={playerPos.name || "Anonymo"}
+              isConnected={isConnected}
+            />
+          )}
+
         </div>
 
         {/* 3. RIGHT SIDEBARHUD - MINIMAP COMPASS & TAB CONTROLS */}
@@ -1061,9 +1072,9 @@ export default function App() {
             <button 
               onClick={() => {
                 const isMobile = window.innerWidth < 768;
-                const currentZ = gameState.mapZoomLevel ?? (isMobile ? 1.5 : 3.5);
-                setGameState({...gameState, mapZoomLevel: Math.max(0.5, currentZ - (isMobile ? 0.25 : 0.5))});
-                playSynthSound("beep");
+                const currentZ = gameState.mapZoomLevel ?? (isMobile ? 2.5 : 6.5);
+                setGameState({...gameState, mapZoomLevel: Math.max(isMobile ? 1.0 : 2.0, currentZ - (isMobile ? 0.25 : 0.5))});
+                playSynthSound("click");
               }}
               className="w-6 h-6 md:w-5 md:h-5 bg-[#8b5a2b] hover:bg-[#a6713c] rounded text-white text-[12px] flex items-center justify-center font-bold active:bg-amber-600"
             >
@@ -1075,9 +1086,9 @@ export default function App() {
             <button 
               onClick={() => {
                 const isMobile = window.innerWidth < 768;
-                const currentZ = gameState.mapZoomLevel ?? (isMobile ? 1.5 : 3.5);
-                setGameState({...gameState, mapZoomLevel: Math.min(isMobile ? 2.5 : 5.0, currentZ + (isMobile ? 0.25 : 0.5))});
-                playSynthSound("beep");
+                const currentZ = gameState.mapZoomLevel ?? (isMobile ? 2.5 : 6.5);
+                setGameState({...gameState, mapZoomLevel: Math.min(isMobile ? 5.0 : 10.0, currentZ + (isMobile ? 0.25 : 0.5))});
+                playSynthSound("click");
               }}
               className="w-6 h-6 md:w-5 md:h-5 bg-[#8b5a2b] hover:bg-[#a6713c] rounded text-white text-[12px] flex items-center justify-center font-bold active:bg-amber-600"
             >
@@ -1188,16 +1199,7 @@ export default function App() {
           <OnlineIndicator count={onlineCount} isConnected={isConnected} />
         )}
 
-        {/* MULTIPLAYER: Chat MMO por mapa */}
-        {isMultiplayerEnabled && (
-          <ChatBox
-            messages={chatMessages}
-            onSend={sendChat}
-            onlineCount={onlineCount}
-            currentPlayerName={playerPos.name || "Anonymo"}
-            isConnected={isConnected}
-          />
-        )}
+
 
         <DialogSystem
           activeDialog={gameState.activeDialog}

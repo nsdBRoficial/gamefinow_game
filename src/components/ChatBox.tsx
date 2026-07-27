@@ -64,13 +64,13 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
 
   return (
     <div
-      className="fixed bottom-20 left-2 z-50 flex flex-col items-start gap-1"
+      className="relative z-50 flex flex-col items-start"
       style={{ pointerEvents: "auto" }}
     >
       {/* Caixa expandida de chat */}
       {isExpanded && (
         <div
-          className="w-72 flex flex-col rounded-xl overflow-hidden shadow-2xl border border-white/10"
+          className="absolute left-14 md:left-12 top-0 w-72 flex flex-col rounded-xl overflow-hidden shadow-2xl border border-white/10"
           style={{
             background: "rgba(10, 12, 20, 0.92)",
             backdropFilter: "blur(12px)",
@@ -151,26 +151,20 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
       {/* Botão toggle */}
       <button
         onClick={handleToggle}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wide transition-all shadow-lg"
+        className="w-11 h-11 md:w-9 md:h-9 flex items-center justify-center rounded-lg text-[10px] font-bold uppercase tracking-wide transition-all shadow-[2px_2.5px_0px_#000] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none group relative"
         style={{
-          background: hasNewMsg
-            ? "rgba(56, 189, 248, 0.9)"
-            : "rgba(10, 12, 20, 0.85)",
-          border: hasNewMsg ? "1px solid #38bdf8" : "1px solid rgba(255,255,255,0.1)",
-          color: hasNewMsg ? "#000" : "#94a3b8",
-          backdropFilter: "blur(8px)",
+          background: hasNewMsg ? "rgba(56, 189, 248, 0.9)" : "#ebd9c0",
+          border: "2px solid #000",
+          color: hasNewMsg ? "#000" : "#000",
         }}
         title="Chat MMO"
       >
-        <MessageSquare className="w-3 h-3" />
-        <span>Chat</span>
+        <MessageSquare className="w-5 h-5 md:w-4 md:h-4" />
+        <span className="absolute left-13 bg-black text-white text-[8px] uppercase tracking-wider px-2 py-1 rounded border border-white/20 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-150 font-mono">
+          Abrir Chat MMO
+        </span>
         {hasNewMsg && (
-          <span className="w-1.5 h-1.5 rounded-full bg-black animate-ping" />
-        )}
-        {isExpanded ? (
-          <ChevronDown className="w-3 h-3" />
-        ) : (
-          <ChevronUp className="w-3 h-3" />
+          <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500 border border-black animate-pulse" />
         )}
       </button>
     </div>

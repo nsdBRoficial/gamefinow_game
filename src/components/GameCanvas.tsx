@@ -1183,9 +1183,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const dims = latestDimensions.current;
     const calculatedWaveOffset = Math.floor(performance.now() / 250) % 16;
 
-    // Dynamic zoom level: 3.5 for desktop (close-up retro zoom), 1.5 for mobile (looks perfect/roomy)
-    // If gameState.mapZoomLevel is defined, we use it directly, scaling appropriately depending on device.
-    const defaultZoom = dims.width < 768 ? 1.5 : 3.5;
+    // Dynamic zoom level: 6.5 for desktop, 2.5 for mobile
+    // If latestGameState.current.mapZoomLevel is defined, we use it directly, scaling appropriately depending on device.
+    const defaultZoom = dims.width < 768 ? 2.5 : 6.5;
     const currentZoomLevel = latestGameState.current.mapZoomLevel !== undefined ? latestGameState.current.mapZoomLevel : defaultZoom;
 
     // Background base
