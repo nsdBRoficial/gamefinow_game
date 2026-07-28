@@ -83,6 +83,7 @@ export interface Player {
   eyeColor?: string;     // Cor hex dos olhos
   torsoStyle?: string;   // Ex: "tshirt" | "suit" | "hoodie" | "jacket" | "cyber" | "robe" | "royal" | "dress"
   walletAddress?: string; // Alias para publicKey quando usado fora do gameState
+  isGM?: boolean;
 }
 
 export interface NPC {

@@ -153,7 +153,7 @@ export const AdminPanel: React.FC = () => {
           </div>
           <div className="flex items-center gap-3">
             <button 
-              onClick={() => window.open("/", "_blank")} 
+              onClick={() => window.open("/?mode=gm", "_blank")} 
               className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 border border-red-600 rounded-xl text-sm font-bold text-white transition-colors">
               <Play className="w-4 h-4" /> Entrar como GM
             </button>

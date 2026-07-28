@@ -80,11 +80,26 @@ export default function App() {
   const [isMaintenance, setIsMaintenance] = useState(false);
 
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [hasStarted, setHasStarted] = useState(false);
+  
+  // Verificação de Modo GM via URL + Token
+  const isGmMode = new URLSearchParams(window.location.search).get("mode") === "gm" && localStorage.getItem("admin_token") !== null;
+  const [isLoggedIn, setIsLoggedIn] = useState(isGmMode);
+  const [hasStarted, setHasStarted] = useState(isGmMode);
 
-  // ─── MULTIPLAYER: ID do jogador baseado na wallet Stellar (ou UUID fallback) ───
-  const playerId = getOrCreatePlayerId(gameState.wallet.publicKey || undefined);
+  useEffect(() => {
+    if (isGmMode) {
+      setPlayerPos((prev) => ({
+        ...prev,
+        name: "GM",
+        isGM: true,
+      }));
+    } else if (playerPos.isGM) {
+      setPlayerPos((prev) => ({ ...prev, isGM: false }));
+    }
+  }, [isGmMode, setPlayerPos]);
+
+  // ─── MULTIPLAYER: ID do jogador baseado na wallet Stellar (ou GM) ───
+  const playerId = isGmMode ? "gm_admin" : getOrCreatePlayerId(gameState.wallet.publicKey || undefined);
 
   // ─── MULTIPLAYER: Hook de sincronização em tempo real ────────────────────────
   const {
