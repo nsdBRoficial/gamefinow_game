@@ -1675,6 +1675,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             activeTitle: rp.active_title,
             bubbleText: rp.bubbleText,
             bubbleTimer: rp.bubbleTimer,
+            isGM: rp.isGM,
           }));
         // Limpa estados de interpolação de players que saíram do mapa
         cleanupRenderStates(mappedReal);
