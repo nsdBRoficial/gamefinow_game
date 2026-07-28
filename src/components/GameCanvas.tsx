@@ -1744,11 +1744,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
     if (isGM) {
       prefix = "";
-      namePart = "GM";
+      namePart = "[GM]";
       suffix = "";
       tagColor = "#ff0000";
-      tagShadowColor = "#cc0000";
-      tagShadowBlur = 8;
+      tagShadowColor = "#fbbf24";
+      tagShadowBlur = 10;
       borderStyle = "#ff0000";
     } else if (currentTitle === "Herói Lendário de Stellar") {
       // 5. Herói Lendário: Verde Matrix (#00ff66)

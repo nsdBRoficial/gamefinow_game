@@ -172,7 +172,8 @@ function buildPlayerPayload(playerId: string, player: Player): OnlinePlayer {
     gender: player.gender || "male",
     active_outfit: player.activeOutfit || null,
     active_title: player.activeTitle || null,
-    name_style: player.nameStyle || "plain"
+    name_style: player.nameStyle || "plain",
+    isGM: player.isGM || false
   };
 }
 

@@ -239,10 +239,10 @@ export const drawOtherPlayers = (
 
     if (p.isGM) {
       prefix = "";
-      namePart = "GM";
+      namePart = "[GM]";
       tagColor = "#ff0000";
-      tagShadowColor = "#cc0000";
-      tagShadowBlur = 8;
+      tagShadowColor = "#fbbf24";
+      tagShadowBlur = 10;
       borderStyle = "#ff0000";
     }
     const part1 = prefix + namePart;
