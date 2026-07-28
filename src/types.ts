@@ -84,6 +84,13 @@ export interface Player {
   torsoStyle?: string;   // Ex: "tshirt" | "suit" | "hoodie" | "jacket" | "cyber" | "robe" | "royal" | "dress"
   walletAddress?: string; // Alias para publicKey quando usado fora do gameState
   isGM?: boolean;
+  // Combat stats (preparação para batalhas)
+  level?: number;
+  hp?: number;
+  maxHp?: number;
+  attack?: number;
+  defense?: number;
+  speed?: number;
 }
 
 export interface NPC {

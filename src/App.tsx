@@ -92,6 +92,12 @@ export default function App() {
         ...prev,
         name: "GM",
         isGM: true,
+        level: 99,
+        hp: 9999,
+        maxHp: 9999,
+        attack: 9999,
+        defense: 9999,
+        speed: 9999,
       }));
       setGameState((prev) => {
         const gmQuests = { ...prev.quests };

@@ -173,7 +173,13 @@ function buildPlayerPayload(playerId: string, player: Player): OnlinePlayer {
     active_outfit: player.activeOutfit || null,
     active_title: player.activeTitle || null,
     name_style: player.nameStyle || "plain",
-    isGM: player.isGM || false
+    isGM: player.isGM || false,
+    level: player.level,
+    hp: player.hp,
+    maxHp: player.maxHp,
+    attack: player.attack,
+    defense: player.defense,
+    speed: player.speed
   };
 }
 
