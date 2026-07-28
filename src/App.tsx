@@ -807,11 +807,11 @@ export default function App() {
   const playerTitle = playerPos.activeTitle || defaultTitle;
 
   // RPG stats calculations
-  const attrStr = 12 + completedCount * 3;
-  const attrInt = 10 + completedCount * 6;
-  const attrAgi = 11 + completedCount * 2;
-  const attrRes = 10 + completedCount * 4;
-  const attrFaith = gameState.wallet.hasWallet ? 20 + completedCount * 12 : 0;
+  const attrStr = isGmMode ? 9999 : 12 + completedCount * 3;
+  const attrInt = isGmMode ? 9999 : 10 + completedCount * 6;
+  const attrAgi = isGmMode ? 9999 : 11 + completedCount * 2;
+  const attrRes = isGmMode ? 9999 : 10 + completedCount * 4;
+  const attrFaith = isGmMode ? 9999 : (gameState.wallet.hasWallet ? 20 + completedCount * 12 : 0);
 
   const isMovementBlocked = !!gameState.activeModal || !!gameState.activeDialog || !!activeWindow || showPassport || showMapModal;
 
@@ -898,12 +898,12 @@ export default function App() {
                 <div className="flex items-center gap-1.5">
                   <span className="text-[11px] md:text-[11px] font-black leading-none text-red-700 tracking-wider">HP</span>
                   <span className="text-[11px] md:text-[11px] font-mono leading-none font-black text-slate-800 bg-[#ebd9c0]/50 px-1 rounded border border-black/5">
-                    {80 + completedCount * 30} / {80 + completedCount * 30}
+                    {isGmMode ? 9999 : 80 + completedCount * 30} / {isGmMode ? 9999 : 80 + completedCount * 30}
                   </span>
                 </div>
                 <div className="flex gap-0.5 mt-1">
                   {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((h) => {
-                    const isLit = h <= 5 + completedCount;
+                    const isLit = isGmMode ? true : h <= 5 + completedCount;
                     return (
                       <span 
                         key={h} 
@@ -923,8 +923,8 @@ export default function App() {
               {/* EXP Progress Bar (Pixel styled) */}
               <div className="hidden lg:flex flex-col w-36 bg-[#1a1913]/12 px-2.5 py-1 rounded-lg border border-black/15 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]">
                 <div className="flex justify-between text-[11px] leading-none mb-1 font-black">
-                  <span className="text-amber-800">EXP LVL {completedCount + 1}</span>
-                  <span className="text-amber-950">{progressPercent}%</span>
+                  <span className="text-amber-800">EXP LVL {isGmMode ? 99 : completedCount + 1}</span>
+                  <span className="text-amber-950">{isGmMode ? 100 : progressPercent}%</span>
                 </div>
                 <div className="w-full h-2 bg-black/20 border border-black/15 rounded overflow-hidden">
                   <div 
