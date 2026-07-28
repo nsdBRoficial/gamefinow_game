@@ -87,7 +87,7 @@ CREATE INDEX IF NOT EXISTS idx_chat_map_time ON chat_messages(map_id, created_at
 -- ─── VIEW: players_presence_with_info ─────────────────────────────────────────
 -- View que une presença + dados de customização do personagem
 -- O serviço usa esta view para buscar todos os jogadores no mapa
-CREATE OR REPLACE VIEW players_presence_with_info AS
+CREATE OR REPLACE VIEW players_presence_with_info WITH (security_invoker = on) AS
   SELECT
     pp.player_id,
     p.name,

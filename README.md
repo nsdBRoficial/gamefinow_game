@@ -1,9 +1,9 @@
 <div align="center">
   <img src="https://stellar.org/images/stellar-logo.svg" alt="Stellar Logo" width="100"/>
-  <h1>GameFiNow — v0.7.7</h1>
+  <h1>GameFiNow — v0.7.9.5</h1>
   <p><strong>A Gamified On-Boarding Experience for the Stellar Ecosystem</strong></p>
   <p>
-    <img src="https://img.shields.io/badge/version-v0.7.7-cyan?style=flat-square" alt="version"/>
+    <img src="https://img.shields.io/badge/version-v0.7.9.5-cyan?style=flat-square" alt="version"/>
     <img src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square" alt="license"/>
     <img src="https://img.shields.io/badge/network-Stellar_Testnet-yellow?style=flat-square" alt="network"/>
     <img src="https://img.shields.io/badge/i18n-EN_|_PT_|_ES-green?style=flat-square" alt="languages"/>
@@ -17,6 +17,21 @@
 **GameFiNow** is a retro-style MMO RPG built on Web3, designed to educate and onboard new users into the Stellar network in an intuitive, fun, and engaging way. Players complete interactive quests that simulate real on-chain interactions — from generating a cryptographic keypair, to depositing funds via an Anchor (On-Ramp), to swapping tokens using Soroban smart contracts and locking assets in a hold vault.
 
 The game runs entirely in the browser, using a 60 FPS HTML5 Canvas engine, and communicates with the **Stellar Testnet** via **WalletNow SDK** and the **Horizon API**.
+
+---
+
+## ✨ What's New in v0.7.9.5 — Game Master Command Center & Player Moderation
+
+### 🛡️ Centro de Comando GM (Game Master)
+- **Painel Administrativo Completo**: Uma dashboard estilo "Central de Comando" secreta acessível apenas por administradores em `/admin`.
+- **Autenticação Segura JWT**: Usa JWT + chave secreta para validar a entrada do moderador e assinar todas as ações punitivas.
+- **Relatórios de Jogadores ao Vivo**: Tabela listando todos os jogadores que estão online ou que já conectaram, exibindo ID da carteira, nome customizado, status e ações rápidas de moderação.
+
+### 🔨 Sistema de Banimento & Suspensão em Tempo Real
+- **Moderação Instantânea via WebSockets**: Integração nativa entre o Supabase e o servidor `socket.io` em NodeJS (Express).
+- **Opções de Punição Escalonadas**: O GM pode aplicar advertências, suspensões temporárias (1 dia, 3 dias, 7 dias) ou Banimento Permanente.
+- **Enforcer RLS (Row Level Security)**: As políticas do banco de dados protegem contra edição não autorizada no painel, garantindo que o status de `is_banned` e `suspended_until` sejam imutáveis por jogadores.
+- **Bloqueio de Jogo (Kick Engine)**: Se um usuário suspenso tenta entrar na sala, o servidor recusa e injeta uma tela vermelha opaca impenetrável via manipulação do `document.body` e destrói os dados do Storage para prevenir By-Pass! Efeitos de "Fantasmas" no mapa causados por montagens assíncronas do React Strict Mode foram corrigidos!
 
 ---
 

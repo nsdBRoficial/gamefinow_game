@@ -9,8 +9,13 @@ import App from './App.tsx';
 import './index.css';
 import './i18n/i18n';
 
+import { AdminPanel } from './components/AdminPanel.tsx';
+import { AboutPage } from './components/AboutPage.tsx';
+
+const path = window.location.pathname;
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    {path === '/admin' ? <AdminPanel /> : path === '/about' ? <AboutPage onClose={() => window.location.href = '/'} /> : <App />}
   </StrictMode>,
 );

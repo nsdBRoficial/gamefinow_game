@@ -39,7 +39,7 @@ import { DialogSystem } from "./components/DialogSystem";
 import { OutfitShopModal } from "./components/OutfitShopModal";
 import { ChatBox, OnlineIndicator } from "./components/ChatBox";
 import { useMultiplayer } from "./hooks/useMultiplayer";
-import { getOrCreatePlayerId } from "./services/multiplayerService";
+import { getOrCreatePlayerId, subscribeToGlobalEvents, getSocket } from "./services/multiplayerService";
 import ReactNipple from "react-nipple";
 import { useTranslation } from "react-i18next";
 import { GameState, Player, NPC, Transaction, QuestId, Quest, WalletState } from "./types";
@@ -74,6 +74,11 @@ export default function App() {
   const setPlayerPos = useGameStore((s) => s.setPlayerPos);
 
   const [npcs] = useState<NPC[]>(INITIAL_NPCS);
+  const [isGameStarted, setIsGameStarted] = useState(false);
+  const [showWalletModal, setShowWalletModal] = useState(false);
+  const [showNetworkError, setShowNetworkError] = useState(false);
+  const [isMaintenance, setIsMaintenance] = useState(false);
+
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
@@ -99,67 +104,71 @@ export default function App() {
   const [showPassport, setShowPassport] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
 
+  useEffect(() => {
+    if (isMultiplayerEnabled) {
+      subscribeToGlobalEvents(
+        ({ msg, from }) => {
+          setGameState((prev) => ({
+            ...prev,
+            activeDialog: {
+              npcName: `ANÚNCIO: ${from}`,
+              text: [msg],
+              currentStep: 0,
+              npcId: "system",
+            },
+          }));
+        },
+        ({ reason }) => {
+          console.error(`[App] JOGADOR KICKADO: ${reason}`);
+          sessionStorage.removeItem("gfn_player_session_id");
+          sessionStorage.removeItem("guest_name");
+          localStorage.removeItem("stellar_public_key");
+          // Mostra na propria pagina de forma obvia e para o app
+          document.body.innerHTML = `
+            <div style="background-color: black; color: red; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; font-family: monospace;">
+              <h1>CONTA SUSPENSA</h1>
+              <p>${reason}</p>
+              <button onclick="window.location.reload()" style="margin-top:20px; padding: 10px 20px; background: red; color: white; border: none; cursor: pointer;">Voltar</button>
+            </div>
+          `;
+        },
+        ({ mapId }) => {
+          setPlayerPos((prev) => ({
+            ...prev,
+            mapId: mapId as any,
+            x: 30,
+            y: 30,
+            targetX: 30,
+            targetY: 30,
+            isMoving: false,
+            dir: "down",
+          }));
+        }
+      );
+
+      const handleMaintenance = (data: { active: boolean }) => {
+        setIsMaintenance(data.active);
+      };
+      const socket = getSocket();
+      if (socket) {
+        socket.on("maintenance_mode", handleMaintenance);
+      }
+      return () => {
+        if (socket) socket.off("maintenance_mode", handleMaintenance);
+      }
+    }
+  }, [isMultiplayerEnabled, setGameState, setPlayerPos]);
+
   const handleResetAndNewCharacter = () => {
     try {
       localStorage.removeItem("stellar_island_game_state_v1");
       localStorage.removeItem("stellar_island_player_pos_v1");
+      localStorage.removeItem("walletnow_stellar_sk");
     } catch (e) {
       console.warn("Could not clean localStorage", e);
     }
     
-    // Reset player position to center
-    setPlayerPos({
-      x: 30,
-      y: 30,
-      targetX: 30,
-      targetY: 30,
-      dir: "down",
-      isMoving: false,
-      frame: 0,
-      headColor: "#fcd34d",
-      torsoColor: "#ef4444",
-      legsColor: "#2563eb",
-      shoesColor: "#1e293b",
-      headType: "square",
-      torsoType: "plain",
-      shoesType: "sneakers",
-      skinColor: "#ffdbac",
-      faceType: "smile",
-      accessoryType: "backpack",
-      name: "Anonymo",
-      mapId: "center",
-    });
-
-    // Reset game state
-    setGameState({
-      wallet: {
-        hasWallet: false,
-        publicKey: "",
-        secretKey: "",
-        xlmBalance: 0,
-        usdcBalance: 0,
-        soroBalance: 0,
-        isLocked: false,
-        lockedAmount: 0,
-        name: "",
-        email: "",
-        usdwBalance: 0,
-        brwBalance: 0,
-        vaultXlm: 0,
-        vaultUsdw: 0,
-        vaultBrw: 0,
-        poolXlmUsdw: 0,
-        poolUsdwBrw: 0,
-      },
-      quests: INITIAL_QUESTS,
-      transactions: [],
-      activeDialog: null,
-      activeModal: null,
-      currentLedger: 6184293,
-      jamesDialogsDone: [],
-    });
-    
-    setIsLoggedIn(false);
+    window.location.reload();
   };
 
   const handleTeleportToCenter = () => {
@@ -820,6 +829,19 @@ export default function App() {
     );
   }
 
+  if (isMaintenance) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white" style={{ fontFamily: "'Inter', sans-serif" }}>
+        <div className="text-center p-8 border border-red-500/50 bg-red-500/10 rounded-2xl max-w-md shadow-2xl shadow-red-500/20 backdrop-blur-md relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-red-500"></div>
+          <h1 className="text-3xl font-black text-red-500 uppercase tracking-widest mb-4">Em Manutenção</h1>
+          <p className="text-slate-300 font-medium">Os Game Masters ativaram o protocolo de emergência.</p>
+          <p className="text-slate-400 mt-3 text-sm">O jogo voltará ao ar assim que as verificações de segurança forem concluídas. Por favor, aguarde.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-screen h-screen bg-[#0c0d0e] flex flex-col selection:bg-[#ffc600] selection:text-black font-sans relative overflow-hidden select-none outline-none" tabIndex={0}>
       
@@ -1224,7 +1246,6 @@ export default function App() {
               🧭 X: {Math.round(playerPos.x)} Y: {Math.round(playerPos.y)}
             </span>
           </div>
-
           <div className="hidden sm:flex items-center gap-2 text-[9px] font-semibold text-slate-400">
             <span className="inline-block w-2 h-2 rounded-full bg-[#5db81d] animate-ping mr-0.5" />
             <span className="text-[#5db81d] font-bold uppercase tracking-wider">{t("ui.networkActive")}</span>

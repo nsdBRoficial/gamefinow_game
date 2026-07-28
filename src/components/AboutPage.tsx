@@ -209,6 +209,7 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
     { id: "world",      label: t("about.nav.world"),      Icon: Map,        color: "#14b8a6" },
     { id: "partners",   label: t("about.nav.partners"),   Icon: Globe,      color: "#ec4899" },
     { id: "livestats",  label: t("about.nav.livestats"),  Icon: Activity,   color: "#4ade80" },
+    { id: "admin",      label: "Admin",                   Icon: Shield,     color: "#ef4444" },
     { id: "roadmap",    label: t("about.nav.roadmap"),    Icon: Layers,     color: "#818cf8" },
   ];
 
@@ -279,6 +280,10 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
   }, []);
 
   const scrollTo = (id: string) => {
+    if (id === "admin") {
+      window.open("/admin", "_blank");
+      return;
+    }
     const el = document.getElementById(id);
     const container = document.getElementById("about-container");
     if (el && container) container.scrollTo({ top: el.offsetTop - 20, behavior: "smooth" });

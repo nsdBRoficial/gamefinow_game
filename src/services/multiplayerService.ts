@@ -41,6 +41,7 @@ export interface OnlinePlayer {
   name_style: string | null;
   bubbleText?: string;
   bubbleTimer?: number;
+  isGM?: boolean;
 }
 
 export interface ChatMessage {
@@ -62,12 +63,24 @@ let lastPublishedY = -1;
 
 const mapLivePlayers = new Map<string, OnlinePlayer>();
 let socket: Socket | null = null;
+export const getSocket = () => socket;
+
+let lastJoinMapData: any = null;
 
 if (MULTIPLAYER_ENABLED) {
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
   socket = io(backendUrl);
   socket.on("connect", () => {
     console.log("[Multiplayer] Conectado ao WebSocket:", socket?.id);
+    if (lastJoinMapData) {
+      console.log("[Multiplayer] Reenviando join_map após reconexão...");
+      socket?.emit("join_map", lastJoinMapData);
+    }
+  });
+  
+  socket.on("disconnect", () => {
+    console.log("[Multiplayer] Desconectado do WebSocket.");
+    mapLivePlayers.clear(); // Evita fantasmas
   });
 }
 
@@ -193,7 +206,10 @@ export function subscribeToMap(
     playerPayload = buildPlayerPayload(playerId, playerData);
   }
 
-  socket.emit("join_map", { mapId, playerId, playerPayload });
+  const adminToken = localStorage.getItem("admin_token");
+  lastJoinMapData = { mapId, playerId, playerPayload, adminToken };
+  console.error("[Multiplayer] ⚠️ EMITINDO JOIN MAP:", lastJoinMapData);
+  socket.emit("join_map", lastJoinMapData);
 
   socket.off("player_move");
   socket.on("player_move", (payload: OnlinePlayer) => {
@@ -227,6 +243,26 @@ export function subscribeToMap(
   }
 }
 
+export function subscribeToGlobalEvents(
+  onAnnounce: (data: { msg: string, from: string }) => void,
+  onKick: (data: { reason: string }) => void,
+  onForceTeleport: (data: { mapId: string }) => void
+) {
+  if (!socket) return;
+  
+  socket.off("announce");
+  socket.on("announce", onAnnounce);
+  
+  socket.off("kick_user");
+  socket.on("kick_user", (data) => {
+    console.error("[Multiplayer] RECEBIDO EVENTO kick_user DO SERVIDOR!", data);
+    onKick(data);
+  });
+  
+  socket.off("force_teleport");
+  socket.on("force_teleport", onForceTeleport);
+}
+
 export function unsubscribeFromCurrentMap(): void {
   // Limpar os listeners não é estritamente necessário no SPA mas ajuda a prevenir memory leaks
   if (socket) {
@@ -238,9 +274,10 @@ export function unsubscribeFromCurrentMap(): void {
 }
 
 export async function removePlayerFromPresence(playerId: string): Promise<void> {
-  // No WebSockets, ao desconectar ele já some da tela.
-  // Podemos opcionalmente limpar a base se quisermos, mas não afeta a fluidez.
-  if (socket) socket.disconnect();
+  // No WebSockets, ao fechar a aba o navegador já encerra a conexão.
+  // Chamar disconnect() aqui quebra o React Strict Mode (que dá unmount e mount super rápido), 
+  // fazendo o socket morrer e não receber o evento de kick_user.
+  // if (socket) socket.disconnect();
 }
 
 export async function sendChatMessage(

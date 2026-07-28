@@ -1722,19 +1722,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       suffix = ` [${last4}]`;
     }
 
-    const part1 = prefix + namePart;
-    const part2 = suffix;
-
-    const part1Width = ctx.measureText(part1).width;
-    const part2Width = ctx.measureText(part2).width;
-    const totalWidth = part1Width + part2Width;
-    const playerNameW = totalWidth + 8;
-    const playerNameH = 13;
-
-    // Draw background
-    ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
-    ctx.fillRect(playerScreenX + 16 - playerNameW / 2, playerNameY - 2, playerNameW, playerNameH);
-
     // Determine active title / style tier for overhead tag
     const completedCount = [hasWallet, hasOnramp, hasSoroban, hasHold].filter(Boolean).length;
     let currentTitle = playerPosVal.activeTitle;
@@ -1753,7 +1740,15 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     let tagShadowBlur = 0;
     let borderStyle = "#cbd5e1";
 
-    if (currentTitle === "Herói Lendário de Stellar") {
+    const isGM = localStorage.getItem("admin_token") !== null;
+
+    if (isGM) {
+      prefix = "[GM] ";
+      tagColor = "#ef4444";
+      tagShadowColor = "#dc2626";
+      tagShadowBlur = 8;
+      borderStyle = "#ef4444";
+    } else if (currentTitle === "Herói Lendário de Stellar") {
       // 5. Herói Lendário: Verde Matrix (#00ff66)
       tagColor = "#00ff66";
       tagShadowColor = "#00e676";
@@ -1784,6 +1779,19 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       tagShadowBlur = 0;
       borderStyle = "#cbd5e1";
     }
+
+    const part1 = prefix + namePart;
+    const part2 = suffix;
+
+    const part1Width = ctx.measureText(part1).width;
+    const part2Width = ctx.measureText(part2).width;
+    const totalWidth = part1Width + part2Width;
+    const playerNameW = totalWidth + 8;
+    const playerNameH = 13;
+
+    // Draw background
+    ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+    ctx.fillRect(playerScreenX + 16 - playerNameW / 2, playerNameY - 2, playerNameW, playerNameH);
 
     // Apply global shadow for border drawing
     if (tagShadowBlur > 0 && tagShadowColor) {

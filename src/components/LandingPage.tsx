@@ -10,7 +10,6 @@ interface LandingPageProps {
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onPlay, playSynthSound }) => {
   const { t, i18n } = useTranslation();
-  const [showAbout, setShowAbout] = useState(false);
   
   // Background images from 'imagens/'
   const backgrounds = [
@@ -42,8 +41,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onPlay, playSynthSound
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black font-mono selection:bg-cyan-400 selection:text-black">
-      {/* About Page Modal */}
-      {showAbout && <AboutPage onClose={() => setShowAbout(false)} />}
       {/* Background Carousel */}
       {backgrounds.map((bg, index) => (
         <div
@@ -64,7 +61,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onPlay, playSynthSound
       {/* ABOUT BUTTON — top left */}
       <div className="absolute top-6 left-6 z-50">
         <button
-          onClick={() => { setShowAbout(true); playSynthSound("beep"); }}
+          onClick={() => { playSynthSound("beep"); window.open("/about", "_blank"); }}
           className="flex items-center gap-2 px-4 py-2 bg-black/50 backdrop-blur-md border border-white/20 rounded-xl text-white/80 hover:text-white hover:border-cyan-500/50 hover:bg-cyan-950/30 text-sm font-bold uppercase tracking-widest transition-all shadow-lg"
         >
           <Info className="w-4 h-4" />

@@ -234,6 +234,15 @@ export const drawOtherPlayers = (
     }
 
     let prefix = currentTitle === "Herói Lendário de Stellar" ? "⭐ " : "";
+
+    if (p.isGM) {
+      prefix = "[GM] ";
+      tagColor = "#ef4444";
+      tagShadowColor = "#dc2626";
+      tagShadowBlur = 8;
+      borderStyle = "#ef4444";
+    }
+
     let namePart = p.name || "Anonymo";
     const part1 = prefix + namePart;
     const textWidth = ctx.measureText(part1).width;
