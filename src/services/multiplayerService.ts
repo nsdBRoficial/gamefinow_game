@@ -1,12 +1,14 @@
 /**
- * multiplayerService.ts
- * Serviço principal de multiplayer do GameFiNow (Refatorado para WebSockets - Socket.io).
- *
+ * -----------------------------------------------------------------------------
+ * ⚔️ SERVIÇO DE MULTIPLAYER REALTIME (SOCKET.IO) & SINCRONIZAÇÃO DE PLAYERS
+ * -----------------------------------------------------------------------------
  * Responsabilidades:
- *  - Conectar ao Backend Relayer via WebSocket (Socket.io)
- *  - Registrar o jogador local no Supabase (para persistência de perfil)
- *  - Emitir e receber posições, customização e títulos em tempo real
- *  - Gerenciar chat por mapa
+ *  - Conectar ao Backend Relayer via WebSocket (Socket.io) com suporte a JWT.
+ *  - Transmitir posição (x, y), mapa atual (`mapId`), customização de skin/outfit,
+ *    flag de GM (`isGM`) e atributos de combate RPG (`level`, `hp`, `attack`, `defense`, `speed`).
+ *  - Gerenciar salas por mapa (`map:<mapId>`) e transmissões de chat no MMO.
+ *  - Persistir perfil e estado do jogador na tabela `players` do Supabase.
+ * -----------------------------------------------------------------------------
  */
 
 import { supabase, MULTIPLAYER_ENABLED } from "./supabaseClient";

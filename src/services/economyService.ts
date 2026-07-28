@@ -1,8 +1,13 @@
 /**
- * @license
- * SPDX-License-Identifier: Apache-2.0
+ * -----------------------------------------------------------------------------
+ * 💰 SERVIÇO DE ECONOMIA, TAXAS DA PLATAFORMA & REGRAS FINANCEIRAS
+ * -----------------------------------------------------------------------------
+ * Módulo responsável por:
+ * 1. Definir a taxa oficial da plataforma (0.5% em XLM).
+ * 2. Manter o endereço da conta pública da Tesouraria (`GAMEFI_TREASURY_PUBLIC_KEY`).
+ * 3. Estimar e validar o saldo de XLM para pagamento atômico de taxas on-chain.
+ * -----------------------------------------------------------------------------
  */
-
 export const GAMEFI_FEE_PERCENTAGE = parseFloat((import.meta as any).env?.VITE_GAMEFI_FEE_PERCENTAGE || "0.005"); // 0.5%
 export const GAMEFI_TREASURY_PUBLIC_KEY = (import.meta as any).env?.VITE_GAMEFI_TREASURY_PUBLIC_KEY || "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B";
 export const GAMEFI_TOKEN_CODE = (import.meta as any).env?.VITE_GAMEFI_TOKEN_CODE || "GAMEFI";

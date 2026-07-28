@@ -1,3 +1,14 @@
+/**
+ * -----------------------------------------------------------------------------
+ * 🌌 SERVIÇOS STELLAR, HORIZON TESTNET & CONEXÃO ON-CHAIN
+ * -----------------------------------------------------------------------------
+ * Módulo de integração Web3 responsável por:
+ * 1. Geração criptográfica de pares de chave Ed25519 e inicialização via Friendbot (100% On-Chain).
+ * 2. Consulta de saldos e trustlines em tempo real com o servidor Horizon da Stellar.
+ * 3. Trocas DEX via Path Payment Strict Send no Horizon (Híbrido/Protocolo Clássico).
+ * 4. Staking em Cofre Soroban / Vault com envio atômico de XLM (100% On-Chain).
+ * -----------------------------------------------------------------------------
+ */
 import { Buffer } from "buffer";
 import { WalletNowClient } from "@walletnow/sdk";
 import { AccountEngine } from "@walletnow/wallet";

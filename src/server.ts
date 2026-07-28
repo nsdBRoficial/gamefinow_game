@@ -1,3 +1,15 @@
+/**
+ * -----------------------------------------------------------------------------
+ * 🛠️ SERVIDORES DE BACKEND, MULTIPLAYER REALTIME (SOCKET.IO) & RELAYER STELLAR
+ * -----------------------------------------------------------------------------
+ * Módulo principal responsável por:
+ * 1. Inicializar o servidor Express e Socket.io para comunicação MMO em tempo real.
+ * 2. Autenticação e validação de tokens JWT para permissões de GM (Game Master).
+ * 3. Integração direta com Supabase PostgreSQL para controle de banimentos e punições.
+ * 4. Endpoint Relayer (/api/relayer/submit) que inspeciona e valida atômica e on-chain
+ *    a presença da taxa da Tesouraria (0.5% em XLM) antes da publicação na Stellar Testnet.
+ * -----------------------------------------------------------------------------
+ */
 import express from "express";
 import cors from "cors";
 import { createServer } from "http";

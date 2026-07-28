@@ -1,9 +1,9 @@
 <div align="center">
   <img src="https://stellar.org/images/stellar-logo.svg" alt="Stellar Logo" width="100"/>
-  <h1>GameFiNow — v0.7.9.5</h1>
+  <h1>GameFiNow — v0.8.2</h1>
   <p><strong>A Gamified On-Boarding Experience for the Stellar Ecosystem</strong></p>
   <p>
-    <img src="https://img.shields.io/badge/version-v0.7.9.5-cyan?style=flat-square" alt="version"/>
+    <img src="https://img.shields.io/badge/version-v0.8.2-cyan?style=flat-square" alt="version"/>
     <img src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square" alt="license"/>
     <img src="https://img.shields.io/badge/network-Stellar_Testnet-yellow?style=flat-square" alt="network"/>
     <img src="https://img.shields.io/badge/i18n-EN_|_PT_|_ES-green?style=flat-square" alt="languages"/>
@@ -17,6 +17,20 @@
 **GameFiNow** is a retro-style MMO RPG built on Web3, designed to educate and onboard new users into the Stellar network in an intuitive, fun, and engaging way. Players complete interactive quests that simulate real on-chain interactions — from generating a cryptographic keypair, to depositing funds via an Anchor (On-Ramp), to swapping tokens using Soroban smart contracts and locking assets in a hold vault.
 
 The game runs entirely in the browser, using a 60 FPS HTML5 Canvas engine, and communicates with the **Stellar Testnet** via **WalletNow SDK** and the **Horizon API**.
+
+---
+
+## 🛡️ What's New in v0.8.2 — Full Audit, GM Character System & Relayer Anti-Bypass
+
+### 📜 Documentação & Varredura de Auditoria Atualizada
+- **Audit Document v0.8.2**: Lançado o documento oficial [DOC_AUDITORIA_E_AVALIACAO.md](file:///c:/Users/Usu%C3%A1rio/Documents/GitHub/gamefinow_game/DOC_AUDITORIA_E_AVALIACAO.md) contendo a matriz completa das integrações **100% On-Chain**, **Híbridas/Simuladas**, **Backend Off-Chain** e **Painel Admin GM**.
+
+### 🔴 Personagem GM (Game Master) Dedicado
+- **Isolamento de Acesso**: Entrada via `/admin` separada da autenticação de jogadores comuns.
+- **Visual GM Único**: Tag vermelha `⭐ [GM]`, contorno visual especial, LVL 99, status máximos (9999 HP/FOR/INT/AGI/RES), remoção de missões pendentes da interface e bypass automático de permissões.
+
+### 🔒 Backend Fee Relayer (`/api/relayer/submit`)
+- **Validação Atômica da Taxa da Tesouraria**: Verificação obrigatoriamente executada no servidor Express antes da submissão para a Horizon Testnet, prevenindo o bypass da taxa de 0.5% em XLM por alteração maliciosa de XDR no frontend.
 
 ---
 

@@ -1,3 +1,15 @@
+/**
+ * -----------------------------------------------------------------------------
+ * 👑 ROTAS ADMINISTRATIVAS & PAINEL DE CONTROLE DE GM (GAME MASTER)
+ * -----------------------------------------------------------------------------
+ * Módulo de segurança responsável por:
+ * 1. Autenticação de usuários administrativos com hash de senha SHA-256 no Supabase.
+ * 2. Emissão de tokens JWT com perfil de permissão `role: "admin"`.
+ * 3. Endpoints de moderação: Banimento de jogadores, desbanimento, suspensão temporária,
+ *    silenciamento (mute) e anúncios de sistema em tempo real (broadcast Socket.io).
+ * 4. Registro de logs de auditoria na tabela `admin_audit_logs`.
+ * -----------------------------------------------------------------------------
+ */
 import { Router } from "express";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
