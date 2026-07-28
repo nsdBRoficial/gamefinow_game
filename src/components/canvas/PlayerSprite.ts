@@ -102,15 +102,23 @@ export const drawPixelCharacter = (
   isMoving: boolean,
   frame: number,
   direction: "down" | "up" | "left" | "right",
-  showCrown: boolean = false
+  showCrown: boolean = false,
+  isGM: boolean = false
 ) => {
   ctx.save();
 
   // 1. Pixel shadow
+  ctx.shadowBlur = 0; // prevent glow on shadow
   ctx.beginPath();
   ctx.ellipse(cx + 16, cy + 30, 9, 3, 0, 0, Math.PI * 2);
   ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
   ctx.fill();
+
+  // Se for GM, adiciona a aura dourada no personagem
+  if (isGM) {
+    ctx.shadowColor = "#facc15";
+    ctx.shadowBlur = 12;
+  }
 
   // Bobbing / swing offsets
   let walkBob = 0;

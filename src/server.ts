@@ -306,6 +306,10 @@ io.on("connection", (socket) => {
       state.payload = data.payload;
       // Injeta flag isSuspicious no payload para o admin poder ver
       data.payload.isSuspicious = state.isSuspicious;
+      // Garante que o isGM nunca seja perdido ou spoofado pelo client
+      if (state.isGM) {
+        data.payload.isGM = true;
+      }
     }
     
     socket.to(`map:${data.mapId}`).emit("player_move", data.payload);

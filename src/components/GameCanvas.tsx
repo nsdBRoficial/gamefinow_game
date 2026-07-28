@@ -1698,7 +1698,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       playerPosVal.isMoving,
       playerPosVal.frame,
       playerPosVal.dir,
-      isLegend
+      isLegend,
+      playerPosVal.isGM === true
     );
 
     // Display Player name tag over their head with proper head clearance, dynamic formatting and neon effects
@@ -1747,8 +1748,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       namePart = "[GM]";
       suffix = "";
       tagColor = "#ff0000";
-      tagShadowColor = "#fbbf24";
-      tagShadowBlur = 10;
+      tagShadowColor = "";
+      tagShadowBlur = 0;
       borderStyle = "#ff0000";
     } else if (currentTitle === "Herói Lendário de Stellar") {
       // 5. Herói Lendário: Verde Matrix (#00ff66)

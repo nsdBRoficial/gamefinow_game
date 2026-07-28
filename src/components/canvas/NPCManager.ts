@@ -200,7 +200,8 @@ export const drawOtherPlayers = (
       isActuallyMoving,
       render.frame,
       p.dir,
-      false
+      false,
+      p.isGM === true
     );
 
     // ── Name tag do player ────────────────────────────────────────────────────
@@ -241,8 +242,8 @@ export const drawOtherPlayers = (
       prefix = "";
       namePart = "[GM]";
       tagColor = "#ff0000";
-      tagShadowColor = "#fbbf24";
-      tagShadowBlur = 10;
+      tagShadowColor = "";
+      tagShadowBlur = 0;
       borderStyle = "#ff0000";
     }
     const part1 = prefix + namePart;
