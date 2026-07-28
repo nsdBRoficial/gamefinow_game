@@ -239,7 +239,7 @@ export const drawOtherPlayers = (
     let namePart = p.name || "Anonymo";
 
     if (p.isGM) {
-      prefix = "";
+      prefix = "⭐ ";
       namePart = "[GM]";
       tagColor = "#ff0000";
       tagShadowColor = "";

@@ -93,10 +93,18 @@ export default function App() {
         name: "GM",
         isGM: true,
       }));
+      setGameState((prev) => {
+        const gmQuests = { ...prev.quests };
+        gmQuests.wallet.status = "completed";
+        gmQuests.onramp.status = "completed";
+        gmQuests.soroban.status = "completed";
+        gmQuests.hold.status = "completed";
+        return { ...prev, quests: gmQuests };
+      });
     } else if (playerPos.isGM) {
       setPlayerPos((prev) => ({ ...prev, isGM: false }));
     }
-  }, [isGmMode, setPlayerPos]);
+  }, [isGmMode, setPlayerPos, setGameState]);
 
   // ─── MULTIPLAYER: ID do jogador baseado na wallet Stellar (ou GM) ───
   const playerId = isGmMode ? "gm_admin" : getOrCreatePlayerId(gameState.wallet.publicKey || undefined);
@@ -1198,23 +1206,25 @@ export default function App() {
         </div>
 
         {/* 4. CHRONICLES ACTIVE QUEST FLOATING CARD OVERLAY */}
-        <div className="absolute top-26 md:top-20 left-[62px] md:left-[54px] z-10 bg-[#fbf5eb]/95 border-2 border-black rounded-lg p-2.5 w-[260px] sm:w-[380px] md:w-[480px] shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] text-[10px] md:text-[9.5px] leading-snug font-mono select-none pointer-events-none text-left">
-          <div className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 bg-[#ffbf00] rounded-full animate-ping" />
-            <span className="text-[8px] md:text-[7.5px] text-amber-800 font-extrabold uppercase tracking-wider">{t('ui.activeQuest')}</span>
+        {!isGmMode && (
+          <div className="absolute top-26 md:top-20 left-[62px] md:left-[54px] z-10 bg-[#fbf5eb]/95 border-2 border-black rounded-lg p-2.5 w-[260px] sm:w-[380px] md:w-[480px] shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] text-[10px] md:text-[9.5px] leading-snug font-mono select-none pointer-events-none text-left">
+            <div className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 bg-[#ffbf00] rounded-full animate-ping" />
+              <span className="text-[8px] md:text-[7.5px] text-amber-800 font-extrabold uppercase tracking-wider">{t('ui.activeQuest')}</span>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2 mt-0.5">
+              <span className="text-black font-black block leading-tight text-[11.5px] md:text-[10.5px] uppercase shrink-0">
+                {currentActiveQuest ? ((currentActiveQuest.id as string) === "all_done" ? currentActiveQuest.title : t(`quests.${currentActiveQuest.id}.title`)) : "NEW QUESTS COMING SOON"}
+              </span>
+              <span className="text-slate-600 text-[10px] md:text-[9px] block leading-snug sm:border-l sm:border-black/15 sm:pl-2">
+                {currentActiveQuest ? ((currentActiveQuest.id as string) === "all_done" ? currentActiveQuest.instructions : t(`quests.${currentActiveQuest.id}.instructions`)) : "You have completed all current onboarding quests on the Stellar network. Stay tuned for upcoming adventures!"}
+              </span>
+            </div>
           </div>
-          <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2 mt-0.5">
-            <span className="text-black font-black block leading-tight text-[11.5px] md:text-[10.5px] uppercase shrink-0">
-              {currentActiveQuest ? ((currentActiveQuest.id as string) === "all_done" ? currentActiveQuest.title : t(`quests.${currentActiveQuest.id}.title`)) : "NEW QUESTS COMING SOON"}
-            </span>
-            <span className="text-slate-600 text-[10px] md:text-[9px] block leading-snug sm:border-l sm:border-black/15 sm:pl-2">
-              {currentActiveQuest ? ((currentActiveQuest.id as string) === "all_done" ? currentActiveQuest.instructions : t(`quests.${currentActiveQuest.id}.instructions`)) : "You have completed all current onboarding quests on the Stellar network. Stay tuned for upcoming adventures!"}
-            </span>
-          </div>
-        </div>
+        )}
 
         {/* 5. TRAVELER LENDÁRIO CELEBRATION RIBLED */}
-        {isCompletedAll && (
+        {!isGmMode && isCompletedAll && (
           <div className="absolute top-[150px] md:top-32 left-1/2 -translate-x-1/2 z-10 bg-[#ffbf00] border-2 border-black px-3.5 py-1.5 rounded-full shadow-[2px_2px_0px_#000] text-[9.5px] md:text-[8.5px] font-black text-black tracking-wider flex items-center gap-1.5 animate-bounce select-none pointer-events-none">
             {t('ui.legendaryRibbon')}
           </div>

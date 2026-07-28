@@ -1745,7 +1745,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const isGM = playerPosVal.isGM === true;
 
     if (isGM) {
-      prefix = "";
+      prefix = "⭐ ";
       namePart = "[GM]";
       suffix = "";
       tagColor = "#ff0000";
