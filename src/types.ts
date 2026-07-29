@@ -110,6 +110,15 @@ export interface NPC {
   emoji: string;
 }
 
+export interface CombatText {
+  id: string;
+  text: string;
+  x: number;
+  y: number;
+  color: string;
+  timestamp: number;
+}
+
 export interface GameState {
   wallet: WalletState;
   quests: Record<QuestId, Quest>;
@@ -126,4 +135,7 @@ export interface GameState {
   mapZoomLevel?: number;
   isBattleModeActive?: boolean;
   lockedTargetId?: string | null;
+  // Player Stats RPG
+  xp_current?: number;
+  level?: number;
 }

@@ -140,6 +140,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     { id: "snake5", name: "Snake", x: 30, y: 35, targetX: 30, targetY: 35, isMoving: false, frame: 0, color: "#4ade80", level: 4, hp: 110, maxHp: 110, bounceOffset: 0, dir: "right" },
   ]);
 
+  // --- BATTLE SYSTEM REFS ---
+  const lastAttackTimeRef = useRef<number>(0);
+  const combatTextsRef = useRef<import('../types').CombatText[]>([]);
+  // --------------------------
   // MMO Other Players walking around the 60x60 map in real time!
   const otherPlayersRef = useRef<any[]>([
     {
@@ -673,6 +677,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       updateOtherPlayers(delta);
 
       updatePlayer(delta);
+      updateCombat(time);
       drawGame();
 
       animationFrameId = requestAnimationFrame(gameLoop);
@@ -1061,6 +1066,114 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         }
       }
     });
+  };
+
+  // Update Combat Logic (Auto-Attack & Cooldowns)
+  const updateCombat = (time: number) => {
+    // Remove textos expirados
+    combatTextsRef.current = combatTextsRef.current.filter((t) => time - t.timestamp < 1500);
+
+    if (!latestGameState.current.isBattleModeActive) return;
+    const targetId = latestGameState.current.lockedTargetId;
+    if (!targetId) return;
+
+    const player = latestPlayerPos.current;
+    
+    // Procura o alvo nas listas (inclui mapas diferentes, mas só bate se dist <= 2)
+    let targetCreature: any = null;
+    [creaturesRef.current, wormsRef.current, crabsRef.current, beesRef.current, snakesRef.current].forEach(list => {
+      const found = list.find(c => c.id === targetId);
+      if (found) targetCreature = found;
+    });
+
+    if (targetCreature) {
+      const dist = Math.hypot(player.x - targetCreature.x, player.y - targetCreature.y);
+      if (dist <= 2.0) {
+        // Cooldown temporário de 1 seg
+        if (time - lastAttackTimeRef.current > 1000) {
+          lastAttackTimeRef.current = time;
+          
+          const isMiss = Math.random() < 0.15; // 15% miss
+          
+          if (isMiss) {
+            combatTextsRef.current.push({
+              id: Math.random().toString(),
+              text: "MISS",
+              x: targetCreature.x,
+              y: targetCreature.y - 0.5,
+              color: "#9ca3af",
+              timestamp: time
+            });
+          } else {
+            // Damage Formula: 10 + (Level * 2)
+            const pLevel = latestGameState.current.level || 1;
+            const baseDmg = 10 + (pLevel * 2);
+            const finalDmg = Math.floor(baseDmg * (0.85 + Math.random() * 0.3));
+
+            targetCreature.hp -= finalDmg;
+
+            combatTextsRef.current.push({
+              id: Math.random().toString(),
+              text: `-${finalDmg}`,
+              x: targetCreature.x,
+              y: targetCreature.y - 0.5,
+              color: "#ef4444",
+              timestamp: time
+            });
+
+            // Target Death
+            if (targetCreature.hp <= 0) {
+              const MOB_STATS: Record<string, any> = {
+                "Slime": { xp: 15, tokenChance: 0.20, minToken: 0.1, maxToken: 0.3 },
+                "Cave Worm": { xp: 45, tokenChance: 0.18, minToken: 0.5, maxToken: 1.2 },
+                "Crab": { xp: 80, tokenChance: 0.15, minToken: 1.0, maxToken: 1.5 },
+                "Bee": { xp: 185, tokenChance: 0.30, minToken: 1.5, maxToken: 3.0 },
+                "Snake": { xp: 350, tokenChance: 0.40, minToken: 2.0, maxToken: 5.0 }
+              };
+              const stats = MOB_STATS[targetCreature.name] || MOB_STATS["Slime"];
+
+              // XP with +- 15% variance
+              const finalXP = Math.floor(stats.xp * (0.85 + Math.random() * 0.3));
+              useGameStore.getState().addExperience(finalXP);
+              
+              combatTextsRef.current.push({
+                id: Math.random().toString(),
+                text: `+${finalXP} XP`,
+                x: targetCreature.x,
+                y: targetCreature.y - 1.0,
+                color: "#facc15",
+                timestamp: time
+              });
+
+              // Drops
+              if (Math.random() < stats.tokenChance) {
+                const droppedTokens = parseFloat((stats.minToken + Math.random() * (stats.maxToken - stats.minToken)).toFixed(2));
+                const currentWallet = useGameStore.getState().wallet;
+                useGameStore.getState().updateWallet({ gamefiBalance: (currentWallet.gamefiBalance || 0) + droppedTokens });
+                
+                combatTextsRef.current.push({
+                  id: Math.random().toString(),
+                  text: `+${droppedTokens} GFN`,
+                  x: targetCreature.x,
+                  y: targetCreature.y - 1.5,
+                  color: "#10b981",
+                  timestamp: time + 100 // slight delay for visual
+                });
+              }
+
+              useGameStore.getState().setLockedTarget(null);
+
+              // Respawn instantly at a slightly randomized nearby position
+              targetCreature.hp = targetCreature.maxHp;
+              targetCreature.x = Math.max(2, Math.min(57, targetCreature.x + Math.floor(Math.random() * 6) - 3));
+              targetCreature.y = Math.max(4, Math.min(55, targetCreature.y + Math.floor(Math.random() * 6) - 3));
+              targetCreature.targetX = targetCreature.x;
+              targetCreature.targetY = targetCreature.y;
+            }
+          }
+        }
+      }
+    }
   };
 
   // Update Player position (Snappy & continuous WASD interpolation)
@@ -2010,6 +2123,32 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       ctx.fillText(part2, startX + part1Width, drawY);
       ctx.shadowBlur = 0;
     }
+
+    // 7.4 Render Floating Combat Texts (FCT)
+    const now = performance.now();
+    combatTextsRef.current.forEach(ct => {
+      const age = now - ct.timestamp;
+      const alpha = Math.max(0, 1 - age / 1500);
+      const floatY = (age / 1500) * 20; // Sobe 20px
+      const cx = ct.x * TILE_SIZE + TILE_SIZE / 2;
+      const cy = ct.y * TILE_SIZE - floatY;
+
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = ct.color;
+      ctx.font = "bold 12px 'JetBrains Mono', monospace";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.shadowColor = "black";
+      ctx.shadowBlur = 4;
+      ctx.fillText(ct.text, cx, cy);
+      
+      // Outline for better visibility
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "rgba(0, 0, 0, " + alpha + ")";
+      ctx.strokeText(ct.text, cx, cy);
+      ctx.restore();
+    });
 
     // 7.5. Render Magnetic Quest Arrow (Seta Magnética de Missões)
     const currentQuestTarget = getCurrentQuestTarget(latestGameState.current, playerPosVal);

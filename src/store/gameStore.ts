@@ -14,6 +14,7 @@ interface GameStore extends GameState {
   setActiveDialog: (dialog: GameState["activeDialog"]) => void;
   setBattleMode: (active: boolean) => void;
   setLockedTarget: (targetId: string | null) => void;
+  addExperience: (amount: number) => void;
 }
 
 const getInitialGameState = (): GameState => {
@@ -83,6 +84,8 @@ const getInitialGameState = (): GameState => {
     activeDialog: null,
     activeModal: null,
     currentLedger: 6184293,
+    xp_current: 0,
+    level: 1,
     jamesDialogsDone: [],
     isBattleModeActive: false,
     lockedTargetId: null,
@@ -145,7 +148,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newState = { ...state, ...nextState };
     
     // Extract only GameState properties for localStorage
-    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, ...gameStateToSave } = newState;
+    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, ...gameStateToSave } = newState;
     
     // Encrypt secretKey before saving
     if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
@@ -172,7 +175,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newWallet = { ...state.wallet, ...walletUpdate };
     const newState = { ...state, wallet: newWallet };
     
-    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, ...gameStateToSave } = newState;
+    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, ...gameStateToSave } = newState;
     
     // Encrypt secretKey before saving
     if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
@@ -190,7 +193,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newTxList = [tx, ...state.transactions];
     const newState = { ...state, transactions: newTxList, currentLedger: state.currentLedger + 1 };
     
-    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, ...gameStateToSave } = newState;
+    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, ...gameStateToSave } = newState;
     
     // Encrypt secretKey before saving
     if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
@@ -222,7 +225,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const newState = { ...state, quests: newQuests };
     
-    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, ...gameStateToSave } = newState;
+    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, ...gameStateToSave } = newState;
     
     // Encrypt secretKey before saving
     if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
@@ -248,6 +251,27 @@ export const useGameStore = create<GameStore>((set, get) => ({
   })),
 
   setLockedTarget: (targetId) => set({ lockedTargetId: targetId }),
+
+  addExperience: (amount) => set((state) => {
+    const currentXP = (state.xp_current || 0) + amount;
+    // L = floor((XP / 50)^0.4) + 1
+    const newLevel = Math.floor(Math.pow(currentXP / 50, 0.4)) + 1;
+    
+    const newState = { ...state, xp_current: currentXP, level: newLevel };
+    
+    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, ...gameStateToSave } = newState;
+    
+    // Encrypt secretKey before saving
+    if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
+      const safeWallet = { ...gameStateToSave.wallet };
+      safeWallet.secretKey = encryptAES(safeWallet.secretKey, safeWallet.pin);
+      gameStateToSave.wallet = safeWallet;
+    }
+    
+    localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
+    
+    return { xp_current: currentXP, level: newLevel };
+  }),
 
 }));
 
