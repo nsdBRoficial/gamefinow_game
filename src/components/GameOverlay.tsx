@@ -2461,6 +2461,7 @@ const GameFiFaucetModal: React.FC<GameFiFaucetProps> = ({ wallet, onClose, onUpd
   const [success, setSuccess] = useState<{ message: string; txHash: string } | null>(null);
   const [now, setNow] = useState(Date.now());
   const setPlayerPos = useGameStore(s => s.setPlayerPos);
+  const buyPotions = useGameStore(s => s.buyPotions);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 1000);
@@ -2620,6 +2621,35 @@ const GameFiFaucetModal: React.FC<GameFiFaucetProps> = ({ wallet, onClose, onUpd
         <Sparkles className="h-4 w-4" />
         Curar 100% (Restaurar HP e MP)
       </button>
+
+      {/* Potion Shop */}
+      <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-800">
+        <button
+          type="button"
+          onClick={() => {
+            buyPotions("health");
+            setSuccess({ message: "Comprado 99x Poções de Cura!", txHash: "Off-chain" });
+          }}
+          className="w-full py-3 bg-slate-900 border border-green-800 hover:bg-slate-800 text-green-400 font-bold text-xs rounded-xl flex flex-col items-center justify-center gap-1 cursor-pointer transition shadow-md shadow-green-900/20"
+        >
+          <span className="text-xl">🧪</span>
+          <span>99x Cura (HP)</span>
+          <span className="text-[9px] text-amber-400">100 XLM</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            buyPotions("mana");
+            setSuccess({ message: "Comprado 99x Poções de Mana!", txHash: "Off-chain" });
+          }}
+          className="w-full py-3 bg-slate-900 border border-blue-800 hover:bg-slate-800 text-blue-400 font-bold text-xs rounded-xl flex flex-col items-center justify-center gap-1 cursor-pointer transition shadow-md shadow-blue-900/20"
+        >
+          <span className="text-xl">💧</span>
+          <span>99x Mana (MP)</span>
+          <span className="text-[9px] text-amber-400">100 XLM</span>
+        </button>
+      </div>
 
       <button
         type="button"

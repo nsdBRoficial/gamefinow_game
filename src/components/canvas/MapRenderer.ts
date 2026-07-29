@@ -1374,3 +1374,85 @@ export const drawMapDecorations = (
     }
   });
 };
+
+export const drawActiveAnimations = (
+  ctx: CanvasRenderingContext2D,
+  animations: import("../../types").AnimationEvent[],
+  tileSize: number,
+  now: number
+) => {
+  animations.forEach((anim) => {
+    const elapsed = now - anim.timestamp;
+    if (elapsed > anim.duration) return;
+    const progress = elapsed / anim.duration;
+
+    const x = (anim.startX ?? 0) * tileSize + tileSize / 2;
+    const y = (anim.startY ?? 0) * tileSize + tileSize / 2;
+
+    ctx.save();
+    if (anim.type === "heal") {
+      // Aura de cura (círculos subindo)
+      const radius = 15 + Math.sin(progress * Math.PI) * 10;
+      ctx.beginPath();
+      ctx.arc(x, y - progress * 30, radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(34, 197, 94, ${1 - progress})`; // Green-500
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = "rgba(34, 197, 94, 0.8)";
+      ctx.fill();
+      
+      // Partículas
+      for(let i = 0; i < 5; i++) {
+         const pY = y - progress * 40 - (i * 10);
+         const pX = x + Math.sin(progress * Math.PI * 4 + i) * 15;
+         ctx.beginPath();
+         ctx.arc(pX, pY, 3, 0, Math.PI * 2);
+         ctx.fillStyle = `rgba(134, 239, 172, ${1 - progress})`; // Green-300
+         ctx.fill();
+      }
+    } else if (anim.type === "fire") {
+      // Fire explosion
+      const radius = progress * 45;
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(239, 68, 68, ${1 - progress})`; // Red-500
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = "rgba(239, 68, 68, 0.8)";
+      ctx.fill();
+      
+      ctx.beginPath();
+      ctx.arc(x, y, radius * 0.6, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(253, 224, 71, ${1 - progress})`; // Yellow-300
+      ctx.fill();
+    } else if (anim.type === "lightning") {
+      // Lightning strike
+      const alpha = progress < 0.5 ? progress * 2 : (1 - progress) * 2;
+      ctx.strokeStyle = `rgba(168, 85, 247, ${alpha})`; // Purple-500
+      ctx.lineWidth = 5;
+      ctx.shadowColor = "#a855f7";
+      ctx.shadowBlur = 15;
+
+      ctx.beginPath();
+      ctx.moveTo(x, y - 250); // Do topo
+      
+      ctx.lineTo(x + (Math.random() * 30 - 15), y - 180);
+      ctx.lineTo(x - (Math.random() * 30 - 15), y - 120);
+      ctx.lineTo(x + (Math.random() * 30 - 15), y - 60);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      
+      // Impacto no chao
+      if (progress > 0.1) {
+        ctx.beginPath();
+        ctx.ellipse(x, y, progress * 40, progress * 15, 0, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(168, 85, 247, ${1 - progress})`;
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.ellipse(x, y, progress * 20, progress * 7.5, 0, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(216, 180, 254, ${1 - progress})`;
+        ctx.fill();
+      }
+    }
+    ctx.restore();
+  });
+};

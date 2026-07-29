@@ -119,6 +119,17 @@ export interface CombatText {
   timestamp: number;
 }
 
+export interface AnimationEvent {
+  id: string;
+  type: "heal" | "fire" | "lightning";
+  startX?: number; 
+  startY?: number; 
+  targetX?: number; 
+  targetY?: number;
+  timestamp: number;
+  duration: number;
+}
+
 export interface GameState {
   wallet: WalletState;
   quests: Record<QuestId, Quest>;
@@ -138,4 +149,9 @@ export interface GameState {
   // Player Stats RPG
   xp_current?: number;
   level?: number;
+  inventory?: {
+    healthPotions: number;
+    manaPotions: number;
+  };
+  activeAnimations?: AnimationEvent[];
 }

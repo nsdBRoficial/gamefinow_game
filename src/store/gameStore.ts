@@ -16,6 +16,10 @@ interface GameStore extends GameState {
   setLockedTarget: (targetId: string | null) => void;
   addExperience: (amount: number) => void;
   castMagic: (type: "heal" | "fire" | "lightning") => void;
+  buyPotions: (type: "health" | "mana") => void;
+  usePotion: (type: "health" | "mana") => void;
+  addActiveAnimation: (anim: import("../types").AnimationEvent) => void;
+  removeActiveAnimation: (id: string) => void;
 }
 
 const getInitialGameState = (): GameState => {
@@ -87,6 +91,11 @@ const getInitialGameState = (): GameState => {
     currentLedger: 6184293,
     xp_current: 0,
     level: 1,
+    inventory: {
+      healthPotions: 0,
+      manaPotions: 0,
+    },
+    activeAnimations: [],
     jamesDialogsDone: [],
     isBattleModeActive: false,
     lockedTargetId: null,
@@ -235,7 +244,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
     const nextLevel = Math.floor(Math.pow(nextXP / 50, 0.4)) + 1;
 
-    const newState = { ...state, quests: newQuests, xp_current: nextXP, level: nextLevel };
+    let nextPlayerPos = { ...state.playerPos };
+    if (nextLevel > (state.level || 1)) {
+      nextPlayerPos.maxHp = 100 + ((nextLevel - 1) * 25);
+      nextPlayerPos.hp = nextPlayerPos.maxHp;
+      nextPlayerPos.maxMp = 50 + ((nextLevel - 1) * 10);
+      nextPlayerPos.mp = nextPlayerPos.maxMp;
+      localStorage.setItem("stellar_island_player_pos_v1", JSON.stringify(nextPlayerPos));
+    }
+
+    const newState = { ...state, quests: newQuests, xp_current: nextXP, level: nextLevel, playerPos: nextPlayerPos };
     
     const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, castMagic, ...gameStateToSave } = newState;
     
@@ -249,7 +267,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     
     localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
     
-    return { quests: newQuests };
+    return { quests: newQuests, xp_current: nextXP, level: nextLevel, playerPos: nextPlayerPos };
   }),
 
   setActiveModal: (modal) => set({ activeModal: modal }),
@@ -269,7 +287,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // L = floor((XP / 50)^0.4) + 1
     const newLevel = Math.floor(Math.pow(currentXP / 50, 0.4)) + 1;
     
-    const newState = { ...state, xp_current: currentXP, level: newLevel };
+    let nextPlayerPos = { ...state.playerPos };
+    if (newLevel > (state.level || 1)) {
+      nextPlayerPos.maxHp = 100 + ((newLevel - 1) * 25);
+      nextPlayerPos.hp = nextPlayerPos.maxHp;
+      nextPlayerPos.maxMp = 50 + ((newLevel - 1) * 10);
+      nextPlayerPos.mp = nextPlayerPos.maxMp;
+      localStorage.setItem("stellar_island_player_pos_v1", JSON.stringify(nextPlayerPos));
+    }
+
+    const newState = { ...state, xp_current: currentXP, level: newLevel, playerPos: nextPlayerPos };
     
     const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, castMagic, ...gameStateToSave } = newState;
     
@@ -282,7 +309,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     
     localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
     
-    return { xp_current: currentXP, level: newLevel };
+    return { xp_current: currentXP, level: newLevel, playerPos: nextPlayerPos };
   }),
 
   castMagic: (type) => set((state) => {
@@ -311,9 +338,93 @@ export const useGameStore = create<GameStore>((set, get) => ({
       hp: nextHp
     };
 
+    const newAnim: import("../types").AnimationEvent = {
+      id: `anim_${Date.now()}_${Math.random()}`,
+      type,
+      startX: state.playerPos.x,
+      startY: state.playerPos.y,
+      timestamp: Date.now(),
+      duration: type === "heal" ? 1000 : 600
+    };
+
     localStorage.setItem("stellar_island_player_pos_v1", JSON.stringify(nextPlayerPos));
-    return { playerPos: nextPlayerPos };
+    return { playerPos: nextPlayerPos, activeAnimations: [...(state.activeAnimations || []), newAnim] };
   }),
+
+  buyPotions: (type) => set((state) => {
+    if (state.wallet.xlmBalance < 100) return state; // Falha silenciosa ou com warning se quiser
+
+    const currentInventory = state.inventory || { healthPotions: 0, manaPotions: 0 };
+    const newInventory = { ...currentInventory };
+    if (type === "health") newInventory.healthPotions += 99;
+    if (type === "mana") newInventory.manaPotions += 99;
+
+    const newWallet = { ...state.wallet, xlmBalance: state.wallet.xlmBalance - 100 };
+    const newState = { ...state, wallet: newWallet, inventory: newInventory };
+
+    // Salvar estado e excluir actions iteráveis
+    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, castMagic, buyPotions, usePotion, addActiveAnimation, removeActiveAnimation, ...gameStateToSave } = newState;
+    
+    if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
+      const { encryptAES } = require("../utils/cryptoUtils");
+      const safeWallet = { ...gameStateToSave.wallet };
+      safeWallet.secretKey = encryptAES(safeWallet.secretKey, safeWallet.pin);
+      gameStateToSave.wallet = safeWallet;
+    }
+    
+    localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
+    
+    return { wallet: newWallet, inventory: newInventory };
+  }),
+
+  usePotion: (type) => set((state) => {
+    const currentInventory = state.inventory || { healthPotions: 0, manaPotions: 0 };
+    if (type === "health" && currentInventory.healthPotions <= 0) return state;
+    if (type === "mana" && currentInventory.manaPotions <= 0) return state;
+
+    const newInventory = { ...currentInventory };
+    let nextPlayerPos = { ...state.playerPos };
+    const maxHp = state.playerPos.maxHp ?? 100;
+    const maxMp = state.playerPos.maxMp ?? 50;
+    let newAnim: import("../types").AnimationEvent | null = null;
+
+    if (type === "health") {
+      newInventory.healthPotions -= 1;
+      nextPlayerPos.hp = Math.min(maxHp, (state.playerPos.hp ?? 0) + Math.floor(maxHp * 0.4));
+      newAnim = { id: `anim_${Date.now()}_heal`, type: "heal", startX: state.playerPos.x, startY: state.playerPos.y, timestamp: Date.now(), duration: 1000 };
+    }
+    if (type === "mana") {
+      newInventory.manaPotions -= 1;
+      nextPlayerPos.mp = Math.min(maxMp, (state.playerPos.mp ?? 0) + Math.floor(maxMp * 0.5));
+    }
+
+    localStorage.setItem("stellar_island_player_pos_v1", JSON.stringify(nextPlayerPos));
+    
+    const newState = { ...state, inventory: newInventory, playerPos: nextPlayerPos };
+    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, castMagic, buyPotions, usePotion, addActiveAnimation, removeActiveAnimation, ...gameStateToSave } = newState;
+    
+    if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
+      const { encryptAES } = require("../utils/cryptoUtils");
+      const safeWallet = { ...gameStateToSave.wallet };
+      safeWallet.secretKey = encryptAES(safeWallet.secretKey, safeWallet.pin);
+      gameStateToSave.wallet = safeWallet;
+    }
+    
+    localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
+    
+    if (newAnim) {
+      return { inventory: newInventory, playerPos: nextPlayerPos, activeAnimations: [...(state.activeAnimations || []), newAnim] };
+    }
+    return { inventory: newInventory, playerPos: nextPlayerPos };
+  }),
+
+  addActiveAnimation: (anim) => set((state) => ({
+    activeAnimations: [...(state.activeAnimations || []), anim]
+  })),
+
+  removeActiveAnimation: (id) => set((state) => ({
+    activeAnimations: (state.activeAnimations || []).filter(a => a.id !== id)
+  })),
 
 }));
 

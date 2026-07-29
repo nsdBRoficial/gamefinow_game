@@ -142,6 +142,34 @@ export default function App() {
   const [showMapModal, setShowMapModal] = useState(false);
 
   useEffect(() => {
+    // 1. Força o Nível 5 para jogadores que já concluíram todas as quests (Herói Lendário) e estão abaixo do Nível 5
+    if (hasStar && (gameState.level || 1) < 5) {
+      setGameState({ xp_current: 1600, level: 5 });
+      setPlayerPos(prev => ({
+        ...prev,
+        maxHp: 200,
+        hp: 200,
+        maxMp: 90,
+        mp: 90
+      }));
+    } 
+    // 2. Sincronizar maxHp/maxMp antigos com o Level atual do jogador
+    else if (gameState.level && playerPos.maxHp) {
+      const expectedHp = 100 + ((gameState.level - 1) * 25);
+      const expectedMp = 50 + ((gameState.level - 1) * 10);
+      if (playerPos.maxHp !== expectedHp || playerPos.maxMp !== expectedMp) {
+        setPlayerPos(prev => ({
+          ...prev,
+          maxHp: expectedHp,
+          hp: (prev.hp === prev.maxHp || !prev.hp) ? expectedHp : prev.hp,
+          maxMp: expectedMp,
+          mp: (prev.mp === prev.maxMp || !prev.mp) ? expectedMp : prev.mp,
+        }));
+      }
+    }
+  }, [hasStar, gameState.level, playerPos.maxHp, playerPos.maxMp, setGameState, setPlayerPos]);
+
+  useEffect(() => {
     if (isMultiplayerEnabled) {
       subscribeToGlobalEvents(
         ({ msg, from }) => {

@@ -10,7 +10,7 @@ import { getMapGrid, getMapDecorations, isGateBlocked, MapId } from "../maps";
 import { useTranslation } from "react-i18next";
 import { Compass, MapPin, Sparkles } from "lucide-react";
 import { drawPixelCharacter, getNPCPixelChar } from "./canvas/PlayerSprite";
-import { drawMapTiles, drawSpecialTerminals, drawMapDecorations } from "./canvas/MapRenderer";
+import { drawMapTiles, drawSpecialTerminals, drawMapDecorations, drawActiveAnimations } from "./canvas/MapRenderer";
 import { drawNPCs, drawOtherPlayers, cleanupRenderStates } from "./canvas/NPCManager";
 import { OnlinePlayer } from "../services/multiplayerService";
 import { getCurrentQuestTarget, drawQuestArrow } from "./canvas/QuestArrowRenderer";
@@ -2195,6 +2195,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       ctx.strokeText(ct.text, cx, cy);
       ctx.restore();
     });
+
+    // 7.4.5 Render Animations (Heal, Fire, Lightning)
+    if (gameStateVal.activeAnimations && gameStateVal.activeAnimations.length > 0) {
+      drawActiveAnimations(ctx, gameStateVal.activeAnimations, TILE_SIZE, now);
+    }
 
     // 7.5. Render Magnetic Quest Arrow (Seta Magnética de Missões)
     const currentQuestTarget = getCurrentQuestTarget(latestGameState.current, playerPosVal);

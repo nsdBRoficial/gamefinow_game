@@ -5,17 +5,24 @@ export const BattleHUD: React.FC = () => {
   const isBattleModeActive = useGameStore((s) => s.isBattleModeActive);
   const playerPos = useGameStore((s) => s.playerPos);
   const castMagic = useGameStore((s) => s.castMagic);
+  const usePotion = useGameStore((s) => s.usePotion);
+  const inventory = useGameStore((s) => s.inventory);
 
-  // Lida com atalhos de teclado 1, 2, 3 para as magias
+  // Lida com atalhos de teclado 1, 2, 3 para as magias e 4, 5 para itens
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Evita disparar atalhos se estiver digitando no chat
+      if (e.target && (e.target as HTMLElement).tagName === "INPUT") return;
+      
       if (e.key === "1") castMagic("heal");
       if (e.key === "2") castMagic("fire");
       if (e.key === "3") castMagic("lightning");
+      if (e.key === "4") usePotion("health");
+      if (e.key === "5") usePotion("mana");
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [castMagic]);
+  }, [castMagic, usePotion]);
 
   if (!isBattleModeActive) return null;
 
@@ -72,8 +79,37 @@ export const BattleHUD: React.FC = () => {
             <span className="absolute -bottom-2 bg-black/80 text-purple-300 text-[10px] font-mono px-1.5 rounded border border-purple-800/50">25 MP</span>
           </button>
 
+          {/* Divider */}
+          <div className="w-px h-12 bg-slate-700 mx-1"></div>
+
+          {/* Item 4: Health Potion */}
+          <button 
+            onClick={() => usePotion("health")}
+            className={`group relative w-12 h-12 bg-slate-900 border-2 ${(inventory?.healthPotions ?? 0) > 0 ? "border-green-500 hover:scale-110 active:scale-95 shadow-[0_0_10px_rgba(34,197,94,0.3)]" : "border-slate-700 opacity-50 grayscale"} rounded-xl flex items-center justify-center transition-all cursor-pointer`}
+            title="Poção de Cura (Recupera 40% HP | Tecla 4)"
+          >
+            <span className="text-xl">🧪</span>
+            <span className="absolute -top-2.5 -left-2.5 w-5 h-5 bg-slate-900 text-white text-[10px] font-black rounded-full border border-slate-600 flex items-center justify-center shadow-lg group-hover:bg-slate-800">4</span>
+            <span className="absolute -bottom-2 -right-2 bg-slate-800 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full border border-slate-600 shadow-md">
+              x{inventory?.healthPotions ?? 0}
+            </span>
+          </button>
+
+          {/* Item 5: Mana Potion */}
+          <button 
+            onClick={() => usePotion("mana")}
+            className={`group relative w-12 h-12 bg-slate-900 border-2 ${(inventory?.manaPotions ?? 0) > 0 ? "border-blue-500 hover:scale-110 active:scale-95 shadow-[0_0_10px_rgba(59,130,246,0.3)]" : "border-slate-700 opacity-50 grayscale"} rounded-xl flex items-center justify-center transition-all cursor-pointer`}
+            title="Poção de Mana (Recupera 50% MP | Tecla 5)"
+          >
+            <span className="text-xl">💧</span>
+            <span className="absolute -top-2.5 -left-2.5 w-5 h-5 bg-slate-900 text-white text-[10px] font-black rounded-full border border-slate-600 flex items-center justify-center shadow-lg group-hover:bg-slate-800">5</span>
+            <span className="absolute -bottom-2 -right-2 bg-slate-800 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full border border-slate-600 shadow-md">
+              x{inventory?.manaPotions ?? 0}
+            </span>
+          </button>
+
           {/* Mana MP Indicator Minimal */}
-          <div className="flex flex-col justify-end ml-4 h-full pb-1">
+          <div className="flex flex-col justify-end ml-2 h-full pb-1">
             <div className="text-[10px] font-black text-blue-400 text-center mb-0.5 tracking-widest">MP</div>
             <div className="w-2.5 h-12 bg-black/80 border border-blue-900 rounded-full flex items-end overflow-hidden p-px">
               <div 
