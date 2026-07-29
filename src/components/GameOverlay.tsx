@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from "react";
 import { WalletNowClient } from "@walletnow/sdk";
 import { WalletState, Transaction } from "../types";
+import { useGameStore } from "../store/gameStore";
 import { onboardUser, StellarAnchorService, TestnetKitService } from "../services/stellarServices";
 import { Keypair } from "@stellar/stellar-sdk";
 import { SEP24Service } from "../services/sep24Service";
@@ -2459,6 +2460,7 @@ const GameFiFaucetModal: React.FC<GameFiFaucetProps> = ({ wallet, onClose, onUpd
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{ message: string; txHash: string } | null>(null);
   const [now, setNow] = useState(Date.now());
+  const setPlayerPos = useGameStore(s => s.setPlayerPos);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 1000);
@@ -2522,6 +2524,15 @@ const GameFiFaucetModal: React.FC<GameFiFaucetProps> = ({ wallet, onClose, onUpd
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFullRestore = () => {
+    setPlayerPos(prev => ({
+      ...prev,
+      hp: prev.maxHp ?? 100,
+      mp: prev.maxMp ?? 50
+    }));
+    setSuccess({ message: "HP e MP totalmente restaurados na Fonte Sagrada!", txHash: "Off-chain" });
   };
 
   return (
@@ -2599,6 +2610,16 @@ const GameFiFaucetModal: React.FC<GameFiFaucetProps> = ({ wallet, onClose, onUpd
           {loading ? "Banhando-se na Fonte Mágica..." : "Coletar 10 GAMEFI da Fonte"}
         </button>
       )}
+
+      {/* Restore HP/MP Button */}
+      <button
+        type="button"
+        onClick={handleFullRestore}
+        className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs uppercase tracking-wider rounded-xl transition cursor-pointer font-mono shadow-lg flex items-center justify-center gap-2"
+      >
+        <Sparkles className="h-4 w-4" />
+        Curar 100% (Restaurar HP e MP)
+      </button>
 
       <button
         type="button"

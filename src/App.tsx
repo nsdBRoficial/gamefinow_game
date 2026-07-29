@@ -132,6 +132,8 @@ export default function App() {
 
   // Handle active retro floating window overlays: "customizer" | "backpack" | "ledger" | "guide" | null
   const [activeWindow, setActiveWindow] = useState<"customizer" | "backpack" | "ledger" | "guide" | null>(null);
+  const [showActiveQuest, setShowActiveQuest] = useState(false);
+  const [showLegendaryRibbon, setShowLegendaryRibbon] = useState(false);
 
   // Compute hasStar for Battle Mode
   const hasCompletedAllQuests = Object.values(gameState.quests || {}).every(q => q.status === "completed");
@@ -269,6 +271,21 @@ export default function App() {
     
     return () => clearInterval(interval);
   }, []);
+
+  // Auto-cura passiva (1 HP por segundo fora de batalha)
+  useEffect(() => {
+    const healInterval = setInterval(() => {
+      if (!gameState.isBattleModeActive && playerPos.hp !== undefined && playerPos.maxHp !== undefined) {
+        if (playerPos.hp < playerPos.maxHp) {
+          setPlayerPos(prev => ({
+            ...prev,
+            hp: Math.min((prev.hp || 0) + 1, prev.maxHp || 100)
+          }));
+        }
+      }
+    }, 1000);
+    return () => clearInterval(healInterval);
+  }, [gameState.isBattleModeActive, playerPos.hp, playerPos.maxHp, setPlayerPos]);
 
   // Web Audio Synthesizer Sounds
   const playSynthSound = (type: "beep" | "success" | "coin" | "unlock") => {
@@ -748,8 +765,15 @@ export default function App() {
 
   const activeQuestsArray = Object.values(gameState.quests) as Quest[];
   const completedCount = activeQuestsArray.filter(q => q.status === "completed").length;
-  const progressPercent = Math.round((completedCount / activeQuestsArray.length) * 100);
   const isCompletedAll = gameState.quests.hold.status === "completed";
+
+  const currentXP = gameState.xp_current || 0;
+  const currentLevel = gameState.level || 1;
+  const xpForNextLevel = Math.ceil(50 * Math.pow(currentLevel, 2.5));
+  const xpForCurrentLevel = Math.ceil(50 * Math.pow(currentLevel - 1, 2.5));
+  const xpIntoThisLevel = currentXP - xpForCurrentLevel;
+  const xpNeededForNext = xpForNextLevel - xpForCurrentLevel;
+  const progressPercent = isGmMode ? 100 : Math.min(100, Math.max(0, (xpIntoThisLevel / xpNeededForNext) * 100));
 
   let currentActiveQuest = activeQuestsArray.find(q => q.status === "active");
   if (!currentActiveQuest && isCompletedAll) {
@@ -899,85 +923,97 @@ export default function App() {
                 <span className="text-base md:text-base">{soundEnabled ? "🔊" : "🔇"}</span>
               </button>
               
-              {/* HP Hearts & Health Bar combined */}
-              <div className="flex flex-col items-start bg-[#1a1913]/12 px-2.5 py-1.5 md:py-1 rounded-lg border border-black/15 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[11px] md:text-[11px] font-black leading-none text-red-700 tracking-wider">HP</span>
-                  <span className="text-[11px] md:text-[11px] font-mono leading-none font-black text-slate-800 bg-[#ebd9c0]/50 px-1 rounded border border-black/5">
-                    {isGmMode ? 9999 : 80 + completedCount * 30} / {isGmMode ? 9999 : 80 + completedCount * 30}
-                  </span>
+              {/* HP/MP Bars */}
+              <div className="flex flex-col items-start bg-[#1a1913]/12 px-2.5 py-1.5 rounded-lg border border-black/15 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] w-36 gap-1">
+                {/* HP */}
+                <div className="w-full">
+                  <div className="flex justify-between items-center w-full mb-0.5">
+                    <span className="text-[9px] font-black leading-none text-red-700 tracking-wider">HP</span>
+                    <span className="text-[9px] font-mono leading-none font-black text-slate-800">
+                      {playerPos.hp ?? 100} / {playerPos.maxHp ?? 100}
+                    </span>
+                  </div>
+                  <div className="w-full h-1.5 bg-black/30 border border-black/30 rounded overflow-hidden relative">
+                    <div 
+                      className="h-full bg-green-500 shadow-[0_1px_0_rgba(255,255,255,0.3)_inset] transition-all duration-300"
+                      style={{ width: `${Math.max(0, Math.min(100, ((playerPos.hp ?? 100) / (playerPos.maxHp ?? 100)) * 100))}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="flex gap-0.5 mt-1">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((h) => {
-                    const isLit = isGmMode ? true : h <= 5 + completedCount;
-                    return (
-                      <span 
-                        key={h} 
-                        className={`text-[12px] md:text-[13px] select-none leading-none ${
-                          isLit 
-                            ? "text-red-500 font-bold drop-shadow-[0.5px_0.5px_0_rgba(0,0,0,0.35)] animate-pulse" 
-                            : "text-neutral-500 opacity-20"
-                        }`}
-                      >
-                        ❤️
-                      </span>
-                    );
-                  })}
+                {/* MP */}
+                <div className="w-full">
+                  <div className="flex justify-between items-center w-full mb-0.5">
+                    <span className="text-[9px] font-black leading-none text-blue-700 tracking-wider">MP</span>
+                    <span className="text-[9px] font-mono leading-none font-black text-slate-800">
+                      {playerPos.mp ?? 50} / {playerPos.maxMp ?? 50}
+                    </span>
+                  </div>
+                  <div className="w-full h-1.5 bg-black/30 border border-black/30 rounded overflow-hidden relative">
+                    <div 
+                      className="h-full bg-blue-500 shadow-[0_1px_0_rgba(255,255,255,0.3)_inset] transition-all duration-300"
+                      style={{ width: `${Math.max(0, Math.min(100, ((playerPos.mp ?? 50) / (playerPos.maxMp ?? 50)) * 100))}%` }}
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* EXP Progress Bar (Pixel styled) */}
-              <div className="hidden lg:flex flex-col w-36 bg-[#1a1913]/12 px-2.5 py-1 rounded-lg border border-black/15 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]">
-                <div className="flex justify-between text-[11px] leading-none mb-1 font-black">
-                  <span className="text-amber-800">EXP LVL {isGmMode ? 99 : completedCount + 1}</span>
-                  <span className="text-amber-950">{isGmMode ? 100 : progressPercent}%</span>
+              {/* EXP Progress Bar & Buffs */}
+              <div className="hidden lg:flex flex-col w-44 gap-1">
+                {/* EXP */}
+                <div className="bg-[#1a1913]/12 px-2.5 py-1 rounded-lg border border-black/15 shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)] w-full">
+                  <div className="flex justify-between text-[10px] leading-none mb-1 font-black">
+                    <span className="text-amber-800">LVL {isGmMode ? 99 : currentLevel}</span>
+                    <span className="text-amber-950 tracking-tighter">
+                      {isGmMode ? "MAX" : `${currentXP} / ${xpForNextLevel}`}
+                    </span>
+                  </div>
+                  <div className="w-full h-1.5 bg-black/20 border border-black/15 rounded overflow-hidden">
+                    <div 
+                      className="h-full bg-amber-500 shadow-[0_1px_0_rgba(255,255,255,0.2)_inset] transition-all duration-300"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="w-full h-2 bg-black/20 border border-black/15 rounded overflow-hidden">
-                  <div 
-                    className="h-full bg-amber-500 shadow-[0_1px_0_rgba(255,255,255,0.2)_inset] transition-all duration-300"
-                    style={{ width: `${progressPercent}%` }}
-                  />
+
+                {/* BUFFS */}
+                <div className="flex items-center justify-center gap-1.5 bg-[#1a1913]/15 px-2 py-0.5 rounded-lg border border-black/12 shadow-[inset_0_1px_1px_rgba(0,0,0,0.05)] w-full">
+                  <span className="text-[9px] font-black text-[#473b2c] mr-1">BUFFS:</span>
+                  <span 
+                    className="text-xs cursor-help relative group" 
+                    title={playerPos.x === 30 && playerPos.y === 31 ? "🛡️ Zona Segura (Você está protegido)" : "🏕️ Explorando a Ilha"}
+                  >
+                    {playerPos.x === 30 && playerPos.y === 31 ? "🛡️" : "⚔️"}
+                  </span>
+                  
+                  {gameState.quests.onramp.status === "completed" && (
+                    <>
+                      <span className="text-xs animate-pulse" title="💰 Investidor (Ativo no Mercado)">💰</span>
+                      <span className="text-xs animate-pulse" title="⚡ Aura de Velocidade (+10%)">⚡</span>
+                    </>
+                  )}
+
+                  {gameState.wallet.hasWallet && (
+                    <span className="text-xs text-cyan-700 font-bold" title="🔑 Chaves Stellar Sincronizadas">🔑</span>
+                  )}
+                  {isCompletedAll && (
+                    <span className="text-xs text-amber-500 font-bold animate-bounce" title="🌟 Conquista Lendária Desbloqueada">🌟</span>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Title / Class Badge (Shown here next to HP on mobile) */}
-            <span className="block md:hidden bg-[#1e293b] text-[#ffbf00] border-2 border-black rounded-lg px-2.5 py-1.5 text-[11px] font-black shadow-[2px_2px_0px_#000] uppercase tracking-wider">
+            <span className="block md:hidden bg-[#1e293b] text-[#ffbf00] border-2 border-black rounded-lg px-2 py-1 text-[9px] font-black shadow-[1px_1px_0px_#000] uppercase tracking-wider whitespace-nowrap">
               👑 {playerTitle}
             </span>
           </div>
 
-          {/* Center Section on desktop: Immersive Title & Buff Indicators */}
+          {/* Center Section on desktop: Immersive Title */}
           <div className="hidden md:flex items-center gap-2">
             {/* Title / Class Badge */}
-            <span className="bg-[#1e293b] text-[#ffbf00] border-2 border-black rounded-lg px-2.5 py-1 text-[12.5px] font-black shadow-[2px_2px_0px_#000] uppercase tracking-wider">
+            <span className="bg-[#1e293b] text-[#ffbf00] border-2 border-black rounded-lg px-2.5 py-1 text-[10px] font-black shadow-[2px_2px_0px_#000] uppercase tracking-wider whitespace-nowrap max-w-[150px] truncate text-center leading-tight">
               👑 {playerTitle}
             </span>
-
-            {/* Glowing active buff icons */}
-            <div className="hidden md:flex items-center gap-1.5 bg-[#1a1913]/15 px-2 py-1 rounded-lg border border-black/12 shadow-[inset_0_1px_1px_rgba(0,0,0,0.05)]">
-              <span className="text-[11px] font-black text-[#473b2c] mr-1">BUFFS:</span>
-              <span 
-                className={`text-sm cursor-help relative group`} 
-                title={playerPos.x === 30 && playerPos.y === 31 ? "🛡️ Zona Segura (Você está protegido)" : "🏕️ Explorando a Ilha"}
-              >
-                {playerPos.x === 30 && playerPos.y === 31 ? "🛡️" : "⚔️"}
-              </span>
-              
-              {gameState.quests.onramp.status === "completed" && (
-                <>
-                  <span className="text-sm animate-pulse" title="💰 Investidor (Ativo no Mercado)">💰</span>
-                  <span className="text-sm animate-pulse" title="⚡ Aura de Velocidade (+10%)">⚡</span>
-                </>
-              )}
-
-              {gameState.wallet.hasWallet && (
-                <span className="text-sm text-cyan-700 font-bold" title="🔑 Chaves Stellar Sincronizadas">🔑</span>
-              )}
-              {isCompletedAll && (
-                <span className="text-sm text-amber-500 font-bold animate-bounce" title="🌟 Conquista Lendária Desbloqueada">🌟</span>
-              )}
-            </div>
           </div>
 
           {/* Bottom Row on mobile, Right Section on desktop: Multi-currency Purse & World Clock */}
@@ -988,28 +1024,28 @@ export default function App() {
                 className="bg-[#ffe494] border-2 border-black px-2 py-1 md:px-2 md:py-1 rounded-lg flex items-center gap-1 font-black text-amber-950 text-[11.5px] md:text-[12px] shadow-[1.5px_1.5px_0px_#000]"
                 title="Crystal Shards (XLM) - Usado para taxas de transação."
               >
-                🪙 <span className="font-mono text-[11.5px] md:text-[12.5px]">{gameState.wallet.xlmBalance}</span> <span className="text-[9.5px] font-sans font-black opacity-85">XLM</span>
+                🪙 <span className="font-mono text-[11.5px] md:text-[12.5px]">{Number(gameState.wallet.xlmBalance).toFixed(2).replace('.', ',')}</span> <span className="text-[9.5px] font-sans font-black opacity-85">XLM</span>
               </span>
               {/* USDW Balance */}
               <span 
                 className="bg-[#c2f0fc] border-2 border-black px-2 py-1 md:px-2 md:py-1 rounded-lg flex items-center gap-1 font-black text-cyan-950 text-[11.5px] md:text-[12px] shadow-[1.5px_1.5px_0px_#000]"
                 title="Stellar Anchored Dollar (USDW) - Moeda de valor estável USD."
               >
-                💵 <span className="font-mono text-[11.5px] md:text-[12.5px]">{gameState.wallet.usdwBalance}</span> <span className="text-[9.5px] font-sans font-black opacity-85">USDW</span>
+                💵 <span className="font-mono text-[11.5px] md:text-[12.5px]">{Number(gameState.wallet.usdwBalance || 0).toFixed(2).replace('.', ',')}</span> <span className="text-[9.5px] font-sans font-black opacity-85">USDW</span>
               </span>
               {/* BRW Balance */}
               <span 
                 className="bg-[#c2fcc9] border-2 border-black px-2 py-1 md:px-2 md:py-1 rounded-lg flex items-center gap-1 font-black text-emerald-950 text-[11.5px] md:text-[12px] shadow-[1.5px_1.5px_0px_#000]"
                 title="Stellar Anchored Real (BRW) - Moeda pareada ao Real Brasileiro."
               >
-                🇧🇷 <span className="font-mono text-[11.5px] md:text-[12.5px]">{gameState.wallet.brwBalance}</span> <span className="text-[9.5px] font-sans font-black opacity-85">BRW</span>
+                🇧🇷 <span className="font-mono text-[11.5px] md:text-[12.5px]">{Number(gameState.wallet.brwBalance || 0).toFixed(2).replace('.', ',')}</span> <span className="text-[9.5px] font-sans font-black opacity-85">BRW</span>
               </span>
               {/* GAMEFI COIN Balance (Separated in HUD) */}
               <span 
                 className="bg-gradient-to-r from-amber-400 to-yellow-400 border-2 border-black px-2 py-1 md:px-2 md:py-1 rounded-lg flex items-center gap-1 font-black text-slate-950 text-[11.5px] md:text-[12px] shadow-[1.5px_1.5px_0px_#000] cursor-pointer hover:scale-105 transition-transform"
                 title="Moeda Oficial GameFiNow (GAMEFI)"
               >
-                🎮 <span className="font-mono text-[11.5px] md:text-[12.5px]">{gameState.wallet.gamefiBalance || 0}</span> <span className="text-[9.5px] font-sans font-black opacity-90">GAMEFI</span>
+                🎮 <span className="font-mono text-[11.5px] md:text-[12.5px]">{Number(gameState.wallet.gamefiBalance || 0).toFixed(2).replace('.', ',')}</span> <span className="text-[9.5px] font-sans font-black opacity-90">GAMEFI</span>
               </span>
             </div>
             
@@ -1027,11 +1063,11 @@ export default function App() {
           {/* Active Quests Toggle Scroll */}
           <button
             onClick={() => {
-              setActiveWindow(activeWindow === "backpack" ? null : "backpack");
+              setShowActiveQuest(!showActiveQuest);
               playSynthSound("beep");
             }}
             className={`w-11 h-11 md:w-9 md:h-9 border-2 border-black rounded-lg flex items-center justify-center shadow-[2px_2.5px_0px_#000] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer transition ${
-              activeWindow === "backpack" ? "bg-emerald-400" : "bg-[#ebd9c0] hover:bg-[#f3e6d3]"
+              showActiveQuest ? "bg-emerald-400" : "bg-[#ebd9c0] hover:bg-[#f3e6d3]"
             }`}
             title={t("ui.quests")}
           >
@@ -1103,7 +1139,7 @@ export default function App() {
             title="Saldo da Moeda Oficial GameFiNow (GAMEFI)"
           >
             <span className="text-sm animate-bounce">🪙</span>
-            <span className="text-xs font-black font-mono">{gameState.wallet.gamefiBalance || 0}</span>
+            <span className="text-xs font-black font-mono">{Number(gameState.wallet.gamefiBalance || 0).toFixed(2).replace('.', ',')}</span>
             <span className="text-[9px] font-sans font-black uppercase opacity-90 tracking-wider">GAMEFI</span>
           </div>
 
@@ -1238,8 +1274,8 @@ export default function App() {
         </div>
 
         {/* 4. CHRONICLES ACTIVE QUEST FLOATING CARD OVERLAY */}
-        {!isGmMode && (
-          <div className="absolute top-26 md:top-20 left-[62px] md:left-[54px] z-10 bg-[#fbf5eb]/95 border-2 border-black rounded-lg p-2.5 w-[260px] sm:w-[380px] md:w-[480px] shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] text-[10px] md:text-[9.5px] leading-snug font-mono select-none pointer-events-none text-left">
+        {!isGmMode && showActiveQuest && (
+          <div className="absolute top-26 md:top-20 left-[62px] md:left-[54px] z-10 bg-[#fbf5eb]/95 border-2 border-black rounded-lg p-2.5 w-[260px] sm:w-[380px] md:w-[480px] shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] text-[10px] md:text-[9.5px] leading-snug font-mono select-none pointer-events-none text-left animate-in slide-in-from-left-2 fade-in duration-300">
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 bg-[#ffbf00] rounded-full animate-ping" />
               <span className="text-[8px] md:text-[7.5px] text-amber-800 font-extrabold uppercase tracking-wider">{t('ui.activeQuest')}</span>
@@ -1256,9 +1292,13 @@ export default function App() {
         )}
 
         {/* 5. TRAVELER LENDÁRIO CELEBRATION RIBLED */}
-        {!isGmMode && isCompletedAll && (
-          <div className="absolute top-[150px] md:top-32 left-1/2 -translate-x-1/2 z-10 bg-[#ffbf00] border-2 border-black px-3.5 py-1.5 rounded-full shadow-[2px_2px_0px_#000] text-[9.5px] md:text-[8.5px] font-black text-black tracking-wider flex items-center gap-1.5 animate-bounce select-none pointer-events-none">
+        {!isGmMode && isCompletedAll && showLegendaryRibbon && (
+          <div 
+            onClick={() => setShowLegendaryRibbon(false)}
+            className="absolute top-[150px] md:top-32 left-1/2 -translate-x-1/2 z-10 bg-[#ffbf00] border-2 border-black px-3.5 py-1.5 rounded-full shadow-[2px_2px_0px_#000] text-[9.5px] md:text-[8.5px] font-black text-black tracking-wider flex items-center gap-1.5 animate-bounce select-none cursor-pointer hover:bg-amber-400"
+          >
             {t('ui.legendaryRibbon')}
+            <span className="ml-1 opacity-70">✕</span>
           </div>
         )}
 

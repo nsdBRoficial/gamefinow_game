@@ -221,37 +221,32 @@ export const FloatingWindows: React.FC<FloatingWindowsProps> = ({
                 </div>
               </div>
 
-              {/* Quests timeline card */}
-              <div className="bg-white border-2 border-black p-4 rounded-lg space-y-3 shadow-[2px_2px_0px_rgba(0,0,0,0.15)]">
-                <h3 className="text-xs font-black uppercase tracking-wider text-black font-mono">{t("huds.completed_quests")}</h3>
-                <div className="space-y-2.5 text-xs">
-                  {Object.values(quests).map((q: Quest) => (
+              {/* Inventory Grid (16 slots) */}
+              <div className="bg-white border-2 border-black p-4 rounded-lg space-y-3 shadow-[2px_2px_0px_rgba(0,0,0,0.15)] mt-4">
+                <h3 className="text-xs font-black uppercase tracking-wider text-black font-mono flex items-center justify-between">
+                  {t("huds.backpack_inventory") || "Inventário"}
+                  <span className="text-[10px] text-slate-500 font-bold">0 / 16</span>
+                </h3>
+                
+                <div className="grid grid-cols-4 gap-2">
+                  {Array.from({ length: 16 }).map((_, index) => (
                     <div 
-                      key={q.id}
-                      className={`p-3 rounded-lg border-2 transition ${
-                        q.status === "completed" 
-                          ? "bg-emerald-50 border-[#5db81d] text-black" 
-                          : q.status === "active"
-                            ? "bg-[#ffbf00]/10 border-[#ffbf00] text-black"
-                            : "bg-[#f4f2ea]/40 border-black/10 text-black/40"
-                      }`}
+                      key={`slot-${index}`}
+                      className="aspect-square bg-[#f4f2ea] border-2 border-dashed border-black/20 rounded-md flex items-center justify-center relative hover:bg-[#ece9df] hover:border-black/40 transition-colors cursor-pointer group shadow-[inset_1px_1px_3px_rgba(0,0,0,0.05)]"
                     >
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="font-black uppercase tracking-wide font-mono text-xs">{q.title}</span>
-                        <span className={`text-[9px] font-mono font-black px-1.5 py-0.5 rounded border-2 border-black shadow-[1px_1px_0_#000] ${
-                          q.status === "completed" ? "bg-[#5db81d] text-white" :
-                          q.status === "active" ? "bg-[#ffbf00] text-black" :
-                          "bg-[#ece9df] text-black/40"
-                        }`}>
-                          {q.status === "completed" ? t("huds.completed") :
-                           q.status === "active" ? t("huds.active") : t("huds.blocked")}
-                        </span>
+                      <div className="text-black/10 font-bold text-xl group-hover:scale-110 transition-transform">
+                        +
                       </div>
-                      <p className="text-[11px] leading-relaxed mb-1.5">{q.description}</p>
-                      <span className="text-[10px] text-slate-500 block font-bold">{t("huds.quest_reward")} {q.reward}</span>
+                      <div className="absolute -bottom-1 -right-1 text-[8px] font-mono text-black/30 font-bold">
+                        {index + 1}
+                      </div>
                     </div>
                   ))}
                 </div>
+                
+                <p className="text-[10px] text-slate-500 text-center font-bold mt-2">
+                  Arraste itens para equipar ou usar. (Em breve)
+                </p>
               </div>
             </div>
           )}

@@ -15,6 +15,7 @@ interface GameStore extends GameState {
   setBattleMode: (active: boolean) => void;
   setLockedTarget: (targetId: string | null) => void;
   addExperience: (amount: number) => void;
+  castMagic: (type: "heal" | "fire" | "lightning") => void;
 }
 
 const getInitialGameState = (): GameState => {
@@ -131,11 +132,14 @@ const getInitialPlayerPos = (): Player => {
     name: "Anonymo",
     mapId: "center",
     gender: "male",
-    // Campos de estilo avançado (CharacterCustomizer)
     headStyle: "default",
     eyeStyle: "dots",
     eyeColor: "#1e293b",
     torsoStyle: "tshirt",
+    hp: 100,
+    maxHp: 100,
+    mp: 50,
+    maxMp: 50,
   };
 };
 
@@ -148,7 +152,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newState = { ...state, ...nextState };
     
     // Extract only GameState properties for localStorage
-    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, ...gameStateToSave } = newState;
+    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, castMagic, ...gameStateToSave } = newState;
     
     // Encrypt secretKey before saving
     if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
@@ -175,7 +179,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newWallet = { ...state.wallet, ...walletUpdate };
     const newState = { ...state, wallet: newWallet };
     
-    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, ...gameStateToSave } = newState;
+    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, castMagic, ...gameStateToSave } = newState;
     
     // Encrypt secretKey before saving
     if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
@@ -193,7 +197,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newTxList = [tx, ...state.transactions];
     const newState = { ...state, transactions: newTxList, currentLedger: state.currentLedger + 1 };
     
-    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, ...gameStateToSave } = newState;
+    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, castMagic, ...gameStateToSave } = newState;
     
     // Encrypt secretKey before saving
     if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
@@ -208,6 +212,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   }),
 
   completeQuest: (questId, newStatus = "completed") => set((state) => {
+    const wasAlreadyCompleted = state.quests[questId]?.status === "completed";
+    
     const newQuests = {
       ...state.quests,
       [questId]: { ...state.quests[questId], status: newStatus },
@@ -223,9 +229,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
       newQuests.hold.status = "active";
     }
 
-    const newState = { ...state, quests: newQuests };
+    let nextXP = state.xp_current || 0;
+    if (newStatus === "completed" && !wasAlreadyCompleted) {
+      nextXP += 400; // Matemática para chegar em 1600 XP (Lvl 5) em 4 missões!
+    }
+    const nextLevel = Math.floor(Math.pow(nextXP / 50, 0.4)) + 1;
+
+    const newState = { ...state, quests: newQuests, xp_current: nextXP, level: nextLevel };
     
-    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, ...gameStateToSave } = newState;
+    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, castMagic, ...gameStateToSave } = newState;
     
     // Encrypt secretKey before saving
     if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
@@ -259,7 +271,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     
     const newState = { ...state, xp_current: currentXP, level: newLevel };
     
-    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, ...gameStateToSave } = newState;
+    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, castMagic, ...gameStateToSave } = newState;
     
     // Encrypt secretKey before saving
     if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
@@ -271,6 +283,36 @@ export const useGameStore = create<GameStore>((set, get) => ({
     localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
     
     return { xp_current: currentXP, level: newLevel };
+  }),
+
+  castMagic: (type) => set((state) => {
+    const mp = state.playerPos.mp ?? 50;
+    const maxMp = state.playerPos.maxMp ?? 50;
+    const hp = state.playerPos.hp ?? 100;
+    const maxHp = state.playerPos.maxHp ?? 100;
+
+    let mpCost = 10;
+    if (type === "fire") mpCost = 15;
+    if (type === "lightning") mpCost = 25;
+
+    if (mp < mpCost) {
+      console.warn(`Not enough MP for ${type}`);
+      return state;
+    }
+
+    let nextHp = hp;
+    if (type === "heal") {
+      nextHp = Math.min(maxHp, hp + Math.floor(maxHp * 0.2));
+    }
+
+    const nextPlayerPos = {
+      ...state.playerPos,
+      mp: mp - mpCost,
+      hp: nextHp
+    };
+
+    localStorage.setItem("stellar_island_player_pos_v1", JSON.stringify(nextPlayerPos));
+    return { playerPos: nextPlayerPos };
   }),
 
 }));
