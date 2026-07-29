@@ -142,6 +142,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
   // --- BATTLE SYSTEM REFS ---
   const lastAttackTimeRef = useRef<number>(0);
+  const monsterLastAttackTimeRef = useRef<number>(0);
   const combatTextsRef = useRef<import('../types').CombatText[]>([]);
   // --------------------------
   // MMO Other Players walking around the 60x60 map in real time!
@@ -1089,8 +1090,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     if (targetCreature) {
       const dist = Math.hypot(player.x - targetCreature.x, player.y - targetCreature.y);
       if (dist <= 2.0) {
-        // Cooldown temporário de 1 seg
-        if (time - lastAttackTimeRef.current > 1000) {
+        
+        // Cooldown do Jogador (Ataque mais lento: 1200ms)
+        if (time - lastAttackTimeRef.current > 1200) {
           lastAttackTimeRef.current = time;
           
           const isMiss = Math.random() < 0.15; // 15% miss
@@ -1169,6 +1171,50 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
               targetCreature.y = Math.max(4, Math.min(55, targetCreature.y + Math.floor(Math.random() * 6) - 3));
               targetCreature.targetX = targetCreature.x;
               targetCreature.targetY = targetCreature.y;
+              return; // Termina o combate neste frame pois o monstro morreu
+            }
+          }
+        }
+
+        // Cooldown do Monstro (O monstro ataca o jogador!)
+        if (time - monsterLastAttackTimeRef.current > 1200) {
+          monsterLastAttackTimeRef.current = time;
+
+          const mMiss = Math.random() < 0.20; // Monstros erram 20% das vezes
+          if (mMiss) {
+            combatTextsRef.current.push({
+              id: Math.random().toString(),
+              text: "MISS",
+              x: player.x,
+              y: player.y - 0.5,
+              color: "#9ca3af",
+              timestamp: time
+            });
+          } else {
+            // Dano do monstro
+            const mBaseDmg = (targetCreature.level || 1) * 3;
+            const mFinalDmg = Math.max(1, Math.floor(mBaseDmg * (0.85 + Math.random() * 0.3)));
+            
+            // Subtrai do HP do player!
+            const currentHp = latestPlayerPos.current.hp ?? 100;
+            const newHp = Math.max(0, currentHp - mFinalDmg);
+            
+            useGameStore.getState().setPlayerPos({ hp: newHp });
+
+            combatTextsRef.current.push({
+              id: Math.random().toString(),
+              text: `-${mFinalDmg}`,
+              x: player.x,
+              y: player.y - 0.5,
+              color: "#dc2626", // Vermelho
+              timestamp: time
+            });
+
+            if (newHp <= 0) {
+              // Morte do jogador!
+              useGameStore.getState().setPlayerPos({ hp: latestPlayerPos.current.maxHp || 100 });
+              useGameStore.getState().setBattleMode(false);
+              alert("Você foi derrotado! Recuando para se curar...");
             }
           }
         }
@@ -1910,7 +1956,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     );
 
     // 7.2 Draw Curved HP and MP Bars (Somente no Modo Batalha)
-    if (gameState.isBattleModeActive) {
+    if (gameStateVal.isBattleModeActive) {
       const hp = playerPosVal.hp !== undefined ? playerPosVal.hp : 100;
       const maxHp = playerPosVal.maxHp || 100;
       const mp = playerPosVal.mp !== undefined ? playerPosVal.mp : 50;
