@@ -14,6 +14,7 @@ import { drawMapTiles, drawSpecialTerminals, drawMapDecorations } from "./canvas
 import { drawNPCs, drawOtherPlayers, cleanupRenderStates } from "./canvas/NPCManager";
 import { OnlinePlayer } from "../services/multiplayerService";
 import { getCurrentQuestTarget, drawQuestArrow } from "./canvas/QuestArrowRenderer";
+import { useGameStore } from "../store/gameStore";
 
 interface GameCanvasProps {
   gameState: GameState;
@@ -332,6 +333,55 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       keysPressed.current = {};
     }
   }, [isMovementBlocked]);
+
+  // Mouse/Pointer click on canvas to handle Battle Mode target lock
+  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    // Sempre tentar interagir normalmente primeiro
+    triggerInteraction();
+
+    if (!latestGameState.current.isBattleModeActive) {
+      return;
+    }
+
+    if (!canvasRef.current) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const clickY = e.clientY - rect.top;
+
+    const dims = latestDimensions.current;
+    const defaultZoom = dims.width < 768 ? 2.5 : 3.5;
+    const currentZoomLevel = latestGameState.current.mapZoomLevel !== undefined ? latestGameState.current.mapZoomLevel : defaultZoom;
+
+    const playerWorldX = latestPlayerPos.current.x * TILE_SIZE + TILE_SIZE / 2;
+    const playerWorldY = latestPlayerPos.current.y * TILE_SIZE + TILE_SIZE / 2;
+
+    const worldX = (clickX - dims.width / 2) / currentZoomLevel + playerWorldX;
+    const worldY = (clickY - dims.height / 2) / currentZoomLevel + playerWorldY;
+
+    const gridX = Math.floor(worldX / TILE_SIZE);
+    const gridY = Math.floor(worldY / TILE_SIZE);
+
+    const currentRegion = latestPlayerPos.current.mapId || "center";
+    let clickedCreature = null;
+
+    if (currentRegion === "center") {
+      clickedCreature = creaturesRef.current.find(c => Math.abs(c.x - gridX) <= 1 && Math.abs(c.y - gridY) <= 1);
+    } else if (currentRegion === "east") {
+      clickedCreature = wormsRef.current.find(c => Math.abs(c.x - gridX) <= 1 && Math.abs(c.y - gridY) <= 1);
+    } else if (currentRegion === "north") {
+      clickedCreature = crabsRef.current.find(c => Math.abs(c.x - gridX) <= 1 && Math.abs(c.y - gridY) <= 1);
+    } else if (currentRegion === "west") {
+      clickedCreature = beesRef.current.find(c => Math.abs(c.x - gridX) <= 1 && Math.abs(c.y - gridY) <= 1);
+    } else if (currentRegion === "south") {
+      clickedCreature = snakesRef.current.find(c => Math.abs(c.x - gridX) <= 1 && Math.abs(c.y - gridY) <= 1);
+    }
+
+    if (clickedCreature) {
+      useGameStore.getState().setLockedTarget(clickedCreature.id);
+    } else {
+      useGameStore.getState().setLockedTarget(null);
+    }
+  };
 
   // Helper to trigger interaction with nearby NPC or terminal
   const triggerInteraction = () => {
@@ -1636,6 +1686,49 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       });
     }
 
+    // 5.9 Target Lock & Aggro Indicator
+    if (latestGameState.current.isBattleModeActive) {
+      let activeCreatures: GameCreature[] = [];
+      if (currentRegion === "center") activeCreatures = creaturesRef.current;
+      else if (currentRegion === "east") activeCreatures = wormsRef.current;
+      else if (currentRegion === "north") activeCreatures = crabsRef.current;
+      else if (currentRegion === "west") activeCreatures = beesRef.current;
+      else if (currentRegion === "south") activeCreatures = snakesRef.current;
+
+      activeCreatures.forEach(creature => {
+        const worldX = creature.x * TILE_SIZE;
+        const worldY = creature.y * TILE_SIZE;
+
+        if (worldX < leftBound || worldX > rightBound || worldY < topBound || worldY > bottomBound) return;
+
+        // Draw Aggro Area
+        ctx.beginPath();
+        ctx.arc(worldX + 16, worldY + 16, TILE_SIZE * 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(239, 68, 68, 0.05)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(239, 68, 68, 0.2)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Draw Target Lock
+        if (latestGameState.current.lockedTargetId === creature.id) {
+          ctx.strokeStyle = "#ef4444";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(worldX + 16, worldY + 16, 20, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Crosshairs
+          ctx.beginPath();
+          ctx.moveTo(worldX + 16, worldY - 10);
+          ctx.lineTo(worldX + 16, worldY + 42);
+          ctx.moveTo(worldX - 10, worldY + 16);
+          ctx.lineTo(worldX + 42, worldY + 16);
+          ctx.stroke();
+        }
+      });
+    }
+
     // 6. Render NPCs using the pixel character engine
     const npcsVal = latestNpcs.current;
     const gameStateVal = latestGameState.current;
@@ -1702,6 +1795,86 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       isLegend,
       playerPosVal.isGM === true
     );
+
+    // 7.2 Draw Curved HP and MP Bars (Somente no Modo Batalha)
+    if (gameState.isBattleModeActive) {
+      const hp = playerPosVal.hp !== undefined ? playerPosVal.hp : 100;
+      const maxHp = playerPosVal.maxHp || 100;
+      const mp = playerPosVal.mp !== undefined ? playerPosVal.mp : 50;
+      const maxMp = playerPosVal.maxMp || 50;
+    
+    const barRadius = 24;
+    const barWidth = 6;
+    
+    const drawCurvedBar = (isLeft: boolean, ratio: number, color: string, bgColor: string) => {
+      ctx.save();
+      ctx.lineCap = "butt";
+      
+      let startAngle, endAngle, counterClockwise;
+      if (isLeft) {
+        startAngle = Math.PI * 0.70;
+        endAngle = Math.PI * 1.30;
+        counterClockwise = false;
+      } else {
+        startAngle = Math.PI * 0.30;
+        endAngle = Math.PI * 1.70;
+        counterClockwise = true;
+      }
+      
+      const sweep = Math.PI * 0.60; // 1.30 - 0.70 = 0.60 PI
+
+      // 1. Border
+      ctx.lineWidth = barWidth + 2;
+      ctx.strokeStyle = "#000000";
+      ctx.beginPath();
+      ctx.arc(playerScreenX + 16, playerScreenY + 16, barRadius, startAngle, endAngle, counterClockwise);
+      ctx.stroke();
+      
+      // 2. Background
+      ctx.lineWidth = barWidth;
+      ctx.strokeStyle = bgColor;
+      ctx.beginPath();
+      ctx.arc(playerScreenX + 16, playerScreenY + 16, barRadius, startAngle, endAngle, counterClockwise);
+      ctx.stroke();
+      
+      // 3. Fill
+      if (ratio > 0) {
+        ctx.strokeStyle = color;
+        ctx.beginPath();
+        let currentEndAngle;
+        if (isLeft) {
+           currentEndAngle = startAngle + sweep * ratio;
+        } else {
+           currentEndAngle = startAngle - sweep * ratio;
+        }
+        ctx.arc(playerScreenX + 16, playerScreenY + 16, barRadius, startAngle, currentEndAngle, counterClockwise);
+        ctx.stroke();
+      }
+      
+      // 4. Segment Lines (Retro blocks look)
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.6)";
+      for (let i = 1; i < 10; i++) {
+         let segAngle;
+         if (isLeft) {
+            segAngle = startAngle + sweep * (i / 10);
+         } else {
+            segAngle = startAngle - sweep * (i / 10);
+         }
+         const innerRadius = barRadius - barWidth / 2;
+         const outerRadius = barRadius + barWidth / 2;
+         ctx.beginPath();
+         ctx.moveTo(playerScreenX + 16 + Math.cos(segAngle) * innerRadius, playerScreenY + 16 + Math.sin(segAngle) * innerRadius);
+         ctx.lineTo(playerScreenX + 16 + Math.cos(segAngle) * outerRadius, playerScreenY + 16 + Math.sin(segAngle) * outerRadius);
+         ctx.stroke();
+      }
+      
+      ctx.restore();
+    };
+
+    drawCurvedBar(true, Math.max(0, Math.min(1, hp / maxHp)), "#22c55e", "#14532d"); // Green HP
+    drawCurvedBar(false, Math.max(0, Math.min(1, mp / maxMp)), "#3b82f6", "#1e3a8a"); // Blue MP
+    }
 
     // Display Player name tag over their head with proper head clearance, dynamic formatting and neon effects
     const playerNameY = playerScreenY - 19;
@@ -1866,7 +2039,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         width={dimensions.width}
         height={dimensions.height}
         className="block mx-auto max-w-full h-full cursor-pointer touch-none shadow-inner"
-        onClick={triggerInteraction}
+        onClick={handleCanvasClick}
       />
 
       {/* TOP-LEFT CORNER HUD: COORDINATES & MAP LOCATION */}

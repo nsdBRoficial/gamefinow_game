@@ -44,6 +44,12 @@ export interface OnlinePlayer {
   bubbleText?: string;
   bubbleTimer?: number;
   isGM?: boolean;
+  level?: number;
+  hp?: number;
+  maxHp?: number;
+  attack?: number;
+  defense?: number;
+  speed?: number;
 }
 
 export interface ChatMessage {

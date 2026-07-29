@@ -74,6 +74,26 @@ export interface GameCreature {
   dir: "left" | "right";
 }
 
+// Mock creatures for testing Battle System
+export const MOCK_CREATURES: GameCreature[] = [
+  {
+    id: "mob_1",
+    name: "Slime",
+    x: 27,
+    y: 32,
+    targetX: 27,
+    targetY: 32,
+    isMoving: false,
+    frame: 0,
+    color: "#22c55e",
+    level: 2,
+    hp: 40,
+    maxHp: 40,
+    bounceOffset: 0,
+    dir: "left"
+  }
+];
+
 // Export decorations list
 export const MAP_DECORATIONS: GameDecoration[] = [
   // Central Statue / Coin Fountain

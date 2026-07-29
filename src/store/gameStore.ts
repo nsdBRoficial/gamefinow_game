@@ -12,6 +12,8 @@ interface GameStore extends GameState {
   completeQuest: (questId: QuestId, newStatus?: Quest["status"]) => void;
   setActiveModal: (modal: GameState["activeModal"]) => void;
   setActiveDialog: (dialog: GameState["activeDialog"]) => void;
+  setBattleMode: (active: boolean) => void;
+  setLockedTarget: (targetId: string | null) => void;
 }
 
 const getInitialGameState = (): GameState => {
@@ -47,6 +49,8 @@ const getInitialGameState = (): GameState => {
           activeDialog: null,
           activeModal: null,
           jamesDialogsDone: parsed.jamesDialogsDone || [],
+          isBattleModeActive: parsed.isBattleModeActive || false,
+          lockedTargetId: null,
         };
       }
     }
@@ -80,6 +84,8 @@ const getInitialGameState = (): GameState => {
     activeModal: null,
     currentLedger: 6184293,
     jamesDialogsDone: [],
+    isBattleModeActive: false,
+    lockedTargetId: null,
   };
 };
 
@@ -139,7 +145,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newState = { ...state, ...nextState };
     
     // Extract only GameState properties for localStorage
-    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, ...gameStateToSave } = newState;
+    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, ...gameStateToSave } = newState;
     
     // Encrypt secretKey before saving
     if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
@@ -166,7 +172,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newWallet = { ...state.wallet, ...walletUpdate };
     const newState = { ...state, wallet: newWallet };
     
-    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, ...gameStateToSave } = newState;
+    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, ...gameStateToSave } = newState;
     
     // Encrypt secretKey before saving
     if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
@@ -184,7 +190,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newTxList = [tx, ...state.transactions];
     const newState = { ...state, transactions: newTxList, currentLedger: state.currentLedger + 1 };
     
-    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, ...gameStateToSave } = newState;
+    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, ...gameStateToSave } = newState;
     
     // Encrypt secretKey before saving
     if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
@@ -216,7 +222,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     const newState = { ...state, quests: newQuests };
     
-    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, ...gameStateToSave } = newState;
+    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, ...gameStateToSave } = newState;
     
     // Encrypt secretKey before saving
     if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
@@ -234,5 +240,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setActiveModal: (modal) => set({ activeModal: modal }),
   
   setActiveDialog: (dialog) => set({ activeDialog: dialog }),
+  
+  setBattleMode: (active) => set((state) => ({ 
+    isBattleModeActive: active,
+    // Reset target when disabling battle mode
+    lockedTargetId: active ? state.lockedTargetId : null
+  })),
+
+  setLockedTarget: (targetId) => set({ lockedTargetId: targetId }),
 
 }));
+

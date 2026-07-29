@@ -88,6 +88,8 @@ export interface Player {
   level?: number;
   hp?: number;
   maxHp?: number;
+  mp?: number;
+  maxMp?: number;
   attack?: number;
   defense?: number;
   speed?: number;
@@ -122,4 +124,6 @@ export interface GameState {
   currentLedger: number;
   jamesDialogsDone?: string[];
   mapZoomLevel?: number;
+  isBattleModeActive?: boolean;
+  lockedTargetId?: string | null;
 }

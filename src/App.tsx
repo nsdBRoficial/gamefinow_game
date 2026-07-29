@@ -29,6 +29,7 @@
 
 import React, { useState, useEffect } from "react";
 import { GameCanvas } from "./components/GameCanvas";
+import { BattleHUD } from "./components/BattleHUD";
 import { GameOverlay } from "./components/GameOverlay";
 import { FloatingWindows } from "./components/FloatingWindows";
 import { LoginScreen } from "./components/LoginScreen";
@@ -72,6 +73,7 @@ export default function App() {
   const setGameState = useGameStore((s) => s.setGameState);
   const playerPos = useGameStore((s) => s.playerPos);
   const setPlayerPos = useGameStore((s) => s.setPlayerPos);
+  const setBattleMode = useGameStore((s) => s.setBattleMode);
 
   const [npcs] = useState<NPC[]>(INITIAL_NPCS);
   const [isGameStarted, setIsGameStarted] = useState(false);
@@ -130,6 +132,10 @@ export default function App() {
 
   // Handle active retro floating window overlays: "customizer" | "backpack" | "ledger" | "guide" | null
   const [activeWindow, setActiveWindow] = useState<"customizer" | "backpack" | "ledger" | "guide" | null>(null);
+
+  // Compute hasStar for Battle Mode
+  const hasCompletedAllQuests = Object.values(gameState.quests || {}).every(q => q.status === "completed");
+  const hasStar = playerPos.isGM || hasCompletedAllQuests;
   const [showPassport, setShowPassport] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
 
@@ -1153,6 +1159,26 @@ export default function App() {
             </button>
           </div>
 
+          {/* Battle Mode Trigger */}
+          <button
+            onClick={() => {
+              if (hasStar) {
+                setBattleMode(!gameState.isBattleModeActive);
+                playSynthSound("beep");
+              } else {
+                alert("Você precisa completar todas as missões (Estrela de Guardião) para habilitar o modo de batalha.");
+              }
+            }}
+            className={`w-11 h-11 md:w-9 md:h-9 border-2 border-black rounded-lg flex items-center justify-center shadow-[2px_2.5px_0px_#000] transition ${
+              hasStar ? "hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer" : "opacity-50 cursor-not-allowed grayscale"
+            } ${
+              gameState.isBattleModeActive ? "bg-red-600 text-white border-red-900" : "bg-[#ebd9c0] hover:bg-[#f3e6d3]"
+            }`}
+            title={hasStar ? (gameState.isBattleModeActive ? "Desativar Modo de Batalha" : "Ativar Modo de Batalha") : "Bloqueado: Requer Estrela de Guardião"}
+          >
+            <span className="text-xl md:text-lg">⚔️</span>
+          </button>
+
           {/* Backpack Window Trigger */}
           <button
             onClick={() => {
@@ -1237,6 +1263,7 @@ export default function App() {
         )}
 
         {/* MAIN GAME ENGINE SCREEN CANVAS */}
+        <BattleHUD />
         <div className="w-full h-full">
           <GameCanvas
             gameState={gameState}
