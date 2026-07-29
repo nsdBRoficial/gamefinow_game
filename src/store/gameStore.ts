@@ -18,6 +18,7 @@ interface GameStore extends GameState {
   castMagic: (type: "heal" | "fire" | "lightning") => void;
   buyPotions: (type: "health" | "mana") => void;
   usePotion: (type: "health" | "mana") => void;
+  addItemToInventory: (itemId: string, type: "consumable" | "material" | "currency", quantity: number) => void;
   addActiveAnimation: (anim: import("../types").AnimationEvent) => void;
   removeActiveAnimation: (id: string) => void;
 }
@@ -91,10 +92,7 @@ const getInitialGameState = (): GameState => {
     currentLedger: 6184293,
     xp_current: 0,
     level: 1,
-    inventory: {
-      healthPotions: 0,
-      manaPotions: 0,
-    },
+    inventory: [],
     activeAnimations: [],
     jamesDialogsDone: [],
     isBattleModeActive: false,
@@ -338,11 +336,23 @@ export const useGameStore = create<GameStore>((set, get) => ({
       hp: nextHp
     };
 
+    let startX = state.playerPos.x;
+    let startY = state.playerPos.y;
+
+    if (type !== "heal" && state.lockedTargetId) {
+      // Find target pos from DOM or we just use a generic target position logic if we had it in state
+      // Since creatures aren't in this Zustand store, we'll emit the player's position but with target flag
+      // Wait, let's just leave startX/startY as the player if we don't have the mob pos here.
+      // We can pass targetX/targetY if we knew them. We will need to look them up.
+      // Actually, we can just dispatch an event, or better, we can modify MapRenderer to draw at the lockedTarget position directly.
+    }
+
     const newAnim: import("../types").AnimationEvent = {
       id: `anim_${Date.now()}_${Math.random()}`,
       type,
-      startX: state.playerPos.x,
-      startY: state.playerPos.y,
+      startX: startX,
+      startY: startY,
+      targetId: type !== "heal" ? state.lockedTargetId : null,
       timestamp: Date.now(),
       duration: type === "heal" ? 1000 : 600
     };
@@ -351,22 +361,36 @@ export const useGameStore = create<GameStore>((set, get) => ({
     return { playerPos: nextPlayerPos, activeAnimations: [...(state.activeAnimations || []), newAnim] };
   }),
 
-  buyPotions: (type) => set((state) => {
-    if (state.wallet.xlmBalance < 100) return state; // Falha silenciosa ou com warning se quiser
+  addItemToInventory: (itemId, type, quantity) => set((state) => {
+    const currentInventory = [...(state.inventory || [])];
+    let remaining = quantity;
 
-    const currentInventory = state.inventory || { healthPotions: 0, manaPotions: 0 };
-    const newInventory = { ...currentInventory };
-    if (type === "health") newInventory.healthPotions += 99;
-    if (type === "mana") newInventory.manaPotions += 99;
+    // Try to stack in existing slots first
+    for (const slot of currentInventory) {
+      if (slot.id === itemId && slot.quantity < 99) {
+        const space = 99 - slot.quantity;
+        if (remaining <= space) {
+          slot.quantity += remaining;
+          remaining = 0;
+          break;
+        } else {
+          slot.quantity = 99;
+          remaining -= space;
+        }
+      }
+    }
 
-    const newWallet = { ...state.wallet, xlmBalance: state.wallet.xlmBalance - 100 };
-    const newState = { ...state, wallet: newWallet, inventory: newInventory };
+    // Create new slots for remainder
+    while (remaining > 0) {
+      const toAdd = Math.min(99, remaining);
+      currentInventory.push({ id: itemId, type, quantity: toAdd });
+      remaining -= toAdd;
+    }
 
-    // Salvar estado e excluir actions iteráveis
-    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, castMagic, buyPotions, usePotion, addActiveAnimation, removeActiveAnimation, ...gameStateToSave } = newState;
+    const newState = { ...state, inventory: currentInventory };
+    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, castMagic, buyPotions, usePotion, addItemToInventory, addActiveAnimation, removeActiveAnimation, ...gameStateToSave } = newState;
     
     if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
-      const { encryptAES } = require("../utils/cryptoUtils");
       const safeWallet = { ...gameStateToSave.wallet };
       safeWallet.secretKey = encryptAES(safeWallet.secretKey, safeWallet.pin);
       gameStateToSave.wallet = safeWallet;
@@ -374,37 +398,46 @@ export const useGameStore = create<GameStore>((set, get) => ({
     
     localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
     
-    return { wallet: newWallet, inventory: newInventory };
+    return { inventory: currentInventory };
+  }),
+
+  buyPotions: (type) => set((state) => {
+    // Deprecated for direct use, moving to FaucetModal for real transactions
+    return state;
   }),
 
   usePotion: (type) => set((state) => {
-    const currentInventory = state.inventory || { healthPotions: 0, manaPotions: 0 };
-    if (type === "health" && currentInventory.healthPotions <= 0) return state;
-    if (type === "mana" && currentInventory.manaPotions <= 0) return state;
+    const currentInventory = [...(state.inventory || [])];
+    const itemId = type === "health" ? "health_potion" : "mana_potion";
+    
+    // Find slot with potions
+    const slotIndex = currentInventory.findIndex(s => s.id === itemId && s.quantity > 0);
+    if (slotIndex === -1) return state; // No potions
 
-    const newInventory = { ...currentInventory };
+    currentInventory[slotIndex].quantity -= 1;
+    if (currentInventory[slotIndex].quantity <= 0) {
+      currentInventory.splice(slotIndex, 1);
+    }
+
     let nextPlayerPos = { ...state.playerPos };
     const maxHp = state.playerPos.maxHp ?? 100;
     const maxMp = state.playerPos.maxMp ?? 50;
     let newAnim: import("../types").AnimationEvent | null = null;
 
     if (type === "health") {
-      newInventory.healthPotions -= 1;
       nextPlayerPos.hp = Math.min(maxHp, (state.playerPos.hp ?? 0) + Math.floor(maxHp * 0.4));
       newAnim = { id: `anim_${Date.now()}_heal`, type: "heal", startX: state.playerPos.x, startY: state.playerPos.y, timestamp: Date.now(), duration: 1000 };
     }
     if (type === "mana") {
-      newInventory.manaPotions -= 1;
       nextPlayerPos.mp = Math.min(maxMp, (state.playerPos.mp ?? 0) + Math.floor(maxMp * 0.5));
     }
 
     localStorage.setItem("stellar_island_player_pos_v1", JSON.stringify(nextPlayerPos));
     
-    const newState = { ...state, inventory: newInventory, playerPos: nextPlayerPos };
-    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, castMagic, buyPotions, usePotion, addActiveAnimation, removeActiveAnimation, ...gameStateToSave } = newState;
+    const newState = { ...state, inventory: currentInventory, playerPos: nextPlayerPos };
+    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, castMagic, buyPotions, usePotion, addItemToInventory, addActiveAnimation, removeActiveAnimation, ...gameStateToSave } = newState;
     
     if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
-      const { encryptAES } = require("../utils/cryptoUtils");
       const safeWallet = { ...gameStateToSave.wallet };
       safeWallet.secretKey = encryptAES(safeWallet.secretKey, safeWallet.pin);
       gameStateToSave.wallet = safeWallet;
@@ -413,9 +446,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
     
     if (newAnim) {
-      return { inventory: newInventory, playerPos: nextPlayerPos, activeAnimations: [...(state.activeAnimations || []), newAnim] };
+      return { inventory: currentInventory, playerPos: nextPlayerPos, activeAnimations: [...(state.activeAnimations || []), newAnim] };
     }
-    return { inventory: newInventory, playerPos: nextPlayerPos };
+    return { inventory: currentInventory, playerPos: nextPlayerPos };
   }),
 
   addActiveAnimation: (anim) => set((state) => ({

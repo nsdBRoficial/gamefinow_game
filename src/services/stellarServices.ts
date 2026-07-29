@@ -148,11 +148,44 @@ export const onboardUser = async (
     console.error("Erro ao criar trustlines:", err);
     onLog(`[Erro] Falha ao criar Trustlines. O Swap falhará se não tiver trustline.`);
   }
+
+  return { publicKey, secretKey };
+};
+
+/**
+ * Transfers XLM to a destination on-chain
+ */
+export const transferXLM = async (
+  secretKey: string,
+  destination: string,
+  amount: string,
+  onLog?: (msg: string) => void
+): Promise<string> => {
+  const sourceKeypair = Keypair.fromSecret(secretKey);
+  const account = await server.loadAccount(sourceKeypair.publicKey());
   
-  return {
-    publicKey,
-    secretKey
-  };
+  const tx = new TransactionBuilder(account, {
+    fee: "1000",
+    networkPassphrase: Networks.TESTNET
+  })
+    .addOperation(Operation.payment({
+      destination: destination,
+      asset: Asset.native(),
+      amount: amount
+    }))
+    .setTimeout(30)
+    .build();
+    
+  tx.sign(sourceKeypair);
+  
+  try {
+    const response = await server.submitTransaction(tx);
+    if (onLog) onLog(`[Stellar] Transação de ${amount} XLM enviada! Hash: ${response.hash}`);
+    return response.hash as string;
+  } catch (error: any) {
+    console.error("Erro no transferXLM", error);
+    throw error;
+  }
 };
 
 /**

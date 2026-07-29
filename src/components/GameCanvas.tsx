@@ -1149,9 +1149,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
               // Drops
               if (Math.random() < stats.tokenChance) {
-                const droppedTokens = parseFloat((stats.minToken + Math.random() * (stats.maxToken - stats.minToken)).toFixed(2));
-                const currentWallet = useGameStore.getState().wallet;
-                useGameStore.getState().updateWallet({ gamefiBalance: (currentWallet.gamefiBalance || 0) + droppedTokens });
+                const droppedTokens = Math.max(1, Math.ceil(stats.minToken + Math.random() * (stats.maxToken - stats.minToken)));
+                useGameStore.getState().addItemToInventory("gamefi_token", "currency", droppedTokens);
                 
                 combatTextsRef.current.push({
                   id: Math.random().toString(),
@@ -1160,6 +1159,20 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
                   y: targetCreature.y - 1.5,
                   color: "#10b981",
                   timestamp: time + 100 // slight delay for visual
+                });
+              }
+
+              // Gems Drop (Max 1, 5% chance)
+              if (Math.random() < 0.05) {
+                useGameStore.getState().addItemToInventory("ruby_gem", "material", 1);
+                
+                combatTextsRef.current.push({
+                  id: Math.random().toString(),
+                  text: `+1 Gema!`,
+                  x: targetCreature.x,
+                  y: targetCreature.y - 2.0,
+                  color: "#e879f9",
+                  timestamp: time + 200 // slight delay for visual
                 });
               }
 
@@ -2198,7 +2211,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
     // 7.4.5 Render Animations (Heal, Fire, Lightning)
     if (gameStateVal.activeAnimations && gameStateVal.activeAnimations.length > 0) {
-      drawActiveAnimations(ctx, gameStateVal.activeAnimations, TILE_SIZE, now);
+      drawActiveAnimations(ctx, gameStateVal.activeAnimations, TILE_SIZE, Date.now(), creaturesRef.current);
     }
 
     // 7.5. Render Magnetic Quest Arrow (Seta Magnética de Missões)

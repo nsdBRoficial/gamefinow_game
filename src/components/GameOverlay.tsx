@@ -7,10 +7,10 @@ import React, { useState, useEffect } from "react";
 import { WalletNowClient } from "@walletnow/sdk";
 import { WalletState, Transaction } from "../types";
 import { useGameStore } from "../store/gameStore";
-import { onboardUser, StellarAnchorService, TestnetKitService } from "../services/stellarServices";
+import { onboardUser, StellarAnchorService, TestnetKitService, transferXLM } from "../services/stellarServices";
 import { Keypair } from "@stellar/stellar-sdk";
 import { SEP24Service } from "../services/sep24Service";
-import { estimateFeeInXlm, validateXlmBalanceForFee, GAMEFI_FEE_PERCENTAGE } from "../services/economyService";
+import { estimateFeeInXlm, validateXlmBalanceForFee, GAMEFI_FEE_PERCENTAGE, GAMEFI_TREASURY_PUBLIC_KEY } from "../services/economyService";
 import { 
   Copy, 
   Key, 
@@ -2461,7 +2461,48 @@ const GameFiFaucetModal: React.FC<GameFiFaucetProps> = ({ wallet, onClose, onUpd
   const [success, setSuccess] = useState<{ message: string; txHash: string } | null>(null);
   const [now, setNow] = useState(Date.now());
   const setPlayerPos = useGameStore(s => s.setPlayerPos);
-  const buyPotions = useGameStore(s => s.buyPotions);
+  const addItemToInventory = useGameStore(s => s.addItemToInventory);
+
+  const handleBuyPotions = async (type: "health" | "mana") => {
+    if (!wallet.secretKey || wallet.isLocked) {
+      setError("Carteira bloqueada ou não encontrada. Desbloqueie sua carteira primeiro.");
+      return;
+    }
+    
+    const cost = 100.5; // 100 XLM price + 0.5% gamefi fee
+    if ((wallet.xlmBalance || 0) < cost) {
+      setError("Saldo XLM insuficiente. Você precisa de 100.5 XLM (100 + 0.5 taxa de rede).");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const hash = await transferXLM(
+        wallet.secretKey, 
+        GAMEFI_TREASURY_PUBLIC_KEY, 
+        "100.5",
+        (msg) => console.log(msg)
+      );
+      
+      addItemToInventory(type === "health" ? "health_potion" : "mana_potion", "consumable", 99);
+      
+      onUpdateWallet({
+        xlmBalance: (wallet.xlmBalance || 0) - cost
+      });
+
+      setSuccess({
+        message: `Comprado 99x Poções de ${type === "health" ? "Cura" : "Mana"}! (-100.5 XLM)`,
+        txHash: hash
+      });
+    } catch (e: any) {
+      console.error("Erro Potion Shop", e);
+      setError("Erro ao processar transação na Stellar: " + (e.message || "Falha desconhecida."));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 1000);
@@ -2626,28 +2667,24 @@ const GameFiFaucetModal: React.FC<GameFiFaucetProps> = ({ wallet, onClose, onUpd
       <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-800">
         <button
           type="button"
-          onClick={() => {
-            buyPotions("health");
-            setSuccess({ message: "Comprado 99x Poções de Cura!", txHash: "Off-chain" });
-          }}
-          className="w-full py-3 bg-slate-900 border border-green-800 hover:bg-slate-800 text-green-400 font-bold text-xs rounded-xl flex flex-col items-center justify-center gap-1 cursor-pointer transition shadow-md shadow-green-900/20"
+          disabled={loading}
+          onClick={() => handleBuyPotions("health")}
+          className={`w-full py-3 bg-slate-900 border ${loading ? "border-slate-800 opacity-50 cursor-not-allowed" : "border-green-800 hover:bg-slate-800 cursor-pointer"} text-green-400 font-bold text-xs rounded-xl flex flex-col items-center justify-center gap-1 transition shadow-md shadow-green-900/20`}
         >
           <span className="text-xl">🧪</span>
           <span>99x Cura (HP)</span>
-          <span className="text-[9px] text-amber-400">100 XLM</span>
+          <span className="text-[9px] text-amber-400">100.5 XLM</span>
         </button>
 
         <button
           type="button"
-          onClick={() => {
-            buyPotions("mana");
-            setSuccess({ message: "Comprado 99x Poções de Mana!", txHash: "Off-chain" });
-          }}
-          className="w-full py-3 bg-slate-900 border border-blue-800 hover:bg-slate-800 text-blue-400 font-bold text-xs rounded-xl flex flex-col items-center justify-center gap-1 cursor-pointer transition shadow-md shadow-blue-900/20"
+          disabled={loading}
+          onClick={() => handleBuyPotions("mana")}
+          className={`w-full py-3 bg-slate-900 border ${loading ? "border-slate-800 opacity-50 cursor-not-allowed" : "border-blue-800 hover:bg-slate-800 cursor-pointer"} text-blue-400 font-bold text-xs rounded-xl flex flex-col items-center justify-center gap-1 transition shadow-md shadow-blue-900/20`}
         >
           <span className="text-xl">💧</span>
           <span>99x Mana (MP)</span>
-          <span className="text-[9px] text-amber-400">100 XLM</span>
+          <span className="text-[9px] text-amber-400">100.5 XLM</span>
         </button>
       </div>
 

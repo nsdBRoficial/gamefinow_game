@@ -169,6 +169,23 @@ export default function App() {
     }
   }, [hasStar, gameState.level, playerPos.maxHp, playerPos.maxMp, setGameState, setPlayerPos]);
 
+  // Auto-Regeneration (1 HP and 1 MP per second)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlayerPos(prev => {
+        if (prev.hp === undefined || prev.mp === undefined || !prev.maxHp || !prev.maxMp) return prev;
+        if (prev.hp >= prev.maxHp && prev.mp >= prev.maxMp) return prev;
+        
+        return {
+          ...prev,
+          hp: Math.min(prev.maxHp, prev.hp + 1),
+          mp: Math.min(prev.maxMp, prev.mp + 1)
+        };
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [setPlayerPos]);
+
   useEffect(() => {
     if (isMultiplayerEnabled) {
       subscribeToGlobalEvents(

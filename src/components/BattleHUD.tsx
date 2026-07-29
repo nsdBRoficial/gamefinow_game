@@ -35,6 +35,9 @@ export const BattleHUD: React.FC = () => {
   const hpPercent = Math.max(0, Math.min(100, (hp / maxHp) * 100));
   const mpPercent = Math.max(0, Math.min(100, (mp / maxMp) * 100));
 
+  const healthPotionsCount = (inventory || []).filter(i => i.id === "health_potion").reduce((acc, curr) => acc + curr.quantity, 0);
+  const manaPotionsCount = (inventory || []).filter(i => i.id === "mana_potion").reduce((acc, curr) => acc + curr.quantity, 0);
+
   return (
     <div className="absolute inset-0 pointer-events-none z-30 flex flex-col justify-between p-4">
       
@@ -85,26 +88,26 @@ export const BattleHUD: React.FC = () => {
           {/* Item 4: Health Potion */}
           <button 
             onClick={() => usePotion("health")}
-            className={`group relative w-12 h-12 bg-slate-900 border-2 ${(inventory?.healthPotions ?? 0) > 0 ? "border-green-500 hover:scale-110 active:scale-95 shadow-[0_0_10px_rgba(34,197,94,0.3)]" : "border-slate-700 opacity-50 grayscale"} rounded-xl flex items-center justify-center transition-all cursor-pointer`}
+            className={`group relative w-12 h-12 bg-slate-900 border-2 ${healthPotionsCount > 0 ? "border-green-500 hover:scale-110 active:scale-95 shadow-[0_0_10px_rgba(34,197,94,0.3)]" : "border-slate-700 opacity-50 grayscale"} rounded-xl flex items-center justify-center transition-all cursor-pointer`}
             title="Poção de Cura (Recupera 40% HP | Tecla 4)"
           >
             <span className="text-xl">🧪</span>
             <span className="absolute -top-2.5 -left-2.5 w-5 h-5 bg-slate-900 text-white text-[10px] font-black rounded-full border border-slate-600 flex items-center justify-center shadow-lg group-hover:bg-slate-800">4</span>
             <span className="absolute -bottom-2 -right-2 bg-slate-800 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full border border-slate-600 shadow-md">
-              x{inventory?.healthPotions ?? 0}
+              x{healthPotionsCount}
             </span>
           </button>
 
           {/* Item 5: Mana Potion */}
           <button 
             onClick={() => usePotion("mana")}
-            className={`group relative w-12 h-12 bg-slate-900 border-2 ${(inventory?.manaPotions ?? 0) > 0 ? "border-blue-500 hover:scale-110 active:scale-95 shadow-[0_0_10px_rgba(59,130,246,0.3)]" : "border-slate-700 opacity-50 grayscale"} rounded-xl flex items-center justify-center transition-all cursor-pointer`}
+            className={`group relative w-12 h-12 bg-slate-900 border-2 ${manaPotionsCount > 0 ? "border-blue-500 hover:scale-110 active:scale-95 shadow-[0_0_10px_rgba(59,130,246,0.3)]" : "border-slate-700 opacity-50 grayscale"} rounded-xl flex items-center justify-center transition-all cursor-pointer`}
             title="Poção de Mana (Recupera 50% MP | Tecla 5)"
           >
             <span className="text-xl">💧</span>
             <span className="absolute -top-2.5 -left-2.5 w-5 h-5 bg-slate-900 text-white text-[10px] font-black rounded-full border border-slate-600 flex items-center justify-center shadow-lg group-hover:bg-slate-800">5</span>
             <span className="absolute -bottom-2 -right-2 bg-slate-800 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full border border-slate-600 shadow-md">
-              x{inventory?.manaPotions ?? 0}
+              x{manaPotionsCount}
             </span>
           </button>
 

@@ -126,8 +126,15 @@ export interface AnimationEvent {
   startY?: number; 
   targetX?: number; 
   targetY?: number;
+  targetId?: string | null;
   timestamp: number;
   duration: number;
+}
+
+export interface InventorySlot {
+  id: string; // "health_potion", "mana_potion", "ruby_gem", "gamefi_token"
+  type: "consumable" | "material" | "currency";
+  quantity: number; // max 99
 }
 
 export interface GameState {
@@ -149,9 +156,6 @@ export interface GameState {
   // Player Stats RPG
   xp_current?: number;
   level?: number;
-  inventory?: {
-    healthPotions: number;
-    manaPotions: number;
-  };
+  inventory?: InventorySlot[];
   activeAnimations?: AnimationEvent[];
 }

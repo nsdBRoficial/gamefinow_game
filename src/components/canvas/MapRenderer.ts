@@ -1379,15 +1379,27 @@ export const drawActiveAnimations = (
   ctx: CanvasRenderingContext2D,
   animations: import("../../types").AnimationEvent[],
   tileSize: number,
-  now: number
+  now: number,
+  creatures: any[] = []
 ) => {
   animations.forEach((anim) => {
     const elapsed = now - anim.timestamp;
     if (elapsed > anim.duration) return;
     const progress = elapsed / anim.duration;
 
-    const x = (anim.startX ?? 0) * tileSize + tileSize / 2;
-    const y = (anim.startY ?? 0) * tileSize + tileSize / 2;
+    let tileX = anim.startX ?? 0;
+    let tileY = anim.startY ?? 0;
+
+    if (anim.targetId) {
+      const target = creatures.find(c => c.id === anim.targetId);
+      if (target) {
+        tileX = target.x;
+        tileY = target.y;
+      }
+    }
+
+    const x = tileX * tileSize + tileSize / 2;
+    const y = tileY * tileSize + tileSize / 2;
 
     ctx.save();
     if (anim.type === "heal") {
