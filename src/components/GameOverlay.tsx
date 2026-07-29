@@ -2469,9 +2469,12 @@ const GameFiFaucetModal: React.FC<GameFiFaucetProps> = ({ wallet, onClose, onUpd
       return;
     }
     
-    const cost = 100.5; // 100 XLM price + 0.5% gamefi fee
-    if ((wallet.xlmBalance || 0) < cost) {
-      setError("Saldo XLM insuficiente. Você precisa de 100.5 XLM (100 + 0.5 taxa de rede).");
+    const POTION_PRICE_XLM = 100;
+    const GAMEFI_FEE_XLM = 0.5; // 0.5% de taxa — separada do pagamento principal
+    const totalRequired = POTION_PRICE_XLM + GAMEFI_FEE_XLM;
+    
+    if ((wallet.xlmBalance || 0) < totalRequired) {
+      setError(`Saldo XLM insuficiente. Você precisa de ${totalRequired} XLM (${POTION_PRICE_XLM} + ${GAMEFI_FEE_XLM} taxa GameFi).`);
       return;
     }
 
@@ -2479,23 +2482,34 @@ const GameFiFaucetModal: React.FC<GameFiFaucetProps> = ({ wallet, onClose, onUpd
     setError(null);
     setSuccess(null);
     try {
-      const hash = await transferXLM(
+      // TX1: Pagamento principal — 100 XLM para a Treasury (venda da poção)
+      const hash1 = await transferXLM(
         wallet.secretKey, 
         GAMEFI_TREASURY_PUBLIC_KEY, 
-        "100.5",
-        (msg) => console.log(msg)
+        POTION_PRICE_XLM.toFixed(7),
+        (msg) => console.log("[Potion TX1]", msg)
       );
       
+      // TX2: Taxa GameFi — 0.5 XLM separado (sempre separado, para rastreabilidade)
+      const hash2 = await transferXLM(
+        wallet.secretKey, 
+        GAMEFI_TREASURY_PUBLIC_KEY, 
+        GAMEFI_FEE_XLM.toFixed(7),
+        (msg) => console.log("[Potion Fee TX2]", msg)
+      );
+      
+      // Crédito no inventário após confirmação on-chain
       addItemToInventory(type === "health" ? "health_potion" : "mana_potion", "consumable", 99);
       
       onUpdateWallet({
-        xlmBalance: (wallet.xlmBalance || 0) - cost
+        xlmBalance: (wallet.xlmBalance || 0) - totalRequired
       });
 
       setSuccess({
-        message: `Comprado 99x Poções de ${type === "health" ? "Cura" : "Mana"}! (-100.5 XLM)`,
-        txHash: hash
+        message: `✅ Comprado 99x Poções de ${type === "health" ? "Cura" : "Mana"}! (-${totalRequired} XLM)`,
+        txHash: hash1
       });
+      console.log(`[Potion Shop] TX pagamento: ${hash1} | TX taxa: ${hash2}`);
     } catch (e: any) {
       console.error("Erro Potion Shop", e);
       setError("Erro ao processar transação na Stellar: " + (e.message || "Falha desconhecida."));

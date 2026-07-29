@@ -144,6 +144,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   const lastAttackTimeRef = useRef<number>(0);
   const monsterLastAttackTimeRef = useRef<number>(0);
   const combatTextsRef = useRef<import('../types').CombatText[]>([]);
+  // Regen passiva de HP e MP (1/seg cada)
+  const lastRegenTimeRef = useRef<number>(0);
   // --------------------------
   // MMO Other Players walking around the 60x60 map in real time!
   const otherPlayersRef = useRef<any[]>([
@@ -723,18 +725,19 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       } else {
         if (Math.random() < 0.007) {
           const dirChoice = Math.random();
-          let nextX = c.x;
-          let nextY = c.y;
+          // Math.round() garante índice inteiro para acesso ao grid do mapa
+          let nextX = Math.round(c.x);
+          let nextY = Math.round(c.y);
 
           if (dirChoice < 0.25) {
-            nextY = c.y - 1;
+            nextY -= 1;
           } else if (dirChoice < 0.5) {
-            nextY = c.y + 1;
+            nextY += 1;
           } else if (dirChoice < 0.75) {
-            nextX = c.x - 1;
+            nextX -= 1;
             c.dir = "left";
           } else {
-            nextX = c.x + 1;
+            nextX += 1;
             c.dir = "right";
           }
 
@@ -1074,6 +1077,21 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     // Remove textos expirados
     combatTextsRef.current = combatTextsRef.current.filter((t) => time - t.timestamp < 1500);
 
+    // --- Regen passiva de HP e MP: +1/seg cada ---
+    if (time - lastRegenTimeRef.current >= 1000) {
+      lastRegenTimeRef.current = time;
+      const player = latestPlayerPos.current;
+      const maxHp = player.maxHp ?? 100;
+      const maxMp = player.maxMp ?? 50;
+      const currentHp = player.hp ?? 100;
+      const currentMp = player.mp ?? 50;
+      const newHp = Math.min(maxHp, currentHp + 1);
+      const newMp = Math.min(maxMp, currentMp + 1);
+      if (newHp !== currentHp || newMp !== currentMp) {
+        useGameStore.getState().setPlayerPos({ hp: newHp, mp: newMp });
+      }
+    }
+
     if (!latestGameState.current.isBattleModeActive) return;
     const targetId = latestGameState.current.lockedTargetId;
     if (!targetId) return;
@@ -1178,12 +1196,19 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
               useGameStore.getState().setLockedTarget(null);
 
-              // Respawn instantly at a slightly randomized nearby position
-              targetCreature.hp = targetCreature.maxHp;
-              targetCreature.x = Math.max(2, Math.min(57, targetCreature.x + Math.floor(Math.random() * 6) - 3));
-              targetCreature.y = Math.max(4, Math.min(55, targetCreature.y + Math.floor(Math.random() * 6) - 3));
-              targetCreature.targetX = targetCreature.x;
-              targetCreature.targetY = targetCreature.y;
+              // Respawn com delay de 3 segundos — mob fica invisível (hp=0) até renascer
+              // e ao renascer, posição é arredondada para inteiro (evita crash no acesso ao grid)
+              targetCreature.isMoving = false;
+              const deadCreature = targetCreature;
+              setTimeout(() => {
+                const spawnX = Math.round(Math.max(2, Math.min(57, deadCreature.x + Math.floor(Math.random() * 8) - 4)));
+                const spawnY = Math.round(Math.max(4, Math.min(55, deadCreature.y + Math.floor(Math.random() * 8) - 4)));
+                deadCreature.x = spawnX;
+                deadCreature.y = spawnY;
+                deadCreature.targetX = spawnX;
+                deadCreature.targetY = spawnY;
+                deadCreature.hp = deadCreature.maxHp;
+              }, 3000);
               return; // Termina o combate neste frame pois o monstro morreu
             }
           }
@@ -2211,7 +2236,15 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
     // 7.4.5 Render Animations (Heal, Fire, Lightning)
     if (gameStateVal.activeAnimations && gameStateVal.activeAnimations.length > 0) {
-      drawActiveAnimations(ctx, gameStateVal.activeAnimations, TILE_SIZE, Date.now(), creaturesRef.current);
+      // Passa TODAS as listas de criaturas para que a animação seja renderizada no alvo correto
+      const allCreatures = [
+        ...creaturesRef.current,
+        ...wormsRef.current,
+        ...crabsRef.current,
+        ...beesRef.current,
+        ...snakesRef.current,
+      ];
+      drawActiveAnimations(ctx, gameStateVal.activeAnimations, TILE_SIZE, Date.now(), allCreatures);
     }
 
     // 7.5. Render Magnetic Quest Arrow (Seta Magnética de Missões)

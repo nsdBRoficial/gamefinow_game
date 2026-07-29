@@ -28,7 +28,11 @@ export const ISSUER_SRT = "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5J
 export const ISSUER_USDC = "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5";
 export const ISSUER_GAMEFI = GAMEFI_TOKEN_ISSUER;
 
-const server = new Horizon.Server("https://horizon-testnet.stellar.org");
+const HORIZON_URL = (import.meta as any).env?.VITE_HORIZON_URL || "https://horizon-testnet.stellar.org";
+const IS_MAINNET = HORIZON_URL.includes("stellar.org") && !HORIZON_URL.includes("testnet");
+const NETWORK_PASSPHRASE = IS_MAINNET ? "Public Global Stellar Network ; September 2015" : "Test SDF Network ; September 2015";
+
+const server = new Horizon.Server(HORIZON_URL);
 
 export const VAULT_ADDRESS = "GBTR4BH2TMOEELCVYBAZ46TKGFGGQGUJK5LI3C32XYGIM475MFRSMVLO";
 
@@ -42,7 +46,7 @@ export const initWalletNow = async (): Promise<WalletNowClient> => {
   initPromise = (async () => {
     // Create robust AccountEngine to handle network propagation delay
     const baseAccountEngine = new AccountEngine(
-      "https://horizon-testnet.stellar.org",
+      HORIZON_URL,
       new LocalStorageAdapter("account")
     );
 
@@ -124,7 +128,7 @@ export const onboardUser = async (
 
     const tx = new TransactionBuilder(account, {
       fee: "1000",
-      networkPassphrase: Networks.TESTNET
+      networkPassphrase: NETWORK_PASSPHRASE
     })
       .addOperation(Operation.changeTrust({ asset: assetUSDW, limit: "1000000" }))
       .addOperation(Operation.changeTrust({ asset: assetBRW, limit: "1000000" }))
@@ -166,7 +170,7 @@ export const transferXLM = async (
   
   const tx = new TransactionBuilder(account, {
     fee: "1000",
-    networkPassphrase: Networks.TESTNET
+    networkPassphrase: NETWORK_PASSPHRASE
   })
     .addOperation(Operation.payment({
       destination: destination,
@@ -201,7 +205,7 @@ export class StellarAnchorService {
     console.log(`[StellarAnchorService] Chamando seamlessFund para o domínio ${anchorDomain}`);
     
     try {
-      const server = new Horizon.Server("https://horizon-testnet.stellar.org");
+      const server = new Horizon.Server(HORIZON_URL);
       const keypair = Keypair.fromSecret(userSecretKey);
       const account = await server.loadAccount(keypair.publicKey());
       
@@ -214,7 +218,7 @@ export class StellarAnchorService {
 
       const tx = new TransactionBuilder(account, {
         fee: "100",
-        networkPassphrase: Networks.TESTNET
+        networkPassphrase: NETWORK_PASSPHRASE
       })
         .addOperation(Operation.payment({
           destination: keypair.publicKey(),
@@ -292,7 +296,7 @@ export class TestnetKitService {
     // Transação atômica: Swap + Cobrança da Taxa GameFi em XLM na mesma transação
     const tx = new TransactionBuilder(account, {
       fee: "1000",
-      networkPassphrase: Networks.TESTNET
+      networkPassphrase: NETWORK_PASSPHRASE
     })
       .addOperation(
         // @ts-ignore
@@ -416,7 +420,7 @@ export class TestnetKitService {
     
     const tx = new TransactionBuilder(account, {
       fee: "1000",
-      networkPassphrase: Networks.TESTNET
+      networkPassphrase: NETWORK_PASSPHRASE
     })
       .addOperation(
         Operation.payment({
@@ -509,7 +513,7 @@ export class TestnetKitService {
         if (val.hasSufficientBalance) {
           const txFee = new TransactionBuilder(userAcc, {
             fee: "1000",
-            networkPassphrase: Networks.TESTNET
+            networkPassphrase: NETWORK_PASSPHRASE
           })
             .addOperation(
               Operation.payment({
@@ -540,7 +544,7 @@ export class TestnetKitService {
  */
 export const fetchOnChainBalances = async (publicKey: string) => {
   try {
-    const response = await fetch(`https://horizon-testnet.stellar.org/accounts/${publicKey}`);
+    const response = await fetch(`${HORIZON_URL}/accounts/${publicKey}`);
     if (!response.ok) return null;
     const data = await response.json();
     
@@ -604,7 +608,7 @@ export const executeOutfitPurchaseOnChain = async (
     // Build real Stellar payment operation to GAMEFI_TREASURY_PUBLIC_KEY
     const tx = new TransactionBuilder(sourceAccount, {
       fee: "1000",
-      networkPassphrase: Networks.TESTNET
+      networkPassphrase: NETWORK_PASSPHRASE
     })
       .addOperation(
         Operation.payment({

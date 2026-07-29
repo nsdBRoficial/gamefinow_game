@@ -223,7 +223,7 @@ export function subscribeToMap(
 
   const adminToken = localStorage.getItem("admin_token");
   lastJoinMapData = { mapId, playerId, playerPayload, adminToken };
-  console.error("[Multiplayer] ⚠️ EMITINDO JOIN MAP:", lastJoinMapData);
+  console.log("[Multiplayer] Emitindo JOIN MAP:", { mapId, playerId });
   socket.emit("join_map", lastJoinMapData);
 
   socket.off("player_move");
