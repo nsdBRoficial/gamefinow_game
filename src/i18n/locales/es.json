@@ -478,6 +478,7 @@
     },
     "nav": {
       "home": "Inicio",
+      "startup": "Sobre la Startup",
       "what": "Qué es",
       "howtoplay": "Cómo Jugar",
       "tokenomics": "Tokenomics",
@@ -491,6 +492,20 @@
       "live": "EN VIVO • Testnet",
       "connecting": "Conectando...",
       "updated": "Actualizado"
+    },
+    "startup": {
+      "title": "Sobre la Startup (Pitch Deck)",
+      "subtitle": "Gamificando la adopción de cripto y DeFi en la blockchain Stellar para la próxima generación de usuarios.",
+      "problem_title": "Problema y Solución",
+      "problem_desc": "El onboarding en Web3 y DeFi sigue siendo complejo, intimidante y lleno de fricción para el 99% de los usuarios convencionales. GameFiNow resuelve esto transformando primitivos financieros reales (carteras, swaps, bóvedas de rendimiento, rampas fiats) en un juego retro MMO 2D inmersivo. Cada acción en el juego es una transacción transparente en Stellar, haciendo que la educación financiera y el uso de DeFi sean naturales y divertidos.",
+      "product_title": "Producto y Servicio",
+      "product_desc": "Un universo RPG 2D multijugador impulsado por Stellar y contratos inteligentes Soroban. Características clave: 1) Onboarding sin custodia en 1 clic vía WalletNow; 2) Rampa Pix/Tarjeta integrada (USDW/BRW); 3) Mercado P2P de objetos y cosméticos NFT; 4) Bóvedas de Rendimiento Deflacionario con staking; 5) Hub del Ecosistema con 9+ protocolos socios de Stellar.",
+      "market_title": "Mercado y Público Objetivo",
+      "market_desc": "Operamos en la convergencia entre Web3 Gaming ($30B+) y Finanzas Descentralizadas ($100B+ TVL). Nuestro público objetivo incluye: Gamers retro y casuales (estilo Tibia/Pokemon), entusiastas cripto en mercados emergentes buscando transacciones rápidas y de bajo costo, y principiantes en DeFi que buscan rendimiento pasivo y autocustodia sin fricción.",
+      "business_title": "Modelo de Negocio",
+      "business_desc": "Monetización sostenible impulsada por el protocolo: 1) Comisión del 0.5% en todas las operaciones del mercado P2P y swaps DEX (dividida entre la reserva del Tesoro y la quema deflacionaria de tokens GAMEFI); 2) Venta de cosméticos y atuendos NFT exclusivos; 3) Comisiones de gestión y rendimiento en Bóvedas Soroban; 4) Paquetes B2B de integración y stands de marcas en el mapa.",
+      "future_title": "Plan Futuro y Crecimiento",
+      "future_desc": "Nuestra hoja de ruta hacia la escala global: 1) Lanzamiento en Stellar Mainnet y listado de tokens en DEXs/CEXs; 2) Aplicación móvil nativa (iOS/Android); 3) Sistema de Gobernanza DAO en el Distrito Norte; 4) Torneos de Batalla con bolsas de premios en stablecoins; 5) Expansión cross-chain y piscinas de liquidez automatizadas en Soroban."
     },
     "what": {
       "title": "¿Qué es GameFiNow?",
@@ -506,8 +521,19 @@
     },
     "howtoplay": {
       "title": "Cómo Jugar",
-      "subtitle": "4 quests que te convierten en un nativo DeFi — en menos de 10 minutos.",
-      "quest": "Quest"
+      "subtitle": "Guía completa de onboarding, combate RPG y economía on-chain.",
+      "quest": "Quest",
+      "guide_title": "Manual del Jugador y Mecánicas",
+      "step1_title": "1. Identidad Instantánea y Cartera Sin Custodia",
+      "step1_desc": "Crea tu cartera Stellar sin custodia en 1 clic usando el SDK de WalletNow. Recibe financiamiento automático de la red para empezar a jugar de inmediato.",
+      "step2_title": "2. Depósito y Entrada al Ecosistema",
+      "step2_desc": "Utiliza la pasarela Pix o Tarjeta de Crédito para convertir moneda local en stablecoins (BRW/USDW) con liquidación inmediata en 5 segundos.",
+      "step3_title": "3. Combate RPG, Hechizos y Progresión",
+      "step3_desc": "Explora biomas únicos (Cuevas, Playas, Jardines, Santuarios). Enfréntate a criaturas (Slimes, Cave Worms, Crabs, Bees, Snakes), lanza hechizos (Curación, Fuego, Rayo), regenera HP/MP y gana XP para subir hasta el nivel 99.",
+      "step4_title": "4. Economía P2P y Drops en el Inventario",
+      "step4_desc": "Derrota monstruos para recolectar tokens GAMEFI y Gemas directamente en tu inventario (apilables hasta 99 objetos por casilla). Comercia en el Mercado P2P con 0.5% de comisión.",
+      "step5_title": "5. Bóvedas Soroban y Rendimiento Pasivo",
+      "step5_desc": "Bloquea tus tokens en Bóvedas de Rendimiento en Soroban para obtener APY pasivo, puntos de gloria y mejoras permanentes de estadísticas (+FUERZA / +INTELIGENCIA)."
     },
     "tokenomics": {
       "title": "Tokenomics",

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   X, ExternalLink, Copy, CheckCheck, ChevronDown, Zap, Shield, Globe,
   Coins, BarChart3, Map, BookOpen, Star, TrendingUp, Activity,
-  Server, Clock, Hash, ArrowRight, Layers, Languages
+  Server, Clock, Hash, ArrowRight, Layers, Languages, Target
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -201,6 +201,7 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
 
   const NAV_SECTIONS = [
     { id: "hero",       label: t("about.nav.home"),       Icon: Star,       color: "#f59e0b" },
+    { id: "startup",    label: t("about.nav.startup"),    Icon: Target,     color: "#eab308" },
     { id: "what",       label: t("about.nav.what"),       Icon: BookOpen,   color: "#06b6d4" },
     { id: "howtoplay",  label: t("about.nav.howtoplay"),  Icon: Zap,        color: "#a855f7" },
     { id: "tokenomics", label: t("about.nav.tokenomics"), Icon: Coins,      color: "#22c55e" },
@@ -463,8 +464,28 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
         {/* Rainbow separator */}
         <div className="h-1 w-full" style={{ background: "linear-gradient(90deg,transparent,#f59e0b,#ec4899,#06b6d4,#22c55e,transparent)" }} />
 
+        {/* ══ ABOUT THE STARTUP / PITCH DECK ══════════════════════════════════ */}
+        <section id="startup" className="py-24 px-6 md:px-16 section-bg">
+          <SectionTitle icon={<Shield className="w-5 h-5" />} title={t("about.startup.title")} subtitle={t("about.startup.subtitle")} color="#eab308" />
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl">
+            {[
+              { icon: "🎯", color: "#ef4444", title: t("about.startup.problem_title"),  text: t("about.startup.problem_desc") },
+              { icon: "📦", color: "#06b6d4", title: t("about.startup.product_title"),  text: t("about.startup.product_desc") },
+              { icon: "🌐", color: "#a855f7", title: t("about.startup.market_title"),   text: t("about.startup.market_desc") },
+              { icon: "💰", color: "#22c55e", title: t("about.startup.business_title"), text: t("about.startup.business_desc") },
+              { icon: "🚀", color: "#f59e0b", title: t("about.startup.future_title"),   text: t("about.startup.future_desc") },
+            ].map((c, i) => (
+              <FadeCard key={c.title} delay={i * 80} color={c.color} className={i === 4 ? "md:col-span-2 lg:col-span-2" : ""}>
+                <div className="text-4xl mb-3">{c.icon}</div>
+                <h3 className="text-lg font-black text-white mb-2">{c.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: "#94a3b8" }}>{c.text}</p>
+              </FadeCard>
+            ))}
+          </div>
+        </section>
+
         {/* ══ WHAT IS ══════════════════════════════════════════════════════════ */}
-        <section id="what" className="py-24 px-6 md:px-16 section-bg">
+        <section id="what" className="py-24 px-6 md:px-16">
           <SectionTitle icon={<BookOpen className="w-5 h-5" />} title={t("about.what.title")} subtitle={t("about.what.subtitle")} color="#06b6d4" />
           <div className="grid md:grid-cols-2 gap-5 max-w-5xl">
             {[
@@ -483,9 +504,9 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
         </section>
 
         {/* ══ HOW TO PLAY ══════════════════════════════════════════════════════ */}
-        <section id="howtoplay" className="py-24 px-6 md:px-16">
+        <section id="howtoplay" className="py-24 px-6 md:px-16 section-bg">
           <SectionTitle icon={<Zap className="w-5 h-5" />} title={t("about.howtoplay.title")} subtitle={t("about.howtoplay.subtitle")} color="#a855f7" />
-          <div className="relative max-w-4xl space-y-5">
+          <div className="relative max-w-4xl space-y-5 mb-16">
             <div className="absolute left-6 top-0 bottom-0 w-0.5 hidden md:block" style={{ background: "linear-gradient(180deg,#06b6d4,#22c55e,#f59e0b,#a855f7)" }} />
             {QUESTS.map((q, i) => {
               const { ref, visible } = useIntersection();
@@ -505,6 +526,32 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
                 </div>
               );
             })}
+          </div>
+
+          {/* Manual Expandido do Jogador */}
+          <div className="max-w-5xl mx-auto rounded-3xl p-8" style={{ background: "rgba(0,0,0,0.65)", border: "2px solid rgba(168,85,247,0.3)", backdropFilter: "blur(12px)" }}>
+            <h3 className="text-xl font-black text-white mb-6 flex items-center gap-3">
+              <span className="text-2xl">📖</span> {t("about.howtoplay.guide_title")}
+            </h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              {[
+                { step: "01", icon: "🆔", color: "#06b6d4", title: t("about.howtoplay.step1_title"), desc: t("about.howtoplay.step1_desc") },
+                { step: "02", icon: "💳", color: "#22c55e", title: t("about.howtoplay.step2_title"), desc: t("about.howtoplay.step2_desc") },
+                { step: "03", icon: "⚔️", color: "#ef4444", title: t("about.howtoplay.step3_title"), desc: t("about.howtoplay.step3_desc") },
+                { step: "04", icon: "💎", color: "#f59e0b", title: t("about.howtoplay.step4_title"), desc: t("about.howtoplay.step4_desc") },
+                { step: "05", icon: "🔒", color: "#a855f7", title: t("about.howtoplay.step5_title"), desc: t("about.howtoplay.step5_desc") },
+              ].map((s, i) => (
+                <div key={s.step} className={`rounded-2xl p-5 transition-all hover:scale-[1.01] ${i === 4 ? "md:col-span-2" : ""}`}
+                  style={{ background: "rgba(255,255,255,0.03)", border: `1.5px solid ${s.color}30` }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-2xl">{s.icon}</span>
+                    <span className="font-mono text-xs font-black px-2.5 py-0.5 rounded-full" style={{ background: `${s.color}20`, color: s.color }}>{s.step}</span>
+                  </div>
+                  <h4 className="text-base font-black text-white mb-1.5">{s.title}</h4>
+                  <p className="text-xs leading-relaxed" style={{ color: "#94a3b8" }}>{s.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
