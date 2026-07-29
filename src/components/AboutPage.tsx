@@ -465,9 +465,9 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
         <div className="h-1 w-full" style={{ background: "linear-gradient(90deg,transparent,#f59e0b,#ec4899,#06b6d4,#22c55e,transparent)" }} />
 
         {/* ══ ABOUT THE STARTUP / PITCH DECK ══════════════════════════════════ */}
-        <section id="startup" className="py-24 px-6 md:px-16 section-bg">
-          <SectionTitle icon={<Shield className="w-5 h-5" />} title={t("about.startup.title")} subtitle={t("about.startup.subtitle")} color="#eab308" />
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl">
+        <section id="startup" className="py-32 px-6 md:px-16 section-bg">
+          <SectionTitle icon={<Shield className="w-6 h-6" />} title={t("about.startup.title")} subtitle={t("about.startup.subtitle")} color="#eab308" />
+          <div className="flex flex-col gap-8 max-w-5xl mx-auto">
             {[
               { icon: "🎯", color: "#ef4444", title: t("about.startup.problem_title"),  text: t("about.startup.problem_desc") },
               { icon: "📦", color: "#06b6d4", title: t("about.startup.product_title"),  text: t("about.startup.product_desc") },
@@ -475,10 +475,21 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
               { icon: "💰", color: "#22c55e", title: t("about.startup.business_title"), text: t("about.startup.business_desc") },
               { icon: "🚀", color: "#f59e0b", title: t("about.startup.future_title"),   text: t("about.startup.future_desc") },
             ].map((c, i) => (
-              <FadeCard key={c.title} delay={i * 80} color={c.color} className={i === 4 ? "md:col-span-2 lg:col-span-2" : ""}>
-                <div className="text-4xl mb-3">{c.icon}</div>
-                <h3 className="text-lg font-black text-white mb-2">{c.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: "#94a3b8" }}>{c.text}</p>
+              <FadeCard key={c.title} delay={i * 100} color={c.color} className="flex flex-col md:flex-row items-start md:items-center gap-6 p-8">
+                <div className="w-20 h-20 shrink-0 rounded-2xl flex items-center justify-center text-4xl" style={{ background: `${c.color}15`, border: `2px solid ${c.color}40` }}>
+                  {c.icon}
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-black text-white mb-3 flex items-center gap-3">
+                    {c.title}
+                    <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, ${c.color}50, transparent)` }} />
+                  </h3>
+                  <div className="text-sm leading-relaxed" style={{ color: "#94a3b8" }}>
+                    {c.text.split('\n').map((line, idx) => (
+                      <p key={idx} className={line.startsWith('•') ? 'ml-4 mt-1.5' : (idx > 0 ? 'mt-3' : '')}>{line}</p>
+                    ))}
+                  </div>
+                </div>
               </FadeCard>
             ))}
           </div>
@@ -504,24 +515,25 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
         </section>
 
         {/* ══ HOW TO PLAY ══════════════════════════════════════════════════════ */}
-        <section id="howtoplay" className="py-24 px-6 md:px-16 section-bg">
-          <SectionTitle icon={<Zap className="w-5 h-5" />} title={t("about.howtoplay.title")} subtitle={t("about.howtoplay.subtitle")} color="#a855f7" />
-          <div className="relative max-w-4xl space-y-5 mb-16">
+        <section id="howtoplay" className="py-32 px-6 md:px-16 section-bg">
+          <SectionTitle icon={<Zap className="w-6 h-6" />} title={t("about.howtoplay.title")} subtitle={t("about.howtoplay.subtitle")} color="#a855f7" />
+          
+          <div className="relative max-w-4xl space-y-6 mb-24 mx-auto">
             <div className="absolute left-6 top-0 bottom-0 w-0.5 hidden md:block" style={{ background: "linear-gradient(180deg,#06b6d4,#22c55e,#f59e0b,#a855f7)" }} />
             {QUESTS.map((q, i) => {
               const { ref, visible } = useIntersection();
               return (
                 <div key={q.n} ref={ref} className={`relative md:pl-20 transition-all duration-700 ${visible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-10"}`} style={{ transitionDelay: `${i * 120}ms` }}>
-                  <div className="absolute left-2 top-4 w-8 h-8 rounded-xl flex items-center justify-center text-sm font-black hidden md:flex" style={{ background: `${q.color}20`, border: `2px solid ${q.color}60`, color: q.color }}>{q.n}</div>
-                  <div className="rounded-2xl p-6 transition-all hover:scale-[1.01]" style={{ background: q.bg, border: `2px solid ${q.border}` }}>
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className="text-3xl">{q.icon}</span>
+                  <div className="absolute left-2 top-6 w-8 h-8 rounded-xl flex items-center justify-center text-sm font-black hidden md:flex" style={{ background: `${q.color}20`, border: `2px solid ${q.color}60`, color: q.color }}>{q.n}</div>
+                  <div className="rounded-2xl p-6 md:p-8 transition-all hover:scale-[1.02]" style={{ background: q.bg, border: `2px solid ${q.border}` }}>
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl" style={{ background: `${q.color}20` }}>{q.icon}</div>
                       <div>
-                        <div className="text-[10px] font-black uppercase tracking-widest mb-0.5" style={{ color: q.color }}>{t("about.howtoplay.quest")} {q.n}</div>
-                        <h3 className="text-lg font-black text-white">{q.title}</h3>
+                        <div className="text-[11px] font-black uppercase tracking-widest mb-1" style={{ color: q.color }}>{t("about.howtoplay.quest")} {q.n}</div>
+                        <h3 className="text-xl font-black text-white">{q.title}</h3>
                       </div>
                     </div>
-                    <p className="text-sm leading-relaxed" style={{ color: "#94a3b8" }}>{q.desc}</p>
+                    <p className="text-base leading-relaxed" style={{ color: "#94a3b8" }}>{q.desc}</p>
                   </div>
                 </div>
               );
@@ -529,11 +541,11 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
           </div>
 
           {/* Manual Expandido do Jogador */}
-          <div className="max-w-5xl mx-auto rounded-3xl p-8" style={{ background: "rgba(0,0,0,0.65)", border: "2px solid rgba(168,85,247,0.3)", backdropFilter: "blur(12px)" }}>
-            <h3 className="text-xl font-black text-white mb-6 flex items-center gap-3">
-              <span className="text-2xl">📖</span> {t("about.howtoplay.guide_title")}
+          <div className="max-w-5xl mx-auto rounded-3xl p-8 md:p-12" style={{ background: "rgba(0,0,0,0.65)", border: "2px solid rgba(168,85,247,0.3)", backdropFilter: "blur(12px)" }}>
+            <h3 className="text-2xl md:text-3xl font-black text-white mb-10 flex items-center gap-4">
+              <span className="text-3xl md:text-4xl">📖</span> {t("about.howtoplay.guide_title")}
             </h3>
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-2 gap-8">
               {[
                 { step: "01", icon: "🆔", color: "#06b6d4", title: t("about.howtoplay.step1_title"), desc: t("about.howtoplay.step1_desc") },
                 { step: "02", icon: "💳", color: "#22c55e", title: t("about.howtoplay.step2_title"), desc: t("about.howtoplay.step2_desc") },
@@ -541,14 +553,18 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
                 { step: "04", icon: "💎", color: "#f59e0b", title: t("about.howtoplay.step4_title"), desc: t("about.howtoplay.step4_desc") },
                 { step: "05", icon: "🔒", color: "#a855f7", title: t("about.howtoplay.step5_title"), desc: t("about.howtoplay.step5_desc") },
               ].map((s, i) => (
-                <div key={s.step} className={`rounded-2xl p-5 transition-all hover:scale-[1.01] ${i === 4 ? "md:col-span-2" : ""}`}
+                <div key={s.step} className={`rounded-3xl p-8 transition-all hover:scale-[1.02] ${i === 4 ? "md:col-span-2" : ""}`}
                   style={{ background: "rgba(255,255,255,0.03)", border: `1.5px solid ${s.color}30` }}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-2xl">{s.icon}</span>
-                    <span className="font-mono text-xs font-black px-2.5 py-0.5 rounded-full" style={{ background: `${s.color}20`, color: s.color }}>{s.step}</span>
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl" style={{ background: `${s.color}20` }}>{s.icon}</div>
+                    <span className="font-mono text-sm font-black px-3 py-1 rounded-full" style={{ background: `${s.color}20`, color: s.color }}>{s.step}</span>
                   </div>
-                  <h4 className="text-base font-black text-white mb-1.5">{s.title}</h4>
-                  <p className="text-xs leading-relaxed" style={{ color: "#94a3b8" }}>{s.desc}</p>
+                  <h4 className="text-xl font-black text-white mb-3">{s.title}</h4>
+                  <div className="text-sm leading-relaxed" style={{ color: "#cbd5e1" }}>
+                    {s.desc.split('\n').map((line, idx) => (
+                      <p key={idx} className={line.startsWith('•') ? 'ml-3 mt-1.5' : (idx > 0 ? 'mt-2' : '')}>{line}</p>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
