@@ -1162,9 +1162,17 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       "Bee": { xp: 185, tokenChance: 0.30, minToken: 1.5, maxToken: 3.0 },
       "Snake": { xp: 350, tokenChance: 0.40, minToken: 2.0, maxToken: 5.0 }
     };
-    const stats = MOB_STATS[targetCreature.name] || MOB_STATS["Slime"];
+    const monsterKey = targetCreature.name === "Blob" ? "Slime" : targetCreature.name;
+    const stats = MOB_STATS[monsterKey] || MOB_STATS["Slime"];
 
-    const finalXP = Math.floor(stats.xp * (0.85 + Math.random() * 0.3));
+    const pLevel = latestGameState.current.level || 1;
+    const mLevel = targetCreature.level || 1;
+    const levelDiff = mLevel - pLevel;
+    
+    // XP Multiplier: +25% per level above, -25% per level below (min 10%)
+    const xpMultiplier = Math.max(0.1, 1 + (levelDiff * 0.25)); 
+
+    const finalXP = Math.floor(stats.xp * xpMultiplier * (0.85 + Math.random() * 0.3));
     useGameStore.getState().addExperience(finalXP);
     
     combatTextsRef.current.push({
@@ -1252,6 +1260,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     activeAnims.forEach(anim => {
       if (anim.targetId && anim.type !== "heal" && !processedAnimsRef.current.has(anim.id)) {
         processedAnimsRef.current.add(anim.id);
+        
+        if (Date.now() - anim.timestamp > 1500) {
+          return;
+        }
         
         // Find target
         let spellTarget: any = null;
