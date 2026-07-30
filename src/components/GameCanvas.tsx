@@ -1421,9 +1421,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
         if (newX === targetX && newY === targetY) {
           // Finished moving to cell, check portal teleportation instantly!
-          const tile = mapGridRef.current[targetY][targetX];
-          let finalX = targetX;
-          let finalY = targetY;
+          const safeTargetX = Math.round(targetX);
+          const safeTargetY = Math.round(targetY);
+          const tile = mapGridRef.current[safeTargetY][safeTargetX];
+          let finalX = safeTargetX;
+          let finalY = safeTargetY;
           let triggeredTeleport = false;
           let nextMapId: "center" | "east" | "west" | "north" | "south" = prev.mapId || "center";
 
@@ -1488,11 +1490,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             };
           }
 
-          checkTerminalProximity(targetX, targetY, prev.mapId || "center");
+          checkTerminalProximity(safeTargetX, safeTargetY, prev.mapId || "center");
           return {
             ...prev,
-            x: targetX,
-            y: targetY,
+            x: safeTargetX,
+            y: safeTargetY,
             isMoving: false,
             frame: 0,
           };
@@ -1514,8 +1516,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           return prev;
         }
 
-        let nextTargetX = targetX;
-        let nextTargetY = targetY;
+        let nextTargetX = Math.round(targetX);
+        let nextTargetY = Math.round(targetY);
         let nextDir = dir;
         let wantToMove = false;
 
