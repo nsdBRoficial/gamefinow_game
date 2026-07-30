@@ -585,6 +585,57 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       return;
     }
 
+    // Interact with notebook on the TROQPAY stand
+    if (playerPos.mapId === "center" && checkX === 27 && checkY === 21) {
+      onTalkToNPC({
+        id: "troqpay_info",
+        name: "TROQPAY INFO",
+        x: 27,
+        y: 21,
+        dir: "down",
+        dialogs: [
+          "Where you start doesn't define your market.",
+          "Sell locally. Get paid globally. Turn global demand into sales.",
+          "Without rebuilding your operation country by country."
+        ]
+      });
+      return;
+    }
+
+    // Interact with notebook on the VELLORA stand
+    if (playerPos.mapId === "center" && checkX === 27 && checkY === 15) {
+      onTalkToNPC({
+        id: "vellora_info",
+        name: "VELLORA INFO",
+        x: 27,
+        y: 15,
+        dir: "down",
+        dialogs: [
+          "The crypto market in the palm of your hand.",
+          "Buy and sell Bitcoin, Ethereum, Solana and most cryptocurrencies — across 100+ blockchains — plus tokenized real-world assets, all via PIX.",
+          "No addresses to memorize, no networks to choose, no jargon — the app handles the complexity for you."
+        ]
+      });
+      return;
+    }
+
+    // Interact with notebook on the MUTAV stand
+    if (playerPos.mapId === "center" && checkX === 32 && checkY === 42) {
+      onTalkToNPC({
+        id: "mutav_info",
+        name: "MUTAV INFO",
+        x: 32,
+        y: 42,
+        dir: "down",
+        dialogs: [
+          "Access the $10B Brazilian Rental Guarantee Market.",
+          "The on-chain rental guarantee fund.",
+          "Opening real assets with real yield to investors through onchain guarantee funds."
+        ]
+      });
+      return;
+    }
+
 
     checkTerminalProximity(targetX, targetY, playerPos.mapId || "center");
   };

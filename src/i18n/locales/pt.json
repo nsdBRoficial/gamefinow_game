@@ -498,7 +498,7 @@
       "problem_title": "Problema e Solução",
       "problem_desc": "O onboarding em Web3 e DeFi continua sendo complexo, assustador e cheio de fricção para 99% dos usuários comuns. O GameFiNow resolve isso transformando primitivos financeiros reais (carteiras, swaps, cofres de rendimento, pagamentos via Pix) em um jogo retro MMO 2D imersivo. Cada interação no jogo é uma transação transparente na Stellar, tornando a educação financeira e o uso de DeFi naturais, visuais e divertidos.",
       "product_title": "Produto ou Serviço",
-      "product_desc": "Um universo RPG 2D multiplayer alimentado pela Stellar e contratos inteligentes Soroban. Nosso produto oferece:\n\n• Onboarding sem custódia em 1 clique via WalletNow.\n• Rampa Pix/Cartão integrada para stablecoins (USDW/BRW).\n• Mercado P2P on-chain de itens e cosméticos (NFTs).\n• Cofres de Rendimento Deflacionário com sistema de Staking.\n• Hub gamificado conectando mais de 9 protocolos do ecossistema Stellar.",
+      "product_desc": "Um universo RPG 2D multiplayer alimentado pela Stellar e contratos inteligentes Soroban. Nosso produto oferece:\n\n• Onboarding sem custódia em 1 clique via WalletNow.\n• Rampa Pix/Cartão integrada para stablecoins (USDW/BRW).\n• Mercado P2P on-chain de itens e cosméticos (NFTs).\n• Cofres de Rendimento Deflacionário com sistema de Staking.\n• Hub gamificado conectando mais de 12 protocolos do ecossistema Stellar.",
       "market_title": "Mercado e Público-Alvo",
       "market_desc": "Atuamos na convergência perfeita entre os mercados de Web3 Gaming ($30B+) e Finanças Descentralizadas ($100B+ TVL). Nosso público-alvo central inclui:\n\n• Gamers casuais e nostálgicos buscando estética retro (estilo Tibia/Pokemon).\n• Entusiastas de criptomoedas na América Latina e países emergentes que buscam pagamentos rápidos e de baixo custo.\n• Novatos no mundo DeFi que desejam renda passiva e auto-custódia sem as tradicionais barreiras de entrada e jargões complexos.",
       "business_title": "Modelo de Negócio",
@@ -516,7 +516,7 @@
       "defi_title": "DeFi Através do Gameplay",
       "defi_text": "Quest 1 = criação de carteira. Quest 2 = on-ramp. Quest 3 = troca de tokens. Quest 4 = cofres de rendimento. Ao terminar o onboarding, os jogadores são usuários reais de DeFi — sem perceber a complexidade.",
       "ecosystem_title": "O Ecossistema",
-      "ecosystem_text": "GameFiNow é uma plataforma para o ecossistema DeFi da Stellar. 9 protocolos parceiros — Soroswap, WalletNow, DefIndex, PigFi, Dupply, NIDO, AutoFin, NEARX e WAVE — têm stands dedicados dentro do mundo."
+      "ecosystem_text": "GameFiNow é uma plataforma para o ecossistema DeFi da Stellar. 12 protocolos parceiros — Soroswap, WalletNow, DefIndex, PigFi, Dupply, NIDO, AutoFin, NEARX, WAVE, TroqPay, Vellora e MUTAV — têm stands dedicados dentro do mundo."
     },
     "howtoplay": {
       "title": "Como Jogar",
@@ -580,7 +580,7 @@
       "title": "Mapa do Mundo",
       "subtitle": "5 distritos interconectados — cada um com experiências únicas, parceiros e mecânicas DeFi.",
       "center_name": "Praça Central",
-      "center_desc": "O coração pulsante do GameFiNow. É aqui que toda jornada começa. A Praça Central abriga o terminal ATM DeFi on-chain, a loja P2P de negociação, a loja de cosméticos com roupas exclusivas, a Torneira de XLM gratuito e todos os stands dos parceiros: Soroswap, WalletNow, DefIndex, PigFi, Dupply, NIDO, AutoFin, NEARX e WAVE. 9 protocolos ativos, 5 NPCs e inúmeras interações on-chain — tudo em um só lugar.",
+      "center_desc": "O coração pulsante do GameFiNow. É aqui que toda jornada começa. A Praça Central abriga o terminal ATM DeFi on-chain, a loja P2P de negociação, a loja de cosméticos com roupas exclusivas, a Torneira de XLM gratuito e todos os stands dos parceiros: Soroswap, WalletNow, DefIndex, PigFi, Dupply, NIDO, AutoFin, NEARX, WAVE, TroqPay, Vellora e MUTAV. 12 protocolos ativos, 5 NPCs e inúmeras interações on-chain — tudo em um só lugar.",
       "east_name": "Distrito Leste",
       "east_desc": "Acessível pelo Portal Leste na Praça Central, o Distrito Leste é a zona avançada para jogadores experientes em DeFi. Aqui você encontrará mecânicas mais profundas de liquidez, acesso a cofres de rendimento e futuras quests nativas do Soroban, pensadas para quem já domina o mundo Web3.",
       "west_name": "Distrito Oeste",

@@ -240,6 +240,9 @@ export function generateCentralMap(): number[][] {
   grid[18][31] = TileType.BLOCK; grid[18][32] = TileType.BLOCK; grid[18][33] = TileType.BLOCK; // SOROSWAP
   grid[45][26] = TileType.BLOCK; grid[45][27] = TileType.BLOCK; grid[45][28] = TileType.BLOCK; // NEARX
   grid[32][42] = TileType.BLOCK; grid[32][43] = TileType.BLOCK; grid[32][44] = TileType.BLOCK; // AUTOFIN (x=42,43,44 y=32)
+  grid[21][26] = TileType.BLOCK; grid[21][27] = TileType.BLOCK; grid[21][28] = TileType.BLOCK; // TROQPAY
+  grid[15][26] = TileType.BLOCK; grid[15][27] = TileType.BLOCK; grid[15][28] = TileType.BLOCK; // VELLORA
+  grid[42][31] = TileType.BLOCK; grid[42][32] = TileType.BLOCK; grid[42][33] = TileType.BLOCK; // MUTAV
   grid[32][47] = TileType.BLOCK; grid[32][48] = TileType.BLOCK; grid[32][49] = TileType.BLOCK; // NIDO (x=47,48,49 y=32)
   grid[27][46] = TileType.BLOCK; grid[27][47] = TileType.BLOCK; grid[27][48] = TileType.BLOCK; // LOJA OUTFIT STORE
   grid[28][46] = TileType.BLOCK; grid[28][47] = TileType.BLOCK; grid[28][48] = TileType.BLOCK; // LOJA OUTFIT STORE
@@ -332,6 +335,15 @@ export const CENTRAL_DECORATIONS: GameDecoration[] = [
 
   // NIDO Stand (x=47..49, y=32)
   { x: 47, y: 32, type: "stand", text: "NIDO", width: 3, color: "#eab308" },
+
+  // TROQPAY Stand
+  { x: 26, y: 21, type: "stand", text: "TROQPAY", width: 3, color: "#3b82f6" },
+
+  // VELLORA Stand
+  { x: 26, y: 15, type: "stand", text: "VELLORA", width: 3, color: "#f59e0b" },
+
+  // MUTAV Stand
+  { x: 31, y: 42, type: "stand", text: "MUTAV", width: 3, color: "#10b981" },
 
   // ALTAR DE QUEIMA ETERNA (4 sqms: x=41..42, y=27..28, sem texto na tela)
   { x: 41, y: 27, type: "pixel_burn_brazier", width: 2, height: 2, color: "#f97316" },

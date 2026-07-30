@@ -240,6 +240,9 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
     { name: "AUTOFIN",   color: "#6366f1", emoji: "🚗", desc: "Auto finance dApp. Automate financial workflows with DeFi primitives on Stellar.", url: "" },
     { name: "NEARX",     color: "#9333ea", emoji: "🌐", desc: "Cross-chain protocol bridging NEAR and Stellar ecosystems.", url: "" },
     { name: "WAVE",      color: "#06b6d4", emoji: "🌊", desc: "Wave DeFi protocol — next-generation liquidity on Stellar network.", url: "" },
+    { name: "TROQPAY",   color: "#3b82f6", emoji: "🌍", desc: "Where you start doesn't define your market. Sell locally. Get paid globally. Turn global demand into sales.", url: "https://troqpay.com/en" },
+    { name: "VELLORA",   color: "#f59e0b", emoji: "📱", desc: "The crypto market in the palm of your hand. Buy and sell Bitcoin, Ethereum, Solana and most cryptocurrencies.", url: "https://appvellora.net/" },
+    { name: "MUTAV",     color: "#10b981", emoji: "🏠", desc: "Access the $10B Brazilian Rental Guarantee Market. The on-chain rental guarantee fund.", url: "https://www.mutav.finance/en" },
   ];
 
   const ZONES = [

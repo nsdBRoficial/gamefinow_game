@@ -498,7 +498,7 @@
       "problem_title": "Problem & Solution",
       "problem_desc": "Onboarding into Web3 and DeFi remains complex, scary, and full of friction for 99% of mainstream users. GameFiNow solves this by transforming real financial primitives (wallets, swaps, yield vaults, local fiat payments) into an immersive 2D retro MMO game. Every interaction in the game is a transparent transaction on Stellar, making financial education and DeFi usage natural, visual, and fun.",
       "product_title": "Product & Service",
-      "product_desc": "A multiplayer 2D RPG universe powered by Stellar and Soroban smart contracts. Our product offers:\n\n• 1-click non-custodial onboarding via WalletNow.\n• Integrated Fiat On-Ramp for stablecoins (USDW/BRW).\n• On-chain P2P marketplace for items and cosmetics (NFTs).\n• Deflationary Yield Vaults with a Staking system.\n• A gamified hub connecting over 9 protocols from the Stellar ecosystem.",
+      "product_desc": "A multiplayer 2D RPG universe powered by Stellar and Soroban smart contracts. Our product offers:\n\n• 1-click non-custodial onboarding via WalletNow.\n• Integrated Fiat On-Ramp for stablecoins (USDW/BRW).\n• On-chain P2P marketplace for items and cosmetics (NFTs).\n• Deflationary Yield Vaults with a Staking system.\n• A gamified hub connecting over 12 protocols from the Stellar ecosystem.",
       "market_title": "Market & Target Audience",
       "market_desc": "We operate at the perfect convergence between the Web3 Gaming ($30B+) and Decentralized Finance ($100B+ TVL) markets. Our core target audience includes:\n\n• Casual and nostalgic gamers seeking retro aesthetics (Tibia/Pokemon style).\n• Crypto enthusiasts in Latin America and emerging markets looking for fast, low-cost payments.\n• DeFi newcomers who want passive income and self-custody without traditional entry barriers and complex jargon.",
       "business_title": "Business Model",
@@ -516,7 +516,7 @@
       "defi_title": "DeFi Through Gameplay",
       "defi_text": "Quest 1 = wallet creation. Quest 2 = on-ramp. Quest 3 = token swaps. Quest 4 = yield vaults. By finishing onboarding, players are real DeFi users — without knowing it was that complex.",
       "ecosystem_title": "The Ecosystem",
-      "ecosystem_text": "GameFiNow is a platform for the Stellar DeFi ecosystem. 9 partner protocols — Soroswap, WalletNow, DefIndex, PigFi, Dupply, NIDO, AutoFin, NEARX, and WAVE — have dedicated stands inside the world."
+      "ecosystem_text": "GameFiNow is a platform for the Stellar DeFi ecosystem. 12 partner protocols — Soroswap, WalletNow, DefIndex, PigFi, Dupply, NIDO, AutoFin, NEARX, WAVE, TroqPay, Vellora, and MUTAV — have dedicated stands inside the world."
     },
     "howtoplay": {
       "title": "How to Play",
@@ -580,7 +580,7 @@
       "title": "World Map",
       "subtitle": "5 interconnected districts — each with unique experiences, partners and DeFi mechanics.",
       "center_name": "Central Plaza",
-      "center_desc": "The beating heart of GameFiNow. This is where every journey begins. The Central Plaza hosts the on-chain ATM DeFi terminal, the P2P trading store, the cosmetics shop with exclusive outfits, the Faucet fountain for free XLM, and all partner stands from Soroswap, WalletNow, DefIndex, PigFi, Dupply, NIDO, AutoFin, NEARX and WAVE. 9 active protocols, 5 NPCs, and countless on-chain interactions — all in one place.",
+      "center_desc": "The beating heart of GameFiNow. This is where every journey begins. The Central Plaza hosts the on-chain ATM DeFi terminal, the P2P trading store, the cosmetics shop with exclusive outfits, the Faucet fountain for free XLM, and all partner stands from Soroswap, WalletNow, DefIndex, PigFi, Dupply, NIDO, AutoFin, NEARX, WAVE, TroqPay, Vellora and MUTAV. 12 active protocols, 5 NPCs, and countless on-chain interactions — all in one place.",
       "east_name": "East District",
       "east_desc": "Accessible via the East Portal in the Central Plaza, the East District is the advanced zone for experienced DeFi players. Here you'll find deeper liquidity mechanics, yield vault access and future Soroban-native quests designed for users who already know their way around Web3.",
       "west_name": "West District",
