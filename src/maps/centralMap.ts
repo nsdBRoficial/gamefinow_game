@@ -340,10 +340,10 @@ export const CENTRAL_DECORATIONS: GameDecoration[] = [
   { x: 26, y: 21, type: "stand", text: "TROQPAY", width: 3, color: "#3b82f6" },
 
   // VELLORA Stand
-  { x: 26, y: 15, type: "stand", text: "VELLORA", width: 3, color: "#f59e0b" },
+  { x: 26, y: 15, type: "stand", text: "VELLORA", width: 3, color: "#f97316" },
 
   // MUTAV Stand
-  { x: 31, y: 42, type: "stand", text: "MUTAV", width: 3, color: "#10b981" },
+  { x: 31, y: 42, type: "stand", text: "MUTAV", width: 3, color: "#eab308" },
 
   // ALTAR DE QUEIMA ETERNA (4 sqms: x=41..42, y=27..28, sem texto na tela)
   { x: 41, y: 27, type: "pixel_burn_brazier", width: 2, height: 2, color: "#f97316" },
