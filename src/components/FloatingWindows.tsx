@@ -39,7 +39,7 @@ export const FloatingWindows: React.FC<FloatingWindowsProps> = ({
 }) => {
   if (!activeWindow) return null;
 
-  const { wallet, quests, transactions, currentLedger } = gameState;
+  const { wallet, quests, transactions, currentLedger, inventory } = gameState;
   const { t } = useTranslation();
 
   // Copy to clipboard helper
@@ -229,19 +229,46 @@ export const FloatingWindows: React.FC<FloatingWindowsProps> = ({
                 </h3>
                 
                 <div className="grid grid-cols-4 gap-2">
-                  {Array.from({ length: 16 }).map((_, index) => (
-                    <div 
-                      key={`slot-${index}`}
-                      className="aspect-square bg-[#f4f2ea] border-2 border-dashed border-black/20 rounded-md flex items-center justify-center relative hover:bg-[#ece9df] hover:border-black/40 transition-colors cursor-pointer group shadow-[inset_1px_1px_3px_rgba(0,0,0,0.05)]"
-                    >
-                      <div className="text-black/10 font-bold text-xl group-hover:scale-110 transition-transform">
-                        +
+                  {Array.from({ length: 16 }).map((_, index) => {
+                    const item = inventory?.[index];
+                    let icon = "+";
+                    let isItem = false;
+                    
+                    if (item) {
+                      isItem = true;
+                      if (item.id === "gamefi_token") icon = "🪙";
+                      else if (item.id === "ruby_gem") icon = "💎";
+                      else if (item.id === "health_potion") icon = "🧪";
+                      else if (item.id === "mana_potion") icon = "🔮";
+                      else icon = "📦";
+                    }
+                    
+                    const displayQuantity = item?.id === "gamefi_token" ? Math.floor(wallet.gamefiBalance || 0) : item?.quantity;
+
+                    return (
+                      <div 
+                        key={`slot-${index}`}
+                        className={`aspect-square border-2 rounded-md flex items-center justify-center relative transition-transform cursor-pointer group shadow-[inset_1px_1px_3px_rgba(0,0,0,0.05)] ${
+                          isItem ? "bg-amber-100 border-amber-300 hover:scale-[1.02]" : "bg-[#f4f2ea] border-dashed border-black/20 hover:bg-[#ece9df] hover:border-black/40"
+                        }`}
+                        title={isItem ? `${item.id === "gamefi_token" ? "GameFi Token" : item.id === "ruby_gem" ? "Ruby Gem" : item.id === "health_potion" ? "Poção de Vida" : item.id === "mana_potion" ? "Poção de Mana" : item.id}` : "Slot vazio"}
+                      >
+                        <div className={`font-bold transition-transform ${isItem ? 'text-3xl drop-shadow-sm' : 'text-black/10 text-xl group-hover:scale-110'}`}>
+                          {icon}
+                        </div>
+                        {isItem && (
+                          <div className="absolute -bottom-1 -right-1 bg-black text-white text-[10px] font-black px-1.5 py-0.5 rounded-full border border-slate-600 shadow-md">
+                            x{displayQuantity}
+                          </div>
+                        )}
+                        {!isItem && (
+                          <div className="absolute -bottom-1 -right-1 text-[8px] font-mono text-black/30 font-bold">
+                            {index + 1}
+                          </div>
+                        )}
                       </div>
-                      <div className="absolute -bottom-1 -right-1 text-[8px] font-mono text-black/30 font-bold">
-                        {index + 1}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 
                 <p className="text-[10px] text-slate-500 text-center font-bold mt-2">

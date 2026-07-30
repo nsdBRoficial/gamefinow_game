@@ -101,6 +101,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     { id: "slime4", name: "Blob", x: 36, y: 34, targetX: 36, targetY: 34, isMoving: false, frame: 0, color: "#ef4444", level: 3, hp: 100, maxHp: 100, bounceOffset: 0, dir: "right" },
     { id: "slime5", name: "Blob", x: 28, y: 25, targetX: 28, targetY: 25, isMoving: false, frame: 0, color: "#f97316", level: 1, hp: 100, maxHp: 100, bounceOffset: 0, dir: "left" },
     { id: "slime6", name: "Blob", x: 32, y: 35, targetX: 32, targetY: 35, isMoving: false, frame: 0, color: "#b45309", level: 2, hp: 100, maxHp: 100, bounceOffset: 0, dir: "right" },
+    { id: "slime7", name: "Blob", x: 5, y: 5, targetX: 5, targetY: 5, isMoving: false, frame: 0, color: "#8b5cf6", level: 6, hp: 150, maxHp: 150, bounceOffset: 0, dir: "right" },
+    { id: "slime8", name: "Blob", x: 55, y: 5, targetX: 55, targetY: 5, isMoving: false, frame: 0, color: "#7c3aed", level: 7, hp: 180, maxHp: 180, bounceOffset: 0, dir: "left" },
+    { id: "slime9", name: "Blob", x: 5, y: 55, targetX: 5, targetY: 55, isMoving: false, frame: 0, color: "#6d28d9", level: 8, hp: 220, maxHp: 220, bounceOffset: 0, dir: "right" },
+    { id: "slime10", name: "Blob", x: 55, y: 55, targetX: 55, targetY: 55, isMoving: false, frame: 0, color: "#5b21b6", level: 9, hp: 260, maxHp: 260, bounceOffset: 0, dir: "left" },
+    { id: "slime11", name: "Blob", x: 30, y: 5, targetX: 30, targetY: 5, isMoving: false, frame: 0, color: "#4c1d95", level: 10, hp: 300, maxHp: 300, bounceOffset: 0, dir: "right" },
   ]);
 
   // Cave Worms — criaturas exclusivas da caverna do Leste (East Map)
@@ -111,6 +116,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     { id: "worm3", name: "Cave Worm", x: 20, y: 38, targetX: 20, targetY: 38, isMoving: false, frame: 0, color: "#6b21a8", level: 5, hp: 120, maxHp: 120, bounceOffset: 0, dir: "right" },
     { id: "worm4", name: "Cave Worm", x: 48, y: 25, targetX: 48, targetY: 25, isMoving: false, frame: 0, color: "#be123c", level: 3, hp: 80,  maxHp: 80,  bounceOffset: 0, dir: "left"  },
     { id: "worm5", name: "Cave Worm", x: 35, y: 50, targetX: 35, targetY: 50, isMoving: false, frame: 0, color: "#9f1239", level: 6, hp: 150, maxHp: 150, bounceOffset: 0, dir: "right" },
+    { id: "worm6", name: "Cave Worm", x: 6, y: 6, targetX: 6, targetY: 6, isMoving: false, frame: 0, color: "#450a0a", level: 6, hp: 160, maxHp: 160, bounceOffset: 0, dir: "right" },
+    { id: "worm7", name: "Cave Worm", x: 54, y: 8, targetX: 54, targetY: 8, isMoving: false, frame: 0, color: "#450a0a", level: 7, hp: 190, maxHp: 190, bounceOffset: 0, dir: "left" },
+    { id: "worm8", name: "Cave Worm", x: 6, y: 54, targetX: 6, targetY: 54, isMoving: false, frame: 0, color: "#4c1d95", level: 8, hp: 230, maxHp: 230, bounceOffset: 0, dir: "right" },
+    { id: "worm9", name: "Cave Worm", x: 54, y: 54, targetX: 54, targetY: 54, isMoving: false, frame: 0, color: "#3b0764", level: 9, hp: 280, maxHp: 280, bounceOffset: 0, dir: "left" },
+    { id: "worm10", name: "Cave Worm", x: 30, y: 56, targetX: 30, targetY: 56, isMoving: false, frame: 0, color: "#1e1b4b", level: 10, hp: 320, maxHp: 320, bounceOffset: 0, dir: "right" },
   ]);
 
   // Crabs — criaturas exclusivas da praia do Norte (North Map)
@@ -120,6 +130,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     { id: "crab3", name: "Crab", x: 35, y: 26, targetX: 35, targetY: 26, isMoving: false, frame: 0, color: "#b91c1c", level: 2, hp: 60, maxHp: 60, bounceOffset: 0, dir: "right" },
     { id: "crab4", name: "Crab", x: 45, y: 24, targetX: 45, targetY: 24, isMoving: false, frame: 0, color: "#ea580c", level: 4, hp: 100, maxHp: 100, bounceOffset: 0, dir: "left" },
     { id: "crab5", name: "Crab", x: 30, y: 25, targetX: 30, targetY: 25, isMoving: false, frame: 0, color: "#991b1b", level: 5, hp: 120, maxHp: 120, bounceOffset: 0, dir: "right" },
+    { id: "crab6", name: "Crab", x: 4, y: 8, targetX: 4, targetY: 8, isMoving: false, frame: 0, color: "#7f1d1d", level: 6, hp: 140, maxHp: 140, bounceOffset: 0, dir: "right" },
+    { id: "crab7", name: "Crab", x: 56, y: 8, targetX: 56, targetY: 8, isMoving: false, frame: 0, color: "#7f1d1d", level: 7, hp: 170, maxHp: 170, bounceOffset: 0, dir: "left" },
+    { id: "crab8", name: "Crab", x: 4, y: 52, targetX: 4, targetY: 52, isMoving: false, frame: 0, color: "#450a0a", level: 8, hp: 210, maxHp: 210, bounceOffset: 0, dir: "right" },
+    { id: "crab9", name: "Crab", x: 56, y: 52, targetX: 56, targetY: 52, isMoving: false, frame: 0, color: "#450a0a", level: 9, hp: 250, maxHp: 250, bounceOffset: 0, dir: "left" },
+    { id: "crab10", name: "Crab", x: 30, y: 5, targetX: 30, targetY: 5, isMoving: false, frame: 0, color: "#1a2e05", level: 10, hp: 290, maxHp: 290, bounceOffset: 0, dir: "right" },
   ]);
 
   // Bees — criaturas exclusivas do jardim do Oeste (West Map)
@@ -129,6 +144,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     { id: "bee3", name: "Bee", x: 10, y: 35, targetX: 10, targetY: 35, isMoving: false, frame: 0, color: "#fef08a", level: 1, hp: 50, maxHp: 50, bounceOffset: 0, dir: "right" },
     { id: "bee4", name: "Bee", x: 50, y: 35, targetX: 50, targetY: 35, isMoving: false, frame: 0, color: "#ca8a04", level: 3, hp: 80, maxHp: 80, bounceOffset: 0, dir: "left" },
     { id: "bee5", name: "Bee", x: 30, y: 22, targetX: 30, targetY: 22, isMoving: false, frame: 0, color: "#fde047", level: 2, hp: 65, maxHp: 65, bounceOffset: 0, dir: "right" },
+    { id: "bee6", name: "Bee", x: 5, y: 5, targetX: 5, targetY: 5, isMoving: false, frame: 0, color: "#a16207", level: 6, hp: 120, maxHp: 120, bounceOffset: 0, dir: "right" },
+    { id: "bee7", name: "Bee", x: 55, y: 5, targetX: 55, targetY: 5, isMoving: false, frame: 0, color: "#854d0e", level: 7, hp: 150, maxHp: 150, bounceOffset: 0, dir: "left" },
+    { id: "bee8", name: "Bee", x: 5, y: 55, targetX: 5, targetY: 55, isMoving: false, frame: 0, color: "#713f12", level: 8, hp: 190, maxHp: 190, bounceOffset: 0, dir: "right" },
+    { id: "bee9", name: "Bee", x: 55, y: 55, targetX: 55, targetY: 55, isMoving: false, frame: 0, color: "#422006", level: 9, hp: 220, maxHp: 220, bounceOffset: 0, dir: "left" },
+    { id: "bee10", name: "Bee", x: 30, y: 55, targetX: 30, targetY: 55, isMoving: false, frame: 0, color: "#b45309", level: 10, hp: 260, maxHp: 260, bounceOffset: 0, dir: "right" },
   ]);
 
   // Snakes — criaturas exclusivas do santuário do Sul (South Map)
@@ -138,6 +158,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     { id: "snake3", name: "Snake", x: 15, y: 45, targetX: 15, targetY: 45, isMoving: false, frame: 0, color: "#22c55e", level: 3, hp: 90,  maxHp: 90,  bounceOffset: 0, dir: "right" },
     { id: "snake4", name: "Snake", x: 45, y: 45, targetX: 45, targetY: 45, isMoving: false, frame: 0, color: "#166534", level: 6, hp: 150, maxHp: 150, bounceOffset: 0, dir: "left" },
     { id: "snake5", name: "Snake", x: 30, y: 35, targetX: 30, targetY: 35, isMoving: false, frame: 0, color: "#4ade80", level: 4, hp: 110, maxHp: 110, bounceOffset: 0, dir: "right" },
+    { id: "snake6", name: "Snake", x: 6, y: 6, targetX: 6, targetY: 6, isMoving: false, frame: 0, color: "#065f46", level: 6, hp: 160, maxHp: 160, bounceOffset: 0, dir: "right" },
+    { id: "snake7", name: "Snake", x: 54, y: 6, targetX: 54, targetY: 6, isMoving: false, frame: 0, color: "#064e3b", level: 7, hp: 200, maxHp: 200, bounceOffset: 0, dir: "left" },
+    { id: "snake8", name: "Snake", x: 6, y: 54, targetX: 6, targetY: 54, isMoving: false, frame: 0, color: "#022c22", level: 8, hp: 240, maxHp: 240, bounceOffset: 0, dir: "right" },
+    { id: "snake9", name: "Snake", x: 54, y: 54, targetX: 54, targetY: 54, isMoving: false, frame: 0, color: "#14532d", level: 9, hp: 280, maxHp: 280, bounceOffset: 0, dir: "left" },
+    { id: "snake10", name: "Snake", x: 30, y: 5, targetX: 30, targetY: 5, isMoving: false, frame: 0, color: "#065f46", level: 10, hp: 320, maxHp: 320, bounceOffset: 0, dir: "right" },
   ]);
 
   // --- BATTLE SYSTEM REFS ---
@@ -146,6 +171,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   const combatTextsRef = useRef<import('../types').CombatText[]>([]);
   // Regen passiva de HP e MP (1/seg cada)
   const lastRegenTimeRef = useRef<number>(0);
+  const processedAnimsRef = useRef<Set<string>>(new Set());
   // --------------------------
   // MMO Other Players walking around the 60x60 map in real time!
   const otherPlayersRef = useRef<any[]>([
@@ -747,6 +773,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const speed = 0.07 * (delta / 16.66);
 
     creatures.forEach((c) => {
+      if (c.hp <= 0) return;
       if (c.isMoving) {
         let newX = c.x;
         let newY = c.y;
@@ -813,6 +840,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const speed = 0.14 * (delta / 16.66);
 
     worms.forEach((w) => {
+      if (w.hp <= 0) return;
       if (w.isMoving) {
         let newX = w.x;
         let newY = w.y;
@@ -873,6 +901,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const speed = 0.08 * (delta / 16.66);
 
     crabs.forEach((c) => {
+      if (c.hp <= 0) return;
       if (c.isMoving) {
         let newX = c.x;
         let newY = c.y;
@@ -930,6 +959,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const speed = 0.12 * (delta / 16.66); // bees are fast
 
     bees.forEach((b) => {
+      if (b.hp <= 0) return;
       if (b.isMoving) {
         let newX = b.x;
         let newY = b.y;
@@ -990,6 +1020,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const speed = 0.06 * (delta / 16.66); // snakes are sneaky and slower
 
     snakes.forEach((s) => {
+      if (s.hp <= 0) return;
       if (s.isMoving) {
         let newX = s.x;
         let newY = s.y;
@@ -1123,6 +1154,75 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     });
   };
 
+  const handleTargetDeath = (targetCreature: any, time: number) => {
+    const MOB_STATS: Record<string, any> = {
+      "Slime": { xp: 15, tokenChance: 0.20, minToken: 0.1, maxToken: 0.3 },
+      "Cave Worm": { xp: 45, tokenChance: 0.18, minToken: 0.5, maxToken: 1.2 },
+      "Crab": { xp: 80, tokenChance: 0.15, minToken: 1.0, maxToken: 1.5 },
+      "Bee": { xp: 185, tokenChance: 0.30, minToken: 1.5, maxToken: 3.0 },
+      "Snake": { xp: 350, tokenChance: 0.40, minToken: 2.0, maxToken: 5.0 }
+    };
+    const stats = MOB_STATS[targetCreature.name] || MOB_STATS["Slime"];
+
+    const finalXP = Math.floor(stats.xp * (0.85 + Math.random() * 0.3));
+    useGameStore.getState().addExperience(finalXP);
+    
+    combatTextsRef.current.push({
+      id: Math.random().toString(),
+      text: `+${finalXP} XP`,
+      x: targetCreature.x,
+      y: targetCreature.y - 1.0,
+      color: "#facc15",
+      timestamp: time
+    });
+
+    if (Math.random() < stats.tokenChance) {
+      const droppedTokens = Math.max(1, Math.ceil(stats.minToken + Math.random() * (stats.maxToken - stats.minToken)));
+      useGameStore.getState().addItemToInventory("gamefi_token", "currency", droppedTokens);
+      
+      const currentWallet = useGameStore.getState().wallet;
+      useGameStore.getState().updateWallet({
+        gamefiBalance: (currentWallet.gamefiBalance || 0) + droppedTokens
+      });
+      
+      combatTextsRef.current.push({
+        id: Math.random().toString(),
+        text: `+${droppedTokens} GFN`,
+        x: targetCreature.x,
+        y: targetCreature.y - 1.5,
+        color: "#10b981",
+        timestamp: time + 100
+      });
+    }
+
+    if (Math.random() < 0.05) {
+      useGameStore.getState().addItemToInventory("ruby_gem", "material", 1);
+      
+      combatTextsRef.current.push({
+        id: Math.random().toString(),
+        text: `+1 Gema!`,
+        x: targetCreature.x,
+        y: targetCreature.y - 2.0,
+        color: "#e879f9",
+        timestamp: time + 200
+      });
+    }
+
+    useGameStore.getState().setLockedTarget(null);
+
+    targetCreature.isMoving = false;
+    const deadCreature = targetCreature;
+    setTimeout(() => {
+      const spawnX = Math.round(Math.max(2, Math.min(57, deadCreature.x + Math.floor(Math.random() * 8) - 4)));
+      const spawnY = Math.round(Math.max(4, Math.min(55, deadCreature.y + Math.floor(Math.random() * 8) - 4)));
+      deadCreature.x = spawnX;
+      deadCreature.y = spawnY;
+      deadCreature.targetX = spawnX;
+      deadCreature.targetY = spawnY;
+      deadCreature.hp = deadCreature.maxHp;
+    }, 15000);
+  };
+
   // Update Combat Logic (Auto-Attack & Cooldowns)
   const updateCombat = (time: number) => {
     // Remove textos expirados
@@ -1131,19 +1231,60 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     // --- Regen passiva de HP e MP: +1/seg cada ---
     if (time - lastRegenTimeRef.current >= 1000) {
       lastRegenTimeRef.current = time;
-      const player = latestPlayerPos.current;
-      const maxHp = player.maxHp ?? 100;
-      const maxMp = player.maxMp ?? 50;
-      const currentHp = player.hp ?? 100;
-      const currentMp = player.mp ?? 50;
-      const newHp = Math.min(maxHp, currentHp + 1);
-      const newMp = Math.min(maxMp, currentMp + 1);
-      if (newHp !== currentHp || newMp !== currentMp) {
-        useGameStore.getState().setPlayerPos({ hp: newHp, mp: newMp });
+      if (!latestGameState.current.isBattleModeActive) {
+        const player = latestPlayerPos.current;
+        const maxHp = player.maxHp ?? 100;
+        const maxMp = player.maxMp ?? 50;
+        const currentHp = player.hp ?? 100;
+        const currentMp = player.mp ?? 50;
+        const newHp = Math.min(maxHp, currentHp + 1);
+        const newMp = Math.min(maxMp, currentMp + 1);
+        if (newHp !== currentHp || newMp !== currentMp) {
+          useGameStore.getState().setPlayerPos({ hp: newHp, mp: newMp });
+        }
       }
     }
 
     if (!latestGameState.current.isBattleModeActive) return;
+
+    // Process spell damage
+    const activeAnims = latestGameState.current.activeAnimations || [];
+    activeAnims.forEach(anim => {
+      if (anim.targetId && anim.type !== "heal" && !processedAnimsRef.current.has(anim.id)) {
+        processedAnimsRef.current.add(anim.id);
+        
+        // Find target
+        let spellTarget: any = null;
+        [creaturesRef.current, wormsRef.current, crabsRef.current, beesRef.current, snakesRef.current].forEach(list => {
+          const found = list.find(c => c.id === anim.targetId);
+          if (found) spellTarget = found;
+        });
+
+        if (spellTarget && spellTarget.hp > 0) {
+          const pLevel = latestGameState.current.level || 1;
+          let baseDmg = 10 + (pLevel * 2);
+          if (anim.type === "fire") baseDmg = 25 + (pLevel * 3);
+          if (anim.type === "lightning") baseDmg = 45 + (pLevel * 4);
+          
+          const finalDmg = Math.floor(baseDmg * (0.85 + Math.random() * 0.3));
+          spellTarget.hp -= finalDmg;
+
+          combatTextsRef.current.push({
+            id: Math.random().toString(),
+            text: `-${finalDmg}`,
+            x: spellTarget.x,
+            y: spellTarget.y - 0.5,
+            color: anim.type === "fire" ? "#f97316" : "#a855f7",
+            timestamp: time
+          });
+
+          if (spellTarget.hp <= 0) {
+            handleTargetDeath(spellTarget, time);
+          }
+        }
+      }
+    });
+
     const targetId = latestGameState.current.lockedTargetId;
     if (!targetId) return;
 
@@ -1157,6 +1298,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     });
 
     if (targetCreature) {
+      if (targetCreature.hp <= 0) return;
       const dist = Math.hypot(player.x - targetCreature.x, player.y - targetCreature.y);
       if (dist <= 2.0) {
         
@@ -1194,72 +1336,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
             // Target Death
             if (targetCreature.hp <= 0) {
-              const MOB_STATS: Record<string, any> = {
-                "Slime": { xp: 15, tokenChance: 0.20, minToken: 0.1, maxToken: 0.3 },
-                "Cave Worm": { xp: 45, tokenChance: 0.18, minToken: 0.5, maxToken: 1.2 },
-                "Crab": { xp: 80, tokenChance: 0.15, minToken: 1.0, maxToken: 1.5 },
-                "Bee": { xp: 185, tokenChance: 0.30, minToken: 1.5, maxToken: 3.0 },
-                "Snake": { xp: 350, tokenChance: 0.40, minToken: 2.0, maxToken: 5.0 }
-              };
-              const stats = MOB_STATS[targetCreature.name] || MOB_STATS["Slime"];
-
-              // XP with +- 15% variance
-              const finalXP = Math.floor(stats.xp * (0.85 + Math.random() * 0.3));
-              useGameStore.getState().addExperience(finalXP);
-              
-              combatTextsRef.current.push({
-                id: Math.random().toString(),
-                text: `+${finalXP} XP`,
-                x: targetCreature.x,
-                y: targetCreature.y - 1.0,
-                color: "#facc15",
-                timestamp: time
-              });
-
-              // Drops
-              if (Math.random() < stats.tokenChance) {
-                const droppedTokens = Math.max(1, Math.ceil(stats.minToken + Math.random() * (stats.maxToken - stats.minToken)));
-                useGameStore.getState().addItemToInventory("gamefi_token", "currency", droppedTokens);
-                
-                combatTextsRef.current.push({
-                  id: Math.random().toString(),
-                  text: `+${droppedTokens} GFN`,
-                  x: targetCreature.x,
-                  y: targetCreature.y - 1.5,
-                  color: "#10b981",
-                  timestamp: time + 100 // slight delay for visual
-                });
-              }
-
-              // Gems Drop (Max 1, 5% chance)
-              if (Math.random() < 0.05) {
-                useGameStore.getState().addItemToInventory("ruby_gem", "material", 1);
-                
-                combatTextsRef.current.push({
-                  id: Math.random().toString(),
-                  text: `+1 Gema!`,
-                  x: targetCreature.x,
-                  y: targetCreature.y - 2.0,
-                  color: "#e879f9",
-                  timestamp: time + 200 // slight delay for visual
-                });
-              }
-
-              useGameStore.getState().setLockedTarget(null);
-
-              // Respawn com delay de 3 segundos — mob fica invisível (hp=0) até renascer
-              // e ao renascer, posição é arredondada para inteiro (evita crash no acesso ao grid)
-              targetCreature.isMoving = false;
-              const deadCreature = targetCreature;
-              setTimeout(() => {
-                const spawnX = Math.round(Math.max(2, Math.min(57, deadCreature.x + Math.floor(Math.random() * 8) - 4)));
-                const spawnY = Math.round(Math.max(4, Math.min(55, deadCreature.y + Math.floor(Math.random() * 8) - 4)));
-                deadCreature.x = spawnX;
-                deadCreature.y = spawnY;
-                deadCreature.targetX = spawnX;
-                deadCreature.targetY = spawnY;
-                deadCreature.hp = deadCreature.maxHp;
-              }, 3000);
+              handleTargetDeath(targetCreature, time);
               return; // Termina o combate neste frame pois o monstro morreu
             }
           }
@@ -1555,6 +1632,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
     // 5. Render Passive Slime Blobs
     creaturesRef.current.forEach((slime) => {
+      if (slime.hp <= 0) return;
       if (currentRegion !== "center") {
         return;
       }
@@ -1635,6 +1713,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     // 5.5 Render Cave Worms (exclusivos do mapa Leste)
     if (currentRegion === "east") {
       wormsRef.current.forEach((worm) => {
+        if (worm.hp <= 0) return;
         const wx = worm.x * TILE_SIZE;
         const wy = worm.y * TILE_SIZE + worm.bounceOffset;
 
@@ -1736,6 +1815,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     // 5.6 Render Crabs (exclusivos do mapa Norte)
     if (currentRegion === "north") {
       crabsRef.current.forEach((crab) => {
+        if (crab.hp <= 0) return;
         const wx = crab.x * TILE_SIZE;
         const wy = crab.y * TILE_SIZE - crab.bounceOffset;
 
@@ -1802,6 +1882,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     // 5.7 Render Bees (West Map)
     if (currentRegion === "west") {
       beesRef.current.forEach((bee) => {
+        if (bee.hp <= 0) return;
         const wx = bee.x * TILE_SIZE;
         const wy = bee.y * TILE_SIZE; // base y without bounce
         const bob = bee.bounceOffset;
@@ -1871,6 +1952,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     // 5.8 Render Snakes (South Map)
     if (currentRegion === "south") {
       snakesRef.current.forEach((snake) => {
+        if (snake.hp <= 0) return;
         const wx = snake.x * TILE_SIZE;
         const wy = snake.y * TILE_SIZE;
 
@@ -1944,6 +2026,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       else if (currentRegion === "south") activeCreatures = snakesRef.current;
 
       activeCreatures.forEach(creature => {
+        if (creature.hp <= 0) return;
         const worldX = creature.x * TILE_SIZE;
         const worldY = creature.y * TILE_SIZE;
 
