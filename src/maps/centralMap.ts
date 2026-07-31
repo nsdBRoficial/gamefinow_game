@@ -350,4 +350,7 @@ export const CENTRAL_DECORATIONS: GameDecoration[] = [
 
   // FONTE FAUCET (2 sqms: x=28, y=24..25 -> pé no y=25)
   { x: 28, y: 24, type: "pixel_faucet", width: 1, height: 2, color: "#38bdf8" },
+
+  // NÚCLEO STELLAR (Centro do mapa para o evento de wave, ocupa 2x2)
+  { x: 29, y: 29, type: "stellar_nucleus", width: 2, height: 2 },
 ];

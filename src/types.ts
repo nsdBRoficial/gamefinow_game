@@ -115,11 +115,12 @@ export interface NPC {
   dir: "up" | "down" | "left" | "right";
   dialogs: string[];
   activeQuestDialogs?: string[];
-  completedDialogs: string[];
+  completedDialogs?: string[];
   questTrigger?: QuestId;
-  color: string;
-  accentColor: string;
-  emoji: string;
+  color?: string;
+  accentColor?: string;
+  emoji?: string;
+  onDialogComplete?: () => void;
 }
 
 export interface CombatText {
@@ -158,6 +159,7 @@ export interface GameState {
     text: string[];
     currentStep: number;
     npcId: string;
+    onDialogComplete?: () => void;
   } | null;
   activeModal: "wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | "outfit_shop" | null;
   currentLedger: number;
@@ -177,4 +179,8 @@ export interface GameState {
   miningEndTimestamp?: number;
   miningTotalDuration?: number;
   miningRarity?: "common" | "uncommon" | "rare" | "epic";
+  // Wave Event
+  isWaveActive?: boolean;
+  stellarNucleusHp?: number;
+  waveMonstersKilled?: number;
 }

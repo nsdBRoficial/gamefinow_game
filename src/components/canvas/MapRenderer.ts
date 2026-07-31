@@ -1,6 +1,7 @@
 import { TileType, GameDecoration } from "../../gameData";
 import { getMapDecorations, MapId } from "../../maps";
 import { Player } from "../../types";
+import { useGameStore } from "../../store/gameStore";
 
 export const drawPixelShop = (
   ctx: CanvasRenderingContext2D,
@@ -1416,6 +1417,84 @@ export const drawMapDecorations = (
         ctx.closePath();
         ctx.fill();
         
+        break;
+
+      case "stellar_nucleus":
+        // Base - pedestal
+        ctx.fillStyle = "#1e293b"; // slate-800
+        ctx.fillRect(worldX + 8, worldY + 32, 48, 16);
+        ctx.fillStyle = "#334155"; // slate-700
+        ctx.fillRect(worldX + 12, worldY + 28, 40, 8);
+        ctx.fillStyle = "#475569"; // slate-600
+        ctx.fillRect(worldX + 16, worldY + 24, 32, 8);
+
+        // Core cristal (flutuando animado)
+        const time = Date.now();
+        const floatOffset = Math.sin(time / 500) * 4;
+        
+        // Aura glow
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(worldX + 32, worldY + 8 + floatOffset, 24, 0, Math.PI * 2);
+        const grad = ctx.createRadialGradient(worldX + 32, worldY + 8 + floatOffset, 4, worldX + 32, worldY + 8 + floatOffset, 24);
+        grad.addColorStop(0, "rgba(56, 189, 248, 0.8)"); // light blue
+        grad.addColorStop(1, "rgba(56, 189, 248, 0)");
+        ctx.fillStyle = grad;
+        ctx.fill();
+        ctx.restore();
+
+        // Crystal shape
+        ctx.fillStyle = "#0ea5e9"; // sky-500
+        ctx.beginPath();
+        ctx.moveTo(worldX + 32, worldY - 12 + floatOffset); // top
+        ctx.lineTo(worldX + 48, worldY + 8 + floatOffset); // right
+        ctx.lineTo(worldX + 32, worldY + 28 + floatOffset); // bottom
+        ctx.lineTo(worldX + 16, worldY + 8 + floatOffset); // left
+        ctx.closePath();
+        ctx.fill();
+
+        // Crystal highlight
+        ctx.fillStyle = "#7dd3fc"; // sky-300
+        ctx.beginPath();
+        ctx.moveTo(worldX + 32, worldY - 12 + floatOffset); // top
+        ctx.lineTo(worldX + 32, worldY + 28 + floatOffset); // bottom
+        ctx.lineTo(worldX + 22, worldY + 8 + floatOffset); // mid-left
+        ctx.closePath();
+        ctx.fill();
+
+        // Get Nucleus HP from Global Store
+        const nucleusHp = useGameStore.getState().gameState.stellarNucleusHp ?? 10000;
+        const maxNucleusHp = 10000; // max hp constant
+
+        // Name tag & HP bar
+        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+        ctx.fillRect(worldX - 16, worldY - 26, 96, 14);
+        ctx.strokeStyle = "#38bdf8";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(worldX - 16, worldY - 26, 96, 14);
+
+        ctx.fillStyle = "#bae6fd";
+        ctx.font = "bold 8px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(`NÚCLEO STELLAR`, worldX + 32, worldY - 16);
+
+        // HP bar background
+        ctx.fillStyle = "#1e293b";
+        ctx.fillRect(worldX - 14, worldY - 11, 92, 4);
+        // Current HP
+        ctx.fillStyle = "#22c55e"; // Green for healthy, can change if low
+        if (nucleusHp / maxNucleusHp < 0.25) ctx.fillStyle = "#ef4444"; // Red if critical
+        else if (nucleusHp / maxNucleusHp < 0.5) ctx.fillStyle = "#eab308"; // Yellow if half
+        ctx.fillRect(worldX - 14, worldY - 11, 92 * (nucleusHp / maxNucleusHp), 4);
+        
+        // Glow pulse if under attack
+        if (useGameStore.getState().gameState.isWaveActive) {
+          ctx.beginPath();
+          ctx.arc(worldX + 32, worldY + 8, 40 + Math.sin(time/200)*5, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(239, 68, 68, 0.1)"; // Red alert pulse
+          ctx.fill();
+        }
+
         break;
 
       case "p2p_store":

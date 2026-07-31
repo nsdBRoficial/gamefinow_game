@@ -309,6 +309,74 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     return () => resizeObserver.disconnect();
   }, []);
 
+  // Horde Manager
+  useEffect(() => {
+    if (!gameState.isWaveActive) return;
+
+    // Inicializa os status do evento se ainda não configurados
+    if (useGameStore.getState().gameState.stellarNucleusHp === undefined) {
+      useGameStore.getState().setGameState({ stellarNucleusHp: 10000, waveMonstersKilled: 0 });
+    }
+
+    let timeElapsed = 0;
+    const interval = setInterval(() => {
+      const currentGameState = useGameStore.getState().gameState;
+      if (!currentGameState.isWaveActive) {
+        clearInterval(interval);
+        return;
+      }
+      
+      timeElapsed += 2000;
+      
+      // Checa se sobreviveu por 60 segundos
+      if (timeElapsed >= 60000) {
+        clearInterval(interval);
+        useGameStore.getState().setGameState({ isWaveActive: false });
+        // Recompensa Global (exemplo: dá 500 XP e 50 GameFi Tokens para o player local)
+        useGameStore.getState().addExperience(500);
+        useGameStore.getState().addItemToInventory("gamefi_token", "currency", 50);
+        alert("Vitória! O Núcleo Stellar foi protegido. Você recebeu +500 XP e 50 GameFi Tokens!");
+        // Limpa os monstros do evento
+        creaturesRef.current = creaturesRef.current.filter(c => c.name !== "Corruptor");
+        return;
+      }
+
+      // Checa se o núcleo foi destruído
+      if ((currentGameState.stellarNucleusHp || 0) <= 0) {
+        clearInterval(interval);
+        useGameStore.getState().setGameState({ isWaveActive: false });
+        alert("O Núcleo Stellar foi destruído! Fim da Onda.");
+        // Limpa os monstros do evento
+        creaturesRef.current = creaturesRef.current.filter(c => c.name !== "Corruptor");
+        return;
+      }
+
+      const creatures = creaturesRef.current;
+      // Spawna um monstro por intervalo, se houver menos de 15 monstros no total
+      if (creatures.filter(c => c.hp > 0).length < 20) {
+        const side = Math.floor(Math.random() * 4);
+        let sx = 0, sy = 0;
+        if (side === 0) { sx = 3; sy = 3; } // top left
+        else if (side === 1) { sx = 56; sy = 3; } // top right
+        else if (side === 2) { sx = 3; sy = 56; } // bot left
+        else { sx = 56; sy = 56; } // bot right
+        
+        creatures.push({
+          id: `corruptor_${Date.now()}_${Math.random()}`,
+          name: "Corruptor",
+          x: sx, y: sy,
+          targetX: sx, targetY: sy,
+          dir: "down", isMoving: false, frame: 0, bounceOffset: 0,
+          color: "#991b1b", // red-800
+          hp: 150, maxHp: 150,
+          level: 10,
+        });
+      }
+    }, 2000); // 1 monstro a cada 2 segundos
+
+    return () => clearInterval(interval);
+  }, [gameState.isWaveActive]);
+
   // Keyboard Event Listeners for Movement and Interaction
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -468,6 +536,45 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       return;
     }
     
+    // Check for Stellar Nucleus (Start Wave Event)
+    const nucleusNode = mapDecorations.find(d => 
+      d.type === "stellar_nucleus" && 
+      checkX >= d.x && checkX < d.x + (d.width || 1) && 
+      checkY >= d.y && checkY < d.y + (d.height || 1)
+    );
+    if (nucleusNode) {
+      if (!latestGameState.current.isWaveActive) {
+        onTalkToNPC({
+          id: "nucleus_prompt",
+          name: "NÚCLEO STELLAR",
+          x: nucleusNode.x,
+          y: nucleusNode.y,
+          dir: "down",
+          dialogs: [
+            "O Núcleo pulsa com energia ancestral.",
+            "Iniciar purificação? Isso atrairá hordas de corrompidos em direção ao Núcleo!",
+            "Prepare-se para defender o núcleo. (Ative o Modo Batalha para lutar!)"
+          ],
+          onDialogComplete: () => {
+             useGameStore.getState().setGameState({ isWaveActive: true, stellarNucleusHp: 10000, waveMonstersKilled: 0 });
+          }
+        });
+      } else {
+        onTalkToNPC({
+          id: "nucleus_status",
+          name: "NÚCLEO STELLAR",
+          x: nucleusNode.x,
+          y: nucleusNode.y,
+          dir: "down",
+          dialogs: [
+            `A purificação está em andamento! (HP: ${latestGameState.current.stellarNucleusHp} / 10000)`,
+            "Defenda o Núcleo!"
+          ]
+        });
+      }
+      return;
+    }
+
     // Interact with notebook on the GAMEFINOW stand
     if (playerPos.mapId === "center" && checkX === 22 && checkY === 32) {
       onTalkToNPC({
@@ -825,31 +932,60 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           c.bounceOffset = 0;
         }
       } else {
-        if (Math.random() < 0.007) {
-          const dirChoice = Math.random();
-          // Math.round() garante índice inteiro para acesso ao grid do mapa
+        const isWaveActive = latestGameState.current.isWaveActive;
+        
+        if (isWaveActive) {
+          // Evento de onda: ignora movimento aleatório, marcha para (29,29)
           let nextX = Math.round(c.x);
           let nextY = Math.round(c.y);
-
-          if (dirChoice < 0.25) {
-            nextY -= 1;
-          } else if (dirChoice < 0.5) {
-            nextY += 1;
-          } else if (dirChoice < 0.75) {
-            nextX -= 1;
-            c.dir = "left";
+          
+          if (nextX < 29) { nextX++; c.dir = "right"; }
+          else if (nextX > 29) { nextX--; c.dir = "left"; }
+          else if (nextY < 29) { nextY++; }
+          else if (nextY > 29) { nextY--; }
+          
+          if (nextX === 29 && nextY === 29) {
+            // Kamikaze attack!
+            c.hp = 0;
+            useGameStore.getState().setGameState(prev => ({
+              stellarNucleusHp: Math.max(0, (prev.stellarNucleusHp ?? 10000) - 200)
+            }));
           } else {
-            nextX += 1;
-            c.dir = "right";
-          }
-
-          if (nextX >= 20 && nextX <= 40 && nextY >= 20 && nextY <= 40) {
             const tile = mapGridRef.current[nextY][nextX];
-            if (tile === TileType.GRASS) {
+            if (!isCollidable(tile) || tile === TileType.WATER) { // They can traverse water to reach core!
               c.targetX = nextX;
               c.targetY = nextY;
               c.isMoving = true;
               c.frame = 0;
+            }
+          }
+        } else {
+          // Comportamento normal: Movimento aleatório e pacífico
+          if (Math.random() < 0.007) {
+            const dirChoice = Math.random();
+            let nextX = Math.round(c.x);
+            let nextY = Math.round(c.y);
+  
+            if (dirChoice < 0.25) {
+              nextY -= 1;
+            } else if (dirChoice < 0.5) {
+              nextY += 1;
+            } else if (dirChoice < 0.75) {
+              nextX -= 1;
+              c.dir = "left";
+            } else {
+              nextX += 1;
+              c.dir = "right";
+            }
+  
+            if (nextX >= 20 && nextX <= 40 && nextY >= 20 && nextY <= 40) {
+              const tile = mapGridRef.current[nextY][nextX];
+              if (tile === TileType.GRASS) {
+                c.targetX = nextX;
+                c.targetY = nextY;
+                c.isMoving = true;
+                c.frame = 0;
+              }
             }
           }
         }

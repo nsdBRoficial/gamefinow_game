@@ -428,6 +428,13 @@ export default function App() {
           }
         }
 
+        // Executa callback onDialogComplete se existir (mesmo fora do React re-render cycle)
+        if (currentDialog?.onDialogComplete) {
+          setTimeout(() => {
+            currentDialog.onDialogComplete!();
+          }, 0);
+        }
+
         return {
           ...prev,
           activeDialog: null,
@@ -508,6 +515,7 @@ export default function App() {
         text: dialogueLines,
         currentStep: 0,
         npcId: npc.id,
+        onDialogComplete: npc.onDialogComplete,
       },
     }));
   };
