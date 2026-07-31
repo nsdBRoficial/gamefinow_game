@@ -95,74 +95,74 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
   // Passive Slime Blobs in town square (tracked in Ref for 60fps buttery smooth rendering without React state overhead)
   const creaturesRef = useRef<GameCreature[]>([
-    { id: "slime1", name: "Blob", x: 25, y: 24, targetX: 25, targetY: 24, isMoving: false, frame: 0, color: "#eab308", level: 1, hp: 100, maxHp: 100, bounceOffset: 0, dir: "left" },
-    { id: "slime2", name: "Blob", x: 35, y: 24, targetX: 35, targetY: 24, isMoving: false, frame: 0, color: "#d97706", level: 1, hp: 100, maxHp: 100, bounceOffset: 0, dir: "right" },
-    { id: "slime3", name: "Blob", x: 24, y: 34, targetX: 24, targetY: 34, isMoving: false, frame: 0, color: "#ea580c", level: 2, hp: 100, maxHp: 100, bounceOffset: 0, dir: "left" },
-    { id: "slime4", name: "Blob", x: 36, y: 34, targetX: 36, targetY: 34, isMoving: false, frame: 0, color: "#ef4444", level: 3, hp: 100, maxHp: 100, bounceOffset: 0, dir: "right" },
-    { id: "slime5", name: "Blob", x: 28, y: 25, targetX: 28, targetY: 25, isMoving: false, frame: 0, color: "#f97316", level: 1, hp: 100, maxHp: 100, bounceOffset: 0, dir: "left" },
-    { id: "slime6", name: "Blob", x: 32, y: 35, targetX: 32, targetY: 35, isMoving: false, frame: 0, color: "#b45309", level: 2, hp: 100, maxHp: 100, bounceOffset: 0, dir: "right" },
-    { id: "slime7", name: "Blob", x: 5, y: 5, targetX: 5, targetY: 5, isMoving: false, frame: 0, color: "#8b5cf6", level: 6, hp: 150, maxHp: 150, bounceOffset: 0, dir: "right" },
-    { id: "slime8", name: "Blob", x: 55, y: 5, targetX: 55, targetY: 5, isMoving: false, frame: 0, color: "#7c3aed", level: 7, hp: 180, maxHp: 180, bounceOffset: 0, dir: "left" },
-    { id: "slime9", name: "Blob", x: 5, y: 55, targetX: 5, targetY: 55, isMoving: false, frame: 0, color: "#6d28d9", level: 8, hp: 220, maxHp: 220, bounceOffset: 0, dir: "right" },
-    { id: "slime10", name: "Blob", x: 55, y: 55, targetX: 55, targetY: 55, isMoving: false, frame: 0, color: "#5b21b6", level: 9, hp: 260, maxHp: 260, bounceOffset: 0, dir: "left" },
-    { id: "slime11", name: "Blob", x: 30, y: 5, targetX: 30, targetY: 5, isMoving: false, frame: 0, color: "#4c1d95", level: 10, hp: 300, maxHp: 300, bounceOffset: 0, dir: "right" },
+    { id: "slime1", name: "Blob", x: 25, y: 24, targetX: 25, targetY: 24, isMoving: false, frame: 0, color: "#eab308", level: 5, hp: 250, maxHp: 250, bounceOffset: 0, dir: "left" },
+    { id: "slime2", name: "Blob", x: 35, y: 24, targetX: 35, targetY: 24, isMoving: false, frame: 0, color: "#d97706", level: 5, hp: 250, maxHp: 250, bounceOffset: 0, dir: "right" },
+    { id: "slime3", name: "Blob", x: 24, y: 34, targetX: 24, targetY: 34, isMoving: false, frame: 0, color: "#ea580c", level: 6, hp: 300, maxHp: 300, bounceOffset: 0, dir: "left" },
+    { id: "slime4", name: "Blob", x: 36, y: 34, targetX: 36, targetY: 34, isMoving: false, frame: 0, color: "#ef4444", level: 5, hp: 250, maxHp: 250, bounceOffset: 0, dir: "right" },
+    { id: "slime5", name: "Blob", x: 28, y: 25, targetX: 28, targetY: 25, isMoving: false, frame: 0, color: "#f97316", level: 6, hp: 300, maxHp: 300, bounceOffset: 0, dir: "left" },
+    { id: "slime6", name: "Blob", x: 32, y: 35, targetX: 32, targetY: 35, isMoving: false, frame: 0, color: "#b45309", level: 6, hp: 300, maxHp: 300, bounceOffset: 0, dir: "right" },
+    { id: "slime7", name: "Blob", x: 5, y: 5, targetX: 5, targetY: 5, isMoving: false, frame: 0, color: "#8b5cf6", level: 6, hp: 300, maxHp: 300, bounceOffset: 0, dir: "right" },
+    { id: "slime8", name: "Blob", x: 55, y: 5, targetX: 55, targetY: 5, isMoving: false, frame: 0, color: "#7c3aed", level: 7, hp: 350, maxHp: 350, bounceOffset: 0, dir: "left" },
+    { id: "slime9", name: "Blob", x: 5, y: 55, targetX: 5, targetY: 55, isMoving: false, frame: 0, color: "#6d28d9", level: 7, hp: 350, maxHp: 350, bounceOffset: 0, dir: "right" },
+    { id: "slime10", name: "Blob", x: 55, y: 55, targetX: 55, targetY: 55, isMoving: false, frame: 0, color: "#5b21b6", level: 7, hp: 350, maxHp: 350, bounceOffset: 0, dir: "left" },
+    { id: "slime11", name: "Blob", x: 30, y: 5, targetX: 30, targetY: 5, isMoving: false, frame: 0, color: "#4c1d95", level: 7, hp: 350, maxHp: 350, bounceOffset: 0, dir: "right" },
   ]);
 
   // Cave Worms — criaturas exclusivas da caverna do Leste (East Map)
   // Patrulham entre as paredes particionantes (rows 16..44, cols 4..58)
   const wormsRef = useRef<GameCreature[]>([
-    { id: "worm1", name: "Cave Worm", x: 12, y: 20, targetX: 12, targetY: 20, isMoving: false, frame: 0, color: "#7f1d1d", level: 3, hp: 80,  maxHp: 80,  bounceOffset: 0, dir: "right" },
-    { id: "worm2", name: "Cave Worm", x: 40, y: 8,  targetX: 40, targetY: 8,  isMoving: false, frame: 0, color: "#991b1b", level: 4, hp: 100, maxHp: 100, bounceOffset: 0, dir: "left"  },
-    { id: "worm3", name: "Cave Worm", x: 20, y: 38, targetX: 20, targetY: 38, isMoving: false, frame: 0, color: "#6b21a8", level: 5, hp: 120, maxHp: 120, bounceOffset: 0, dir: "right" },
-    { id: "worm4", name: "Cave Worm", x: 48, y: 25, targetX: 48, targetY: 25, isMoving: false, frame: 0, color: "#be123c", level: 3, hp: 80,  maxHp: 80,  bounceOffset: 0, dir: "left"  },
-    { id: "worm5", name: "Cave Worm", x: 35, y: 50, targetX: 35, targetY: 50, isMoving: false, frame: 0, color: "#9f1239", level: 6, hp: 150, maxHp: 150, bounceOffset: 0, dir: "right" },
-    { id: "worm6", name: "Cave Worm", x: 6, y: 6, targetX: 6, targetY: 6, isMoving: false, frame: 0, color: "#450a0a", level: 6, hp: 160, maxHp: 160, bounceOffset: 0, dir: "right" },
-    { id: "worm7", name: "Cave Worm", x: 54, y: 8, targetX: 54, targetY: 8, isMoving: false, frame: 0, color: "#450a0a", level: 7, hp: 190, maxHp: 190, bounceOffset: 0, dir: "left" },
-    { id: "worm8", name: "Cave Worm", x: 6, y: 54, targetX: 6, targetY: 54, isMoving: false, frame: 0, color: "#4c1d95", level: 8, hp: 230, maxHp: 230, bounceOffset: 0, dir: "right" },
-    { id: "worm9", name: "Cave Worm", x: 54, y: 54, targetX: 54, targetY: 54, isMoving: false, frame: 0, color: "#3b0764", level: 9, hp: 280, maxHp: 280, bounceOffset: 0, dir: "left" },
-    { id: "worm10", name: "Cave Worm", x: 30, y: 56, targetX: 30, targetY: 56, isMoving: false, frame: 0, color: "#1e1b4b", level: 10, hp: 320, maxHp: 320, bounceOffset: 0, dir: "right" },
+    { id: "worm1", name: "Cave Worm", x: 12, y: 20, targetX: 12, targetY: 20, isMoving: false, frame: 0, color: "#7f1d1d", level: 7, hp: 350, maxHp: 350, bounceOffset: 0, dir: "right" },
+    { id: "worm2", name: "Cave Worm", x: 40, y: 8,  targetX: 40, targetY: 8,  isMoving: false, frame: 0, color: "#991b1b", level: 7, hp: 350, maxHp: 350, bounceOffset: 0, dir: "left"  },
+    { id: "worm3", name: "Cave Worm", x: 20, y: 38, targetX: 20, targetY: 38, isMoving: false, frame: 0, color: "#6b21a8", level: 7, hp: 350, maxHp: 350, bounceOffset: 0, dir: "right" },
+    { id: "worm4", name: "Cave Worm", x: 48, y: 25, targetX: 48, targetY: 25, isMoving: false, frame: 0, color: "#be123c", level: 8, hp: 420, maxHp: 420, bounceOffset: 0, dir: "left"  },
+    { id: "worm5", name: "Cave Worm", x: 35, y: 50, targetX: 35, targetY: 50, isMoving: false, frame: 0, color: "#9f1239", level: 8, hp: 420, maxHp: 420, bounceOffset: 0, dir: "right" },
+    { id: "worm6", name: "Cave Worm", x: 6, y: 6, targetX: 6, targetY: 6, isMoving: false, frame: 0, color: "#450a0a", level: 8, hp: 420, maxHp: 420, bounceOffset: 0, dir: "right" },
+    { id: "worm7", name: "Cave Worm", x: 54, y: 8, targetX: 54, targetY: 8, isMoving: false, frame: 0, color: "#450a0a", level: 8, hp: 420, maxHp: 420, bounceOffset: 0, dir: "left" },
+    { id: "worm8", name: "Cave Worm", x: 6, y: 54, targetX: 6, targetY: 54, isMoving: false, frame: 0, color: "#4c1d95", level: 9, hp: 500, maxHp: 500, bounceOffset: 0, dir: "right" },
+    { id: "worm9", name: "Cave Worm", x: 54, y: 54, targetX: 54, targetY: 54, isMoving: false, frame: 0, color: "#3b0764", level: 9, hp: 500, maxHp: 500, bounceOffset: 0, dir: "left" },
+    { id: "worm10", name: "Cave Worm", x: 30, y: 56, targetX: 30, targetY: 56, isMoving: false, frame: 0, color: "#1e1b4b", level: 9, hp: 500, maxHp: 500, bounceOffset: 0, dir: "right" },
   ]);
 
   // Crabs — criaturas exclusivas da praia do Norte (North Map)
   const crabsRef = useRef<GameCreature[]>([
-    { id: "crab1", name: "Crab", x: 15, y: 26, targetX: 15, targetY: 26, isMoving: false, frame: 0, color: "#dc2626", level: 2, hp: 60, maxHp: 60, bounceOffset: 0, dir: "right" },
-    { id: "crab2", name: "Crab", x: 25, y: 24, targetX: 25, targetY: 24, isMoving: false, frame: 0, color: "#f97316", level: 3, hp: 80, maxHp: 80, bounceOffset: 0, dir: "left" },
-    { id: "crab3", name: "Crab", x: 35, y: 26, targetX: 35, targetY: 26, isMoving: false, frame: 0, color: "#b91c1c", level: 2, hp: 60, maxHp: 60, bounceOffset: 0, dir: "right" },
-    { id: "crab4", name: "Crab", x: 45, y: 24, targetX: 45, targetY: 24, isMoving: false, frame: 0, color: "#ea580c", level: 4, hp: 100, maxHp: 100, bounceOffset: 0, dir: "left" },
-    { id: "crab5", name: "Crab", x: 30, y: 25, targetX: 30, targetY: 25, isMoving: false, frame: 0, color: "#991b1b", level: 5, hp: 120, maxHp: 120, bounceOffset: 0, dir: "right" },
-    { id: "crab6", name: "Crab", x: 4, y: 8, targetX: 4, targetY: 8, isMoving: false, frame: 0, color: "#7f1d1d", level: 6, hp: 140, maxHp: 140, bounceOffset: 0, dir: "right" },
-    { id: "crab7", name: "Crab", x: 56, y: 8, targetX: 56, targetY: 8, isMoving: false, frame: 0, color: "#7f1d1d", level: 7, hp: 170, maxHp: 170, bounceOffset: 0, dir: "left" },
-    { id: "crab8", name: "Crab", x: 4, y: 52, targetX: 4, targetY: 52, isMoving: false, frame: 0, color: "#450a0a", level: 8, hp: 210, maxHp: 210, bounceOffset: 0, dir: "right" },
-    { id: "crab9", name: "Crab", x: 56, y: 52, targetX: 56, targetY: 52, isMoving: false, frame: 0, color: "#450a0a", level: 9, hp: 250, maxHp: 250, bounceOffset: 0, dir: "left" },
-    { id: "crab10", name: "Crab", x: 30, y: 5, targetX: 30, targetY: 5, isMoving: false, frame: 0, color: "#1a2e05", level: 10, hp: 290, maxHp: 290, bounceOffset: 0, dir: "right" },
+    { id: "crab1", name: "Crab", x: 15, y: 26, targetX: 15, targetY: 26, isMoving: false, frame: 0, color: "#dc2626", level: 9, hp: 500, maxHp: 500, bounceOffset: 0, dir: "right" },
+    { id: "crab2", name: "Crab", x: 25, y: 24, targetX: 25, targetY: 24, isMoving: false, frame: 0, color: "#f97316", level: 9, hp: 500, maxHp: 500, bounceOffset: 0, dir: "left" },
+    { id: "crab3", name: "Crab", x: 35, y: 26, targetX: 35, targetY: 26, isMoving: false, frame: 0, color: "#b91c1c", level: 9, hp: 500, maxHp: 500, bounceOffset: 0, dir: "right" },
+    { id: "crab4", name: "Crab", x: 45, y: 24, targetX: 45, targetY: 24, isMoving: false, frame: 0, color: "#ea580c", level: 10, hp: 600, maxHp: 600, bounceOffset: 0, dir: "left" },
+    { id: "crab5", name: "Crab", x: 30, y: 25, targetX: 30, targetY: 25, isMoving: false, frame: 0, color: "#991b1b", level: 10, hp: 600, maxHp: 600, bounceOffset: 0, dir: "right" },
+    { id: "crab6", name: "Crab", x: 4, y: 8, targetX: 4, targetY: 8, isMoving: false, frame: 0, color: "#7f1d1d", level: 10, hp: 600, maxHp: 600, bounceOffset: 0, dir: "right" },
+    { id: "crab7", name: "Crab", x: 56, y: 8, targetX: 56, targetY: 8, isMoving: false, frame: 0, color: "#7f1d1d", level: 11, hp: 700, maxHp: 700, bounceOffset: 0, dir: "left" },
+    { id: "crab8", name: "Crab", x: 4, y: 52, targetX: 4, targetY: 52, isMoving: false, frame: 0, color: "#450a0a", level: 11, hp: 700, maxHp: 700, bounceOffset: 0, dir: "right" },
+    { id: "crab9", name: "Crab", x: 56, y: 52, targetX: 56, targetY: 52, isMoving: false, frame: 0, color: "#450a0a", level: 11, hp: 700, maxHp: 700, bounceOffset: 0, dir: "left" },
+    { id: "crab10", name: "Crab", x: 30, y: 5, targetX: 30, targetY: 5, isMoving: false, frame: 0, color: "#1a2e05", level: 11, hp: 700, maxHp: 700, bounceOffset: 0, dir: "right" },
   ]);
 
   // Bees — criaturas exclusivas do jardim do Oeste (West Map)
   const beesRef = useRef<GameCreature[]>([
-    { id: "bee1", name: "Bee", x: 10, y: 25, targetX: 10, targetY: 25, isMoving: false, frame: 0, color: "#facc15", level: 1, hp: 50, maxHp: 50, bounceOffset: 0, dir: "right" },
-    { id: "bee2", name: "Bee", x: 50, y: 30, targetX: 50, targetY: 30, isMoving: false, frame: 0, color: "#eab308", level: 2, hp: 65, maxHp: 65, bounceOffset: 0, dir: "left" },
-    { id: "bee3", name: "Bee", x: 10, y: 35, targetX: 10, targetY: 35, isMoving: false, frame: 0, color: "#fef08a", level: 1, hp: 50, maxHp: 50, bounceOffset: 0, dir: "right" },
-    { id: "bee4", name: "Bee", x: 50, y: 35, targetX: 50, targetY: 35, isMoving: false, frame: 0, color: "#ca8a04", level: 3, hp: 80, maxHp: 80, bounceOffset: 0, dir: "left" },
-    { id: "bee5", name: "Bee", x: 30, y: 22, targetX: 30, targetY: 22, isMoving: false, frame: 0, color: "#fde047", level: 2, hp: 65, maxHp: 65, bounceOffset: 0, dir: "right" },
-    { id: "bee6", name: "Bee", x: 5, y: 5, targetX: 5, targetY: 5, isMoving: false, frame: 0, color: "#a16207", level: 6, hp: 120, maxHp: 120, bounceOffset: 0, dir: "right" },
-    { id: "bee7", name: "Bee", x: 55, y: 5, targetX: 55, targetY: 5, isMoving: false, frame: 0, color: "#854d0e", level: 7, hp: 150, maxHp: 150, bounceOffset: 0, dir: "left" },
-    { id: "bee8", name: "Bee", x: 5, y: 55, targetX: 5, targetY: 55, isMoving: false, frame: 0, color: "#713f12", level: 8, hp: 190, maxHp: 190, bounceOffset: 0, dir: "right" },
-    { id: "bee9", name: "Bee", x: 55, y: 55, targetX: 55, targetY: 55, isMoving: false, frame: 0, color: "#422006", level: 9, hp: 220, maxHp: 220, bounceOffset: 0, dir: "left" },
-    { id: "bee10", name: "Bee", x: 30, y: 55, targetX: 30, targetY: 55, isMoving: false, frame: 0, color: "#b45309", level: 10, hp: 260, maxHp: 260, bounceOffset: 0, dir: "right" },
+    { id: "bee1", name: "Bee", x: 10, y: 25, targetX: 10, targetY: 25, isMoving: false, frame: 0, color: "#facc15", level: 11, hp: 700, maxHp: 700, bounceOffset: 0, dir: "right" },
+    { id: "bee2", name: "Bee", x: 50, y: 30, targetX: 50, targetY: 30, isMoving: false, frame: 0, color: "#eab308", level: 11, hp: 700, maxHp: 700, bounceOffset: 0, dir: "left" },
+    { id: "bee3", name: "Bee", x: 10, y: 35, targetX: 10, targetY: 35, isMoving: false, frame: 0, color: "#fef08a", level: 11, hp: 700, maxHp: 700, bounceOffset: 0, dir: "right" },
+    { id: "bee4", name: "Bee", x: 50, y: 35, targetX: 50, targetY: 35, isMoving: false, frame: 0, color: "#ca8a04", level: 12, hp: 800, maxHp: 800, bounceOffset: 0, dir: "left" },
+    { id: "bee5", name: "Bee", x: 30, y: 22, targetX: 30, targetY: 22, isMoving: false, frame: 0, color: "#fde047", level: 12, hp: 800, maxHp: 800, bounceOffset: 0, dir: "right" },
+    { id: "bee6", name: "Bee", x: 5, y: 5, targetX: 5, targetY: 5, isMoving: false, frame: 0, color: "#a16207", level: 12, hp: 800, maxHp: 800, bounceOffset: 0, dir: "right" },
+    { id: "bee7", name: "Bee", x: 55, y: 5, targetX: 55, targetY: 5, isMoving: false, frame: 0, color: "#854d0e", level: 13, hp: 950, maxHp: 950, bounceOffset: 0, dir: "left" },
+    { id: "bee8", name: "Bee", x: 5, y: 55, targetX: 5, targetY: 55, isMoving: false, frame: 0, color: "#713f12", level: 13, hp: 950, maxHp: 950, bounceOffset: 0, dir: "right" },
+    { id: "bee9", name: "Bee", x: 55, y: 55, targetX: 55, targetY: 55, isMoving: false, frame: 0, color: "#422006", level: 13, hp: 950, maxHp: 950, bounceOffset: 0, dir: "left" },
+    { id: "bee10", name: "Bee", x: 30, y: 55, targetX: 30, targetY: 55, isMoving: false, frame: 0, color: "#b45309", level: 13, hp: 950, maxHp: 950, bounceOffset: 0, dir: "right" },
   ]);
 
   // Snakes — criaturas exclusivas do santuário do Sul (South Map)
   const snakesRef = useRef<GameCreature[]>([
-    { id: "snake1", name: "Snake", x: 15, y: 15, targetX: 15, targetY: 15, isMoving: false, frame: 0, color: "#16a34a", level: 4, hp: 110, maxHp: 110, bounceOffset: 0, dir: "right" },
-    { id: "snake2", name: "Snake", x: 45, y: 15, targetX: 45, targetY: 15, isMoving: false, frame: 0, color: "#15803d", level: 5, hp: 130, maxHp: 130, bounceOffset: 0, dir: "left" },
-    { id: "snake3", name: "Snake", x: 15, y: 45, targetX: 15, targetY: 45, isMoving: false, frame: 0, color: "#22c55e", level: 3, hp: 90,  maxHp: 90,  bounceOffset: 0, dir: "right" },
-    { id: "snake4", name: "Snake", x: 45, y: 45, targetX: 45, targetY: 45, isMoving: false, frame: 0, color: "#166534", level: 6, hp: 150, maxHp: 150, bounceOffset: 0, dir: "left" },
-    { id: "snake5", name: "Snake", x: 30, y: 35, targetX: 30, targetY: 35, isMoving: false, frame: 0, color: "#4ade80", level: 4, hp: 110, maxHp: 110, bounceOffset: 0, dir: "right" },
-    { id: "snake6", name: "Snake", x: 6, y: 6, targetX: 6, targetY: 6, isMoving: false, frame: 0, color: "#065f46", level: 6, hp: 160, maxHp: 160, bounceOffset: 0, dir: "right" },
-    { id: "snake7", name: "Snake", x: 54, y: 6, targetX: 54, targetY: 6, isMoving: false, frame: 0, color: "#064e3b", level: 7, hp: 200, maxHp: 200, bounceOffset: 0, dir: "left" },
-    { id: "snake8", name: "Snake", x: 6, y: 54, targetX: 6, targetY: 54, isMoving: false, frame: 0, color: "#022c22", level: 8, hp: 240, maxHp: 240, bounceOffset: 0, dir: "right" },
-    { id: "snake9", name: "Snake", x: 54, y: 54, targetX: 54, targetY: 54, isMoving: false, frame: 0, color: "#14532d", level: 9, hp: 280, maxHp: 280, bounceOffset: 0, dir: "left" },
-    { id: "snake10", name: "Snake", x: 30, y: 5, targetX: 30, targetY: 5, isMoving: false, frame: 0, color: "#065f46", level: 10, hp: 320, maxHp: 320, bounceOffset: 0, dir: "right" },
+    { id: "snake1", name: "Snake", x: 15, y: 15, targetX: 15, targetY: 15, isMoving: false, frame: 0, color: "#16a34a", level: 13, hp: 950, maxHp: 950, bounceOffset: 0, dir: "right" },
+    { id: "snake2", name: "Snake", x: 45, y: 15, targetX: 45, targetY: 15, isMoving: false, frame: 0, color: "#15803d", level: 13, hp: 950, maxHp: 950, bounceOffset: 0, dir: "left" },
+    { id: "snake3", name: "Snake", x: 15, y: 45, targetX: 15, targetY: 45, isMoving: false, frame: 0, color: "#22c55e", level: 14, hp: 1200, maxHp: 1200, bounceOffset: 0, dir: "right" },
+    { id: "snake4", name: "Snake", x: 45, y: 45, targetX: 45, targetY: 45, isMoving: false, frame: 0, color: "#166534", level: 14, hp: 1200, maxHp: 1200, bounceOffset: 0, dir: "left" },
+    { id: "snake5", name: "Snake", x: 30, y: 35, targetX: 30, targetY: 35, isMoving: false, frame: 0, color: "#4ade80", level: 14, hp: 1200, maxHp: 1200, bounceOffset: 0, dir: "right" },
+    { id: "snake6", name: "Snake", x: 6, y: 6, targetX: 6, targetY: 6, isMoving: false, frame: 0, color: "#065f46", level: 15, hp: 1500, maxHp: 1500, bounceOffset: 0, dir: "right" },
+    { id: "snake7", name: "Snake", x: 54, y: 6, targetX: 54, targetY: 6, isMoving: false, frame: 0, color: "#064e3b", level: 15, hp: 1500, maxHp: 1500, bounceOffset: 0, dir: "left" },
+    { id: "snake8", name: "Snake", x: 6, y: 54, targetX: 6, targetY: 54, isMoving: false, frame: 0, color: "#022c22", level: 15, hp: 1500, maxHp: 1500, bounceOffset: 0, dir: "right" },
+    { id: "snake9", name: "Snake", x: 54, y: 54, targetX: 54, targetY: 54, isMoving: false, frame: 0, color: "#14532d", level: 15, hp: 1500, maxHp: 1500, bounceOffset: 0, dir: "left" },
+    { id: "snake10", name: "Snake", x: 30, y: 5, targetX: 30, targetY: 5, isMoving: false, frame: 0, color: "#065f46", level: 15, hp: 1500, maxHp: 1500, bounceOffset: 0, dir: "right" },
   ]);
 
   // --- BATTLE SYSTEM REFS ---
@@ -521,17 +521,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         return;
       }
       
-      let durationMinutes = 5;
-      if (mineNode.mineRarity === "uncommon") durationMinutes = 15;
-      else if (mineNode.mineRarity === "rare") durationMinutes = 30;
-      else if (mineNode.mineRarity === "epic") durationMinutes = 60;
-      
-      const durationMs = durationMinutes * 60 * 1000;
-      
+      // Abre o modal de mineração para o usuário confirmar
       useGameStore.getState().setGameState({
-        miningEndTimestamp: Date.now() + durationMs,
-        miningTotalDuration: durationMs,
-        miningRarity: mineNode.mineRarity
+        activeModal: "mining_node",
+        currentMineRarity: mineNode.mineRarity
       });
       return;
     }
@@ -543,35 +536,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       checkY >= d.y && checkY < d.y + (d.height || 1)
     );
     if (nucleusNode) {
-      if (!latestGameState.current.isWaveActive) {
-        onTalkToNPC({
-          id: "nucleus_prompt",
-          name: "NÚCLEO STELLAR",
-          x: nucleusNode.x,
-          y: nucleusNode.y,
-          dir: "down",
-          dialogs: [
-            "O Núcleo pulsa com energia ancestral.",
-            "Iniciar purificação? Isso atrairá hordas de corrompidos em direção ao Núcleo!",
-            "Prepare-se para defender o núcleo. (Ative o Modo Batalha para lutar!)"
-          ],
-          onDialogComplete: () => {
-             useGameStore.getState().setGameState({ isWaveActive: true, stellarNucleusHp: 10000, waveMonstersKilled: 0 });
-          }
-        });
-      } else {
-        onTalkToNPC({
-          id: "nucleus_status",
-          name: "NÚCLEO STELLAR",
-          x: nucleusNode.x,
-          y: nucleusNode.y,
-          dir: "down",
-          dialogs: [
-            `A purificação está em andamento! (HP: ${latestGameState.current.stellarNucleusHp} / 10000)`,
-            "Defenda o Núcleo!"
-          ]
-        });
-      }
+      // O núcleo por enquanto não exibe os diálogos de iniciar purificação
+      // (a ação de 'iniciar wave' será refeita com banners adequados futuramente).
       return;
     }
 
@@ -850,6 +816,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         onNearTerminal("hold");
         return;
       }
+    }
+    const mapDecorations = getMapDecorations(currentMapId as MapId);
+    const mineNode = mapDecorations.find(d => Math.abs(d.x - x) <= 1 && Math.abs(d.y - y) <= 1 && d.type === "mine");
+    if (mineNode) {
+      onNearTerminal("mine");
+      return;
     }
 
     onNearTerminal(null);
@@ -1437,6 +1409,21 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       }
     }
 
+    if (latestGameState.current.pendingLevelUp) {
+      combatTextsRef.current.push({
+        id: Math.random().toString(),
+        text: `LEVEL UP!`,
+        x: latestPlayerPos.current.x,
+        y: latestPlayerPos.current.y - 2.0,
+        color: "#facc15", // Amarelo Dourado
+        timestamp: time + 3000
+      });
+      const { playSynthSound } = require('../utils/audioUtils');
+      playSynthSound("success");
+      // Limpar flag
+      useGameStore.getState().setGameState({ pendingLevelUp: false });
+    }
+
     if (!latestGameState.current.isBattleModeActive) return;
 
     // Process spell damage
@@ -1554,7 +1541,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             });
           } else {
             // Dano do monstro
-            const mBaseDmg = (targetCreature.level || 1) * 3;
+            const mBaseDmg = (targetCreature.level || 1) * 4;
             const mFinalDmg = Math.max(1, Math.floor(mBaseDmg * (0.85 + Math.random() * 0.3)));
             
             // Subtrai do HP do player!
@@ -1747,6 +1734,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
           const targetTile = mapGridRef.current[nextTargetY][nextTargetX];
           if (isCollidable(targetTile)) {
+            return { ...prev, dir: nextDir };
+          }
+
+          const currentRegionDecs = getMapDecorations(playerPos.mapId || "center");
+          const hitsMine = currentRegionDecs.some(d => d.type === "mine" && d.x === nextTargetX && d.y === nextTargetY);
+          if (hitsMine) {
             return { ...prev, dir: nextDir };
           }
 

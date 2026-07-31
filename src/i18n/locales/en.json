@@ -24,11 +24,41 @@
       "instructions": "Enter the South Portal (Golden) to the Secret Chamber and talk to Bobba [NPC], the Elder.",
       "reward": "Legendary VIP Stellar Holder Title 🌟"
     },
+    "kill_center": {
+      "title": "Threat in the Central Square",
+      "description": "Invading Slimes are polluting the sacred Central Square! Prove your worth in combat by protecting the heart of the city.",
+      "instructions": "Activate Battle Mode (⚔️), eliminate 5 Slimes, and report your success to Master James.",
+      "reward": "50 XP + Monster Loot"
+    },
+    "kill_east": {
+      "title": "Warriors of the East Forge",
+      "description": "Cave Worms are attacking Blacksmith Kael's supplies! Prevent them from destroying the forge.",
+      "instructions": "Cross the East Portal (Blue), eliminate 5 Cave Worms, and return to Master James.",
+      "reward": "100 XP + Monster Loot"
+    },
+    "kill_north": {
+      "title": "Hunter of the North Docks",
+      "description": "Captain HC's sea routes have been blocked by Giant Crabs. Free the port!",
+      "instructions": "Cross the North Portal (Green), eliminate 5 Crabs, and return to Master James.",
+      "reward": "150 XP + Monster Loot"
+    },
+    "kill_west": {
+      "title": "Pathfinder of the West Bazaar",
+      "description": "Mutant bees are spreading panic in the alchemical market. Restore peace for the merchants!",
+      "instructions": "Cross the West Portal (Purple), eliminate 5 Bees, and return to Master James.",
+      "reward": "250 XP + Monster Loot"
+    },
+    "kill_south": {
+      "title": "Hero of the South Sanctuary",
+      "description": "Shadow snakes have corrupted the Sacred Sanctuary. This is your final trial as a Guardian!",
+      "instructions": "Cross the South Portal (Golden), eliminate 5 Snakes, and return to Master James.",
+      "reward": "500 XP + Monster Loot"
+    },
     "all_done": {
-      "title": "NEW QUESTS COMING SOON",
-      "description": "You have completed all current onboarding quests on the Stellar network. Stay tuned for upcoming adventures!",
-      "instructions": "You have completed all current onboarding quests on the Stellar network. Stay tuned for upcoming adventures!",
-      "reward": "Legendary Title 🌟"
+      "title": "THE END IS JUST THE BEGINNING",
+      "description": "You have proven yourself to be the supreme hero of the Stellar network! But new grand quests are being forged by the gods.",
+      "instructions": "Continue strengthening your heroes, collecting treasures, and preparing for the upcoming expansions!",
+      "reward": "Eternal Glory 🌟"
     }
   },
   "dialogs": {

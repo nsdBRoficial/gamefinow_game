@@ -56,6 +56,7 @@ export interface Quest {
   targetMap?: string;       // Mapa onde a quest ocorre (ex: "center")
   xpReward?: number;        // XP concedido ao completar
   dropItemId?: string;      // Item especial dropado ao completar
+  pendingActivation?: boolean; // Flag para gate sequencial de kill quests
 }
 
 export interface Player {
@@ -145,9 +146,9 @@ export interface AnimationEvent {
 }
 
 export interface InventorySlot {
-  id: string; // "health_potion", "mana_potion", "ruby_gem", "gamefi_token"
-  type: "consumable" | "material" | "currency";
-  quantity: number; // max 99
+  id: string; // "health_potion", "mana_potion", "ruby_gem", "gamefi_token", "pickaxe"
+  type: "consumable" | "material" | "currency" | "tool";
+  quantity: number; // max 99, or durabilidade for tools
 }
 
 export interface GameState {
@@ -161,7 +162,7 @@ export interface GameState {
     npcId: string;
     onDialogComplete?: () => void;
   } | null;
-  activeModal: "wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | "outfit_shop" | null;
+  activeModal: "wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | "outfit_shop" | "mining_node" | null;
   currentLedger: number;
   jamesDialogsDone?: string[];
   mapZoomLevel?: number;
@@ -179,6 +180,7 @@ export interface GameState {
   miningEndTimestamp?: number;
   miningTotalDuration?: number;
   miningRarity?: "common" | "uncommon" | "rare" | "epic";
+  currentMineRarity?: "common" | "uncommon" | "rare" | "epic";
   // Wave Event
   isWaveActive?: boolean;
   stellarNucleusHp?: number;

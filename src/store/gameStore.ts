@@ -19,7 +19,7 @@ interface GameStore extends GameState {
   castMagic: (type: "heal" | "fire" | "lightning") => void;
   buyPotions: (type: "health" | "mana") => void;
   usePotion: (type: "health" | "mana") => void;
-  addItemToInventory: (itemId: string, type: "consumable" | "material" | "currency", quantity: number) => void;
+  addItemToInventory: (itemId: string, type: "consumable" | "material" | "currency" | "tool", quantity: number) => void;
   addActiveAnimation: (anim: import("../types").AnimationEvent) => void;
   removeActiveAnimation: (id: string) => void;
 }
@@ -238,12 +238,30 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     let nextXP = state.xp_current || 0;
-    if (newStatus === "completed" && !wasAlreadyCompleted) {
-      nextXP += 400; // Matemática para chegar em 1600 XP (Lvl 5) em 4 missões!
-    }
-    const nextLevel = Math.floor(Math.pow(nextXP / 50, 0.4)) + 1;
-
+    let nextLevel = Math.floor(Math.pow(nextXP / 50, 0.4)) + 1;
     let isLevelingUp = false;
+
+    if (newStatus === "completed" && !wasAlreadyCompleted) {
+      if (questId === "wallet" || questId === "onramp" || questId === "soroban" || questId === "hold") {
+        // Force level up sequence for onboarding quests: Lvl 2, Lvl 3, Lvl 4, Lvl 5
+        const targetLevel = (questId === "wallet") ? 2 : (questId === "onramp") ? 3 : (questId === "soroban") ? 4 : 5;
+        if (nextLevel < targetLevel) {
+          nextLevel = targetLevel;
+          // Calculate exact XP needed for this level
+          nextXP = Math.ceil(50 * Math.pow(targetLevel - 1, 2.5));
+          isLevelingUp = true;
+        }
+      } else {
+        // Normal quests give flat XP
+        nextXP += 400; 
+        const calcLevel = Math.floor(Math.pow(nextXP / 50, 0.4)) + 1;
+        if (calcLevel > nextLevel) {
+          nextLevel = calcLevel;
+          isLevelingUp = true;
+        }
+      }
+    }
+
     let nextPlayerPos = { ...state.playerPos };
     if (nextLevel > (state.level || 1)) {
       isLevelingUp = true;
@@ -341,6 +359,19 @@ export const useGameStore = create<GameStore>((set, get) => ({
       // Adiciona drop ao inventário
       if (quest.dropItemId) {
         state.addItemToInventory(quest.dropItemId, "material", 1);
+      }
+
+      // ── Progressão Sequencial das Kill Quests: center→east→north→west→south ──
+      const killSequence: QuestId[] = ["kill_center", "kill_east", "kill_north", "kill_west", "kill_south"];
+      const currentSeqIdx = killSequence.indexOf(matchingQuestId);
+      if (currentSeqIdx !== -1 && currentSeqIdx < killSequence.length - 1) {
+        const nextKillQuestId = killSequence[currentSeqIdx + 1];
+        if (newQuests[nextKillQuestId]?.status === "locked") {
+          // Fica locked até o jogador confirmar com James — deixamos como "pending_unlock"
+          // A confirmação com James ativa através de jamesDialogsDone (handled in App.tsx)
+          // Por ora, marcamos como "locked" mas adicionamos a flag no store para o James saber
+          newQuests[nextKillQuestId] = { ...newQuests[nextKillQuestId], pendingActivation: true };
+        }
       }
 
       useGameStore.setState((s) => ({

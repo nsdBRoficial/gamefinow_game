@@ -25,11 +25,51 @@ const mapGrids: Record<MapId, number[][]> = {
 };
 
 const mapDecorations: Record<MapId, any[]> = {
-  center: [...CENTRAL_DECORATIONS, { x: 30, y: 30, type: "mine", mineRarity: "common" }],
-  east: [...FORGE_DECORATIONS, { x: 45, y: 15, type: "mine", mineRarity: "epic" }],
-  north: [...PORT_DECORATIONS, { x: 38, y: 15, type: "mine", mineRarity: "uncommon" }],
-  west: [...BAZAAR_DECORATIONS, { x: 8, y: 22, type: "mine", mineRarity: "rare" }],
-  south: [...SANCTUARY_DECORATIONS, { x: 12, y: 48, type: "mine", mineRarity: "epic" }],
+  center: [
+    ...CENTRAL_DECORATIONS,
+    // 5 Jazidas periféricas espalhadas no mapa Central
+    { x: 4, y: 6, type: "mine", mineRarity: "common" },
+    { x: 54, y: 5, type: "mine", mineRarity: "uncommon" },
+    { x: 56, y: 52, type: "mine", mineRarity: "common" },
+    { x: 5, y: 53, type: "mine", mineRarity: "uncommon" },
+    { x: 30, y: 4, type: "mine", mineRarity: "rare" },
+  ],
+  east: [
+    ...FORGE_DECORATIONS,
+    // 5 Jazidas periféricas no mapa Leste (cavernas)
+    { x: 6, y: 4, type: "mine", mineRarity: "rare" },
+    { x: 54, y: 6, type: "mine", mineRarity: "epic" },
+    { x: 56, y: 50, type: "mine", mineRarity: "rare" },
+    { x: 5, y: 52, type: "mine", mineRarity: "uncommon" },
+    { x: 50, y: 28, type: "mine", mineRarity: "epic" },
+  ],
+  north: [
+    ...PORT_DECORATIONS,
+    // 5 Jazidas periféricas no mapa Norte (porto)
+    { x: 4, y: 4, type: "mine", mineRarity: "uncommon" },
+    { x: 54, y: 4, type: "mine", mineRarity: "rare" },
+    { x: 56, y: 48, type: "mine", mineRarity: "uncommon" },
+    { x: 4, y: 50, type: "mine", mineRarity: "common" },
+    { x: 30, y: 56, type: "mine", mineRarity: "rare" },
+  ],
+  west: [
+    ...BAZAAR_DECORATIONS,
+    // 5 Jazidas periféricas no mapa Oeste (bazar)
+    { x: 5, y: 4, type: "mine", mineRarity: "rare" },
+    { x: 53, y: 5, type: "mine", mineRarity: "uncommon" },
+    { x: 55, y: 52, type: "mine", mineRarity: "common" },
+    { x: 4, y: 54, type: "mine", mineRarity: "rare" },
+    { x: 3, y: 28, type: "mine", mineRarity: "epic" },
+  ],
+  south: [
+    ...SANCTUARY_DECORATIONS,
+    // 5 Jazidas periféricas no mapa Sul (santuário)
+    { x: 4, y: 5, type: "mine", mineRarity: "uncommon" },
+    { x: 53, y: 4, type: "mine", mineRarity: "epic" },
+    { x: 55, y: 50, type: "mine", mineRarity: "rare" },
+    { x: 5, y: 52, type: "mine", mineRarity: "common" },
+    { x: 30, y: 55, type: "mine", mineRarity: "epic" },
+  ],
 };
 
 
@@ -39,6 +79,33 @@ export function getMapGrid(mapId: MapId): number[][] {
 
 export function getMapDecorations(mapId: MapId): any[] {
   return mapDecorations[mapId] || mapDecorations.center;
+}
+
+import { isCollidable } from "../gameData";
+
+export function relocateMine(mapId: MapId, oldX: number, oldY: number) {
+  const decs = mapDecorations[mapId];
+  if (!decs) return;
+  const mineIndex = decs.findIndex(d => d.type === "mine" && d.x === oldX && d.y === oldY);
+  
+  if (mineIndex > -1) {
+    const grid = getMapGrid(mapId);
+    let newX, newY;
+    let attempts = 0;
+    
+    do {
+      newX = Math.floor(Math.random() * 56) + 2; // 2 to 57
+      newY = Math.floor(Math.random() * 56) + 2;
+      attempts++;
+    } while (
+      attempts < 100 && 
+      (Math.abs(newX - 30) < 18 && Math.abs(newY - 30) < 18) || // Not in center
+      isCollidable(grid[newY][newX]) // Not on a wall
+    );
+    
+    decs[mineIndex].x = newX;
+    decs[mineIndex].y = newY;
+  }
 }
 
 import { NPC } from "../types";

@@ -1360,63 +1360,124 @@ export const drawMapDecorations = (
         break;
 
       case "mine":
-        // Base da rocha
-        ctx.fillStyle = "#52525b"; // zinc-600
+        // ── JAZIDA MINERAL — grande, vistosa, impossível de ignorar ──
+        ctx.save();
+        const mineTime = performance.now();
+        const minePulse = Math.sin(mineTime / 300) * 0.5 + 0.5; // 0 to 1
+
+        // Sombra projetada
+        ctx.fillStyle = "rgba(0,0,0,0.5)";
         ctx.beginPath();
-        ctx.moveTo(worldX + 8, worldY + 28);
-        ctx.lineTo(worldX + 24, worldY + 28);
-        ctx.lineTo(worldX + 28, worldY + 16);
-        ctx.lineTo(worldX + 20, worldY + 6);
-        ctx.lineTo(worldX + 12, worldY + 6);
-        ctx.lineTo(worldX + 4, worldY + 16);
-        ctx.closePath();
+        ctx.ellipse(worldX + 20, worldY + 52, 20, 6, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Sombra / Detalhes da rocha
-        ctx.fillStyle = "#3f3f46"; // zinc-700
-        ctx.beginPath();
-        ctx.moveTo(worldX + 16, worldY + 28);
-        ctx.lineTo(worldX + 24, worldY + 28);
-        ctx.lineTo(worldX + 28, worldY + 16);
-        ctx.lineTo(worldX + 20, worldY + 12);
-        ctx.lineTo(worldX + 16, worldY + 18);
-        ctx.closePath();
-        ctx.fill();
+        // Cor principal e glow baseados na raridade
+        let mineGemColor = "#94a3b8"; // common (cinza prata)
+        let mineGlowColor = "rgba(148, 163, 184, 0.7)";
+        let mineBgColor = "#475569";
+        let mineGlowRadius = 16 + minePulse * 6;
 
-        // Cor da gema baseada na raridade
-        let gemColor = "#71717a"; // common (cinza)
-        let glowColor = "transparent";
-        if (dec.mineRarity === "uncommon") { gemColor = "#22c55e"; glowColor = "rgba(34, 197, 94, 0.4)"; } // green
-        else if (dec.mineRarity === "rare") { gemColor = "#3b82f6"; glowColor = "rgba(59, 130, 246, 0.5)"; } // blue
-        else if (dec.mineRarity === "epic") { gemColor = "#a855f7"; glowColor = "rgba(168, 85, 247, 0.6)"; } // purple
-
-        // Glow (brilho externo para raros/épicos)
-        if (glowColor !== "transparent") {
-          ctx.beginPath();
-          ctx.arc(worldX + 16, worldY + 16, 12, 0, Math.PI * 2);
-          ctx.fillStyle = glowColor;
-          ctx.fill();
+        if (dec.mineRarity === "uncommon") {
+          mineGemColor = "#4ade80"; mineGlowColor = `rgba(74, 222, 128, ${0.5 + minePulse * 0.4})`;
+          mineBgColor = "#166534"; mineGlowRadius = 20 + minePulse * 8;
+        } else if (dec.mineRarity === "rare") {
+          mineGemColor = "#60a5fa"; mineGlowColor = `rgba(96, 165, 250, ${0.6 + minePulse * 0.4})`;
+          mineBgColor = "#1e3a8a"; mineGlowRadius = 24 + minePulse * 10;
+        } else if (dec.mineRarity === "epic") {
+          mineGemColor = "#c084fc"; mineGlowColor = `rgba(192, 132, 252, ${0.7 + minePulse * 0.3})`;
+          mineBgColor = "#581c87"; mineGlowRadius = 28 + minePulse * 12;
         }
 
-        // Gema encravada 1
-        ctx.fillStyle = gemColor;
+        // Aura de brilho ao redor da jazida
+        const mineGradient = ctx.createRadialGradient(worldX + 20, worldY + 22, 2, worldX + 20, worldY + 22, mineGlowRadius * 2.5);
+        mineGradient.addColorStop(0, mineGlowColor);
+        mineGradient.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = mineGradient;
         ctx.beginPath();
-        ctx.moveTo(worldX + 12, worldY + 12);
-        ctx.lineTo(worldX + 16, worldY + 8);
-        ctx.lineTo(worldX + 20, worldY + 14);
-        ctx.lineTo(worldX + 16, worldY + 18);
+        ctx.arc(worldX + 20, worldY + 22, mineGlowRadius * 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Corpo principal da rocha (grande, irregular)
+        ctx.fillStyle = mineBgColor;
+        ctx.beginPath();
+        ctx.moveTo(worldX + 4, worldY + 50);
+        ctx.lineTo(worldX + 0, worldY + 32);
+        ctx.lineTo(worldX + 6, worldY + 14);
+        ctx.lineTo(worldX + 16, worldY + 6);
+        ctx.lineTo(worldX + 28, worldY + 4);
+        ctx.lineTo(worldX + 38, worldY + 10);
+        ctx.lineTo(worldX + 42, worldY + 24);
+        ctx.lineTo(worldX + 40, worldY + 44);
+        ctx.lineTo(worldX + 28, worldY + 52);
+        ctx.lineTo(worldX + 12, worldY + 52);
         ctx.closePath();
         ctx.fill();
 
-        // Gema encravada 2 (menor)
+        // Detalhe de sombra na rocha (textura)
+        ctx.fillStyle = "rgba(0,0,0,0.25)";
         ctx.beginPath();
-        ctx.moveTo(worldX + 6, worldY + 18);
-        ctx.lineTo(worldX + 10, worldY + 16);
-        ctx.lineTo(worldX + 12, worldY + 20);
-        ctx.lineTo(worldX + 8, worldY + 22);
+        ctx.moveTo(worldX + 24, worldY + 52);
+        ctx.lineTo(worldX + 40, worldY + 44);
+        ctx.lineTo(worldX + 42, worldY + 24);
+        ctx.lineTo(worldX + 30, worldY + 30);
+        ctx.lineTo(worldX + 26, worldY + 48);
         ctx.closePath();
         ctx.fill();
-        
+
+        // Gema encravada central (grande, brilhante)
+        ctx.fillStyle = mineGemColor;
+        ctx.shadowColor = mineGemColor;
+        ctx.shadowBlur = 10 + minePulse * 8;
+        ctx.beginPath();
+        ctx.moveTo(worldX + 21, worldY + 6);   // top
+        ctx.lineTo(worldX + 32, worldY + 18);  // right
+        ctx.lineTo(worldX + 21, worldY + 34);  // bottom
+        ctx.lineTo(worldX + 10, worldY + 18);  // left
+        ctx.closePath();
+        ctx.fill();
+
+        // Brilho interno da gema
+        ctx.fillStyle = "rgba(255,255,255,0.5)";
+        ctx.shadowBlur = 0;
+        ctx.beginPath();
+        ctx.moveTo(worldX + 21, worldY + 8);
+        ctx.lineTo(worldX + 28, worldY + 18);
+        ctx.lineTo(worldX + 21, worldY + 22);
+        ctx.lineTo(worldX + 14, worldY + 18);
+        ctx.closePath();
+        ctx.fill();
+
+        // Gema menor secundária
+        ctx.fillStyle = mineGemColor;
+        ctx.shadowColor = mineGemColor;
+        ctx.shadowBlur = 6 + minePulse * 4;
+        ctx.beginPath();
+        ctx.moveTo(worldX + 6, worldY + 28);
+        ctx.lineTo(worldX + 12, worldY + 22);
+        ctx.lineTo(worldX + 16, worldY + 30);
+        ctx.lineTo(worldX + 8, worldY + 36);
+        ctx.closePath();
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Indicador de ESPAÇO se estiver perto
+        const isNearMine = Math.abs(playerPos.x - dec.x) <= 1 && Math.abs(playerPos.y - dec.y) <= 1;
+        if (isNearMine) {
+          ctx.font = "bold 8px 'JetBrains Mono', monospace";
+          const mText = "ESPAÇO";
+          const mW = ctx.measureText(mText).width + 8;
+          ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+          ctx.fillRect(worldX + 32 - mW / 2, worldY - 10, mW, 11);
+          ctx.strokeStyle = mineGemColor;
+          ctx.lineWidth = 1;
+          ctx.strokeRect(worldX + 32 - mW / 2, worldY - 10, mW, 11);
+          ctx.fillStyle = "#ffffff";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(mText, worldX + 32, worldY - 5);
+        }
+
+        ctx.restore();
         break;
 
       case "stellar_nucleus":
@@ -1466,26 +1527,7 @@ export const drawMapDecorations = (
         const nucleusHp = useGameStore.getState().stellarNucleusHp ?? 10000;
         const maxNucleusHp = 10000; // max hp constant
 
-        // Name tag & HP bar
-        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
-        ctx.fillRect(worldX - 16, worldY - 26, 96, 14);
-        ctx.strokeStyle = "#38bdf8";
-        ctx.lineWidth = 1;
-        ctx.strokeRect(worldX - 16, worldY - 26, 96, 14);
-
-        ctx.fillStyle = "#bae6fd";
-        ctx.font = "bold 8px monospace";
-        ctx.textAlign = "center";
-        ctx.fillText(`NÚCLEO STELLAR`, worldX + 32, worldY - 16);
-
-        // HP bar background
-        ctx.fillStyle = "#1e293b";
-        ctx.fillRect(worldX - 14, worldY - 11, 92, 4);
-        // Current HP
-        ctx.fillStyle = "#22c55e"; // Green for healthy, can change if low
-        if (nucleusHp / maxNucleusHp < 0.25) ctx.fillStyle = "#ef4444"; // Red if critical
-        else if (nucleusHp / maxNucleusHp < 0.5) ctx.fillStyle = "#eab308"; // Yellow if half
-        ctx.fillRect(worldX - 14, worldY - 11, 92 * (nucleusHp / maxNucleusHp), 4);
+        // Nome e HP tag removidos conforme solicitado — objeto interativo sem texto ou barras flutuantes
         
         // Glow pulse if under attack
         if (useGameStore.getState().isWaveActive) {

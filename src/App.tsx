@@ -136,8 +136,10 @@ export default function App() {
   const [showActiveQuest, setShowActiveQuest] = useState(false);
   const [showLegendaryRibbon, setShowLegendaryRibbon] = useState(false);
 
-  // Compute hasStar for Battle Mode
-  const hasCompletedAllQuests = Object.values(gameState.quests || {}).every(q => q.status === "completed");
+  // Compute hasStar for Battle Mode — only checks the 4 blockchain quests, NOT kill quests
+  const hasCompletedAllQuests = ["wallet", "onramp", "soroban", "hold"].every(
+    (id) => gameState.quests[id]?.status === "completed"
+  );
   const hasStar = playerPos.isGM || hasCompletedAllQuests;
   const [showPassport, setShowPassport] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
@@ -169,6 +171,19 @@ export default function App() {
       }
     }
   }, [hasStar, gameState.level, playerPos.maxHp, playerPos.maxMp, setGameState, setPlayerPos]);
+
+  // Quando o jogador obtém a Estrela de Guardião, ativa a Kill Quest do Centro
+  useEffect(() => {
+    if (hasStar && gameState.quests.kill_center?.status === "locked") {
+      setGameState((prev) => ({
+        ...prev,
+        quests: {
+          ...prev.quests,
+          kill_center: { ...prev.quests.kill_center, status: "active" },
+        },
+      }));
+    }
+  }, [hasStar, gameState.quests.kill_center?.status, setGameState]);
 
   // Auto-Regeneration (1 HP and 1 MP per second)
   useEffect(() => {
@@ -269,7 +284,7 @@ export default function App() {
   };
 
   // Is the player near any smart terminal?
-  const [isNearTerminal, setIsNearTerminal] = useState<"wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | "outfit_shop" | null>(null);
+  const [isNearTerminal, setIsNearTerminal] = useState<"wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | "outfit_shop" | "mine" | null>(null);
 
   // Simulate periodic Stellar Ledger sequence increments (Consensus in 5 seconds)
   // And fetch real on-chain balances from testnet!
@@ -426,17 +441,35 @@ export default function App() {
           } else if (prev.quests.hold.status === "completed" && !updatedJamesList.includes("guide_all_completed")) {
             updatedJamesList.push("guide_all_completed");
           }
+          if (prev.quests.kill_south?.status === "completed" && !updatedJamesList.includes("james_kill_all_done")) {
+            updatedJamesList.push("james_kill_all_done");
+          }
         }
 
-        // Executa callback onDialogComplete se existir (mesmo fora do React re-render cycle)
-        if (currentDialog?.onDialogComplete) {
-          setTimeout(() => {
-            currentDialog.onDialogComplete!();
-          }, 0);
+        // ── Kill Quest sequencial: Se James acaba de confirmar e a próxima kill está pendente ──
+        let updatedQuestsForKill = { ...prev.quests };
+        if (currentDialog && currentDialog.npcId === "guide") {
+          // Sequência: center→east→north→west→south
+          const killSequence = ["kill_center", "kill_east", "kill_north", "kill_west", "kill_south"] as const;
+          for (const killId of killSequence) {
+            const kq = updatedQuestsForKill[killId as keyof typeof updatedQuestsForKill] as any;
+            if (kq && kq.pendingActivation && kq.status !== "active" && kq.status !== "completed") {
+              updatedQuestsForKill = {
+                ...updatedQuestsForKill,
+                [killId]: { ...kq, status: "active", pendingActivation: false },
+              };
+              // Registra confirmação desta kill no James
+              if (!updatedJamesList.includes(`james_kill_${killId}`)) {
+                updatedJamesList.push(`james_kill_${killId}`);
+              }
+              break; // Ativa apenas uma por vez
+            }
+          }
         }
 
         return {
           ...prev,
+          quests: updatedQuestsForKill,
           activeDialog: null,
           activeModal: nextModal,
           jamesDialogsDone: updatedJamesList,
@@ -488,14 +521,100 @@ export default function App() {
           dialogKey = "dialogs.guide.q4_active";
         }
       } else if (holdStatus === "completed") {
-        dialogKey = "dialogs.guide.all_completed";
+        // ── Kill Quests sequenciais ──
+        const killCenter = gameState.quests.kill_center;
+        const killEast = gameState.quests.kill_east;
+        const killNorth = gameState.quests.kill_north;
+        const killWest = gameState.quests.kill_west;
+        const killSouth = gameState.quests.kill_south;
+
+        if (killCenter?.status === "completed" && killEast?.pendingActivation) {
+          // kill_center completa, east esperando confirmação
+          dialogKey = "__kill_east_unlock__";
+        } else if (killEast?.status === "completed" && killNorth?.pendingActivation) {
+          dialogKey = "__kill_north_unlock__";
+        } else if (killNorth?.status === "completed" && killWest?.pendingActivation) {
+          dialogKey = "__kill_west_unlock__";
+        } else if (killWest?.status === "completed" && killSouth?.pendingActivation) {
+          dialogKey = "__kill_south_unlock__";
+        } else if (killSouth?.status === "completed") {
+          dialogKey = "__kill_all_completed__";
+        } else if (killCenter?.status === "active") {
+          dialogKey = "__kill_center_active__";
+        } else if (killEast?.status === "active") {
+          dialogKey = "__kill_east_active__";
+        } else if (killNorth?.status === "active") {
+          dialogKey = "__kill_north_active__";
+        } else if (killWest?.status === "active") {
+          dialogKey = "__kill_west_active__";
+        } else if (killSouth?.status === "active") {
+          dialogKey = "__kill_south_active__";
+        } else {
+          dialogKey = "dialogs.guide.all_completed";
+        }
       }
     }
+
+    // ── Diálogos especiais das Kill Quests (não passam pelo i18n) ──
+    const KILL_QUEST_DIALOGS: Record<string, string[]> = {
+      "__kill_east_unlock__": [
+        "⚔️ Impressionante! Você exterminou os Blobs da Praça Central!",
+        "Os Vermes das Cavernas no Leste estão cada vez mais ousados. A Forja de Kael está em perigo!",
+        "Missão desbloqueada: Guerreiro da Forja Leste 🪱",
+        "Vá ao Portal Leste e elimine 5 Cave Worms para proteger o ferreiro!",
+      ],
+      "__kill_north_unlock__": [
+        "⚔️ Fantástico! Você é um verdadeiro caçador de Cavernas!",
+        "Os Caranguejos gigantes do Norte estão bloqueando as rotas navais do Capitão HC!",
+        "Missão desbloqueada: Caçador do Porto Norte 🦀",
+        "Entre pelo Portal Norte e elimine 5 Crabs para liberar o porto!",
+      ],
+      "__kill_west_unlock__": [
+        "⚔️ Herói! Os mercadores do Norte agradecem!",
+        "As Abelhas Gigantes do Bazar Oeste atacam os comerciantes alquimistas!",
+        "Missão desbloqueada: Desbravador do Bazar Oeste 🐝",
+        "Vá ao Portal Oeste e elimine 5 Bees raivosas para restaurar a paz!",
+      ],
+      "__kill_south_unlock__": [
+        "⚔️ Inacreditável! O Bazar Oeste prospera graças a você!",
+        "Mas há rumores sombrios do Santuário Sul... Serpentes Místicas corrompidas pelo caos!",
+        "Missão desbloqueada: Herói do Santuário Sul 🐍",
+        "Esta é sua maior batalha! Vá ao Portal Sul e elimine 5 Snakes para salvar o Santuário!",
+      ],
+      "__kill_center_active__": [
+        "Ainda há Slimes ameaçando a Praça Central!",
+        "Ative o Modo Batalha e limpe a área! Preciso que você elimine 5 Slimes."
+      ],
+      "__kill_east_active__": [
+        "A forja de Kael ainda corre perigo!",
+        "Siga para o Leste e elimine 5 Cave Worms."
+      ],
+      "__kill_north_active__": [
+        "O Capitão HC precisa da sua ajuda com os caranguejos!",
+        "Siga para o Norte e elimine 5 Crabs."
+      ],
+      "__kill_west_active__": [
+        "As abelhas gigantes continuam atormentando o Bazar Oeste!",
+        "Siga para o Oeste e elimine 5 Bees."
+      ],
+      "__kill_south_active__": [
+        "As Serpentes Místicas estão destruindo o Santuário Sul!",
+        "Siga para o Sul e elimine 5 Snakes."
+      ],
+      "__kill_all_completed__": [
+        "🌟 LENDÁRIO! Você completou todas as caças e provou ser o maior guerreiro de Stellar!",
+        "Os cinco mapas estão limpos e os cidadãos estão em paz.",
+        "Você é agora o CAMPEÃO DE STELLAR — um título que poucos alcançaram!",
+        "Que sua espada brilhe sempre, herói! Novas aventuras aguardam além das estrelas...",
+      ],
+    };
 
     const res = t(dialogKey, { returnObjects: true });
     let dialogueLines: string[] = [];
 
-    if (Array.isArray(res)) {
+    if (dialogKey.startsWith("__") && KILL_QUEST_DIALOGS[dialogKey]) {
+      dialogueLines = KILL_QUEST_DIALOGS[dialogKey];
+    } else if (Array.isArray(res)) {
       dialogueLines = res as string[];
     } else if (npc.dialogs && npc.dialogs.length > 0) {
       dialogueLines = npc.dialogs;
@@ -523,6 +642,7 @@ export default function App() {
   const handleTriggerModal = () => {
     playSynthSound("beep");
     if (isNearTerminal) {
+      if (isNearTerminal === "mine") return;
       // Trava de Acesso: Apenas para quem tem a Estrela de Guardião (Carteira Stellar forjada / Missão concluída)
       const hasStar = gameState.wallet.hasWallet || gameState.quests.wallet.status === "completed";
 
@@ -609,9 +729,8 @@ export default function App() {
         ledgerSequence: prev.currentLedger,
       };
 
-      const updatedQuests = { ...prev.quests };
-      updatedQuests.wallet.status = "completed";
-      updatedQuests.onramp.status = "active";
+      // O completeQuest já ativa a próxima quest e concede 400 XP automaticamente!
+      useGameStore.getState().completeQuest("wallet");
 
       return {
         ...prev,
@@ -629,14 +748,23 @@ export default function App() {
           usdcBalance: 0,
           soroBalance: 0,
         },
-        quests: updatedQuests,
+        quests: useGameStore.getState().quests,
         transactions: [newTx, ...prev.transactions],
+        xp_current: useGameStore.getState().xp_current,
+        level: useGameStore.getState().level,
+        playerPos: useGameStore.getState().playerPos,
       };
     });
   };
 
   const handleOnRampSuccess = (asset: "XLM" | "USDW" | "BRW", amountAdded: number, method: "PIX" | "CARD") => {
     playSynthSound("coin");
+    
+    // Guard: só avança se a quest onramp ainda não foi completada
+    if (useGameStore.getState().quests.onramp.status !== "completed") {
+      useGameStore.getState().completeQuest("onramp");
+    }
+
     setGameState((prev) => {
       const newTx: Transaction = {
         id: generateTxHash(),
@@ -649,19 +777,13 @@ export default function App() {
         ledgerSequence: prev.currentLedger,
       };
 
-      const updatedQuests = { ...prev.quests };
-      updatedQuests.onramp.status = "completed";
-      updatedQuests.soroban.status = "active";
-
       const balanceField = asset === "XLM" ? "xlmBalance" : asset === "USDW" ? "usdwBalance" : "brwBalance";
 
       return {
-        ...prev,
         wallet: {
           ...prev.wallet,
           [balanceField]: (prev.wallet[balanceField] || 0) + amountAdded,
         },
-        quests: updatedQuests,
         transactions: [newTx, ...prev.transactions],
       };
     });
@@ -669,6 +791,12 @@ export default function App() {
 
   const handleSwapSuccess = (fromAsset: "XLM" | "USDW" | "BRW", toAsset: "XLM" | "USDW" | "BRW", amountFrom: number, amountTo: number) => {
     playSynthSound("success");
+    
+    // Guard: só avança se a quest soroban ainda não foi completada
+    if (useGameStore.getState().quests.soroban.status !== "completed") {
+      useGameStore.getState().completeQuest("soroban");
+    }
+
     setGameState((prev) => {
       const fromField = fromAsset === "XLM" ? "xlmBalance" : fromAsset === "USDW" ? "usdwBalance" : "brwBalance";
       const toField = toAsset === "XLM" ? "xlmBalance" : toAsset === "USDW" ? "usdwBalance" : "brwBalance";
@@ -687,10 +815,6 @@ export default function App() {
         ledgerSequence: prev.currentLedger,
       };
 
-      const updatedQuests = { ...prev.quests };
-      updatedQuests.soroban.status = "completed";
-      updatedQuests.hold.status = "active";
-
       return {
         ...prev,
         wallet: {
@@ -698,7 +822,7 @@ export default function App() {
           [fromField]: Math.max(0, currentFrom - amountFrom),
           [toField]: currentTo + amountTo,
         },
-        quests: updatedQuests,
+        quests: useGameStore.getState().quests,
         transactions: [newTx, ...prev.transactions],
       };
     });
@@ -706,10 +830,13 @@ export default function App() {
 
   const handleHoldSuccess = (asset: "XLM" | "USDW" | "BRW", amount: number, updatedFields: Partial<WalletState>, tx: Transaction) => {
     playSynthSound("success");
-    setGameState((prev) => {
-      const updatedQuests = { ...prev.quests };
-      updatedQuests.hold.status = "completed";
+    
+    // Guard: só completa hold se ainda não foi completada
+    if (useGameStore.getState().quests.hold.status !== "completed") {
+      useGameStore.getState().completeQuest("hold");
+    }
 
+    setGameState((prev) => {
       return {
         ...prev,
         wallet: {
@@ -718,8 +845,11 @@ export default function App() {
           isLocked: true,
           lockedAmount: (prev.wallet.lockedAmount || 0) + (asset === "XLM" ? amount : 0),
         },
-        quests: updatedQuests,
+        quests: useGameStore.getState().quests,
         transactions: [tx, ...prev.transactions],
+        xp_current: useGameStore.getState().xp_current,
+        level: useGameStore.getState().level,
+        playerPos: useGameStore.getState().playerPos,
       };
     });
   };
@@ -789,7 +919,7 @@ export default function App() {
   // Keyboard shortcut listener to advance dialogue boxes and toggle full map
   useEffect(() => {
     const handleGlobalKeys = (e: KeyboardEvent) => {
-      if (e.key === " " || e.key === "Enter") {
+      if (e.key === " ") {
         // Prevent default scroll on Space
         const target = e.target as HTMLElement;
         if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable)) {
@@ -830,7 +960,18 @@ export default function App() {
   const progressPercent = isGmMode ? 100 : Math.min(100, Math.max(0, (xpIntoThisLevel / xpNeededForNext) * 100));
 
   let currentActiveQuest = activeQuestsArray.find(q => q.status === "active");
-  if (!currentActiveQuest && isCompletedAll) {
+  const isPendingKillQuest = activeQuestsArray.some(q => q.pendingActivation);
+
+  if (!currentActiveQuest && isPendingKillQuest) {
+    currentActiveQuest = {
+      id: "pending_kill" as any,
+      title: "REPORTAR AO JAMES",
+      description: "Retorne ao saguão principal para receber as honrarias e sua próxima missão.",
+      instructions: "Siga para a Praça Central e converse com James [NPC].",
+      reward: "Nova Missão 🌟",
+      status: "active"
+    };
+  } else if (!currentActiveQuest && gameState.quests.kill_south?.status === "completed") {
     currentActiveQuest = {
       id: "all_done" as any,
       title: "NEW QUESTS COMING SOON",
@@ -838,6 +979,15 @@ export default function App() {
       instructions: "You have completed all current onboarding quests on the Stellar network. Stay tuned for upcoming adventures!",
       reward: "Legendary Title 🌟",
       status: "completed"
+    };
+  } else if (!currentActiveQuest && isCompletedAll && !isPendingKillQuest) {
+     currentActiveQuest = {
+      id: "pending_kill" as any,
+      title: "REPORTAR AO JAMES",
+      description: "Retorne ao saguão principal para receber as honrarias e sua próxima missão.",
+      instructions: "Siga para a Praça Central e converse com James [NPC].",
+      reward: "Nova Missão 🌟",
+      status: "active"
     };
   } else if (!currentActiveQuest) {
     currentActiveQuest = activeQuestsArray[activeQuestsArray.length - 1];
@@ -1336,10 +1486,16 @@ export default function App() {
             </div>
             <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2 mt-0.5">
               <span className="text-black font-black block leading-tight text-[11.5px] md:text-[10.5px] uppercase shrink-0">
-                {currentActiveQuest ? ((currentActiveQuest.id as string) === "all_done" ? currentActiveQuest.title : t(`quests.${currentActiveQuest.id}.title`)) : "NEW QUESTS COMING SOON"}
+                {currentActiveQuest 
+                  ? (((currentActiveQuest.id as string) === "all_done" || (currentActiveQuest.id as string) === "pending_kill")
+                      ? currentActiveQuest.title 
+                      : t(`quests.${currentActiveQuest.id}.title`) + 
+                        ((currentActiveQuest.id as string).startsWith("kill_") ? ` (${currentActiveQuest.killCount || 0}/${currentActiveQuest.killGoal || 5})` : "")
+                    ) 
+                  : "NEW QUESTS COMING SOON"}
               </span>
               <span className="text-slate-600 text-[10px] md:text-[9px] block leading-snug sm:border-l sm:border-black/15 sm:pl-2">
-                {currentActiveQuest ? ((currentActiveQuest.id as string) === "all_done" ? currentActiveQuest.instructions : t(`quests.${currentActiveQuest.id}.instructions`)) : "You have completed all current onboarding quests on the Stellar network. Stay tuned for upcoming adventures!"}
+                {currentActiveQuest ? (((currentActiveQuest.id as string) === "all_done" || (currentActiveQuest.id as string) === "pending_kill") ? currentActiveQuest.instructions : t(`quests.${currentActiveQuest.id}.instructions`)) : "You have completed all current onboarding quests on the Stellar network. Stay tuned for upcoming adventures!"}
               </span>
             </div>
           </div>

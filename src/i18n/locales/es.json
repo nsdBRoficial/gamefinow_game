@@ -24,11 +24,41 @@
       "instructions": "Entra por el Portal Sur (Dorado) hacia la Cámara Secreta y habla con Bobba [NPC], el Anciano.",
       "reward": "Título de Guardián Legendario VIP Stellar Holder 🌟"
     },
+    "kill_center": {
+      "title": "Amenaza en la Plaza Central",
+      "description": "¡Los Slimes invasores están contaminando la sagrada Plaza Central! Demuestra tu valor en combate protegiendo el corazón de la ciudad.",
+      "instructions": "Activa el Modo Batalla (⚔️), elimina 5 Slimes y reporta tu éxito al Maestro James.",
+      "reward": "50 XP + Botín de Monstruos"
+    },
+    "kill_east": {
+      "title": "Guerreros de la Forja Este",
+      "description": "¡Gusanos de las cavernas están atacando los suministros del Herrero Kael! Evita que destruyan la forja.",
+      "instructions": "Cruza el Portal Este (Azul), elimina 5 Cave Worms y regresa al Maestro James.",
+      "reward": "100 XP + Botín de Monstruos"
+    },
+    "kill_north": {
+      "title": "Cazador de los Muelles del Norte",
+      "description": "Las rutas marítimas del Capitán HC han sido bloqueadas por Cangrejos Gigantes. ¡Libera el puerto!",
+      "instructions": "Cruza el Portal Norte (Verde), elimina 5 Crabs y regresa al Maestro James.",
+      "reward": "150 XP + Botín de Monstruos"
+    },
+    "kill_west": {
+      "title": "Pionero del Bazar Oeste",
+      "description": "Abejas mutantes están sembrando el pánico en el mercado alquímico. ¡Restaura la paz para los mercaderes!",
+      "instructions": "Cruza el Portal Oeste (Morado), elimina 5 Bees y regresa al Maestro James.",
+      "reward": "250 XP + Botín de Monstruos"
+    },
+    "kill_south": {
+      "title": "Héroe del Santuario Sur",
+      "description": "Las serpientes sombrías han corrompido el Santuario Sagrado. ¡Esta es tu prueba final como Guardián!",
+      "instructions": "Cruza el Portal Sur (Dorado), elimina 5 Snakes y regresa al Maestro James.",
+      "reward": "500 XP + Botín de Monstruos"
+    },
     "all_done": {
-      "title": "NEW QUESTS COMING SOON",
-      "description": "You have completed all current onboarding quests on the Stellar network. Stay tuned for upcoming adventures!",
-      "instructions": "You have completed all current onboarding quests on the Stellar network. Stay tuned for upcoming adventures!",
-      "reward": "Legendary Title 🌟"
+      "title": "EL FIN ES SOLO EL COMIENZO",
+      "description": "¡Has demostrado ser el héroe supremo de la red Stellar! Pero nuevas misiones grandiosas están siendo forjadas por los dioses.",
+      "instructions": "¡Continúa fortaleciendo a tus héroes, recolectando tesoros y preparándote para las próximas expansiones!",
+      "reward": "Gloria Eterna 🌟"
     }
   },
   "dialogs": {

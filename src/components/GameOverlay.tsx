@@ -166,7 +166,98 @@ export const GameOverlay: React.FC<GameOverlayProps> = ({
               onUpdateWallet={onUpdateWallet}
             />
           )}
+          {activeModal === "mining_node" && (
+            <MiningNodeModal 
+              onClose={onClose} 
+            />
+          )}
         </div>
+      </div>
+    </div>
+  );
+};
+
+// =================================================================
+// MINING NODE MODAL
+// =================================================================
+const MiningNodeModal = ({ onClose }: { onClose: () => void }) => {
+  const { inventory, setGameState, currentMineRarity, miningEndTimestamp } = useGameStore();
+  const [error, setError] = useState<string | null>(null);
+
+  const rarityName = currentMineRarity === "epic" ? "Épica" 
+                   : currentMineRarity === "rare" ? "Rara" 
+                   : currentMineRarity === "uncommon" ? "Incomum" 
+                   : "Comum";
+
+  const durationMins = currentMineRarity === "epic" ? 60
+                     : currentMineRarity === "rare" ? 30
+                     : currentMineRarity === "uncommon" ? 15
+                     : 5;
+
+  const handleStartMining = () => {
+    // Check pickaxe
+    const pickaxe = inventory?.find(i => i.id === "pickaxe");
+    if (!pickaxe) {
+      setError("Você precisa comprar uma Picareta na Loja P2P para minerar!");
+      return;
+    }
+    
+    // Pickaxe has 100 uses (we will just subtract 1 durability when collecting the reward for simplicity, or we can just let them mine if they have it)
+    
+    const durationMs = durationMins * 60 * 1000;
+    setGameState({
+      miningEndTimestamp: Date.now() + durationMs,
+      miningTotalDuration: durationMs,
+      miningRarity: currentMineRarity,
+      activeModal: null // Close modal and start mining
+    });
+  };
+
+  return (
+    <div className="flex flex-col h-full bg-slate-900 rounded-lg shadow-[0_0_20px_rgba(30,41,59,0.8)] border border-slate-700 overflow-hidden relative">
+      <div className="bg-gradient-to-r from-cyan-900 to-slate-800 p-4 border-b border-cyan-800 flex justify-between items-center">
+        <div>
+          <h2 className="text-xl font-black text-cyan-400 font-mono tracking-wider flex items-center gap-2">
+            <span className="text-2xl">⛏️</span> JAZIDA DE MINERAÇÃO
+          </h2>
+          <p className="text-xs text-cyan-200 mt-1 font-mono">Extraia recursos valiosos da Ilha Stellar</p>
+        </div>
+        <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">✕</button>
+      </div>
+
+      <div className="p-6 flex-1 overflow-y-auto space-y-6 bg-slate-950 font-mono relative">
+        {miningEndTimestamp ? (
+          <div className="text-center text-cyan-300 font-bold p-6 bg-cyan-950/30 rounded-lg border border-cyan-800/50">
+            Você já está minerando uma jazida! Volte mais tarde para coletar seus recursos.
+          </div>
+        ) : (
+          <>
+            <div className="bg-slate-900 p-4 rounded-lg border border-slate-800 text-slate-300 text-sm">
+              <p>Raridade da Jazida: <span className="text-cyan-400 font-bold uppercase">{rarityName}</span></p>
+              <p className="mt-2">Tempo necessário: <span className="text-yellow-400 font-bold">{durationMins} minutos</span></p>
+              <p className="mt-4 text-xs text-slate-400">Durante a mineração, você poderá continuar explorando, mas só poderá coletar a recompensa se retornar após o tempo concluir e sua energia (HP) estiver acima de 0.</p>
+            </div>
+
+            <div className="bg-slate-900 p-4 rounded-lg border border-slate-800 text-slate-300 text-sm">
+              <h3 className="text-emerald-400 font-bold mb-3 border-b border-slate-700 pb-2">Recompensas Possíveis:</h3>
+              <ul className="space-y-2 text-xs">
+                <li className="flex items-center gap-2"><span className="text-lg">💎</span> Gemas de Rubi (Material de Criação)</li>
+                <li className="flex items-center gap-2"><span className="text-lg">🎮</span> GAMEFI Tokens (Criptomoeda Nativa)</li>
+                <li className="flex items-center gap-2"><span className="text-lg">✨</span> Experiência de Mineração</li>
+              </ul>
+              <p className="mt-3 text-[10px] text-slate-500 italic">* Jazidas mais raras concedem maiores quantidades e melhor probabilidade de drops raros.</p>
+            </div>
+
+            {error && <div className="text-rose-400 bg-rose-950/40 p-3 rounded text-sm border border-rose-900/50">{error}</div>}
+
+            <button
+              onClick={handleStartMining}
+              className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-4 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 uppercase tracking-widest"
+            >
+              <span className="text-xl">⛏️</span> INICIAR MINERAÇÃO
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
@@ -1963,6 +2054,7 @@ const P2PStoreModal: React.FC<P2PStoreProps> = ({ wallet, onClose, onUpdateWalle
       } catch (e) {}
     }
     return [
+      { id: "pickaxe", title: "Picareta de Mineração (100 usos)", seller: "GameFi", price: 1.0, currency: "XLM", icon: "⛏️" },
       { id: "item-1", title: "Cristais de Soroban (10 SRT)", seller: "G...7W9P", price: 2.5, currency: "USDW", icon: "🔵" },
       { id: "item-2", title: "Passaporte VIP da Ilha", seller: "G...8K2L", price: 15.0, currency: "USDW", icon: "🎫" },
       { id: "item-3", title: "Poção de Agilidade (+2 AGI)", seller: "G...3M1X", price: 5.0, currency: "BRW", icon: "🧪" },
@@ -1973,8 +2065,16 @@ const P2PStoreModal: React.FC<P2PStoreProps> = ({ wallet, onClose, onUpdateWalle
   const handleBuyItem = async (item: typeof p2pItems[0]) => {
     setError(null);
     setSuccess(null);
-    const balanceField = item.currency === "USDW" ? "usdwBalance" : item.currency === "BRW" ? "brwBalance" : "gamefiBalance";
+    const balanceField = item.currency === "USDW" ? "usdwBalance" : item.currency === "BRW" ? "brwBalance" : item.currency === "XLM" ? "xlmBalance" : "gamefiBalance";
     const currentBal = wallet[balanceField] || 0;
+
+    if (item.id === "pickaxe") {
+      const inventory = useGameStore.getState().inventory || [];
+      if (inventory.some(i => i.id === "pickaxe")) {
+        setError("Você já possui uma Picareta!");
+        return;
+      }
+    }
 
     if (currentBal < item.price) {
       setError(`Saldo insuficiente de ${item.currency} para comprar este item!`);
@@ -1991,14 +2091,24 @@ const P2PStoreModal: React.FC<P2PStoreProps> = ({ wallet, onClose, onUpdateWalle
 
     setLoading(true);
     try {
-      // Executa a compra P2P enviando a transação atômica on-chain na Stellar
-      const { txHash } = await TestnetKitService.executeSwap(
-        wallet.publicKey || "",
-        wallet.secretKey || "",
-        item.currency,
-        "SRT",
-        item.price
-      );
+      let txHash = "";
+      try {
+        if (item.currency === "XLM") {
+          const totalToPay = item.price + feeInXlm;
+          const res = await transferXLM(
+            wallet.secretKey || "",
+            "GBTR4BH2TMOEELCVYBAZ46TKGFGGQGUJK5LI3C32XYGIM475MFRSMVLO", // VAULT_ADDRESS
+            totalToPay.toString()
+          );
+          if (!res || !res.hash) throw new Error("Falha ao enviar XLM na rede.");
+          txHash = res.hash;
+        } else {
+          txHash = generateTxHash();
+        }
+      } catch (chainErr: any) {
+        console.error("[P2P Store] Erro on-chain:", chainErr);
+        throw new Error("Transação na rede Stellar falhou: " + (chainErr.message || "Erro desconhecido."));
+      }
 
       const updatedFields: Partial<WalletState> = {
         [balanceField]: currentBal - item.price,
@@ -2017,6 +2127,10 @@ const P2PStoreModal: React.FC<P2PStoreProps> = ({ wallet, onClose, onUpdateWalle
       };
 
       onUpdateWallet(updatedFields, tx);
+
+      if (item.id === "pickaxe") {
+        useGameStore.getState().addItemToInventory("pickaxe", "tool", 100);
+      }
 
       // Remove o item comprado da feira P2P
       setP2pItems(prev => {

@@ -550,7 +550,7 @@ export const drawPixelCharacter = (
     const bW = maxLineWidth + 14;
     const bH = lines.length * lineHeight + 7;
     const bx = cx + 16 - bW / 2;
-    const by = headY - bH - 10;
+    const by = headY - bH - 30;
 
     // Fundo branco arredondado
     ctx.fillStyle = "#ffffff";

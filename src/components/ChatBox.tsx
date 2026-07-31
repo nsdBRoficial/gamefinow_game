@@ -39,9 +39,11 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
       ) {
         return;
       }
-      if (e.key === "Enter" && !isExpanded && isConnected) {
-        e.preventDefault();
-        setIsExpanded(true);
+      if (e.key === "Enter") {
+        e.preventDefault(); // Bloqueia cliques acidentais em botões
+        if (!isExpanded && isConnected) {
+          setIsExpanded(true);
+        }
       }
     };
 

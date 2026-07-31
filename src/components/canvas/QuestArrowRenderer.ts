@@ -294,20 +294,83 @@ export function getCurrentQuestTarget(
     }
   }
 
-  // ─── 5. TODAS AS MISSÕES CONCLUÍDAS ──────────────────────────────────────
-  if (quests.hold.status === "completed") {
-    const talkedAllCompletedJames = jamesDialogsDone.includes("guide_all_completed");
+  // ─── 5. KILL QUESTS SEQUENCIAIS (após pegar a estrela) ──────────────────────
+  if (quests.hold?.status === "completed") {
+    const killCenter = quests.kill_center;
+    const killEast = quests.kill_east;
+    const killNorth = quests.kill_north;
+    const killWest = quests.kill_west;
+    const killSouth = quests.kill_south;
 
-    // Se ainda não recebeu os parabéns do James no Centro, aponta pro James [NPC]
-    if (!talkedAllCompletedJames) {
+    // Determina qual kill quest está ativa agora
+    const activeKill = 
+      killCenter?.status === "active" ? killCenter :
+      killEast?.status === "active" ? killEast :
+      killNorth?.status === "active" ? killNorth :
+      killWest?.status === "active" ? killWest :
+      killSouth?.status === "active" ? killSouth : null;
+
+    // Determina se há kill pendente de confirmação com James
+    const pendingKill =
+      killEast?.pendingActivation ? { targetMap: "east", name: "James" } :
+      killNorth?.pendingActivation ? { targetMap: "north", name: "James" } :
+      killWest?.pendingActivation ? { targetMap: "west", name: "James" } :
+      killSouth?.pendingActivation ? { targetMap: "south", name: "James" } :
+      null;
+
+    if (pendingKill) {
+      // Aponta pro James para confirmar a próxima kill quest
       if (currentMap === "center") {
         return {
           name: "James [NPC]",
-          x: 27,
-          y: 28,
+          x: 27, y: 28,
           mapId: "center",
           type: "npc",
-          color: "#22c55e",
+          color: "#ef4444",
+        };
+      } else {
+        return {
+          name: "Portal para o Centro",
+          x: getReturnPortalCoord(currentMap).x,
+          y: getReturnPortalCoord(currentMap).y,
+          mapId: currentMap,
+          type: "portal",
+          color: "#ef4444",
+        };
+      }
+    }
+
+    if (activeKill) {
+      const targetMap = activeKill.targetMap as "center" | "east" | "north" | "west" | "south";
+      // Portais de destino por mapa
+      const portalCoords: Record<string, { x: number; y: number }> = {
+        center: { x: 29.5, y: 29.5 }, // já está no centro
+        east: { x: 58, y: 29.5 },
+        north: { x: 29.5, y: 1 },
+        west: { x: 1, y: 29.5 },
+        south: { x: 29.5, y: 58 },
+      };
+      const killColors: Record<string, string> = {
+        kill_center: "#f87171",
+        kill_east: "#fb923c",
+        kill_north: "#34d399",
+        kill_west: "#a78bfa",
+        kill_south: "#f472b6",
+      };
+      const qColor = killColors[activeKill.id] || "#ef4444";
+
+      if (currentMap === targetMap) {
+        // Já está no mapa certo, a seta desaparece (pois os monstros espalham-se pelo mapa)
+        return null;
+      } else if (currentMap === "center") {
+        // Ir ao portal correto
+        const dest = portalCoords[targetMap];
+        return {
+          name: `Portal → ${targetMap}`,
+          x: dest.x, y: dest.y,
+          mapId: "center",
+          type: "portal",
+          color: qColor,
         };
       } else {
         return {
@@ -320,8 +383,31 @@ export function getCurrentQuestTarget(
         };
       }
     }
-    
-    // Após receber os parabéns finais do James: a seta DESAPARECE completamente!
+
+    // Todas kill quests completas — seta aponta pro James para o parabéns final
+    if (!jamesDialogsDone.includes("james_kill_all_done")) {
+      if (killSouth?.status === "completed") {
+        if (currentMap === "center") {
+          return {
+            name: "James [NPC]",
+            x: 27, y: 28,
+            mapId: "center",
+            type: "npc",
+            color: "#facc15",
+          };
+        } else {
+          return {
+            name: "Portal para o Centro",
+            x: getReturnPortalCoord(currentMap).x,
+            y: getReturnPortalCoord(currentMap).y,
+            mapId: currentMap,
+            type: "portal",
+            color: "#38bdf8",
+          };
+        }
+      }
+    }
+
     return null;
   }
 
