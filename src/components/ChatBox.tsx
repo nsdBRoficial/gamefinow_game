@@ -165,13 +165,13 @@ export const ChatBox: React.FC<ChatBoxProps> = ({
             <input
               ref={inputRef}
               className="flex-1 bg-white/5 border border-white/10 rounded-lg px-2.5 py-1.5 text-[11px] text-white placeholder-slate-500 outline-none focus:border-cyan-500/50 transition font-mono"
-              placeholder={isConnected ? "Digite e pressione Enter..." : "Conectando..."}
+              placeholder={isConnected ? "Digite (máx. 80 chars)..." : "Conectando..."}
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value.slice(0, 200))}
+              onChange={(e) => setInputValue(e.target.value.slice(0, 80))}
               onKeyDown={handleKeyDown}
               disabled={!isConnected}
               autoComplete="off"
-              maxLength={200}
+              maxLength={80}
             />
             <button
               onClick={handleSend}

@@ -2138,7 +2138,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       playerPosVal.frame,
       playerPosVal.dir,
       isLegend,
-      playerPosVal.isGM === true
+      playerPosVal.isGM === true,
+      playerPosVal.bubbleText  // Fix: jogador local agora vê seu próprio balão
     );
 
     // 7.2 Draw Curved HP and MP Bars (Somente no Modo Batalha)

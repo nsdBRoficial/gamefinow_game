@@ -6,7 +6,7 @@
  *   const { onlinePlayers, onlineCount, chatMessages, sendChat, isConnected } = useMultiplayer({
  *     playerId,
  *     playerPos,
- *     onAppearanceChange,
+ *     setPlayerPos,
  *   });
  *
  * - Registra o jogador no Supabase ao montar
@@ -14,6 +14,8 @@
  * - Assina o canal do mapa atual
  * - Re-assina automaticamente ao trocar de mapa
  * - Remove presença ao desmontar (tab fechada)
+ * - Filtra palavrões (PT/EN/ES) antes de enviar chat
+ * - Exibe balão de mensagem acima do personagem (local e remoto) por 5s
  */
 
 import { useEffect, useRef, useState, useCallback } from "react";
@@ -32,10 +34,12 @@ import {
   getOnlineCount,
   updatePlayerAppearance,
 } from "../services/multiplayerService";
+import { processChatMessage } from "../utils/profanityFilter";
 
 interface UseMultiplayerOptions {
   playerId: string;
   playerPos: Player;
+  setPlayerPos: (updater: Partial<Player> | ((prev: Player) => Partial<Player>)) => void;
 }
 
 interface UseMultiplayerResult {
@@ -50,6 +54,7 @@ interface UseMultiplayerResult {
 export function useMultiplayer({
   playerId,
   playerPos,
+  setPlayerPos,
 }: UseMultiplayerOptions): UseMultiplayerResult {
   const [onlinePlayers, setOnlinePlayers] = useState<OnlinePlayer[]>([]);
   const [onlineCount, setOnlineCount] = useState(0);
@@ -59,6 +64,8 @@ export function useMultiplayer({
   const prevMapId = useRef<string>("");
   const prevPlayerId = useRef<string>("");
   const appearanceUpdateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Timers para limpar o bubbleText dos outros jogadores
+  const bubbleTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   // ─── Registro inicial do jogador ──────────────────────────────────────────
   useEffect(() => {
@@ -100,17 +107,17 @@ export function useMultiplayer({
     // Busca contagem de online
     getOnlineCount().then(setOnlineCount);
 
-    // Assina canal Realtime do mapa com dados completos do player (Fase 3.1)
+    // Assina canal Realtime do mapa com dados completos do player
     subscribeToMap(
       mapId,
       playerId,
       (players) => {
         setOnlinePlayers(players);
-        // Fase 2.1: Deriva a contagem dos dados já recebidos (+1 para incluir o próprio jogador)
-        // Evita centenas de requests HTTP extras por minuto ao Supabase
+        // Deriva a contagem dos dados já recebidos (+1 para incluir o próprio jogador)
         setOnlineCount(players.length + 1);
       },
       (msg) => {
+        // Atualiza histórico de mensagens
         setChatMessages((prev) => {
           // Evita duplicatas
           if (prev.some((m) => m.id === msg.id)) return prev;
@@ -118,8 +125,34 @@ export function useMultiplayer({
           // Mantém apenas as últimas 50 mensagens
           return next.slice(-50);
         });
+
+        // ── Balloon: setar bubbleText no OnlinePlayer correspondente ──────────
+        // Isso garante que o balão aparece em tempo real no canvas para todos
+        if (msg.player_id !== playerId) {
+          const filteredMsg = processChatMessage(msg.message);
+          setOnlinePlayers((prev) =>
+            prev.map((p) =>
+              p.player_id === msg.player_id
+                ? { ...p, bubbleText: filteredMsg }
+                : p
+            )
+          );
+
+          // Limpa bubbleText do outro player após 5s
+          const existingTimer = bubbleTimers.current.get(msg.player_id);
+          if (existingTimer) clearTimeout(existingTimer);
+          const timer = setTimeout(() => {
+            setOnlinePlayers((prev) =>
+              prev.map((p) =>
+                p.player_id === msg.player_id ? { ...p, bubbleText: undefined } : p
+              )
+            );
+            bubbleTimers.current.delete(msg.player_id);
+          }, 5000);
+          bubbleTimers.current.set(msg.player_id, timer);
+        }
       },
-      playerPos // Fase 3.1: dados completos para o track() de presença
+      playerPos
     );
   }, [playerId, playerPos.mapId]);
 
@@ -176,18 +209,31 @@ export function useMultiplayer({
     playerPos.gender,
   ]);
 
-  // ─── Envio de chat ────────────────────────────────────────────────────────
+  // ─── Envio de chat + Balloon local ───────────────────────────────────────
   const sendChat = useCallback(
     async (message: string) => {
       if (!playerId || !playerPos.mapId) return;
+
+      // Aplica filtro de palavrões e limita a 80 chars
+      const cleanMsg = processChatMessage(message);
+      if (!cleanMsg.trim()) return;
+
+      // Envia pelo socket
       await sendChatMessage(
         playerPos.mapId || "center",
         playerId,
         playerPos.name || "Anonymo",
-        message
+        cleanMsg
       );
+
+      // ── Balloon: jogador local vê seu próprio balão imediatamente ──────────
+      setPlayerPos({ bubbleText: cleanMsg, bubbleTimer: Date.now() + 5000 });
+      // Limpa após 5 segundos
+      setTimeout(() => {
+        setPlayerPos((prev) => ({ ...prev, bubbleText: undefined, bubbleTimer: undefined }));
+      }, 5000);
     },
-    [playerId, playerPos.mapId, playerPos.name]
+    [playerId, playerPos.mapId, playerPos.name, setPlayerPos]
   );
 
   return {

@@ -275,18 +275,39 @@ export const drawOtherPlayers = (
 
     // ── Speech bubble ─────────────────────────────────────────────────────────
     if (p.bubbleText) {
-      const bubbleY = screenY - 24;
-      ctx.font = "bold 9px 'JetBrains Mono', monospace";
-      const bTextWidth = ctx.measureText(p.bubbleText).width;
-      const bW = bTextWidth + 12;
-      const bH = 16;
-      const bx = screenX + 16 - bW / 2;
-      const by = bubbleY - bH - 4;
+      const MAX_LINE_CHARS = 22;
+      const FONT_SIZE = 9;
+      const lineHeight = FONT_SIZE + 3;
 
-      // Background da bolha
+      ctx.font = `bold ${FONT_SIZE}px 'JetBrains Mono', monospace`;
+
+      // Quebra em até 2 linhas
+      let lines: string[];
+      const text = p.bubbleText;
+      if (text.length <= MAX_LINE_CHARS) {
+        lines = [text];
+      } else {
+        const mid = text.lastIndexOf(" ", MAX_LINE_CHARS) || MAX_LINE_CHARS;
+        lines = [
+          text.slice(0, mid).trim(),
+          text.slice(mid).trim().slice(0, MAX_LINE_CHARS),
+        ].filter(Boolean);
+      }
+
+      const maxLineWidth = Math.max(...lines.map((l) => ctx.measureText(l).width));
+      const bW = maxLineWidth + 14;
+      const bH = lines.length * lineHeight + 7;
+      const bx = screenX + 16 - bW / 2;
+      const by = screenY - 24 - bH;
+
+      // Fundo branco arredondado
       ctx.fillStyle = "#ffffff";
       ctx.beginPath();
-      ctx.roundRect(bx, by, bW, bH, 4);
+      if (ctx.roundRect) {
+        ctx.roundRect(bx, by, bW, bH, 5);
+      } else {
+        ctx.rect(bx, by, bW, bH);
+      }
       ctx.fill();
       ctx.strokeStyle = "#0f172a";
       ctx.lineWidth = 1.2;
@@ -294,24 +315,22 @@ export const drawOtherPlayers = (
 
       // Ponteiro triangular para baixo
       ctx.beginPath();
-      ctx.moveTo(screenX + 16 - 4, by + bH);
-      ctx.lineTo(screenX + 16, by + bH + 4);
-      ctx.lineTo(screenX + 16 + 4, by + bH);
+      ctx.moveTo(screenX + 12, by + bH);
+      ctx.lineTo(screenX + 16, by + bH + 5);
+      ctx.lineTo(screenX + 20, by + bH);
       ctx.fillStyle = "#ffffff";
       ctx.fill();
-
-      ctx.beginPath();
-      ctx.moveTo(screenX + 16 - 4, by + bH);
-      ctx.lineTo(screenX + 16, by + bH + 4);
-      ctx.lineTo(screenX + 16 + 4, by + bH);
       ctx.strokeStyle = "#0f172a";
       ctx.lineWidth = 1.2;
       ctx.stroke();
 
+      // Texto
       ctx.fillStyle = "#0f172a";
       ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(p.bubbleText, screenX + 16, by + bH / 2 + 0.5);
+      ctx.textBaseline = "top";
+      lines.forEach((line, i) => {
+        ctx.fillText(line, screenX + 16, by + 4 + i * lineHeight);
+      });
     }
 
     ctx.restore();

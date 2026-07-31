@@ -103,7 +103,8 @@ export const drawPixelCharacter = (
   frame: number,
   direction: "down" | "up" | "left" | "right",
   showCrown: boolean = false,
-  isGM: boolean = false
+  isGM: boolean = false,
+  bubbleText?: string
 ) => {
   ctx.save();
 
@@ -521,6 +522,68 @@ export const drawPixelCharacter = (
     ctx.fillRect(cx + 9, crownY - 2, 2, 2);
     ctx.fillRect(cx + 15, crownY - 2, 2, 2);
     ctx.fillRect(cx + 21, crownY - 2, 2, 2);
+  }
+
+  // ── Balão de mensagem (speech bubble) do jogador LOCAL ─────────────────────
+  // Renderizado aqui para que o próprio jogador veja seu balão no canvas.
+  // Outros jogadores têm seus balões renderizados em NPCManager.drawOtherPlayers().
+  if (bubbleText && bubbleText.length > 0) {
+    ctx.save();
+    const MAX_LINE_CHARS = 22;
+    const FONT_SIZE = 9;
+    ctx.font = `bold ${FONT_SIZE}px 'JetBrains Mono', monospace`;
+
+    // Quebra em até 2 linhas
+    let lines: string[];
+    if (bubbleText.length <= MAX_LINE_CHARS) {
+      lines = [bubbleText];
+    } else {
+      const mid = bubbleText.lastIndexOf(" ", MAX_LINE_CHARS) || MAX_LINE_CHARS;
+      lines = [
+        bubbleText.slice(0, mid).trim(),
+        bubbleText.slice(mid).trim().slice(0, MAX_LINE_CHARS),
+      ].filter(Boolean);
+    }
+
+    const lineHeight = FONT_SIZE + 3;
+    const maxLineWidth = Math.max(...lines.map((l) => ctx.measureText(l).width));
+    const bW = maxLineWidth + 14;
+    const bH = lines.length * lineHeight + 7;
+    const bx = cx + 16 - bW / 2;
+    const by = headY - bH - 10;
+
+    // Fundo branco arredondado
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    if (ctx.roundRect) {
+      ctx.roundRect(bx, by, bW, bH, 5);
+    } else {
+      ctx.rect(bx, by, bW, bH);
+    }
+    ctx.fill();
+    ctx.strokeStyle = "#0f172a";
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // Ponteiro triangular apontando para o personagem
+    ctx.beginPath();
+    ctx.moveTo(cx + 12, by + bH);
+    ctx.lineTo(cx + 16, by + bH + 5);
+    ctx.lineTo(cx + 20, by + bH);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+    ctx.strokeStyle = "#0f172a";
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // Texto
+    ctx.fillStyle = "#0f172a";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    lines.forEach((line, i) => {
+      ctx.fillText(line, cx + 16, by + 4 + i * lineHeight);
+    });
+    ctx.restore();
   }
 
   ctx.restore();

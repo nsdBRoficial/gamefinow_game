@@ -128,6 +128,7 @@ export default function App() {
   } = useMultiplayer({
     playerId,
     playerPos,
+    setPlayerPos,
   });
 
   // Handle active retro floating window overlays: "customizer" | "backpack" | "ledger" | "guide" | null

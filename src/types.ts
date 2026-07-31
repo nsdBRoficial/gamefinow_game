@@ -93,6 +93,9 @@ export interface Player {
   attack?: number;
   defense?: number;
   speed?: number;
+  // Chat bubble (balão de mensagem no canvas)
+  bubbleText?: string;   // Texto a ser exibido no balão acima do personagem
+  bubbleTimer?: number;  // Timestamp (ms) de quando o balão deve desaparecer
 }
 
 export interface NPC {
