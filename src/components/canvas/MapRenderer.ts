@@ -1463,7 +1463,7 @@ export const drawMapDecorations = (
         ctx.fill();
 
         // Get Nucleus HP from Global Store
-        const nucleusHp = useGameStore.getState().gameState.stellarNucleusHp ?? 10000;
+        const nucleusHp = useGameStore.getState().stellarNucleusHp ?? 10000;
         const maxNucleusHp = 10000; // max hp constant
 
         // Name tag & HP bar
@@ -1488,9 +1488,9 @@ export const drawMapDecorations = (
         ctx.fillRect(worldX - 14, worldY - 11, 92 * (nucleusHp / maxNucleusHp), 4);
         
         // Glow pulse if under attack
-        if (useGameStore.getState().gameState.isWaveActive) {
+        if (useGameStore.getState().isWaveActive) {
           ctx.beginPath();
-          ctx.arc(worldX + 32, worldY + 8, 40 + Math.sin(time/200)*5, 0, Math.PI * 2);
+          ctx.arc(worldX + 32, worldY + 8, 40 + Math.sin(Date.now()/200)*5, 0, Math.PI * 2);
           ctx.fillStyle = "rgba(239, 68, 68, 0.1)"; // Red alert pulse
           ctx.fill();
         }

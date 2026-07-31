@@ -314,13 +314,13 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     if (!gameState.isWaveActive) return;
 
     // Inicializa os status do evento se ainda não configurados
-    if (useGameStore.getState().gameState.stellarNucleusHp === undefined) {
+    if (useGameStore.getState().stellarNucleusHp === undefined) {
       useGameStore.getState().setGameState({ stellarNucleusHp: 10000, waveMonstersKilled: 0 });
     }
 
     let timeElapsed = 0;
     const interval = setInterval(() => {
-      const currentGameState = useGameStore.getState().gameState;
+      const currentGameState = useGameStore.getState();
       if (!currentGameState.isWaveActive) {
         clearInterval(interval);
         return;
@@ -2337,7 +2337,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
     // 7.5 Render Mining Progress Bar over Player
     if (gameStateVal.miningEndTimestamp && gameStateVal.miningTotalDuration) {
-      const remainingTime = gameStateVal.miningEndTimestamp - time;
+      const remainingTime = gameStateVal.miningEndTimestamp - Date.now();
       if (remainingTime > 0) {
         const progress = 1 - (remainingTime / gameStateVal.miningTotalDuration);
         
@@ -2361,13 +2361,13 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         ctx.fillStyle = "#ffffff";
         ctx.font = "bold 5px monospace";
         ctx.textAlign = "center";
-        const dots = ".".repeat(Math.floor(time / 500) % 4);
+        const dots = ".".repeat(Math.floor(Date.now() / 500) % 4);
         ctx.fillText(`MINERANDO${dots}`, playerScreenX + 16, playerScreenY - 17);
         ctx.restore();
       } else {
         // Mineração concluída
         setTimeout(() => {
-          const currentStoreState = useGameStore.getState().gameState;
+          const currentStoreState = useGameStore.getState();
           if (currentStoreState.miningEndTimestamp && currentStoreState.miningTotalDuration === gameStateVal.miningTotalDuration) {
             // Recompensas baseadas na raridade
             let xp = 50;
