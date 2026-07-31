@@ -15,6 +15,7 @@ interface GameStore extends GameState {
   setBattleMode: (active: boolean) => void;
   setLockedTarget: (targetId: string | null) => void;
   addExperience: (amount: number) => void;
+  registerKill: (creatureName: string, mapId: string) => { questCompleted: boolean; questId?: QuestId; xpGained?: number; dropItemId?: string };
   castMagic: (type: "heal" | "fire" | "lightning") => void;
   buyPotions: (type: "health" | "mana") => void;
   usePotion: (type: "health" | "mana") => void;
@@ -279,6 +280,88 @@ export const useGameStore = create<GameStore>((set, get) => ({
   })),
 
   setLockedTarget: (targetId) => set({ lockedTargetId: targetId }),
+
+  // ─── Registro de Kill para Kill Quests ──────────────────────────────────────
+  registerKill: (creatureName, mapId) => {
+    let result: { questCompleted: boolean; questId?: QuestId; xpGained?: number; dropItemId?: string } = { questCompleted: false };
+
+    const state = useGameStore.getState();
+    const quests = state.quests;
+
+    // Encontra a kill quest que corresponde a esta criatura + mapa
+    const killQuestIds: QuestId[] = ["kill_center", "kill_north", "kill_east", "kill_west", "kill_south"];
+    const matchingQuestId = killQuestIds.find((id) => {
+      const q = quests[id];
+      return (
+        q &&
+        q.status !== "completed" &&
+        q.targetCreature === creatureName &&
+        q.targetMap === mapId
+      );
+    });
+
+    if (!matchingQuestId) return result;
+
+    const quest = quests[matchingQuestId];
+    const newKillCount = (quest.killCount || 0) + 1;
+    const killGoal = quest.killGoal || 5;
+    const isComplete = newKillCount >= killGoal;
+
+    const updatedQuest = {
+      ...quest,
+      killCount: newKillCount,
+      status: isComplete ? ("completed" as const) : quest.status,
+    };
+
+    const newQuests = { ...quests, [matchingQuestId]: updatedQuest };
+    result = { questCompleted: isComplete, questId: matchingQuestId };
+
+    if (isComplete) {
+      // Concede XP
+      const xpToAdd = quest.xpReward || 200;
+      result.xpGained = xpToAdd;
+      result.dropItemId = quest.dropItemId;
+
+      const currentXP = (state.xp_current || 0) + xpToAdd;
+      const newLevel = Math.floor(Math.pow(currentXP / 50, 0.4)) + 1;
+
+      let nextPlayerPos = { ...state.playerPos };
+      if (newLevel > (state.level || 1)) {
+        nextPlayerPos.maxHp = 100 + ((newLevel - 1) * 25);
+        nextPlayerPos.hp = nextPlayerPos.maxHp;
+        nextPlayerPos.maxMp = 50 + ((newLevel - 1) * 10);
+        nextPlayerPos.mp = nextPlayerPos.maxMp;
+        localStorage.setItem("stellar_island_player_pos_v1", JSON.stringify(nextPlayerPos));
+      }
+
+      // Adiciona drop ao inventário
+      if (quest.dropItemId) {
+        state.addItemToInventory(quest.dropItemId, "material", 1);
+      }
+
+      useGameStore.setState((s) => ({
+        quests: newQuests,
+        xp_current: currentXP,
+        level: newLevel,
+        playerPos: nextPlayerPos,
+      }));
+    } else {
+      // Apenas atualiza o progresso
+      useGameStore.setState({ quests: newQuests });
+    }
+
+    // Persiste no localStorage
+    try {
+      const saved = localStorage.getItem("stellar_island_game_state_v1");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        parsed.quests = { ...(parsed.quests || {}), [matchingQuestId]: updatedQuest };
+        localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(parsed));
+      }
+    } catch { /* silently ignore */ }
+
+    return result;
+  },
 
   addExperience: (amount) => set((state) => {
     const currentXP = (state.xp_current || 0) + amount;

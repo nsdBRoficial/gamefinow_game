@@ -1184,6 +1184,30 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       timestamp: time
     });
 
+    // ── Kill Quests Tracking ──
+    const currentMapId = latestPlayerPos.current.mapId || "center";
+    const questRes = useGameStore.getState().registerKill(targetCreature.name, currentMapId);
+    if (questRes.questCompleted && questRes.xpGained) {
+      combatTextsRef.current.push({
+        id: Math.random().toString(),
+        text: `Missão Cumprida! +${questRes.xpGained} XP`,
+        x: targetCreature.x,
+        y: targetCreature.y - 1.5,
+        color: "#facc15",
+        timestamp: time + 500
+      });
+      if (questRes.dropItemId) {
+        combatTextsRef.current.push({
+          id: Math.random().toString(),
+          text: `+Drop Raro!`,
+          x: targetCreature.x,
+          y: targetCreature.y - 2.0,
+          color: "#e879f9",
+          timestamp: time + 1000
+        });
+      }
+    }
+
     if (Math.random() < stats.tokenChance) {
       const droppedTokens = Math.max(1, Math.ceil(stats.minToken + Math.random() * (stats.maxToken - stats.minToken)));
       useGameStore.getState().addItemToInventory("gamefi_token", "currency", droppedTokens);

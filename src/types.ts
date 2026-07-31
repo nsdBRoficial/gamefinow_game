@@ -38,7 +38,9 @@ export interface WalletState {
   lastFaucetClaim?: number; // Timestamp (ms) do ultimo resgate na Fonte Faucet
 }
 
-export type QuestId = "wallet" | "onramp" | "soroban" | "hold";
+export type QuestId =
+  | "wallet" | "onramp" | "soroban" | "hold"
+  | "kill_center" | "kill_north" | "kill_east" | "kill_west" | "kill_south";
 
 export interface Quest {
   id: QuestId;
@@ -47,6 +49,13 @@ export interface Quest {
   instructions: string;
   reward: string;
   status: "locked" | "active" | "completed";
+  // Kill Quest fields
+  killCount?: number;       // Progresso atual de kills
+  killGoal?: number;        // Meta de kills (ex: 5)
+  targetCreature?: string;  // Nome da criatura alvo (ex: "Slime")
+  targetMap?: string;       // Mapa onde a quest ocorre (ex: "center")
+  xpReward?: number;        // XP concedido ao completar
+  dropItemId?: string;      // Item especial dropado ao completar
 }
 
 export interface Player {
