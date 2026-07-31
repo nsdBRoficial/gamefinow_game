@@ -1358,6 +1358,66 @@ export const drawMapDecorations = (
         }
         break;
 
+      case "mine":
+        // Base da rocha
+        ctx.fillStyle = "#52525b"; // zinc-600
+        ctx.beginPath();
+        ctx.moveTo(worldX + 8, worldY + 28);
+        ctx.lineTo(worldX + 24, worldY + 28);
+        ctx.lineTo(worldX + 28, worldY + 16);
+        ctx.lineTo(worldX + 20, worldY + 6);
+        ctx.lineTo(worldX + 12, worldY + 6);
+        ctx.lineTo(worldX + 4, worldY + 16);
+        ctx.closePath();
+        ctx.fill();
+
+        // Sombra / Detalhes da rocha
+        ctx.fillStyle = "#3f3f46"; // zinc-700
+        ctx.beginPath();
+        ctx.moveTo(worldX + 16, worldY + 28);
+        ctx.lineTo(worldX + 24, worldY + 28);
+        ctx.lineTo(worldX + 28, worldY + 16);
+        ctx.lineTo(worldX + 20, worldY + 12);
+        ctx.lineTo(worldX + 16, worldY + 18);
+        ctx.closePath();
+        ctx.fill();
+
+        // Cor da gema baseada na raridade
+        let gemColor = "#71717a"; // common (cinza)
+        let glowColor = "transparent";
+        if (dec.mineRarity === "uncommon") { gemColor = "#22c55e"; glowColor = "rgba(34, 197, 94, 0.4)"; } // green
+        else if (dec.mineRarity === "rare") { gemColor = "#3b82f6"; glowColor = "rgba(59, 130, 246, 0.5)"; } // blue
+        else if (dec.mineRarity === "epic") { gemColor = "#a855f7"; glowColor = "rgba(168, 85, 247, 0.6)"; } // purple
+
+        // Glow (brilho externo para raros/épicos)
+        if (glowColor !== "transparent") {
+          ctx.beginPath();
+          ctx.arc(worldX + 16, worldY + 16, 12, 0, Math.PI * 2);
+          ctx.fillStyle = glowColor;
+          ctx.fill();
+        }
+
+        // Gema encravada 1
+        ctx.fillStyle = gemColor;
+        ctx.beginPath();
+        ctx.moveTo(worldX + 12, worldY + 12);
+        ctx.lineTo(worldX + 16, worldY + 8);
+        ctx.lineTo(worldX + 20, worldY + 14);
+        ctx.lineTo(worldX + 16, worldY + 18);
+        ctx.closePath();
+        ctx.fill();
+
+        // Gema encravada 2 (menor)
+        ctx.beginPath();
+        ctx.moveTo(worldX + 6, worldY + 18);
+        ctx.lineTo(worldX + 10, worldY + 16);
+        ctx.lineTo(worldX + 12, worldY + 20);
+        ctx.lineTo(worldX + 8, worldY + 22);
+        ctx.closePath();
+        ctx.fill();
+        
+        break;
+
       case "p2p_store":
       case "pixel_shop":
         drawPixelShop(ctx, worldX, worldY, dec, tileSize);

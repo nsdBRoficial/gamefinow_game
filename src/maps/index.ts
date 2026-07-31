@@ -25,12 +25,13 @@ const mapGrids: Record<MapId, number[][]> = {
 };
 
 const mapDecorations: Record<MapId, any[]> = {
-  center: CENTRAL_DECORATIONS,
-  east: FORGE_DECORATIONS,
-  north: PORT_DECORATIONS,
-  west: BAZAAR_DECORATIONS,
-  south: SANCTUARY_DECORATIONS,
+  center: [...CENTRAL_DECORATIONS, { x: 30, y: 30, type: "mine", mineRarity: "common" }],
+  east: [...FORGE_DECORATIONS, { x: 45, y: 15, type: "mine", mineRarity: "epic" }],
+  north: [...PORT_DECORATIONS, { x: 38, y: 15, type: "mine", mineRarity: "uncommon" }],
+  west: [...BAZAAR_DECORATIONS, { x: 8, y: 22, type: "mine", mineRarity: "rare" }],
+  south: [...SANCTUARY_DECORATIONS, { x: 12, y: 48, type: "mine", mineRarity: "epic" }],
 };
+
 
 export function getMapGrid(mapId: MapId): number[][] {
   return mapGrids[mapId] || mapGrids.center;

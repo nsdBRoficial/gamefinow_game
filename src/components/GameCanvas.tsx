@@ -444,6 +444,30 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       return;
     }
     
+    // Check for Mining nodes
+    const mapDecorations = getMapDecorations(latestPlayerPos.current.mapId || "center");
+    const mineNode = mapDecorations.find(d => d.x === checkX && d.y === checkY && d.type === "mine");
+    if (mineNode) {
+      if (latestGameState.current.miningEndTimestamp) {
+        // Já está minerando!
+        return;
+      }
+      
+      let durationMinutes = 5;
+      if (mineNode.mineRarity === "uncommon") durationMinutes = 15;
+      else if (mineNode.mineRarity === "rare") durationMinutes = 30;
+      else if (mineNode.mineRarity === "epic") durationMinutes = 60;
+      
+      const durationMs = durationMinutes * 60 * 1000;
+      
+      useGameStore.getState().setGameState({
+        miningEndTimestamp: Date.now() + durationMs,
+        miningTotalDuration: durationMs,
+        miningRarity: mineNode.mineRarity
+      });
+      return;
+    }
+    
     // Interact with notebook on the GAMEFINOW stand
     if (playerPos.mapId === "center" && checkX === 22 && checkY === 32) {
       onTalkToNPC({
@@ -1599,6 +1623,15 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           if (hitsNPC) {
             return { ...prev, dir: nextDir };
           }
+          
+          // Se o jogador começou a se mover, cancela a mineração ativa
+          if (latestGameState.current.miningEndTimestamp) {
+            useGameStore.getState().setGameState({
+              miningEndTimestamp: undefined,
+              miningTotalDuration: undefined,
+              miningRarity: undefined
+            });
+          }
 
           return {
             ...prev,
@@ -2163,8 +2196,59 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       playerPosVal.dir,
       isLegend,
       playerPosVal.isGM === true,
-      playerPosVal.bubbleText  // Fix: jogador local agora vê seu próprio balão
+      playerPosVal.bubbleText
     );
+
+    // 7.5 Render Mining Progress Bar over Player
+    if (gameStateVal.miningEndTimestamp && gameStateVal.miningTotalDuration) {
+      const remainingTime = gameStateVal.miningEndTimestamp - time;
+      if (remainingTime > 0) {
+        const progress = 1 - (remainingTime / gameStateVal.miningTotalDuration);
+        
+        ctx.save();
+        ctx.fillStyle = "rgba(15, 23, 42, 0.8)"; // background escuro
+        ctx.fillRect(playerScreenX - 4, playerScreenY - 14, 40, 6);
+        ctx.strokeStyle = "#475569";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(playerScreenX - 4, playerScreenY - 14, 40, 6);
+
+        // Preenchimento com base na raridade
+        let barColor = "#71717a";
+        if (gameStateVal.miningRarity === "uncommon") barColor = "#22c55e";
+        else if (gameStateVal.miningRarity === "rare") barColor = "#3b82f6";
+        else if (gameStateVal.miningRarity === "epic") barColor = "#a855f7";
+
+        ctx.fillStyle = barColor;
+        ctx.fillRect(playerScreenX - 3, playerScreenY - 13, 38 * progress, 4);
+
+        // Texto MINERANDO animado
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 5px monospace";
+        ctx.textAlign = "center";
+        const dots = ".".repeat(Math.floor(time / 500) % 4);
+        ctx.fillText(`MINERANDO${dots}`, playerScreenX + 16, playerScreenY - 17);
+        ctx.restore();
+      } else {
+        // Mineração concluída
+        setTimeout(() => {
+          const currentStoreState = useGameStore.getState().gameState;
+          if (currentStoreState.miningEndTimestamp && currentStoreState.miningTotalDuration === gameStateVal.miningTotalDuration) {
+            // Recompensas baseadas na raridade
+            let xp = 50;
+            if (gameStateVal.miningRarity === "uncommon") xp = 150;
+            else if (gameStateVal.miningRarity === "rare") xp = 400;
+            else if (gameStateVal.miningRarity === "epic") xp = 1000;
+            
+            useGameStore.getState().addExperience(xp);
+            useGameStore.getState().setGameState({ 
+              miningEndTimestamp: undefined, 
+              miningTotalDuration: undefined, 
+              miningRarity: undefined 
+            });
+          }
+        }, 0);
+      }
+    }
 
     // 7.2 Draw Curved HP and MP Bars (Somente no Modo Batalha)
     if (gameStateVal.isBattleModeActive) {

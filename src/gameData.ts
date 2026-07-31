@@ -48,12 +48,14 @@ export enum TileType {
 export interface GameDecoration {
   x: number;
   y: number;
-  type: "tree" | "bench" | "lamp" | "barrel" | "box" | "statue" | "flower_pot" | "boat" | "stand" | "palm_tree" | "umbrella" | "towel" | "sandcastle" | "p2p_store" | "burn_altar" | "pixel_shop" | "pixel_burn_brazier" | "pixel_faucet";
+  type: "tree" | "bench" | "lamp" | "barrel" | "box" | "statue" | "flower_pot" | "boat" | "stand" | "palm_tree" | "umbrella" | "towel" | "sandcastle" | "p2p_store" | "burn_altar" | "pixel_shop" | "pixel_burn_brazier" | "pixel_faucet" | "mine";
   color?: string;
   text?: string;
   subText?: string;
   width?: number;
   height?: number;
+  // Mining specific
+  mineRarity?: "common" | "uncommon" | "rare" | "epic";
 }
 
 // Passive creature/monster interface (slime blobs)
@@ -96,6 +98,12 @@ export const MOCK_CREATURES: GameCreature[] = [
 
 // Export decorations list
 export const MAP_DECORATIONS: GameDecoration[] = [
+  // --- JAZIDAS DE MINERAÇÃO ---
+  { x: 38, y: 15, type: "mine", mineRarity: "common" }, // Norte (Porto)
+  { x: 12, y: 48, type: "mine", mineRarity: "uncommon" }, // Sul (Santuário)
+  { x: 8, y: 22, type: "mine", mineRarity: "rare" },    // Oeste (Bazaar)
+  { x: 50, y: 38, type: "mine", mineRarity: "epic" },   // Leste (Caverna)
+
   // Central Statue / Coin Fountain
   { x: 30, y: 30, type: "statue" },
   

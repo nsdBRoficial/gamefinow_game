@@ -173,4 +173,8 @@ export interface GameState {
   // Animation Triggers
   isDead?: boolean;
   pendingLevelUp?: boolean;
+  // Mining Progress
+  miningEndTimestamp?: number;
+  miningTotalDuration?: number;
+  miningRarity?: "common" | "uncommon" | "rare" | "epic";
 }
