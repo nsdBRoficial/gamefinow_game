@@ -170,4 +170,7 @@ export interface GameState {
   level?: number;
   inventory?: InventorySlot[];
   activeAnimations?: AnimationEvent[];
+  // Animation Triggers
+  isDead?: boolean;
+  pendingLevelUp?: boolean;
 }

@@ -1496,6 +1496,55 @@ export default function App() {
           />
         )}
 
+        {/* ─── OVERLAYS DE ANIMAÇÃO (DEATH & LEVEL UP) ─── */}
+        {gameState.isDead && (
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black transition-opacity duration-1000 animate-in fade-in">
+            <h1 className="text-red-600 font-serif text-6xl tracking-[0.2em] mb-4 drop-shadow-[0_0_15px_rgba(220,38,38,0.8)]">
+              VOCÊ MORREU
+            </h1>
+            <p className="text-gray-400 font-mono text-lg animate-pulse">
+              Os deuses estão restaurando sua alma...
+            </p>
+            {/* Respawn effect handled via effect hook or timeout below */}
+            <div className="hidden">
+              {setTimeout(() => {
+                const maxHp = playerPos.maxHp || 100;
+                const maxMp = playerPos.maxMp || 50;
+                setPlayerPos((prev) => ({
+                  ...prev,
+                  x: 30,
+                  y: 30,
+                  targetX: 30,
+                  targetY: 30,
+                  mapId: "center",
+                  hp: Math.floor(maxHp * 0.5),
+                  mp: Math.floor(maxMp * 0.5),
+                  isMoving: false,
+                }));
+                setGameState((prev) => ({ ...prev, isDead: false }));
+              }, 5000)}
+            </div>
+          </div>
+        )}
+
+        {gameState.pendingLevelUp && !gameState.isDead && (
+          <div className="absolute inset-0 z-40 pointer-events-none flex flex-col items-center justify-center bg-yellow-500/10 backdrop-blur-[1px]">
+            <div className="animate-bounce flex flex-col items-center">
+              <h1 className="text-yellow-400 font-black text-7xl uppercase tracking-widest drop-shadow-[0_4px_4px_rgba(0,0,0,1)] stroke-black stroke-2" style={{ WebkitTextStroke: '2px black' }}>
+                LEVEL UP!
+              </h1>
+              <p className="text-white font-mono text-2xl drop-shadow-[0_2px_2px_rgba(0,0,0,1)] bg-black/50 px-4 py-1 rounded-full mt-2">
+                Nível {gameState.level}
+              </p>
+            </div>
+            {/* Auto dismiss after 3 seconds */}
+            <div className="hidden">
+              {setTimeout(() => {
+                setGameState((prev) => ({ ...prev, pendingLevelUp: false }));
+              }, 3000)}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 3. TRANSACTIONAL SMART CONTRACTS MODALS */}

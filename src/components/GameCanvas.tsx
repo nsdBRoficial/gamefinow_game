@@ -1413,10 +1413,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             });
 
             if (newHp <= 0) {
-              // Morte do jogador!
-              useGameStore.getState().setPlayerPos({ hp: latestPlayerPos.current.maxHp || 100 });
+              // Morte do jogador - Aciona overlay dramático e limpa estado de batalha
+              useGameStore.getState().setGameState({ isDead: true });
               useGameStore.getState().setBattleMode(false);
-              alert("Você foi derrotado! Recuando para se curar...");
+              useGameStore.getState().setLockedTarget(null);
             }
           }
         }

@@ -243,8 +243,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
     const nextLevel = Math.floor(Math.pow(nextXP / 50, 0.4)) + 1;
 
+    let isLevelingUp = false;
     let nextPlayerPos = { ...state.playerPos };
     if (nextLevel > (state.level || 1)) {
+      isLevelingUp = true;
       nextPlayerPos.maxHp = 100 + ((nextLevel - 1) * 25);
       nextPlayerPos.hp = nextPlayerPos.maxHp;
       nextPlayerPos.maxMp = 50 + ((nextLevel - 1) * 10);
@@ -252,7 +254,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       localStorage.setItem("stellar_island_player_pos_v1", JSON.stringify(nextPlayerPos));
     }
 
-    const newState = { ...state, quests: newQuests, xp_current: nextXP, level: nextLevel, playerPos: nextPlayerPos };
+    const newState = { ...state, quests: newQuests, xp_current: nextXP, level: nextLevel, playerPos: nextPlayerPos, pendingLevelUp: state.pendingLevelUp || isLevelingUp };
     
     const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, castMagic, ...gameStateToSave } = newState;
     
@@ -266,7 +268,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     
     localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
     
-    return { quests: newQuests, xp_current: nextXP, level: nextLevel, playerPos: nextPlayerPos };
+    return { quests: newQuests, xp_current: nextXP, level: nextLevel, playerPos: nextPlayerPos, pendingLevelUp: newState.pendingLevelUp };
   }),
 
   setActiveModal: (modal) => set({ activeModal: modal }),
@@ -325,8 +327,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const currentXP = (state.xp_current || 0) + xpToAdd;
       const newLevel = Math.floor(Math.pow(currentXP / 50, 0.4)) + 1;
 
+      let isLevelingUp = false;
       let nextPlayerPos = { ...state.playerPos };
       if (newLevel > (state.level || 1)) {
+        isLevelingUp = true;
         nextPlayerPos.maxHp = 100 + ((newLevel - 1) * 25);
         nextPlayerPos.hp = nextPlayerPos.maxHp;
         nextPlayerPos.maxMp = 50 + ((newLevel - 1) * 10);
@@ -344,6 +348,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         xp_current: currentXP,
         level: newLevel,
         playerPos: nextPlayerPos,
+        pendingLevelUp: s.pendingLevelUp || isLevelingUp,
       }));
     } else {
       // Apenas atualiza o progresso
@@ -368,8 +373,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // L = floor((XP / 50)^0.4) + 1
     const newLevel = Math.floor(Math.pow(currentXP / 50, 0.4)) + 1;
     
+    let isLevelingUp = false;
     let nextPlayerPos = { ...state.playerPos };
     if (newLevel > (state.level || 1)) {
+      isLevelingUp = true;
       nextPlayerPos.maxHp = 100 + ((newLevel - 1) * 25);
       nextPlayerPos.hp = nextPlayerPos.maxHp;
       nextPlayerPos.maxMp = 50 + ((newLevel - 1) * 10);
@@ -377,7 +384,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       localStorage.setItem("stellar_island_player_pos_v1", JSON.stringify(nextPlayerPos));
     }
 
-    const newState = { ...state, xp_current: currentXP, level: newLevel, playerPos: nextPlayerPos };
+    const newState = { ...state, xp_current: currentXP, level: newLevel, playerPos: nextPlayerPos, pendingLevelUp: state.pendingLevelUp || isLevelingUp };
     
     const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, castMagic, ...gameStateToSave } = newState;
     
@@ -390,7 +397,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     
     localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
     
-    return { xp_current: currentXP, level: newLevel, playerPos: nextPlayerPos };
+    return { xp_current: currentXP, level: newLevel, playerPos: nextPlayerPos, pendingLevelUp: newState.pendingLevelUp };
   }),
 
   castMagic: (type) => set((state) => {
