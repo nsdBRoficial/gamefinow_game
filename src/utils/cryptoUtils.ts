@@ -1,27 +1,31 @@
-import CryptoJS from 'crypto-js';
-
 const FALLBACK_KEY = "g4m3f1n0w_f4llb4ck_k3y_2026!";
 
 /**
- * Encrypts data using AES-GCM equivalent via CryptoJS
- * (CryptoJS uses AES-CBC by default, but it provides strong encryption for our localStorage needs)
+ * Obfuscates data using XOR + Base64 (fallback since crypto-js causes require() error in Vite)
  */
 export const encryptAES = (text: string, pin?: string): string => {
   if (!text) return "";
   const key = pin && pin.length >= 6 ? pin : FALLBACK_KEY;
-  return CryptoJS.AES.encrypt(text, key).toString();
+  let result = "";
+  for (let i = 0; i < text.length; i++) {
+    result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+  }
+  return btoa(result);
 };
 
 /**
- * Decrypts data using AES
+ * De-obfuscates data using XOR + Base64
  */
 export const decryptAES = (cipherText: string, pin?: string): string => {
   if (!cipherText) return "";
   try {
     const key = pin && pin.length >= 6 ? pin : FALLBACK_KEY;
-    const bytes = CryptoJS.AES.decrypt(cipherText, key);
-    const originalText = bytes.toString(CryptoJS.enc.Utf8);
-    return originalText || cipherText; // return original if decryption fails (e.g. was not encrypted)
+    const decoded = atob(cipherText);
+    let originalText = "";
+    for (let i = 0; i < decoded.length; i++) {
+      originalText += String.fromCharCode(decoded.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+    }
+    return originalText;
   } catch (err) {
     console.error("Failed to decrypt AES", err);
     return cipherText;
