@@ -5,6 +5,8 @@ import en from './locales/en.json';
 import pt from './locales/pt.json';
 import es from './locales/es.json';
 
+const savedLanguage = localStorage.getItem('gameLanguage') || 'en';
+
 i18n
   .use(initReactI18next)
   .init({
@@ -13,7 +15,7 @@ i18n
       pt: { translation: pt },
       es: { translation: es }
     },
-    lng: 'en', // default language
+    lng: savedLanguage, // default language
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false

@@ -655,5 +655,46 @@
       "soon": "⏳ Em Breve",
       "future": "🌌 Planejado"
     }
+  },
+  "level5_intro": {
+    "title1": "Parab�ns!",
+    "subtitle1": "N�vel 5 Alcan�ado!",
+    "desc1": "Voc� provou o seu valor para a ilha e desbloqueou todo o ecossistema GameFi. O verdadeiro jogo come�a agora!",
+    "btn_next": "Pr�ximo",
+    "btn_see_news": "Ver Novidades",
+    "title2": "Combate Liberado",
+    "desc2": "Para combater, clique no inimigo, aguarde a mira trav�-lo e aproxime-se! Voc� n�o perde moedas ao morrer, e derrotar inimigos concede tokens GAMEFI. Acompanhe pelo �cone de espadas no HUD direito.",
+    "warning2": "Aten��o: Cuidado com sua vida (HP)!",
+    "title3": "Minera��o",
+    "desc3": "Compre uma Picareta na Loja P2P no mapa Leste! Com ela, aproxime-se de pedras preciosas no mapa Sul para minerar gemas e potencialmente tokens GAMEFI.",
+    "title4": "ATM DEFI",
+    "atm_desc": "O ATM DeFi vai concentrar todas as opera��es de dep�sito, swap e on-ramp em um s� lugar.",
+    "title5": "Tudo Pronto!",
+    "desc5": "A ilha inteira est� agora sob seu dom�nio. Explore, minere, lute e invista.",
+    "btn_finish": "Finalizar"
+  },
+  "overlay": {
+    "processing_stellar": "Aguarde, processando transa��o na rede Stellar...",
+    "mining_text": "Minerando..."
+  },
+  "welcome_tutorial": {
+    "title": "Bem-vindo(a) ao",
+    "desc1": "Voc� acabou de chegar na ilha. Prepare-se para uma aventura incr�vel integrando Web3 e GameFi.",
+    "btn_continue": "Continuar",
+    "movement": "Movimenta��o",
+    "desc2": "Use as teclas <strong className=\"text-emerald-400\">W, A, S, D</strong> ou as <strong className=\"text-emerald-400\">Setas Direcionais</strong> do teclado para se mover pela ilha.",
+    "btn_next": "Pr�ximo",
+    "first_mission": "Sua Primeira Miss�o",
+    "desc3": "V� at� o centro da ilha e <strong className=\"text-amber-400\">fale imediatamente com o James</strong>. Ele lhe dar� instru��es vitais para criar sua carteira Web3 e iniciar sua jornada.",
+    "hint": "Dica:",
+    "hint_desc": "Para interagir com NPCs ou objetos, simplesmente aproxime-se deles!",
+    "btn_start": "Come�ar Aventura!"
+  },
+  "canvas": {
+    "welcome_center": "Bem-vindo ao GameFiNow!",
+    "welcome_south": "Bem-vindo ao DEFINDEX!",
+    "welcome_east": "Bem-vindo ao WALLETNOW!",
+    "welcome_west": "Bem-vindo � SOROSWAP!",
+    "welcome_north": "Bem-vindo � NEARX!"
   }
 }

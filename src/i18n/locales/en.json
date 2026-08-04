@@ -655,5 +655,46 @@
       "soon": "⏳ Coming Soon",
       "future": "🌌 Planned"
     }
+  },
+  "level5_intro": {
+    "title1": "Congratulations!",
+    "subtitle1": "Level 5 Reached!",
+    "desc1": "You have proven your worth to the island and unlocked the entire GameFi ecosystem. The real game begins now!",
+    "btn_next": "Next",
+    "btn_see_news": "See Features",
+    "title2": "Combat Unlocked",
+    "desc2": "To fight, click on the enemy, wait for the target to lock, and approach! You won't lose coins when you die, and defeating enemies grants GAMEFI tokens. Check the swords icon on the right HUD.",
+    "warning2": "Attention: Watch your health (HP)!",
+    "title3": "Mining",
+    "desc3": "Buy a Pickaxe at the P2P Shop in the East map! With it, approach precious stones in the South map to mine gems and potentially GAMEFI tokens.",
+    "title4": "ATM DEFI",
+    "atm_desc": "The DeFi ATM will concentrate all your deposit, swap, and on-ramp operations in one place.",
+    "title5": "All Set!",
+    "desc5": "The entire island is now under your domain. Explore, mine, fight, and invest.",
+    "btn_finish": "Finish"
+  },
+  "overlay": {
+    "processing_stellar": "Please wait, processing transaction on the Stellar network...",
+    "mining_text": "Mining..."
+  },
+  "welcome_tutorial": {
+    "title": "Welcome to",
+    "desc1": "You have just arrived on the island. Prepare yourself for an amazing adventure integrating Web3 and GameFi.",
+    "btn_continue": "Continue",
+    "movement": "Movement",
+    "desc2": "Use the <strong className=\"text-emerald-400\">W, A, S, D</strong> keys or the <strong className=\"text-emerald-400\">Arrow Keys</strong> on your keyboard to move around the island.",
+    "btn_next": "Next",
+    "first_mission": "Your First Mission",
+    "desc3": "Go to the center of the island and <strong className=\"text-amber-400\">talk to James immediately</strong>. He will give you vital instructions to create your Web3 wallet and start your journey.",
+    "hint": "Hint:",
+    "hint_desc": "To interact with NPCs or objects, simply walk up to them!",
+    "btn_start": "Start Adventure!"
+  },
+  "canvas": {
+    "welcome_center": "Welcome to GameFiNow!",
+    "welcome_south": "Welcome to DEFINDEX!",
+    "welcome_east": "Welcome to WALLETNOW!",
+    "welcome_west": "Welcome to SOROSWAP!",
+    "welcome_north": "Welcome to NEARX!"
   }
 }

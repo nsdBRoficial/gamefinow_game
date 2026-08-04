@@ -655,5 +655,46 @@
       "soon": "⏳ Próximamente",
       "future": "🌌 Planificado"
     }
+  },
+  "level5_intro": {
+    "title1": "�Felicidades!",
+    "subtitle1": "�Nivel 5 Alcanzado!",
+    "desc1": "Has demostrado tu val�a en la isla y desbloqueado todo el ecosistema GameFi. �El verdadero juego comienza ahora!",
+    "btn_next": "Siguiente",
+    "btn_see_news": "Ver Novedades",
+    "title2": "Combate Desbloqueado",
+    "desc2": "Para luchar, haz clic en el enemigo, espera a que se fije el objetivo y ac�rcate. No perder�s monedas al morir, y derrotar enemigos te otorgar� tokens GAMEFI. Revisa el icono de espadas en el HUD derecho.",
+    "warning2": "Atenci�n: �Cuidado con tu salud (HP)!",
+    "title3": "Miner�a",
+    "desc3": "�Compra un Pico en la Tienda P2P en el mapa Este! Con �l, ac�rcate a las piedras preciosas en el mapa Sur para extraer gemas y potencialmente tokens GAMEFI.",
+    "title4": "Cajero DEFI",
+    "atm_desc": "El cajero DeFi concentrar� todas tus operaciones de dep�sito, intercambio y rampa de entrada en un solo lugar.",
+    "title5": "�Todo Listo!",
+    "desc5": "Toda la isla est� ahora bajo tu dominio. Explora, mina, lucha e invierte.",
+    "btn_finish": "Finalizar"
+  },
+  "overlay": {
+    "processing_stellar": "Por favor, espere, procesando transacci�n en la red Stellar...",
+    "mining_text": "Miner�a..."
+  },
+  "welcome_tutorial": {
+    "title": "Bienvenido(a) a",
+    "desc1": "Acabas de llegar a la isla. Prep�rate para una aventura incre�ble integrando Web3 y GameFi.",
+    "btn_continue": "Continuar",
+    "movement": "Movimiento",
+    "desc2": "Usa las teclas <strong className=\"text-emerald-400\">W, A, S, D</strong> o las <strong className=\"text-emerald-400\">Flechas Direccionales</strong> del teclado para moverte por la isla.",
+    "btn_next": "Siguiente",
+    "first_mission": "Tu Primera Misi�n",
+    "desc3": "Ve al centro de la isla y <strong className=\"text-amber-400\">habla con James inmediatamente</strong>. �l te dar� instrucciones vitales para crear tu billetera Web3 y comenzar tu viaje.",
+    "hint": "Consejo:",
+    "hint_desc": "�Para interactuar con NPCs u objetos, simplemente ac�rcate a ellos!",
+    "btn_start": "�Comenzar Aventura!"
+  },
+  "canvas": {
+    "welcome_center": "�Bienvenido a GameFiNow!",
+    "welcome_south": "�Bienvenido a DEFINDEX!",
+    "welcome_east": "�Bienvenido a WALLETNOW!",
+    "welcome_west": "�Bienvenido a SOROSWAP!",
+    "welcome_north": "�Bienvenido a NEARX!"
   }
 }
