@@ -14,18 +14,18 @@ export interface PixelCharData {
 
 export const getNPCPixelChar = (id: string): PixelCharData => {
   switch (id) {
-    case "guide": // Frank, o Sacerdote do Templo
+    case "guide": // James [NPC]
       return {
-        skinColor: "#ffe4e6", // Pale elder priest skin
-        headColor: "#1d4ed8", // Wizard blue hood
-        headType: "beanie",   // Pointer hat style
-        torsoColor: "#1e3a8a", // Deep blue robes
-        torsoType: "suit",    // Custom magical collar
-        legsColor: "#1e3a8a",
-        shoesColor: "#1e293b",
-        faceType: "beard",    // Elder white beard
-        accessoryType: "cape", // Celestial cape
-        hairColor: "#f8fafc", // White hair
+        skinColor: "#ffdbac", // Pele clara
+        headColor: "#5c3a21", // Cabelo marrom
+        headType: "topete",   // Estilo de cabelo arrumado
+        torsoColor: "#2d3748", // Camisa cinza escura
+        torsoType: "tshirt",  // Camiseta
+        legsColor: "#1d4ed8", // Calça jeans azul
+        shoesColor: "#000000", // Tênis preto
+        faceType: "blue_eyes", // Olhos azuis
+        accessoryType: "none", // Sem capa
+        hairColor: "#5c3a21", // Cabelo marrom
       };
     case "keymaster": // Kael, o Ferreiro de Raros
       return {
@@ -437,13 +437,15 @@ export const drawPixelCharacter = (
     if (direction === "left") pupilShiftX = -1;
     else if (direction === "right") pupilShiftX = 1;
 
+    const pupilColor = char.faceType === "blue_eyes" ? "#0284c7" : "#000000";
+
     // Left eye
     drawPixelRect(cx + 10, headY + 3, 3, 3, "#ffffff", "");
-    drawPixelRect(cx + 11 + pupilShiftX, headY + 4, 1.5, 1.5, "#000000", "");
+    drawPixelRect(cx + 11 + pupilShiftX, headY + 4, 1.5, 1.5, pupilColor, "");
 
     // Right eye
     drawPixelRect(cx + 18, headY + 3, 3, 3, "#ffffff", "");
-    drawPixelRect(cx + 18.5 + pupilShiftX, headY + 4, 1.5, 1.5, "#000000", "");
+    drawPixelRect(cx + 18.5 + pupilShiftX, headY + 4, 1.5, 1.5, pupilColor, "");
 
     // Eyelashes & Cute Blush for Female
     if (isFemale || char.faceType === "eyelashes" || char.faceType === "makeup") {

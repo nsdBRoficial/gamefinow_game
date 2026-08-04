@@ -171,6 +171,8 @@ export interface GameState {
   // Player Stats RPG
   xp_current?: number;
   level?: number;
+  hasSeenTutorial?: boolean;
+  hasSeenLevel5Intro?: boolean;
   inventory?: InventorySlot[];
   activeAnimations?: AnimationEvent[];
   // Animation Triggers

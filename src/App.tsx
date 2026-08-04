@@ -39,6 +39,8 @@ import { PassportModal } from "./components/PassportModal";
 import { DialogSystem } from "./components/DialogSystem";
 import { OutfitShopModal } from "./components/OutfitShopModal";
 import { ChatBox, OnlineIndicator } from "./components/ChatBox";
+import { WelcomeTutorialModal } from "./components/WelcomeTutorialModal";
+import { Level5IntroModal } from "./components/Level5IntroModal";
 import { useMultiplayer } from "./hooks/useMultiplayer";
 import { getOrCreatePlayerId, subscribeToGlobalEvents, getSocket } from "./services/multiplayerService";
 import ReactNipple from "react-nipple";
@@ -140,6 +142,20 @@ export default function App() {
     playerPos,
     setPlayerPos,
   });
+
+  const [showLevel5IntroDelayed, setShowLevel5IntroDelayed] = useState(false);
+
+  useEffect(() => {
+    // Se o player é level 5+, está no center, e ainda não viu o modal
+    if ((gameState.level || 1) >= 5 && playerPos.mapId === "center" && !gameState.hasSeenLevel5Intro && gameState.hasSeenTutorial) {
+      const t = setTimeout(() => {
+        setShowLevel5IntroDelayed(true);
+      }, 10000);
+      return () => clearTimeout(t);
+    } else {
+      setShowLevel5IntroDelayed(false);
+    }
+  }, [gameState.level, playerPos.mapId, gameState.hasSeenLevel5Intro, gameState.hasSeenTutorial]);
 
   // Handle active retro floating window overlays: "customizer" | "backpack" | "ledger" | "guide" | null
   const [activeWindow, setActiveWindow] = useState<"customizer" | "backpack" | "ledger" | "guide" | null>(null);
@@ -1036,11 +1052,11 @@ export default function App() {
   const currentRegion = getRegionName(playerPos.mapId || "center");
 
   // Dynamic Title (Prioritizes playerPos.activeTitle if set)
-  let defaultTitle = "Náufrago Recém-Chegado";
-  if (completedCount === 1) defaultTitle = "Iniciado de Stellar";
-  else if (completedCount === 2) defaultTitle = "Operador On-Ramp";
-  else if (completedCount === 3) defaultTitle = "Alquimista do Soroban";
-  else if (completedCount >= 4) defaultTitle = "Herói Lendário de Stellar";
+  let defaultTitle = typeof t === "function" ? t('title.newbie', "Newbie Castaway") : "Newbie Castaway";
+  if (completedCount === 1) defaultTitle = typeof t === "function" ? t('title.initiated', "Stellar Initiate") : "Stellar Initiate";
+  else if (completedCount === 2) defaultTitle = typeof t === "function" ? t('title.onramp', "On-Ramp Operator") : "On-Ramp Operator";
+  else if (completedCount === 3) defaultTitle = typeof t === "function" ? t('title.soroban', "Soroban Alchemist") : "Soroban Alchemist";
+  else if (completedCount >= 4) defaultTitle = typeof t === "function" ? t('title.legendary', "Legendary Stellar Hero") : "Legendary Stellar Hero";
 
   useEffect(() => {
     if (playerPos.activeTitle !== defaultTitle) {
@@ -1737,6 +1753,22 @@ export default function App() {
           setPlayerPos={setPlayerPos}
           onClose={() => setGameState((prev) => ({ ...prev, activeModal: null }))}
           playSynthSound={playSynthSound}
+        />
+      )}
+
+      {/* 5. TUTORIAL MODALS */}
+      {!gameState.hasSeenTutorial && (
+        <WelcomeTutorialModal
+          onClose={() => setGameState((prev) => ({ ...prev, hasSeenTutorial: true }))}
+        />
+      )}
+
+      {(gameState.level || 1) >= 5 && showLevel5IntroDelayed && (
+        <Level5IntroModal
+          onClose={() => {
+            setShowLevel5IntroDelayed(false);
+            setGameState((prev) => ({ ...prev, hasSeenLevel5Intro: true }));
+          }}
         />
       )}
 

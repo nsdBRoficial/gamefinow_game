@@ -469,11 +469,11 @@ export function drawQuestArrow(
   const bounce = Math.sin(time / 140) * 3; // Flutuação sutil de levitação
 
   if (isVisibleInScreen) {
-    // ─── 1. GRUDADA MAGNETICAMENTE NO ALVO (Dentro do Viewport) ──────────────
+    // ✨ 1. GRUDADA MAGNETICAMENTE NO ALVO (Dentro do Viewport) 🎯
     // A seta se fixa exatamente no topo do alvo (cabeça do NPC / topo do portal / topo do terminal)
     // Apontando para BAIXO!
     const arrowX = targetWorldX;
-    const arrowY = targetWorldY - 26 + bounce; // Flutua graciosamente acima do topo
+    const arrowY = targetWorldY - 48 + bounce; // Flutua mais alto acima do topo para não cobrir o sprite do NPC/Terminal
 
     drawPixelArrowSprite(ctx, arrowX, arrowY, 0, true);
   } else {
@@ -534,8 +534,8 @@ function drawPixelArrowSprite(
     ctx.rotate(rotationRad);
   }
 
-  // Pixel size scaling super delicado (Aumentado em 100%)
-  const p = 0.70;
+  // Pixel size scaling super delicado (Ajustado para -20% a pedido do usuário)
+  const p = 1.12;
 
   // ── Sombra projetada sob a seta ──
   ctx.fillStyle = "rgba(0, 0, 0, 0.35)";

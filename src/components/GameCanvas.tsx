@@ -337,7 +337,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         // Recompensa Global (exemplo: dá 500 XP e 50 GameFi Tokens para o player local)
         useGameStore.getState().addExperience(500);
         useGameStore.getState().addItemToInventory("gamefi_token", "currency", 50);
-        alert("Vitória! O Núcleo Stellar foi protegido. Você recebeu +500 XP e 50 GameFi Tokens!");
+        alert(typeof t === "function" ? t('alerts.victory', "Victory! The Stellar Nucleus is protected. You received +500 XP and 50 GameFi Tokens!") : "Victory! The Stellar Nucleus is protected. You received +500 XP and 50 GameFi Tokens!");
         // Limpa os monstros do evento
         creaturesRef.current = creaturesRef.current.filter(c => c.name !== "Corruptor");
         return;
@@ -347,7 +347,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       if ((currentGameState.stellarNucleusHp || 0) <= 0) {
         clearInterval(interval);
         useGameStore.getState().setGameState({ isWaveActive: false });
-        alert("O Núcleo Stellar foi destruído! Fim da Onda.");
+        alert(typeof t === "function" ? t('alerts.defeat', "The Stellar Nucleus was destroyed! End of Wave.") : "The Stellar Nucleus was destroyed! End of Wave.");
         // Limpa os monstros do evento
         creaturesRef.current = creaturesRef.current.filter(c => c.name !== "Corruptor");
         return;
@@ -552,7 +552,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         y: 32,
         dir: "down",
         dialogs: [
-          "Bem-vindo ao GameFiNow!",
+          typeof t === 'function' ? t('canvas.welcome_center') : "Welcome to GameFiNow!",
           "Somos um ecossistema que conecta finanças descentralizadas (DeFi) com a diversão dos jogos (GameFi).",
           "Nossa missão é educar e integrar usuários à rede Stellar através de gamificação e recompensas on-chain."
         ]
@@ -569,8 +569,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         y: 32,
         dir: "down",
         dialogs: [
-          "Digitizes invoice financing from end to end.",
-          "We connect businesses seeking working capital with liquidity providers through automated workflows, risk analysis, traceability, and greater transparency at every stage of the transaction."
+          typeof t === 'function' ? t('canvas.dupply_desc1') : "Digitizes invoice financing from end to end.",
+          typeof t === 'function' ? t('canvas.dupply_desc2') : "We connect businesses seeking working capital with liquidity providers through automated workflows, risk analysis, traceability, and greater transparency at every stage of the transaction."
         ]
       });
       return;
@@ -585,9 +585,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         y: 28,
         dir: "down",
         dialogs: [
-          "Bem-vindo ao DEFINDEX!",
+          typeof t === 'function' ? t('canvas.welcome_south') : "Welcome to DEFINDEX!",
           "Nós construímos ferramentas incríveis e índices descentralizados no ecossistema Soroban.",
-          "Explore nossos produtos para automatizar e otimizar seus rendimentos em DeFi!"
+          typeof t === 'function' ? t('canvas.defindex_desc2') : "Explore our products to automate and optimize your DeFi yields!"
         ]
       });
       return;
@@ -602,7 +602,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         y: 28,
         dir: "down",
         dialogs: [
-          "Bem-vindo ao WALLETNOW!",
+          typeof t === 'function' ? t('canvas.welcome_east') : "Welcome to WALLETNOW!",
           "A solução definitiva para o rastreamento e análise da sua carteira DeFi.",
           "Acompanhe seus ativos e rendimentos com segurança e inteligência através dos nossos painéis."
         ]
@@ -619,8 +619,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         y: 32,
         dir: "down",
         dialogs: [
-          "Small amounts, a universe of possibilities.",
-          "The childhood piggy bank has evolved. With PigFi, your family can start saving dollars starting from R$50 via Pix in a simple, visual, and fun way."
+          typeof t === 'function' ? t('canvas.pigfi_desc1') : "Small amounts, a universe of possibilities.",
+          typeof t === 'function' ? t('canvas.pigfi_desc2') : "The childhood piggy bank has evolved. With PigFi, your family can start saving dollars starting from R\ via Pix in a simple, visual, and fun way."
         ]
       });
       return;
@@ -635,8 +635,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         y: 32,
         dir: "down",
         dialogs: [
-          "Condominium administration and governance with transparency and security.",
-          "Streamlining property management, financial tracking, and community decision-making on the Stellar blockchain."
+          typeof t === 'function' ? t('canvas.wave_desc1') : "Condominium administration and governance with transparency and security.",
+          typeof t === 'function' ? t('canvas.wave_desc2') : "Streamlining property management, financial tracking, and community decision-making on the Stellar blockchain."
         ]
       });
       return;
@@ -685,9 +685,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         y: 32,
         dir: "down",
         dialogs: [
-          "Welcome to AUTOFIN!",
-          "Automate your financial infrastructure. Connect banking APIs, DeFi protocols, and wallets in a single visual workflow.",
-          "Visit https://automated.finance for more information."
+          typeof t === 'function' ? t('canvas.autofin_desc1') : "Welcome to AUTOFIN!",
+          typeof t === 'function' ? t('canvas.autofin_desc2') : "Automate your financial infrastructure. Connect banking APIs, DeFi protocols, and wallets in a single visual workflow.",
+          typeof t === 'function' ? t('canvas.autofin_desc3') : "Visit https://automated.finance for more information."
         ]
       });
       return;
@@ -1324,7 +1324,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     if (questRes.questCompleted && questRes.xpGained) {
       combatTextsRef.current.push({
         id: Math.random().toString(),
-        text: `Missão Cumprida! +${questRes.xpGained} XP`,
+        text: typeof t === "function" ? t('quest.completed', { xp: questRes.xpGained, defaultValue: `Quest Completed! +${questRes.xpGained} XP` }) : `Quest Completed! +${questRes.xpGained} XP`,
         x: targetCreature.x,
         y: targetCreature.y - 1.5,
         color: "#facc15",
@@ -2341,12 +2341,24 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     );
 
     // 7.5 Render Mining Progress Bar over Player
+    // 7.5 Render Mining Progress Bar over Player
     if (gameStateVal.miningEndTimestamp && gameStateVal.miningTotalDuration) {
       const remainingTime = gameStateVal.miningEndTimestamp - Date.now();
       if (remainingTime > 0) {
         const progress = 1 - (remainingTime / gameStateVal.miningTotalDuration);
         
         ctx.save();
+        
+        // Render Mining Text above the bar
+        ctx.font = "bold 10px 'Press Start 2P', monospace";
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#10b981"; // emerald-500
+        ctx.strokeStyle = "rgba(0,0,0,0.8)";
+        ctx.lineWidth = 2;
+        const miningText = typeof t === "function" ? t('overlay.mining_text') : "Mining...";
+        ctx.strokeText(miningText, playerScreenX + 16, playerScreenY - 20);
+        ctx.fillText(miningText, playerScreenX + 16, playerScreenY - 20);
+
         ctx.fillStyle = "rgba(15, 23, 42, 0.8)"; // background escuro
         ctx.fillRect(playerScreenX - 4, playerScreenY - 14, 40, 6);
         ctx.strokeStyle = "#475569";
@@ -2497,12 +2509,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     let currentTitle = playerPosVal.activeTitle;
 
     // Force automatic progression if player hasn't completed all 4 quests OR if activeTitle was auto-assigned earlier
-    if (completedCount < 4 || !currentTitle || currentTitle === "Náufrago Recém-Chegado" || (hasHold && currentTitle === "Iniciado de Stellar")) {
-      if (hasHold) currentTitle = "Herói Lendário de Stellar";
-      else if (hasSoroban) currentTitle = "Alquimista do Soroban";
-      else if (hasOnramp) currentTitle = "Operador On-Ramp";
-      else if (hasWallet) currentTitle = "Iniciado de Stellar";
-      else currentTitle = "Náufrago Recém-Chegado";
+    if (completedCount < 4 || !currentTitle || currentTitle === (typeof t === "function" ? t('title.newbie', "Newbie Castaway") : "Newbie Castaway") || (hasHold && currentTitle === (typeof t === "function" ? t('title.initiated', "Stellar Initiate") : "Stellar Initiate"))) {
+      if (hasHold) currentTitle = typeof t === "function" ? t('title.legendary', "Legendary Stellar Hero") : "Legendary Stellar Hero";
+      else if (hasSoroban) currentTitle = typeof t === "function" ? t('title.soroban', "Soroban Alchemist") : "Soroban Alchemist";
+      else if (hasOnramp) currentTitle = typeof t === "function" ? t('title.onramp', "On-Ramp Operator") : "On-Ramp Operator";
+      else if (hasWallet) currentTitle = typeof t === "function" ? t('title.initiated', "Stellar Initiate") : "Stellar Initiate";
+      else currentTitle = typeof t === "function" ? t('title.newbie', "Newbie Castaway") : "Newbie Castaway";
     }
 
     let tagColor = "#ffffff";
@@ -2520,25 +2532,25 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       tagShadowColor = "";
       tagShadowBlur = 0;
       borderStyle = "#ff0000";
-    } else if (currentTitle === "Herói Lendário de Stellar") {
+    } else if (currentTitle === (typeof t === "function" ? t('title.legendary', "Legendary Stellar Hero") : "Legendary Stellar Hero")) {
       // 5. Herói Lendário: Verde Matrix (#00ff66)
       tagColor = "#00ff66";
       tagShadowColor = "#00e676";
       tagShadowBlur = 8;
       borderStyle = "#00ff66";
-    } else if (currentTitle === "Alquimista do Soroban") {
+    } else if (currentTitle === (typeof t === "function" ? t('title.soroban', "Soroban Alchemist") : "Soroban Alchemist")) {
       // 4. Alquimista Soroban: Roxo Místico (#e879f9)
       tagColor = "#e879f9";
       tagShadowColor = "#d946ef";
       tagShadowBlur = 6;
       borderStyle = "#e879f9";
-    } else if (currentTitle === "Operador On-Ramp") {
+    } else if (currentTitle === (typeof t === "function" ? t('title.onramp', "On-Ramp Operator") : "On-Ramp Operator")) {
       // 3. Operador On-Ramp: Dourado Nobre (#fbbf24)
       tagColor = "#fbbf24";
       tagShadowColor = "#f59e0b";
       tagShadowBlur = 6;
       borderStyle = "#fbbf24";
-    } else if (currentTitle === "Iniciado de Stellar") {
+    } else if (currentTitle === (typeof t === "function" ? t('title.initiated', "Stellar Initiate") : "Stellar Initiate")) {
       // 2. Iniciado de Stellar: Amarelo Padrão (#ffc600)
       tagColor = "#ffc600";
       tagShadowColor = "";
@@ -2680,7 +2692,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       <div className="absolute top-3 left-3 bg-slate-900/95 border border-slate-800 rounded-lg p-2 flex flex-col gap-0.5 shadow-md select-none pointer-events-none font-mono">
         <div className="flex items-center gap-1.5 text-xs text-slate-200 font-bold">
           <Compass className="h-3.5 w-3.5 text-cyan-400 animate-spin-slow" />
-          <span>Praça Central</span>
+          <span>{typeof t === "function" ? t('map.center', "Central Square") : "Central Square"}</span>
         </div>
         <div className="flex items-center gap-1 text-[9px] text-slate-400">
           <MapPin className="h-3 w-3 text-emerald-400" />
@@ -2695,3 +2707,4 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     </div>
   );
 };
+
