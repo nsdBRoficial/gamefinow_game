@@ -1,6 +1,9 @@
 import React, { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, CheckCircle2, ShieldAlert, X, Download, Shield, MapPin, Target, Copy } from "lucide-react";
 import { GameState, Player, Quest } from "../types";
+import { useGameStore } from "../store";
+import { getMapDecorations } from "./canvas/MapRenderer";
+import { useTranslation } from "react-i18next";
 
 interface PassportModalProps {
   showPassport: boolean;
@@ -37,6 +40,7 @@ export function PassportModal({
   attrFaith,
   currentActiveQuest,
 }: PassportModalProps) {
+  const { t } = useTranslation();
   const [passportTab, setPassportTab] = useState<"attributes" | "credentials">("attributes");
   const [passportSecVisible, setPassportSecVisible] = useState(false);
 
@@ -115,13 +119,13 @@ export function PassportModal({
                 {/* Name and class info */}
                 <div className="space-y-0.5 flex-1 min-w-0">
                   <span className={`text-[10px] font-black uppercase tracking-tight leading-none block ${
-                    playerTitle === "Herói Lendário de Stellar" || (gameState.quests.hold.status === "completed" && !playerTitle)
+                    playerTitle === (typeof t === "function" ? t('title.legendary', "Legendary Stellar Hero") : "Legendary Stellar Hero") || (gameState.quests.hold.status === "completed" && !playerTitle)
                       ? "text-[#00ff66] drop-shadow-[0_0_3px_rgba(0,255,102,0.5)]"
-                      : playerTitle === "Alquimista do Soroban" || (gameState.quests.soroban.status === "completed" && !playerTitle)
+                      : playerTitle === (typeof t === "function" ? t('title.soroban', "Soroban Alchemist") : "Soroban Alchemist") || (gameState.quests.soroban.status === "completed" && !playerTitle)
                       ? "text-purple-600 drop-shadow-[0_0_3px_rgba(147,51,234,0.4)]"
-                      : playerTitle === "Operador On-Ramp" || (gameState.quests.onramp.status === "completed" && !playerTitle)
+                      : playerTitle === (typeof t === "function" ? t('title.onramp', "On-Ramp Operator") : "On-Ramp Operator") || (gameState.quests.onramp.status === "completed" && !playerTitle)
                       ? "text-amber-600 drop-shadow-[0_0_3px_rgba(217,119,6,0.4)]"
-                      : playerTitle === "Iniciado de Stellar" || (gameState.quests.wallet.status === "completed" && !playerTitle)
+                      : playerTitle === (typeof t === "function" ? t('title.initiated', "Stellar Initiate") : "Stellar Initiate") || (gameState.quests.wallet.status === "completed" && !playerTitle)
                       ? "text-yellow-600 font-extrabold"
                       : "text-slate-800"
                   }`}>

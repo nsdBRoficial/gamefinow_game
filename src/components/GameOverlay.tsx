@@ -63,6 +63,7 @@ const generateTxHash = () => {
 };
 
 import { useTranslation } from "react-i18next";
+import i18n from "../i18n/i18n";
 
 
 export const GameOverlay: React.FC<GameOverlayProps> = ({
@@ -914,11 +915,15 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, o
             type="button"
             onClick={handleAction}
             disabled={loading}
-            className={`w-full py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider text-black font-mono cursor-pointer transition ${
-              activeTab === "deposit" ? "bg-emerald-400 hover:bg-emerald-300" : "bg-red-500 hover:bg-red-400 text-white"
-            }`}
+            className={`mt-4 w-full py-3 px-6 rounded-xl font-bold text-xs uppercase tracking-wider text-black font-mono cursor-pointer transition shadow-lg flex items-center justify-center ${
+              activeTab === "deposit" ? "bg-emerald-400 hover:bg-emerald-300 shadow-emerald-900/50" : "bg-red-500 hover:bg-red-400 text-white shadow-red-900/50"
+            } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
           >
-            {activeTab === "deposit" ? "Gerar PIX de Depósito" : "Confirmar Saque para Conta Bancária"}
+            {loading ? (
+              <span className="text-slate-900 animate-pulse">Aguarde, processando transação na rede Stellar...</span>
+            ) : (
+              activeTab === "deposit" ? "Gerar PIX de Depósito" : "Confirmar Saque para Conta Bancária"
+            )}
           </button>
         </div>
       )}
@@ -1349,12 +1354,12 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
                 type="button"
                 onClick={handleSwap}
                 disabled={loading || swapAmount <= 0}
-                className="w-full py-3 bg-violet-500 hover:bg-violet-400 disabled:opacity-50 text-black font-extrabold text-xs uppercase tracking-wider rounded-xl cursor-pointer transition flex items-center justify-center gap-1.5 font-mono"
+                className="w-full py-3 bg-violet-500 hover:bg-violet-400 disabled:opacity-50 disabled:bg-emerald-500 text-black font-extrabold text-xs uppercase tracking-wider rounded-xl cursor-pointer transition flex items-center justify-center gap-1.5 font-mono"
               >
                 {loading ? (
                   <>
-                    <RefreshCw className="h-4 w-4 animate-spin" />
-                    Buscando Liquidez Soroban...
+                    <RefreshCw className="h-4 w-4 animate-spin text-slate-900" />
+                    <span className="text-slate-900 animate-pulse">Aguarde, processando transação na rede Stellar...</span>
                   </>
                 ) : "Trocar Tokens Agora"}
               </button>
@@ -1676,7 +1681,7 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
         });
       } else {
         setSuccess({
-          message: `Cofre liquidado! Você recebeu seu depósito de ${locked} ${vaultAsset} somado com ${yieldEarned} ${vaultAsset} de juros!`,
+          message: `t('overlay.vault_liquidated', 'Vault liquidated!') Você recebeu seu depósito de ${locked} ${vaultAsset} somado com ${yieldEarned} ${vaultAsset} de juros!`,
           txHash
         });
       }
@@ -1786,30 +1791,38 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
           </div>
 
           <div className="grid grid-cols-3 gap-2 pt-1">
-            <button
-              type="button"
-              onClick={handleDeposit}
-              disabled={loading}
-              className="py-2 px-2 bg-amber-400 hover:bg-amber-300 text-black text-[10px] sm:text-xs font-extrabold uppercase rounded-lg transition cursor-pointer font-mono"
-            >
-              Depositar
-            </button>
-            <button
-              type="button"
-              onClick={() => handleWithdraw(true)}
-              disabled={loading || simulatedYield <= 0}
-              className="py-2 px-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-emerald-400 border border-slate-700 text-[10px] sm:text-xs font-extrabold uppercase rounded-lg transition cursor-pointer font-mono"
-            >
-              Colher
-            </button>
-            <button
-              type="button"
-              onClick={() => handleWithdraw(false)}
-              disabled={loading || activeVaultBalance <= 0}
-              className="py-2 px-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-red-400 border border-slate-700 text-[10px] sm:text-xs font-extrabold uppercase rounded-lg transition cursor-pointer font-mono"
-            >
-              Sacar Cofre
-            </button>
+            {loading ? (
+              <div className="col-span-3 py-2 px-2 bg-emerald-400 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-900/50">
+                <span className="text-slate-900 font-bold text-xs uppercase animate-pulse">Aguarde, processando transação na rede Stellar...</span>
+              </div>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={handleDeposit}
+                  disabled={loading}
+                  className="py-2 px-2 bg-amber-400 hover:bg-amber-300 text-black text-[10px] sm:text-xs font-extrabold uppercase rounded-lg transition cursor-pointer font-mono"
+                >
+                  Depositar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleWithdraw(true)}
+                  disabled={loading || simulatedYield <= 0}
+                  className="py-2 px-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-emerald-400 border border-slate-700 text-[10px] sm:text-xs font-extrabold uppercase rounded-lg transition cursor-pointer font-mono"
+                >
+                  Colher
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleWithdraw(false)}
+                  disabled={loading || activeVaultBalance <= 0}
+                  className="py-2 px-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-red-400 border border-slate-700 text-[10px] sm:text-xs font-extrabold uppercase rounded-lg transition cursor-pointer font-mono"
+                >
+                  Sacar Cofre
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -2050,12 +2063,22 @@ const P2PStoreModal: React.FC<P2PStoreProps> = ({ wallet, onClose, onUpdateWalle
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const inv = useGameStore.getState().inventory || [];
+          const hasPickaxeInInv = inv.some(i => i.id === "pickaxe");
+          const hasPickaxeInShop = parsed.some(i => i.id === "pickaxe");
+          
+          if (!hasPickaxeInInv && !hasPickaxeInShop) {
+            parsed.unshift({ id: "pickaxe", title: "Picareta de Mineração (100 usos)", seller: "GameFi", price: 1.0, currency: "XLM", icon: "⛏️" });
+            localStorage.setItem("gamefinow_p2p_items", JSON.stringify(parsed));
+          }
+          return parsed;
+        }
       } catch (e) {}
     }
     return [
       { id: "pickaxe", title: "Picareta de Mineração (100 usos)", seller: "GameFi", price: 1.0, currency: "XLM", icon: "⛏️" },
-      { id: "item-1", title: "Cristais de Soroban (10 SRT)", seller: "G...7W9P", price: 2.5, currency: "USDW", icon: "🔵" },
+      { id: "item-1", title: "Cristais de Soroban (10 SRT)", seller: "G...7W9P", price: 2.5, currency: "USDW", icon: "💎" },
       { id: "item-2", title: "Passaporte VIP da Ilha", seller: "G...8K2L", price: 15.0, currency: "USDW", icon: "🎫" },
       { id: "item-3", title: "Poção de Agilidade (+2 AGI)", seller: "G...3M1X", price: 5.0, currency: "BRW", icon: "🧪" },
       { id: "item-4", title: "Lote de 50 GAMEFI Tokens", seller: "G...9P4Z", price: 12.0, currency: "USDW", icon: "🎮" },
@@ -2085,7 +2108,7 @@ const P2PStoreModal: React.FC<P2PStoreProps> = ({ wallet, onClose, onUpdateWalle
     const xlmBalance = wallet.xlmBalance || 0;
     const val = validateXlmBalanceForFee(xlmBalance, feeInXlm);
     if (!val.hasSufficientBalance) {
-      setError(`Saldo insuficiente de XLM para pagar a taxa GameFi (0.5%). Mínimo necessário: ${val.minRequired.toFixed(4)} XLM.`);
+      setError(`t('overlay.insufficient_xlm', 'Insufficient XLM balance to pay the GameFi fee (0.5%).') Mínimo necessário: ${val.minRequired.toFixed(4)} XLM.`);
       return;
     }
 
@@ -2407,7 +2430,7 @@ const BurnAltarModal: React.FC<BurnAltarProps> = ({ wallet, onClose, onUpdateWal
     const xlmBalance = wallet.xlmBalance || 0;
     const val = validateXlmBalanceForFee(xlmBalance, feeInXlm);
     if (!val.hasSufficientBalance) {
-      setError(`Saldo insuficiente de XLM para pagar a taxa GameFi (0.5%). Mínimo necessário: ${val.minRequired.toFixed(4)} XLM.`);
+      setError(`t('overlay.insufficient_xlm', 'Insufficient XLM balance to pay the GameFi fee (0.5%).') Mínimo necessário: ${val.minRequired.toFixed(4)} XLM.`);
       return;
     }
 
@@ -2791,7 +2814,7 @@ const GameFiFaucetModal: React.FC<GameFiFaucetProps> = ({ wallet, onClose, onUpd
           className="w-full py-3.5 bg-gradient-to-r from-cyan-600 to-emerald-600 hover:from-cyan-500 hover:to-emerald-500 text-white font-black text-xs uppercase tracking-wider rounded-xl transition cursor-pointer font-mono shadow-lg shadow-cyan-900/40 flex items-center justify-center gap-2"
         >
           <Sparkles className="h-4 w-4" />
-          {loading ? "Banhando-se na Fonte Mágica..." : "Coletar 10 GAMEFI da Fonte"}
+          {loading ? "Banhando-se na Fonte Mágica..." : "t('overlay.collect_fountain', 'Collect 10 GAMEFI from Fountain')"}
         </button>
       )}
 
@@ -2840,3 +2863,4 @@ const GameFiFaucetModal: React.FC<GameFiFaucetProps> = ({ wallet, onClose, onUpd
     </div>
   );
 };
+

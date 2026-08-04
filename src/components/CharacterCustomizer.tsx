@@ -21,6 +21,9 @@ import {
   ExternalLink,
   Edit3
 } from "lucide-react";
+import { useGameStore } from "../store";
+import { getMapDecorations } from "./canvas/MapRenderer";
+import { useTranslation } from "react-i18next";
 import { executeOutfitPurchaseOnChain } from "../services/stellarServices";
 
 interface CharacterCustomizerProps {
@@ -65,6 +68,7 @@ export const CharacterCustomizer: React.FC<CharacterCustomizerProps> = ({
   setPlayerPos,
   gameState,
 }) => {
+  const { t } = useTranslation();
   const completedCount = gameState?.quests
     ? (Object.values(gameState.quests) as Quest[]).filter((q) => q.status === "completed").length
     : 0;
@@ -497,32 +501,32 @@ export const CharacterCustomizer: React.FC<CharacterCustomizerProps> = ({
           <span className="text-[9px] text-slate-400 uppercase font-mono">Cores & Estilos Desbloqueados</span>
           <div className="grid grid-cols-1 gap-1.5 font-mono">
             {[
-              { id: "operador_onramp", title: "Operador On-Ramp", icon: "💳", badge: "Dourado Nobre", colorClass: "text-amber-400 border-amber-500 bg-amber-950/80" },
-              { id: "alquimista_soroban", title: "Alquimista do Soroban", icon: "🧪", badge: "Roxo Místico", colorClass: "text-purple-400 border-purple-500 bg-purple-950/80" },
-              { id: "heroi_stellar", title: "Herói Lendário de Stellar", icon: "👑", badge: "Verde Matrix Elétrico", colorClass: "text-[#00ff66] border-[#00ff66] bg-emerald-950/80" },
-            ].map((t) => {
-              const isSelected = (playerPos.activeTitle || "Herói Lendário de Stellar") === t.title;
+              { id: "operador_onramp", title: typeof t === "function" ? t('title.onramp', "On-Ramp Operator") : "On-Ramp Operator", icon: "💎", badge: "Dourado Nobre", colorClass: "text-amber-400 border-amber-500 bg-amber-950/80" },
+              { id: "alquimista_soroban", title: typeof t === "function" ? t('title.soroban', "Soroban Alchemist") : "Soroban Alchemist", icon: "🔮", badge: "Roxo Místico", colorClass: "text-purple-400 border-purple-500 bg-purple-950/80" },
+              { id: "heroi_stellar", title: typeof t === "function" ? t('title.legendary', "Legendary Stellar Hero") : "Legendary Stellar Hero", icon: "👑", badge: "Verde Matrix Elétrico", colorClass: "text-[#00ff66] border-[#00ff66] bg-emerald-950/80" },
+            ].map((tItem) => {
+              const isSelected = (playerPos.activeTitle || (typeof t === "function" ? t('title.legendary', "Legendary Stellar Hero") : "Legendary Stellar Hero")) === tItem.title;
               const canSelect = completedCount >= 4;
 
               return (
                 <button
-                  key={`title-btn-${t.id}`}
+                  key={`title-btn-${tItem.id}`}
                   disabled={!canSelect}
-                  onClick={() => canSelect && updateCustomization("activeTitle", t.title)}
+                  onClick={() => canSelect && updateCustomization("activeTitle", tItem.title)}
                   className={`p-2 rounded-lg border text-left text-xs transition flex items-center justify-between ${
                     canSelect ? "cursor-pointer" : "cursor-not-allowed opacity-80"
                   } ${
                     isSelected
-                      ? `${t.colorClass} font-black shadow-[0_0_12px_rgba(255,255,255,0.2)] ring-1 ring-white/50 scale-[1.01]`
+                      ? `${tItem.colorClass} font-black shadow-[0_0_12px_rgba(255,255,255,0.2)] ring-1 ring-white/50 scale-[1.01]`
                       : "bg-slate-950/60 border-slate-800 text-slate-400 hover:bg-slate-900"
                   }`}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-sm">{t.icon}</span>
-                    <span className="font-bold">{t.title}</span>
+                    <span className="text-sm">{tItem.icon}</span>
+                    <span className="font-bold">{tItem.title}</span>
                   </div>
-                  <span className={`text-[9px] px-2 py-0.5 rounded border uppercase font-extrabold ${t.colorClass}`}>
-                    {t.badge}
+                  <span className={`text-[9px] px-2 py-0.5 rounded border uppercase font-extrabold ${tItem.colorClass}`}>
+                    {tItem.badge}
                   </span>
                 </button>
               );
