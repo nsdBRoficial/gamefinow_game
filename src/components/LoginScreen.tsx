@@ -164,6 +164,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   };
 
   const changeLanguage = (lng: string) => {
+    localStorage.setItem('gameLanguage', lng);
     i18n.changeLanguage(lng);
     playSynthSound("beep");
   };
