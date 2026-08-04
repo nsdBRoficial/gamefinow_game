@@ -78,6 +78,16 @@ export default function App() {
   const [npcs] = useState<NPC[]>(INITIAL_NPCS);
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
+
+  // Auto-dismiss do banner de Level Up após 3 segundos (via useEffect correto)
+  React.useEffect(() => {
+    if (!gameState.pendingLevelUp) return;
+    const timer = setTimeout(() => {
+      setGameState((prev) => ({ ...prev, pendingLevelUp: false }));
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [gameState.pendingLevelUp]);
+
   const [showNetworkError, setShowNetworkError] = useState(false);
   const [isMaintenance, setIsMaintenance] = useState(false);
 
@@ -133,7 +143,7 @@ export default function App() {
 
   // Handle active retro floating window overlays: "customizer" | "backpack" | "ledger" | "guide" | null
   const [activeWindow, setActiveWindow] = useState<"customizer" | "backpack" | "ledger" | "guide" | null>(null);
-  const [showActiveQuest, setShowActiveQuest] = useState(false);
+  const [showActiveQuest, setShowActiveQuest] = useState(true);
   const [showLegendaryRibbon, setShowLegendaryRibbon] = useState(false);
 
   // Compute hasStar for Battle Mode — only checks the 4 blockchain quests, NOT kill quests
@@ -146,31 +156,30 @@ export default function App() {
 
   useEffect(() => {
     // 1. Força o Nível 5 para jogadores que já concluíram todas as quests (Herói Lendário) e estão abaixo do Nível 5
+    const p = useGameStore.getState().playerPos;
     if (hasStar && (gameState.level || 1) < 5) {
       setGameState({ xp_current: 1600, level: 5 });
-      setPlayerPos(prev => ({
-        ...prev,
+      setPlayerPos({
         maxHp: 200,
         hp: 200,
         maxMp: 90,
         mp: 90
-      }));
+      });
     } 
     // 2. Sincronizar maxHp/maxMp antigos com o Level atual do jogador
-    else if (gameState.level && playerPos.maxHp) {
+    else if (gameState.level && p.maxHp) {
       const expectedHp = 100 + ((gameState.level - 1) * 25);
       const expectedMp = 50 + ((gameState.level - 1) * 10);
-      if (playerPos.maxHp !== expectedHp || playerPos.maxMp !== expectedMp) {
-        setPlayerPos(prev => ({
-          ...prev,
+      if (p.maxHp !== expectedHp || p.maxMp !== expectedMp) {
+        setPlayerPos({
           maxHp: expectedHp,
-          hp: (prev.hp === prev.maxHp || !prev.hp) ? expectedHp : prev.hp,
+          hp: (p.hp === p.maxHp || !p.hp) ? expectedHp : p.hp,
           maxMp: expectedMp,
-          mp: (prev.mp === prev.maxMp || !prev.mp) ? expectedMp : prev.mp,
-        }));
+          mp: (p.mp === p.maxMp || !p.mp) ? expectedMp : p.mp,
+        });
       }
     }
-  }, [hasStar, gameState.level, playerPos.maxHp, playerPos.maxMp, setGameState, setPlayerPos]);
+  }, [hasStar, gameState.level, setGameState, setPlayerPos]);
 
   // Quando o jogador obtém a Estrela de Guardião, ativa a Kill Quest do Centro
   useEffect(() => {
@@ -336,17 +345,18 @@ export default function App() {
   // Auto-cura passiva (1 HP por segundo fora de batalha)
   useEffect(() => {
     const healInterval = setInterval(() => {
-      if (!gameState.isBattleModeActive && playerPos.hp !== undefined && playerPos.maxHp !== undefined) {
-        if (playerPos.hp < playerPos.maxHp) {
-          setPlayerPos(prev => ({
-            ...prev,
-            hp: Math.min((prev.hp || 0) + 1, prev.maxHp || 100)
-          }));
+      const state = useGameStore.getState();
+      const p = state.playerPos;
+      if (!state.isBattleModeActive && p.hp !== undefined && p.maxHp !== undefined) {
+        if (p.hp < p.maxHp) {
+          state.setPlayerPos({
+            hp: Math.min((p.hp || 0) + 1, p.maxHp || 100)
+          });
         }
       }
     }, 1000);
     return () => clearInterval(healInterval);
-  }, [gameState.isBattleModeActive, playerPos.hp, playerPos.maxHp, setPlayerPos]);
+  }, []);
 
   // Web Audio Synthesizer Sounds
   const playSynthSound = (type: "beep" | "success" | "coin" | "unlock") => {
@@ -1692,7 +1702,7 @@ export default function App() {
         )}
 
         {gameState.pendingLevelUp && !gameState.isDead && (
-          <div className="absolute inset-0 z-40 pointer-events-none flex flex-col items-center justify-center bg-yellow-500/10 backdrop-blur-[1px]">
+          <div className="absolute inset-0 z-[100] pointer-events-none flex flex-col items-center justify-center bg-yellow-500/10 backdrop-blur-[1px]">
             <div className="animate-bounce flex flex-col items-center">
               <h1 className="text-yellow-400 font-black text-7xl uppercase tracking-widest drop-shadow-[0_4px_4px_rgba(0,0,0,1)] stroke-black stroke-2" style={{ WebkitTextStroke: '2px black' }}>
                 LEVEL UP!
@@ -1700,12 +1710,6 @@ export default function App() {
               <p className="text-white font-mono text-2xl drop-shadow-[0_2px_2px_rgba(0,0,0,1)] bg-black/50 px-4 py-1 rounded-full mt-2">
                 Nível {gameState.level}
               </p>
-            </div>
-            {/* Auto dismiss after 3 seconds */}
-            <div className="hidden">
-              {setTimeout(() => {
-                setGameState((prev) => ({ ...prev, pendingLevelUp: false }));
-              }, 3000)}
             </div>
           </div>
         )}

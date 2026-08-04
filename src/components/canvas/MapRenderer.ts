@@ -438,20 +438,16 @@ export const drawMapTiles = (
   gridRows: number,
   gridCols: number
 ) => {
-  for (let r = 0; r < gridRows; r++) {
-    for (let c = 0; c < gridCols; c++) {
+  const startR = Math.max(0, Math.floor(topBound / tileSize));
+  const endR = Math.min(gridRows - 1, Math.floor(bottomBound / tileSize));
+  const startC = Math.max(0, Math.floor(leftBound / tileSize));
+  const endC = Math.min(gridCols - 1, Math.floor(rightBound / tileSize));
+
+  for (let r = startR; r <= endR; r++) {
+    for (let c = startC; c <= endC; c++) {
       const tile = mapGrid[r][c];
       const worldX = c * tileSize;
       const worldY = r * tileSize;
-
-      if (
-        worldX < leftBound ||
-        worldX > rightBound ||
-        worldY < topBound ||
-        worldY > bottomBound
-      ) {
-        continue;
-      }
 
       switch (tile) {
         case TileType.WATER:
@@ -1110,8 +1106,10 @@ export const drawMapDecorations = (
   rightBound: number,
   topBound: number,
   bottomBound: number,
-  tileSize: number
+  tileSize: number,
+  playerPos?: { x: number; y: number }
 ) => {
+  const _playerPos = playerPos ?? { x: -9999, y: -9999 };
   getMapDecorations(currentRegion).forEach((dec) => {
     const worldX = dec.x * tileSize;
     const worldY = dec.y * tileSize;
@@ -1461,7 +1459,7 @@ export const drawMapDecorations = (
         ctx.shadowBlur = 0;
 
         // Indicador de ESPAÇO se estiver perto
-        const isNearMine = Math.abs(playerPos.x - dec.x) <= 1 && Math.abs(playerPos.y - dec.y) <= 1;
+        const isNearMine = Math.abs(_playerPos.x - dec.x) <= 1 && Math.abs(_playerPos.y - dec.y) <= 1;
         if (isNearMine) {
           ctx.font = "bold 8px 'JetBrains Mono', monospace";
           const mText = "ESPAÇO";

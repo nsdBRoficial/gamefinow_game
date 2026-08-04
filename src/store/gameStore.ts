@@ -177,9 +177,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setPlayerPos: (updater) => set((state) => {
     const nextPlayer = typeof updater === "function" ? updater(state.playerPos) : updater;
     const newPlayer = { ...state.playerPos, ...nextPlayer };
-    
-    localStorage.setItem("stellar_island_player_pos_v1", JSON.stringify(newPlayer));
-    
+    // Otimização de I/O: Não faz stringify+setItem a 60 FPS. Só salva se o jogador não estiver em animação de movimento entre tiles ou mudando de mapa.
+    if (!newPlayer.isMoving || newPlayer.mapId !== state.playerPos.mapId) {
+      localStorage.setItem("stellar_island_player_pos_v1", JSON.stringify(newPlayer));
+    }
     return { playerPos: newPlayer };
   }),
 
@@ -278,7 +279,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
     
     // Encrypt secretKey before saving
     if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
-      const { encryptAES } = require("../utils/cryptoUtils");
       const safeWallet = { ...gameStateToSave.wallet };
       safeWallet.secretKey = encryptAES(safeWallet.secretKey, safeWallet.pin);
       gameStateToSave.wallet = safeWallet;

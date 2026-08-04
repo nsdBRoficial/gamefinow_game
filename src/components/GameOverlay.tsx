@@ -2100,8 +2100,8 @@ const P2PStoreModal: React.FC<P2PStoreProps> = ({ wallet, onClose, onUpdateWalle
             "GBTR4BH2TMOEELCVYBAZ46TKGFGGQGUJK5LI3C32XYGIM475MFRSMVLO", // VAULT_ADDRESS
             totalToPay.toString()
           );
-          if (!res || !res.hash) throw new Error("Falha ao enviar XLM na rede.");
-          txHash = res.hash;
+          if (!res) throw new Error("Falha ao enviar XLM na rede.");
+          txHash = res;
         } else {
           txHash = generateTxHash();
         }

@@ -120,11 +120,15 @@ export async function upsertPlayer(playerId: string, player: Player): Promise<vo
     
     if (authRes.ok) {
       const { token } = await authRes.json();
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-      authSupabase = createClient(supabaseUrl, supabaseAnonKey, {
-        global: { headers: { Authorization: `Bearer ${token}` } }
-      });
+      if (token && token !== (window as any)._lastAuthToken) {
+        (window as any)._lastAuthToken = token;
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+        const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+        authSupabase = createClient(supabaseUrl, supabaseAnonKey, {
+          global: { headers: { Authorization: `Bearer ${token}` } },
+          auth: { persistSession: false } // Evita conflitos de GoTrue múltiplos
+        });
+      }
     }
 
     await authSupabase!.from("players").upsert(

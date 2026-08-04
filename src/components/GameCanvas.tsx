@@ -14,6 +14,7 @@ import { drawMapTiles, drawSpecialTerminals, drawMapDecorations, drawActiveAnima
 import { drawNPCs, drawOtherPlayers, cleanupRenderStates } from "./canvas/NPCManager";
 import { OnlinePlayer } from "../services/multiplayerService";
 import { getCurrentQuestTarget, drawQuestArrow } from "./canvas/QuestArrowRenderer";
+import { playSynthSound } from "../utils/audioUtils";
 import { useGameStore } from "../store/gameStore";
 
 interface GameCanvasProps {
@@ -138,6 +139,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   ]);
 
   // Bees — criaturas exclusivas do jardim do Oeste (West Map)
+  const processedLevelUpRef = useRef<boolean>(false);
   const beesRef = useRef<GameCreature[]>([
     { id: "bee1", name: "Bee", x: 10, y: 25, targetX: 10, targetY: 25, isMoving: false, frame: 0, color: "#facc15", level: 11, hp: 700, maxHp: 700, bounceOffset: 0, dir: "right" },
     { id: "bee2", name: "Bee", x: 50, y: 30, targetX: 50, targetY: 30, isMoving: false, frame: 0, color: "#eab308", level: 11, hp: 700, maxHp: 700, bounceOffset: 0, dir: "left" },
@@ -1410,18 +1412,20 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     }
 
     if (latestGameState.current.pendingLevelUp) {
-      combatTextsRef.current.push({
-        id: Math.random().toString(),
-        text: `LEVEL UP!`,
-        x: latestPlayerPos.current.x,
-        y: latestPlayerPos.current.y - 2.0,
-        color: "#facc15", // Amarelo Dourado
-        timestamp: time + 3000
-      });
-      const { playSynthSound } = require('../utils/audioUtils');
-      playSynthSound("success");
-      // Limpar flag
-      useGameStore.getState().setGameState({ pendingLevelUp: false });
+      if (!processedLevelUpRef.current) {
+        processedLevelUpRef.current = true;
+        combatTextsRef.current.push({
+          id: Math.random().toString(),
+          text: `LEVEL UP!`,
+          x: latestPlayerPos.current.x,
+          y: latestPlayerPos.current.y - 2.0,
+          color: "#facc15",
+          timestamp: time + 3000
+        });
+        playSynthSound("success");
+      }
+    } else {
+      processedLevelUpRef.current = false;
     }
 
     if (!latestGameState.current.isBattleModeActive) return;
@@ -1724,6 +1728,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
         if (wantToMove) {
           if (
+            Number.isNaN(nextTargetX) ||
+            Number.isNaN(nextTargetY) ||
             nextTargetX < 0 ||
             nextTargetX >= GRID_COLS ||
             nextTargetY < 0 ||
@@ -1732,8 +1738,14 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             return { ...prev, dir: nextDir };
           }
 
-          const targetTile = mapGridRef.current[nextTargetY][nextTargetX];
-          if (isCollidable(targetTile)) {
+          const targetRow = mapGridRef.current[nextTargetY];
+          if (!targetRow) {
+            console.warn(`[GameCanvas] Linha de grid não encontrada para nextTargetY=${nextTargetY}. Prevenindo crash.`);
+            return { ...prev, dir: nextDir };
+          }
+          
+          const targetTile = targetRow[nextTargetX];
+          if (targetTile === undefined || isCollidable(targetTile)) {
             return { ...prev, dir: nextDir };
           }
 
@@ -1828,7 +1840,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     drawSpecialTerminals(ctx, currentRegion as MapId, playerPosVal, TILE_SIZE);
 
     // 4. Render Decorative Objects
-    drawMapDecorations(ctx, currentRegion as MapId, leftBound, rightBound, topBound, bottomBound, TILE_SIZE);
+    drawMapDecorations(ctx, currentRegion as MapId, leftBound, rightBound, topBound, bottomBound, TILE_SIZE, playerPosVal);
 
     // 5. Render Passive Slime Blobs
     creaturesRef.current.forEach((slime) => {

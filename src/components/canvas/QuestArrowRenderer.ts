@@ -534,8 +534,8 @@ function drawPixelArrowSprite(
     ctx.rotate(rotationRad);
   }
 
-  // Pixel size scaling super delicado (10% do tamanho anterior)
-  const p = 0.35;
+  // Pixel size scaling super delicado (Aumentado em 100%)
+  const p = 0.70;
 
   // ── Sombra projetada sob a seta ──
   ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
