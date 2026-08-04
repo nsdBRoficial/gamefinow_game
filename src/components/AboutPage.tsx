@@ -326,7 +326,7 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
       <aside className="hidden lg:flex flex-col w-64 shrink-0 py-6 px-3" style={{ background: "rgba(3,6,14,0.96)", borderRight: "2px solid rgba(245,158,11,0.15)", backdropFilter: "blur(20px)" }}>
         <div className="px-3 mb-6">
           <div className="text-base font-black tracking-widest uppercase rainbow-text mb-0.5">GAMEFINOW</div>
-          <div className="font-mono text-[10px]" style={{ color: "#374151" }}>v0.7.0 • STELLAR TESTNET</div>
+          <div className="font-mono text-[10px]" style={{ color: "#374151" }}>v0.8.2 • STELLAR TESTNET</div>
         </div>
         {/* Language selector */}
         <div className="px-3 mb-5">
@@ -434,7 +434,7 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
                 { label: "🌐 Stellar Testnet",          color: "#06b6d4" },
                 { label: "⚡ Soroban Smart Contracts",  color: "#a855f7" },
                 { label: "👛 WalletNow SDK",            color: "#22c55e" },
-                { label: "🎮 GameFi v0.7.0",            color: "#f59e0b" },
+                { label: "🎮 GameFi v0.8.2",            color: "#f59e0b" },
               ].map(b => (
                 <span key={b.label} className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-black"
                   style={{ background: `${b.color}25`, border: `2px solid ${b.color}60`, color: b.color, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>
@@ -723,7 +723,7 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
           </div>
           <div className="mt-20 mb-8 h-1 w-full rounded-full" style={{ background: "linear-gradient(90deg,#f59e0b,#ec4899,#06b6d4,#22c55e,#a855f7)" }} />
           <div className="text-center">
-            <p className="font-mono text-xs mb-1" style={{ color: "#1f2937" }}>GameFiNow v0.7.0 // Stellar Testnet // {t("about.hero.subtitle")}</p>
+            <p className="font-mono text-xs mb-1" style={{ color: "#1f2937" }}>GameFiNow v0.8.2 // Stellar Testnet // {t("about.hero.subtitle")}</p>
             <a href={`${EXPERT}/account/${ADDRS.treasury}`} target="_blank" rel="noreferrer" className="font-mono text-xs hover:underline" style={{ color: "#374151" }}>{EXPERT}</a>
           </div>
         </section>

@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * GameFiNow - v0.7.0
+ * GameFiNow - v0.8.2
  * A Gamified On-Boarding Experience for the Stellar Ecosystem
  *
  * Main Application Component — orchestrates routing between:
@@ -16,7 +16,7 @@
  *   - Rendering: HTML5 Canvas 60 FPS (GameCanvas.tsx)
  *   - Blockchain: Stellar Testnet via WalletNow SDK & Horizon API
  *
- * Changelog v0.7.0:
+ * Changelog v0.8.2:
  *   - Full i18n support: English (default), Portuguese, Spanish
  *   - Redesigned animated Login Screen with particle effects
  *   - New Landing Page with hero section and CTA button

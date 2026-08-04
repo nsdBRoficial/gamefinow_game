@@ -219,7 +219,7 @@ const MiningNodeModal = ({ onClose }: { onClose: () => void }) => {
       <div className="bg-gradient-to-r from-cyan-900 to-slate-800 p-4 border-b border-cyan-800 flex justify-between items-center">
         <div>
           <h2 className="text-xl font-black text-cyan-400 font-mono tracking-wider flex items-center gap-2">
-            <span className="text-2xl">⛏️</span> JAZIDA DE MINERAÇÃO
+            <span className="text-2xl">⛏️</span> {typeof t === 'function' ? t('overlay.mining_site', 'MINING SITE') : 'MINING SITE'}
           </h2>
           <p className="text-xs text-cyan-200 mt-1 font-mono">Extraia recursos valiosos da Ilha Stellar</p>
         </div>
@@ -308,19 +308,19 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
             <Check className="w-5 h-5 text-cyan-400" />
           </div>
           <div>
-            <h2 className="text-lg font-black text-white font-mono tracking-tight">WALLET DETECTADA</h2>
-            <p className="text-xs text-cyan-400 font-mono">Wallet Forge — East Biome Terminal</p>
+            <h2 className="text-lg font-black text-white font-mono tracking-tight">{typeof t === 'function' ? t('overlay.wallet_detected', 'WALLET DETECTED') : 'WALLET DETECTED'}</h2>
+            <p className="text-xs text-cyan-400 font-mono">{typeof t === 'function' ? t('overlay.east_terminal', 'Wallet Forge - East Biome Terminal') : 'Wallet Forge - East Biome Terminal'}</p>
           </div>
         </div>
 
         <div className="bg-slate-800/70 border border-cyan-500/30 rounded-xl p-4 space-y-3">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-green-400 text-xs font-bold font-mono uppercase tracking-wider">Conta Ativa na Stellar Testnet</span>
+            <span className="text-green-400 text-xs font-bold font-mono uppercase tracking-wider">{typeof t === 'function' ? t('overlay.active_account', 'Active Account on Stellar Testnet') : 'Active Account on Stellar Testnet'}</span>
           </div>
 
           <div className="space-y-1">
-            <p className="text-slate-400 text-[10px] font-mono uppercase tracking-wider">Chave Pública</p>
+            <p className="text-slate-400 text-[10px] font-mono uppercase tracking-wider">{typeof t === 'function' ? t('overlay.public_key', 'Public Key') : 'Public Key'}</p>
             <div className="flex items-center gap-2">
               <code className="text-cyan-300 text-xs font-mono bg-slate-900/60 px-2 py-1 rounded-lg truncate flex-1">
                 {first6}...{last8}
@@ -352,14 +352,14 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
         </div>
 
         <p className="text-slate-400 text-[11px] font-mono text-center">
-          💡 Vá ao <span className="text-amber-400 font-bold">Norte</span> para fazer On-Ramp e adquirir XLM.
+          💎 {typeof t === 'function' ? t('overlay.go_north_text1', 'Go') : 'Go'} <span className="text-amber-400 font-bold">{typeof t === 'function' ? t('overlay.go_north_dir', 'North') : 'North'}</span> {typeof t === 'function' ? t('overlay.go_north_text2', 'to On-Ramp and acquire XLM.') : 'to On-Ramp and acquire XLM.'}
         </p>
 
         <button
           onClick={onClose}
           className="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 rounded-xl font-mono text-sm transition-all"
         >
-          Fechar Terminal
+          {typeof t === 'function' ? t('overlay.close_terminal', 'Close Terminal') : 'Close Terminal'}
         </button>
       </div>
     );
@@ -489,10 +489,10 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
         <form onSubmit={startOnboarding} className="space-y-4">
           <div className="flex items-center space-x-3 text-cyan-400">
             <Shield className="h-7 w-7 animate-pulse" />
-            <h2 className="text-xl font-black uppercase tracking-tight font-mono">Onboarding WalletNow</h2>
+            <h2 className="text-xl font-black uppercase tracking-tight font-mono">{typeof t === 'function' ? t('overlay.onboarding_walletnow', 'WalletNow Onboarding') : 'WalletNow Onboarding'}</h2>
           </div>
           <p className="text-xs text-slate-300 leading-relaxed">
-            Bem-vindo ao portal do Leste. Aqui você utilizará a **WalletNow SDK** para forjar sua carteira na rede de testes Stellar. Escolha seus dados abaixo:
+            {typeof t === 'function' ? t('overlay.east_welcome', 'Welcome to the East portal. Here you will use the WalletNow SDK to forge your wallet on the Stellar testnet. Choose your details below:') : 'Welcome to the East portal. Here you will use the WalletNow SDK to forge your wallet on the Stellar testnet. Choose your details below:'}
           </p>
 
           <div className="space-y-3">
@@ -586,7 +586,7 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
         <div className="space-y-4">
           <div className="flex items-center space-x-2 text-emerald-400">
             <Sparkles className="h-6 w-6 animate-bounce" />
-            <h2 className="text-xl font-black uppercase tracking-tight font-mono">Onboarding WalletNow Concluído!</h2>
+            <h2 className="text-xl font-black uppercase tracking-tight font-mono">{typeof t === 'function' ? t('overlay.onboarding_complete', 'WalletNow Onboarding Completed!') : 'WalletNow Onboarding Completed!'}</h2>
           </div>
           <p className="text-xs text-slate-300 leading-relaxed">
             Seu par de chaves estelares foi forjado e registrado com o e-mail **{email}**. Os últimos 4 dígitos do seu endereço serão incorporados ao seu nome de usuário!
@@ -823,7 +823,7 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, o
         <div className="space-y-4">
           <div className="flex items-center space-x-3 text-emerald-400">
             <CreditCard className="h-7 w-7" />
-            <h2 className="text-xl font-black uppercase tracking-tight font-mono">Câmbio PIX (WalletNow On/Off Ramp)</h2>
+            <h2 className="text-xl font-black uppercase tracking-tight font-mono">{typeof t === 'function' ? t('overlay.pix_exchange', 'PIX Exchange (WalletNow On/Off Ramp)') : 'PIX Exchange (WalletNow On/Off Ramp)'}</h2>
           </div>
 
           <div className="grid grid-cols-2 gap-2 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
@@ -838,7 +838,7 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, o
                 activeTab === "deposit" ? "bg-emerald-500 text-black" : "text-slate-400 hover:text-white"
               }`}
             >
-              Comprar Ativos (On-Ramp)
+              {typeof t === 'function' ? t('overlay.buy_assets_onramp', 'Buy Assets (On-Ramp)') : 'Buy Assets (On-Ramp)'}
             </button>
             <button
               type="button"
@@ -934,7 +934,7 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, o
         <div className="space-y-4 text-center">
           <div className="flex items-center space-x-3 text-emerald-400 border-b border-slate-800 pb-2">
             <RefreshCw className="h-5 w-5 animate-spin" />
-            <h2 className="text-sm font-black uppercase tracking-wider font-mono">Processando Depósito SEP-24</h2>
+            <h2 className="text-sm font-black uppercase tracking-wider font-mono">{typeof t === 'function' ? t('overlay.processing_sep24', 'Processing SEP-24 Deposit') : 'Processing SEP-24 Deposit'}</h2>
           </div>
           
           {sep24IframeUrl === "game-internal:mock-kyc" ? (
@@ -994,7 +994,7 @@ const OnRampModal: React.FC<OnRampProps> = ({ wallet, onClose, onUpdateWallet, o
           <div className="w-12 h-12 bg-emerald-950 border border-emerald-500 rounded-full flex items-center justify-center mx-auto text-emerald-400 animate-bounce">
             <Check className="h-6 w-6" />
           </div>
-          <h2 className="text-lg font-black uppercase tracking-tight text-emerald-400 font-mono">Operação Concluída com Sucesso!</h2>
+          <h2 className="text-lg font-black uppercase tracking-tight text-emerald-400 font-mono">{typeof t === 'function' ? t('overlay.op_success_title', 'Operation Completed Successfully!') : 'Operation Completed Successfully!'}</h2>
           <p className="text-xs text-slate-300">
             A WalletNow SDK processou o seu {activeTab === "deposit" ? "depósito" : "saque"} instantaneamente na rede de testes da Stellar.
           </p>
@@ -1071,7 +1071,7 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
   const handleSwap = async () => {
     setError(null);
     if (swapFrom === swapTo) {
-      setError("Selecione moedas de origem e destino diferentes!");
+      setError("{typeof t === 'function' ? t('overlay.swap_same_asset', 'Select different origin and destination coins!') : 'Select different origin and destination coins!'}");
       return;
     }
 
@@ -1220,7 +1220,7 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
         <div className="space-y-4">
           <div className="flex items-center space-x-3 text-violet-400">
             <ArrowRightLeft className="h-7 w-7" />
-            <h2 className="text-xl font-black uppercase tracking-tight font-mono">DEX & Liquidez (Soroban AMM)</h2>
+            <h2 className="text-xl font-black uppercase tracking-tight font-mono">{typeof t === 'function' ? t('overlay.dex_liquidity', 'DEX & Liquidity (Soroban AMM)') : 'DEX & Liquidity (Soroban AMM)'}</h2>
           </div>
 
           <div className="grid grid-cols-2 gap-2 bg-slate-950 p-1.5 rounded-xl border border-slate-800">
@@ -1502,7 +1502,7 @@ const SorobanSwapModal: React.FC<SorobanSwapProps> = ({ wallet, onClose, onUpdat
           <div className="w-12 h-12 bg-violet-950 border border-violet-500 rounded-full flex items-center justify-center mx-auto text-violet-400 animate-pulse">
             <Sparkles className="h-6 w-6" />
           </div>
-          <h2 className="text-lg font-black uppercase tracking-tight text-violet-400 font-mono">Sucesso na Execução Soroban!</h2>
+          <h2 className="text-lg font-black uppercase tracking-tight text-violet-400 font-mono">{typeof t === 'function' ? t('overlay.soroban_success', 'Soroban Execution Success!') : 'Soroban Execution Success!'}</h2>
           <p className="text-xs text-slate-200">
             {successMessage}
           </p>
@@ -1601,13 +1601,13 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
         amount: amount.toString(),
         asset: vaultAsset,
         fee: estimateFeeInXlm(vaultAsset, amount).toFixed(5),
-        memo: `Depósito no Cofre de Rendimento WalletNow (Estimativa base: +${rewardEstimate})`,
+        memo: `{typeof t === 'function' ? t('overlay.vault_deposit_memo', 'WalletNow Yield Vault Deposit (Base estimate:') : 'WalletNow Yield Vault Deposit (Base estimate:'} +${rewardEstimate})`,
         ledgerSequence: 6184293 + Math.floor(Math.random() * 100)
       };
 
       onHoldSuccess(vaultAsset, amount, updatedFields, tx);
       setSuccess({
-        message: `Você depositou com sucesso ${amount} ${vaultAsset} no cofre de rendimentos da WalletNow!`,
+        message: `{typeof t === 'function' ? t('overlay.you_deposited', 'You successfully deposited') : 'You successfully deposited'} ${amount} ${vaultAsset} {typeof t === 'function' ? t('overlay.in_yield_vault', 'in the WalletNow yield vault!') : 'in the WalletNow yield vault!'}`,
         txHash
       });
       setAmount(20);
@@ -1637,7 +1637,7 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
     }
 
     if (!claimOnly && locked <= 0) {
-      setError("Você não possui fundos travados neste cofre!");
+      setError("{typeof t === 'function' ? t('overlay.no_funds_locked', 'You have no funds locked in this vault!') : 'You have no funds locked in this vault!'}");
       return;
     }
 
@@ -1658,7 +1658,7 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
       const txType = claimOnly ? "VAULT_CLAIM" : "VAULT_WITHDRAW";
       const txMemo = claimOnly 
         ? `Colheita de Rendimento (${yieldEarned} ${vaultAsset})` 
-        : `Resgate do Cofre: Principal + Rendimento (${yieldEarned} ${vaultAsset})`;
+        : `{typeof t === 'function' ? t('overlay.vault_withdrawal_memo', 'Vault Withdrawal: Principal + Yield (') : 'Vault Withdrawal: Principal + Yield ('}${yieldEarned} ${vaultAsset})`;
 
       const tx: Transaction = {
         id: txHash,
@@ -1699,11 +1699,11 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
     <div id="stellar-hold-panel" className="text-slate-100 space-y-4">
       <div className="flex items-center space-x-3 text-amber-400">
         <TrendingUp className="h-7 w-7" />
-        <h2 className="text-xl font-black uppercase tracking-tight font-mono">Cofres DeFi (WalletNow Vaults)</h2>
+        <h2 className="text-xl font-black uppercase tracking-tight font-mono">{typeof t === 'function' ? t('overlay.defi_vaults', 'DeFi Vaults (WalletNow Vaults)') : 'DeFi Vaults (WalletNow Vaults)'}</h2>
       </div>
 
       <p className="text-xs text-slate-300 leading-relaxed">
-        No altar do Sul, você bloqueia seus tokens em cofres automatizados sem custódia para ganhar juros distribuídos e fidelizar sua conta de jogador.
+        {typeof t === 'function' ? t('overlay.south_altar', 'At the South altar, you lock your tokens in automated non-custodial vaults to earn distributed interest and build loyalty for your player account.') : 'At the South altar, you lock your tokens in automated non-custodial vaults to earn distributed interest and build loyalty for your player account.'}
       </p>
 
       {error && (
@@ -1752,7 +1752,7 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3 flex flex-col justify-between">
           <div className="space-y-1.5">
-            <span className="text-[10px] text-slate-400 font-extrabold uppercase block">Depositar no Cofre:</span>
+            <span className="text-[10px] text-slate-400 font-extrabold uppercase block">{typeof t === 'function' ? t('overlay.deposit_in_vault', 'Deposit in Vault:') : 'Deposit in Vault:'}</span>
             <div className="flex items-center space-x-2">
               <input
                 type="number"
@@ -1819,7 +1819,7 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
                   disabled={loading || activeVaultBalance <= 0}
                   className="py-2 px-2 bg-slate-800 hover:bg-slate-700 disabled:opacity-40 text-red-400 border border-slate-700 text-[10px] sm:text-xs font-extrabold uppercase rounded-lg transition cursor-pointer font-mono"
                 >
-                  Sacar Cofre
+                  {typeof t === 'function' ? t('overlay.withdraw_vault', 'Withdraw from Vault') : 'Withdraw from Vault'}
                 </button>
               </>
             )}
@@ -1828,7 +1828,7 @@ const StellarHoldModal: React.FC<StellarHoldProps> = ({ wallet, onClose, onUpdat
 
         <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3.5">
           <div>
-            <span className="text-[10px] text-slate-500 font-bold uppercase font-mono block">Status do seu Cofre:</span>
+            <span className="text-[10px] text-slate-500 font-bold uppercase font-mono block">{typeof t === 'function' ? t('overlay.vault_status', 'Your Vault Status:') : 'Your Vault Status:'}</span>
             <div className="flex justify-between items-baseline mt-1">
               <span className="text-xl font-black font-mono text-slate-100">
                 {activeVaultBalance} <span className="text-xs text-slate-400">{vaultAsset}</span>
@@ -1899,8 +1899,8 @@ const AtfDefiModal: React.FC<AtfDefiProps> = ({
           <Sparkles className="w-6 h-6 animate-pulse" />
         </div>
         <div>
-          <h2 className="text-xl font-black uppercase text-rose-500 tracking-tight font-mono leading-none">ATM DEFI LENDÁRIO</h2>
-          <p className="text-slate-400 text-[10px] mt-1 uppercase font-bold">Bem-vindo, herói. Acesso irrestrito concedido.</p>
+          <h2 className="text-xl font-black uppercase text-rose-500 tracking-tight font-mono leading-none">{typeof t === 'function' ? t('overlay.legendary_atm', 'LEGENDARY DEFI ATM') : 'LEGENDARY DEFI ATM'}</h2>
+          <p className="text-slate-400 text-[10px] mt-1 uppercase font-bold">{typeof t === 'function' ? t('overlay.welcome_hero', 'Welcome, hero. Unrestricted access granted.') : 'Welcome, hero. Unrestricted access granted.'}</p>
         </div>
       </div>
 
@@ -1910,7 +1910,7 @@ const AtfDefiModal: React.FC<AtfDefiProps> = ({
           { id: "saldos", label: "Saldos" },
           { id: "onramp", label: "On/Off Ramp" },
           { id: "swap", label: "Soroban Swap" },
-          { id: "vault", label: "Cofres Yield" },
+          { id: "vault", label: typeof t === 'function' ? t('overlay.yield_vaults_tab', 'Yield Vaults') : 'Yield Vaults' },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -1978,7 +1978,7 @@ const AtfDefiModal: React.FC<AtfDefiProps> = ({
             <div className="mt-4 bg-rose-500/10 border border-rose-500/30 p-3 rounded-lg flex items-start gap-2">
               <Shield className="w-5 h-5 text-rose-400 flex-shrink-0 mt-0.5" />
               <p className="text-[10px] text-rose-300 leading-relaxed">
-                Este terminal bancário unificado é acessível apenas àqueles que provaram seu valor. Todas as suas transações agora são roteadas diretamente pelo hub central da WalletNow na Testnet.
+                {typeof t === 'function' ? t('overlay.bank_terminal', 'This unified banking terminal is accessible only to those who have proven their worth. All your transactions are now routed directly through the central WalletNow hub on the Testnet.') : 'This unified banking terminal is accessible only to those who have proven their worth. All your transactions are now routed directly through the central WalletNow hub on the Testnet.'}
               </p>
             </div>
           </div>
@@ -2240,8 +2240,8 @@ const P2PStoreModal: React.FC<P2PStoreProps> = ({ wallet, onClose, onUpdateWalle
       <div className="flex items-center space-x-3 text-rose-400">
         <Sparkles className="h-7 w-7" />
         <div>
-          <h2 className="text-xl font-black uppercase tracking-tight font-mono text-rose-400">Mercado P2P Store (6 SQM)</h2>
-          <p className="text-[10px] text-slate-400 font-mono">Feira de Trocas Descentralizada da Ilha</p>
+          <h2 className="text-xl font-black uppercase tracking-tight font-mono text-rose-400">{typeof t === 'function' ? t('overlay.p2p_store', 'P2P Store Market (6 SQM)') : 'P2P Store Market (6 SQM)'}</h2>
+          <p className="text-[10px] text-slate-400 font-mono">{typeof t === 'function' ? t('overlay.decentralized_market', 'Decentralized Island Exchange Market') : 'Decentralized Island Exchange Market'}</p>
         </div>
       </div>
 
@@ -2483,8 +2483,8 @@ const BurnAltarModal: React.FC<BurnAltarProps> = ({ wallet, onClose, onUpdateWal
       <div className="flex items-center space-x-3 text-orange-400">
         <span className="text-3xl animate-pulse">🔥</span>
         <div>
-          <h2 className="text-xl font-black uppercase tracking-tight text-orange-400">Altar de Queima Eterna (4 SQM)</h2>
-          <p className="text-[10px] text-slate-400">Pira Deflacionária & Transparência do Tesouro GameFi</p>
+          <h2 className="text-xl font-black uppercase tracking-tight text-orange-400">{typeof t === 'function' ? t('overlay.burn_altar', 'Eternal Burn Altar (4 SQM)') : 'Eternal Burn Altar (4 SQM)'}</h2>
+          <p className="text-[10px] text-slate-400">{typeof t === 'function' ? t('overlay.deflationary_pyre', 'Deflationary Pyre & GameFi Treasury Transparency') : 'Deflationary Pyre & GameFi Treasury Transparency'}</p>
         </div>
       </div>
 
@@ -2747,8 +2747,8 @@ const GameFiFaucetModal: React.FC<GameFiFaucetProps> = ({ wallet, onClose, onUpd
       <div className="flex items-center space-x-3 text-cyan-400">
         <span className="text-3xl animate-pulse">⛲</span>
         <div>
-          <h2 className="text-xl font-black uppercase tracking-tight text-cyan-300">Fonte Mágica Faucet (2 SQM)</h2>
-          <p className="text-[10px] text-slate-400">Recompensa Diária de 10 Tokens GAMEFI (1 Resgate a cada 24h)</p>
+          <h2 className="text-xl font-black uppercase tracking-tight text-cyan-300">{typeof t === 'function' ? t('overlay.magic_faucet', 'Magic Faucet Spring (2 SQM)') : 'Magic Faucet Spring (2 SQM)'}</h2>
+          <p className="text-[10px] text-slate-400">{typeof t === 'function' ? t('overlay.daily_reward', 'Daily Reward of 10 GAMEFI Tokens (1 Claim every 24h)') : 'Daily Reward of 10 GAMEFI Tokens (1 Claim every 24h)'}</p>
         </div>
       </div>
 
