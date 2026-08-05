@@ -214,27 +214,29 @@ export const drawOtherPlayers = (
     let tagShadowBlur = 0;
     let borderStyle = isBot ? "rgba(255,255,255,0.2)" : "rgba(255, 198, 0, 0.55)";
 
-    if (currentTitle === "Herói Lendário de Stellar") {
+    const isLegendary = p.level >= 5 || currentTitle === "Herói Lendário de Stellar" || currentTitle === "Legendary Stellar Hero";
+
+    if (isLegendary) {
       tagColor = "#00ff66";
       tagShadowColor = "#00e676";
       tagShadowBlur = 8;
       borderStyle = "#00ff66";
-    } else if (currentTitle === "Alquimista do Soroban") {
+    } else if (currentTitle === "Alquimista do Soroban" || currentTitle === "Soroban Alchemist") {
       tagColor = "#e879f9";
       tagShadowColor = "#d946ef";
       tagShadowBlur = 6;
       borderStyle = "#e879f9";
-    } else if (currentTitle === "Operador On-Ramp") {
+    } else if (currentTitle === "Operador On-Ramp" || currentTitle === "On-Ramp Operator") {
       tagColor = "#fbbf24";
       tagShadowColor = "#f59e0b";
       tagShadowBlur = 6;
       borderStyle = "#fbbf24";
-    } else if (currentTitle === "Iniciado de Stellar") {
+    } else if (currentTitle === "Iniciado de Stellar" || currentTitle === "Stellar Initiate") {
       tagColor = "#ffc600";
       borderStyle = "#facc15";
     }
 
-    let prefix = currentTitle === "Herói Lendário de Stellar" ? "⭐ " : "";
+    let prefix = isLegendary ? "⭐ " : "";
 
     let namePart = p.name || "Anonymo";
 
