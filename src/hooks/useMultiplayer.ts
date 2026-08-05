@@ -90,6 +90,14 @@ export function useMultiplayer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playerId]);
 
+  // ─── Sincronização de XP/Level ──────────────────────────────────────────
+  useEffect(() => {
+    if (!MULTIPLAYER_ENABLED || !playerId || !gameState) return;
+    upsertPlayer(playerId, playerPos, gameState);
+    // Não colocar playerPos na dependência para evitar flood, a não ser que precise
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playerId, gameState?.xp_current, gameState?.level]);
+
   // ─── Subscrição ao mapa atual ─────────────────────────────────────────────
   useEffect(() => {
     if (!MULTIPLAYER_ENABLED || !playerId) return;
