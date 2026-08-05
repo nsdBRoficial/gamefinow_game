@@ -9,6 +9,9 @@ import { WalletState, Transaction } from "../types";
 import { useGameStore } from "../store/gameStore";
 import { onboardUser, StellarAnchorService, TestnetKitService, transferXLM } from "../services/stellarServices";
 import { Keypair } from "@stellar/stellar-sdk";
+
+// Silence TS errors for the fallback ternary logic: `typeof t === 'function' ? t('key') : 'fallback'`
+declare const t: any;
 import { SEP24Service } from "../services/sep24Service";
 import { estimateFeeInXlm, validateXlmBalanceForFee, GAMEFI_FEE_PERCENTAGE, GAMEFI_TREASURY_PUBLIC_KEY } from "../services/economyService";
 import { 
@@ -2864,3 +2867,52 @@ const GameFiFaucetModal: React.FC<GameFiFaucetProps> = ({ wallet, onClose, onUpd
   );
 };
 
+
+// =================================================================
+// MINING REWARD MODAL — Popup On-Chain (Resultado do Mint GAMEFI)
+// =================================================================
+export const MiningRewardModal: React.FC = () => {
+  const { pendingMiningReward, setGameState, addTransaction } = useGameStore();
+  if (!pendingMiningReward) return null;
+  const { txHash, gems, gamefi, xp, rarity } = pendingMiningReward;
+  const rarityLabel = rarity === "epic" ? "Épica" : rarity === "rare" ? "Rara" : rarity === "uncommon" ? "Incomum" : "Comum";
+  const rarityColor = rarity === "epic" ? "#a855f7" : rarity === "rare" ? "#3b82f6" : rarity === "uncommon" ? "#22c55e" : "#94a3b8";
+  const rarityGlow = rarity === "epic" ? "0 0 24px rgba(168,85,247,0.5)" : rarity === "rare" ? "0 0 24px rgba(59,130,246,0.5)" : rarity === "uncommon" ? "0 0 24px rgba(34,197,94,0.4)" : "0 0 12px rgba(148,163,184,0.3)";
+  const handleClose = () => {
+    if (txHash) {
+      addTransaction({ id: txHash, type: "MINING_REWARD", timestamp: new Date().toISOString(), amount: `+${gamefi.toFixed(7)}`, asset: "GAMEFI", fee: "0.0001000 XLM", memo: `Mining:${rarity}:${gems}gems`, ledgerSequence: 0 });
+    }
+    setGameState({ pendingMiningReward: undefined });
+  };
+  const stellarExpertUrl = txHash ? `https://stellar.expert/explorer/testnet/tx/${txHash}` : null;
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center" style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(4px)" }}>
+      <div className="relative w-full max-w-sm mx-4 rounded-2xl border overflow-hidden font-mono" style={{ background: "linear-gradient(145deg, #0f172a 0%, #1e293b 100%)", borderColor: rarityColor, boxShadow: rarityGlow }}>
+        <div className="px-6 pt-6 pb-4 text-center" style={{ borderBottom: `1px solid ${rarityColor}30` }}>
+          <div className="text-4xl mb-2 animate-bounce">⛏️</div>
+          <h2 className="text-lg font-black uppercase tracking-widest text-white">Mineração Concluída!</h2>
+          <p className="text-xs mt-1" style={{ color: rarityColor }}>Jazida {rarityLabel} — Recompensas On-Chain</p>
+        </div>
+        <div className="px-6 py-4 space-y-3">
+          <div className="flex items-center justify-between bg-slate-800/60 rounded-xl px-4 py-3 border border-slate-700/50"><div className="flex items-center gap-2"><span className="text-2xl">💎</span><span className="text-slate-300 text-sm">Gemas de Rubi</span></div><span className="text-emerald-400 font-black text-lg">+{gems}</span></div>
+          <div className="flex items-center justify-between bg-slate-800/60 rounded-xl px-4 py-3 border border-slate-700/50"><div className="flex items-center gap-2"><span className="text-2xl">🎮</span><span className="text-slate-300 text-sm">GAMEFI Tokens</span></div><span className="font-black text-lg" style={{ color: rarityColor }}>+{gamefi.toFixed(4)}</span></div>
+          <div className="flex items-center justify-between bg-slate-800/60 rounded-xl px-4 py-3 border border-slate-700/50"><div className="flex items-center gap-2"><span className="text-2xl">✨</span><span className="text-slate-300 text-sm">Experiência (XP)</span></div><span className="text-yellow-400 font-black text-lg">+{xp}</span></div>
+        </div>
+        <div className="px-6 pb-4">
+          {stellarExpertUrl ? (
+            <div className="bg-slate-900/80 rounded-xl p-3 border border-slate-700/60">
+              <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-1">🔗 Transação Stellar On-Chain</p>
+              <p className="text-[11px] text-cyan-400 font-mono break-all leading-relaxed">{txHash.slice(0, 20)}...{txHash.slice(-20)}</p>
+              <a href={stellarExpertUrl} target="_blank" rel="noopener noreferrer" className="mt-2 flex items-center gap-1.5 text-[11px] font-bold text-cyan-300 hover:text-cyan-100 transition-colors"><span>🌐</span> Ver no Stellar Expert →</a>
+            </div>
+          ) : (
+            <div className="bg-slate-900/60 rounded-xl p-3 border border-amber-900/40 text-center"><p className="text-[10px] text-amber-400">⚠️ Servidor offline — recompensas aplicadas localmente</p></div>
+          )}
+        </div>
+        <div className="px-6 pb-6">
+          <button onClick={handleClose} className="w-full py-3 rounded-xl font-black text-sm uppercase tracking-widest text-white transition-all active:scale-95" style={{ background: `linear-gradient(135deg, ${rarityColor}cc, ${rarityColor}88)`, boxShadow: `0 4px 16px ${rarityColor}44` }}>🎉 Coletar Recompensas</button>
+        </div>
+      </div>
+    </div>
+  );
+};

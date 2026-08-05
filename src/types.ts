@@ -183,6 +183,14 @@ export interface GameState {
   miningTotalDuration?: number;
   miningRarity?: "common" | "uncommon" | "rare" | "epic";
   currentMineRarity?: "common" | "uncommon" | "rare" | "epic";
+  // Mining Reward (resultado do mint on-chain após conclusão)
+  pendingMiningReward?: {
+    txHash: string;
+    gems: number;
+    gamefi: number;
+    xp: number;
+    rarity: "common" | "uncommon" | "rare" | "epic";
+  };
   // Wave Event
   isWaveActive?: boolean;
   stellarNucleusHp?: number;

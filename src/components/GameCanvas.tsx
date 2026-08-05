@@ -1772,6 +1772,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
               miningTotalDuration: undefined,
               miningRarity: undefined
             });
+            // Aviso visual: speech bubble por 3 segundos
+            useGameStore.getState().setPlayerPos({
+              bubbleText: "⛏️ Mineração cancelada!",
+              bubbleTimer: Date.now() + 3000,
+            });
           }
 
           return {
@@ -2341,63 +2346,150 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     );
 
     // 7.5 Render Mining Progress Bar over Player
-    // 7.5 Render Mining Progress Bar over Player
     if (gameStateVal.miningEndTimestamp && gameStateVal.miningTotalDuration) {
       const remainingTime = gameStateVal.miningEndTimestamp - Date.now();
       if (remainingTime > 0) {
         const progress = 1 - (remainingTime / gameStateVal.miningTotalDuration);
-        
+
+        // ── Timer MM:SS ──
+        const totalSecs = Math.ceil(remainingTime / 1000);
+        const mins = Math.floor(totalSecs / 60).toString().padStart(2, "0");
+        const secs = (totalSecs % 60).toString().padStart(2, "0");
+        const timerText = `${mins}:${secs}`;
+
+        // ── Cor por raridade ──
+        let barColor = "#71717a";      // common  — cinza
+        let rarityColor = "#94a3b8";
+        if (gameStateVal.miningRarity === "uncommon") { barColor = "#22c55e"; rarityColor = "#22c55e"; }
+        else if (gameStateVal.miningRarity === "rare") { barColor = "#3b82f6"; rarityColor = "#3b82f6"; }
+        else if (gameStateVal.miningRarity === "epic") { barColor = "#a855f7"; rarityColor = "#a855f7"; }
+
+        const cx = playerScreenX + 16; // centro horizontal do personagem
+
         ctx.save();
-        
-        // Render Mining Text above the bar
-        ctx.font = "bold 10px 'Press Start 2P', monospace";
-        ctx.textAlign = "center";
-        ctx.fillStyle = "#10b981"; // emerald-500
-        ctx.strokeStyle = "rgba(0,0,0,0.8)";
-        ctx.lineWidth = 2;
-        const miningText = typeof t === "function" ? t('overlay.mining_text') : "Mining...";
-        ctx.strokeText(miningText, playerScreenX + 16, playerScreenY - 20);
-        ctx.fillText(miningText, playerScreenX + 16, playerScreenY - 20);
 
-        ctx.fillStyle = "rgba(15, 23, 42, 0.8)"; // background escuro
-        ctx.fillRect(playerScreenX - 4, playerScreenY - 14, 40, 6);
-        ctx.strokeStyle = "#475569";
+        // ── Fundo do painel (acima do nameplate) ──
+        const panelW = 76;
+        const panelH = 30;
+        const panelX = cx - panelW / 2;
+        const panelY = playerScreenY - 72; // bem acima do nome
+
+        ctx.fillStyle = "rgba(0, 0, 0, 0.65)";
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(panelX, panelY, panelW, panelH, 4);
+        else ctx.rect(panelX, panelY, panelW, panelH);
+        ctx.fill();
+        ctx.strokeStyle = rarityColor;
         ctx.lineWidth = 1;
-        ctx.strokeRect(playerScreenX - 4, playerScreenY - 14, 40, 6);
+        ctx.stroke();
 
-        // Preenchimento com base na raridade
-        let barColor = "#71717a";
-        if (gameStateVal.miningRarity === "uncommon") barColor = "#22c55e";
-        else if (gameStateVal.miningRarity === "rare") barColor = "#3b82f6";
-        else if (gameStateVal.miningRarity === "epic") barColor = "#a855f7";
-
-        ctx.fillStyle = barColor;
-        ctx.fillRect(playerScreenX - 3, playerScreenY - 13, 38 * progress, 4);
-
-        // Texto MINERANDO animado
-        ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 5px monospace";
-        ctx.textAlign = "center";
+        // ── Texto "⛏️ MINERANDO..." animado ──
         const dots = ".".repeat(Math.floor(Date.now() / 500) % 4);
-        ctx.fillText(`MINERANDO${dots}`, playerScreenX + 16, playerScreenY - 17);
+        ctx.font = "bold 6px 'Press Start 2P', monospace";
+        ctx.textAlign = "center";
+        ctx.fillStyle = rarityColor;
+        ctx.fillText(`⛏ MINERANDO${dots}`, cx, panelY + 10);
+
+        // ── Timer MM:SS ──
+        ctx.font = "bold 8px 'JetBrains Mono', monospace";
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText(timerText, cx, panelY + 21);
+
+        // ── Barra de progresso ──
+        const barY = panelY + panelH + 2;
+        const barW = panelW;
+        ctx.fillStyle = "rgba(15, 23, 42, 0.8)";
+        ctx.fillRect(panelX, barY, barW, 5);
+        ctx.strokeStyle = "#475569";
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(panelX, barY, barW, 5);
+        ctx.fillStyle = barColor;
+        ctx.fillRect(panelX + 1, barY + 1, (barW - 2) * progress, 3);
+
         ctx.restore();
       } else {
-        // Mineração concluída
-        setTimeout(() => {
+        // ── Mineração Concluída: Chamar endpoint on-chain ──
+        const completedRarity = gameStateVal.miningRarity;
+        const completedTotalDuration = gameStateVal.miningTotalDuration;
+
+        setTimeout(async () => {
           const currentStoreState = useGameStore.getState();
-          if (currentStoreState.miningEndTimestamp && currentStoreState.miningTotalDuration === gameStateVal.miningTotalDuration) {
-            // Recompensas baseadas na raridade
-            let xp = 50;
-            if (gameStateVal.miningRarity === "uncommon") xp = 150;
-            else if (gameStateVal.miningRarity === "rare") xp = 400;
-            else if (gameStateVal.miningRarity === "epic") xp = 1000;
-            
-            useGameStore.getState().addExperience(xp);
-            useGameStore.getState().setGameState({ 
-              miningEndTimestamp: undefined, 
-              miningTotalDuration: undefined, 
-              miningRarity: undefined 
+          // Evita dupla execução
+          if (
+            !currentStoreState.miningEndTimestamp ||
+            currentStoreState.miningTotalDuration !== completedTotalDuration
+          ) return;
+
+          // Limpa o estado de mineração imediatamente para evitar re-execução
+          useGameStore.getState().setGameState({
+            miningEndTimestamp: undefined,
+            miningTotalDuration: undefined,
+            miningRarity: undefined,
+          });
+
+          const walletAddress = currentStoreState.wallet?.publicKey;
+          if (!walletAddress) return;
+
+          try {
+            const BACKEND_URL =
+              (import.meta as any).env?.VITE_BACKEND_URL || "http://localhost:3001";
+
+            const res = await fetch(`${BACKEND_URL}/api/mining/collect`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ walletAddress, rarity: completedRarity }),
             });
+
+            if (!res.ok) {
+              // Fallback local se o servidor não estiver disponível
+              console.warn("[Mining] Servidor offline — aplicando recompensa local.");
+              const fallbackXp = completedRarity === "epic" ? 1000 :
+                completedRarity === "rare" ? 400 :
+                completedRarity === "uncommon" ? 150 : 50;
+              const fallbackGems = completedRarity === "epic" ? 25 :
+                completedRarity === "rare" ? 10 :
+                completedRarity === "uncommon" ? 4 : 1;
+              const fallbackGamefi = completedRarity === "epic" ? 40 :
+                completedRarity === "rare" ? 11 :
+                completedRarity === "uncommon" ? 3 : 0.75;
+
+              useGameStore.getState().addExperience(fallbackXp);
+              useGameStore.getState().addItemToInventory("ruby_gem", "material", fallbackGems);
+              useGameStore.getState().setGameState({
+                pendingMiningReward: {
+                  txHash: "",
+                  gems: fallbackGems,
+                  gamefi: fallbackGamefi,
+                  xp: fallbackXp,
+                  rarity: completedRarity || "common",
+                },
+              });
+              return;
+            }
+
+            const data = await res.json();
+            const { txHash, gems, gamefi, xp } = data;
+
+            // Aplica recompensas on-chain no estado local
+            useGameStore.getState().addExperience(xp);
+            useGameStore.getState().addItemToInventory("ruby_gem", "material", gems);
+            useGameStore.getState().setGameState((prev) => ({
+              wallet: {
+                ...prev.wallet,
+                gamefiBalance: (prev.wallet.gamefiBalance || 0) + gamefi,
+              },
+              pendingMiningReward: {
+                txHash,
+                gems,
+                gamefi,
+                xp,
+                rarity: completedRarity || "common",
+              },
+            }));
+
+            console.log(`[Mining] ✅ On-chain! Hash: ${txHash} | Gems: ${gems} | GAMEFI: ${gamefi} | XP: ${xp}`);
+          } catch (err) {
+            console.error("[Mining] Erro ao coletar recompensa:", err);
           }
         }, 0);
       }

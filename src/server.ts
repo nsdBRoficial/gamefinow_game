@@ -14,7 +14,7 @@ import express from "express";
 import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import { Keypair, Horizon, Networks, TransactionBuilder, Operation, Asset, Transaction } from "@stellar/stellar-sdk";
+import { Keypair, Horizon, Networks, TransactionBuilder, Operation, Asset, Transaction, Memo } from "@stellar/stellar-sdk";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
@@ -202,7 +202,103 @@ app.post("/api/vault/withdraw", async (req, res) => {
   }
 });
 
+// ─── Endpoint de Recompensa de Mineração (Mint On-Chain GAMEFI) ─────────────
+const GAMEFI_ASSET_CODE = process.env.VITE_GAMEFI_TOKEN_CODE || "GAMEFI";
+const GAMEFI_ASSET_ISSUER = process.env.VITE_GAMEFI_TOKEN_ISSUER || "GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B";
+
+// Tabela de recompensas por raridade (min, max)
+const MINING_REWARDS: Record<string, { gems: [number, number]; gamefi: [number, number]; xp: number; minDurationMs: number }> = {
+  common:   { gems: [1, 2],   gamefi: [0.5, 1],   xp: 50,   minDurationMs: 5   * 60 * 1000 },
+  uncommon: { gems: [3, 5],   gamefi: [2, 4],     xp: 150,  minDurationMs: 15  * 60 * 1000 },
+  rare:     { gems: [8, 12],  gamefi: [8, 15],    xp: 400,  minDurationMs: 30  * 60 * 1000 },
+  epic:     { gems: [20, 30], gamefi: [30, 50],   xp: 1000, minDurationMs: 60  * 60 * 1000 },
+};
+
+// Anti-abuse: guarda o timestamp de início da mineração por carteira
+const activeMiningMap = new Map<string, { startedAt: number; rarity: string }>();
+
+app.post("/api/mining/start", (req, res) => {
+  const { walletAddress, rarity } = req.body;
+  if (!walletAddress || !rarity || !MINING_REWARDS[rarity]) {
+    return res.status(400).json({ error: "walletAddress e rarity válidos são obrigatórios." });
+  }
+  activeMiningMap.set(walletAddress, { startedAt: Date.now(), rarity });
+  console.log(`[Mining] Início registrado para ${walletAddress} | Raridade: ${rarity}`);
+  return res.json({ success: true, startedAt: Date.now() });
+});
+
+app.post("/api/mining/collect", async (req, res) => {
+  const { walletAddress, rarity } = req.body;
+
+  if (!walletAddress || !rarity || !MINING_REWARDS[rarity]) {
+    return res.status(400).json({ error: "walletAddress e rarity válidos são obrigatórios." });
+  }
+
+  // Validação anti-abuse: verifica se o tempo mínimo passou
+  const miningEntry = activeMiningMap.get(walletAddress);
+  const rewardConfig = MINING_REWARDS[rarity];
+
+  if (!miningEntry || miningEntry.rarity !== rarity) {
+    return res.status(400).json({ error: "Nenhuma mineração ativa encontrada para esta carteira e raridade." });
+  }
+
+  const elapsed = Date.now() - miningEntry.startedAt;
+  if (elapsed < rewardConfig.minDurationMs - 5000) { // 5s de tolerância
+    const remaining = Math.ceil((rewardConfig.minDurationMs - elapsed) / 1000);
+    return res.status(400).json({ error: `Mineração ainda não concluída. Aguarde mais ${remaining}s.` });
+  }
+
+  // Calcula recompensas com aleatoriedade dentro da faixa
+  const randBetween = (min: number, max: number) =>
+    Number((Math.random() * (max - min) + min).toFixed(7));
+
+  const gems = Math.floor(randBetween(rewardConfig.gems[0], rewardConfig.gems[1] + 1));
+  const gamefiAmount = randBetween(rewardConfig.gamefi[0], rewardConfig.gamefi[1]);
+  const xp = rewardConfig.xp;
+
+  try {
+    console.log(`[Mining] Iniciando mint de ${gamefiAmount} ${GAMEFI_ASSET_CODE} para ${walletAddress}`);
+
+    const vaultAcc = await horizonServer.loadAccount(VAULT_KEYPAIR.publicKey());
+    const gamefiAsset = new Asset(GAMEFI_ASSET_CODE, GAMEFI_ASSET_ISSUER);
+
+    const tx = new TransactionBuilder(vaultAcc, {
+      fee: "1000",
+      networkPassphrase: Networks.TESTNET,
+    })
+      .addOperation(
+        Operation.payment({
+          destination: walletAddress,
+          asset: gamefiAsset,
+          amount: gamefiAmount.toFixed(7),
+        })
+      )
+      .addMemo(Memo.text(`Mining:${rarity}:${gems}gems`))
+      .setTimeout(30)
+      .build();
+
+    tx.sign(VAULT_KEYPAIR);
+
+    console.log("[Mining] Submetendo transação on-chain...");
+    const response = await horizonServer.submitTransaction(tx);
+    const txHash = response.hash;
+
+    // Remove da lista de ativos após coleta
+    activeMiningMap.delete(walletAddress);
+
+    console.log(`[Mining] ✅ Mint concluído! Hash: ${txHash} | Gems: ${gems} | GAMEFI: ${gamefiAmount} | XP: ${xp}`);
+
+    return res.json({ txHash, gems, gamefi: gamefiAmount, xp, rarity });
+
+  } catch (error: any) {
+    console.error("[Mining] Erro no mint:", error?.response?.data || error);
+    return res.status(500).json({ error: "Falha ao mintar GAMEFI on-chain. Tente novamente." });
+  }
+});
+
 // ─── Socket.io Multiplayer ───────────────────────────────────────────────
+
+
 
 interface PlayerState {
   socketId: string;

@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Eye, EyeOff, CheckCircle2, ShieldAlert, X, Download, Shield, MapPin, Target, Copy } from "lucide-react";
 import { GameState, Player, Quest } from "../types";
-import { useGameStore } from "../store";
-import { getMapDecorations } from "./canvas/MapRenderer";
+import { useGameStore } from "../store/gameStore";
 import { useTranslation } from "react-i18next";
 
 interface PassportModalProps {

@@ -30,7 +30,7 @@
 import React, { useState, useEffect } from "react";
 import { GameCanvas } from "./components/GameCanvas";
 import { BattleHUD } from "./components/BattleHUD";
-import { GameOverlay } from "./components/GameOverlay";
+import { GameOverlay, MiningRewardModal } from "./components/GameOverlay";
 import { FloatingWindows } from "./components/FloatingWindows";
 import { LoginScreen } from "./components/LoginScreen";
 import { LandingPage } from "./components/LandingPage";
@@ -1842,6 +1842,9 @@ export default function App() {
           }}
         />
       )}
+
+      {/* 6. MINING REWARD MODAL — On-Chain GAMEFI Mint Result */}
+      <MiningRewardModal />
 
       {/* SUBTLE IMMERSIVE CREDITS TEXT IN OUTER SPACE */}
       {/* (Moved to bottom HUD) */}

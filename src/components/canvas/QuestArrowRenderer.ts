@@ -510,7 +510,7 @@ export function drawQuestArrow(
     // Distância aproximada em "passos/metros"
     const distTiles = Math.round(Math.hypot(target.x - playerPos.x, target.y - playerPos.y));
 
-    drawPixelArrowSprite(ctx, arrowScreenX, arrowScreenY, angleRad + Math.PI / 2, false, distTiles);
+    drawPixelArrowSprite(ctx, arrowScreenX, arrowScreenY, angleRad - Math.PI / 2, false, distTiles);
   }
 }
 

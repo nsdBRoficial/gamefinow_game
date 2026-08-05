@@ -21,8 +21,7 @@ import {
   ExternalLink,
   Edit3
 } from "lucide-react";
-import { useGameStore } from "../store";
-import { getMapDecorations } from "./canvas/MapRenderer";
+import { useGameStore } from "../store/gameStore";
 import { useTranslation } from "react-i18next";
 import { executeOutfitPurchaseOnChain } from "../services/stellarServices";
 
