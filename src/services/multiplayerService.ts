@@ -157,10 +157,11 @@ export async function upsertPlayer(playerId: string, player: Player, gameState?:
         active_title: player.activeTitle || null,
         unlocked_titles: player.unlockedTitles || [],
         name_style: player.nameStyle || "plain",
-        xp_current: gameState?.xp_current || 0,
-        level: gameState?.level || 1,
-        // Anti-cheat básico: Cria uma assinatura obfuscada do XP usando a chave do jogador
-        xp_signature: encryptAES(String(gameState?.xp_current || 0), playerId.substring(0, 10)),
+        ...(gameState !== undefined ? {
+          xp_current: gameState?.xp_current || 0,
+          level: gameState?.level || 1,
+          xp_signature: encryptAES(String(gameState?.xp_current || 0), playerId.substring(0, 10)),
+        } : {})
       },
       { onConflict: "id" }
     );
