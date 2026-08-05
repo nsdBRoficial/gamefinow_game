@@ -50,6 +50,8 @@ export interface OnlinePlayer {
   attack?: number;
   defense?: number;
   speed?: number;
+  xp_current?: number;
+  xp_signature?: string;
 }
 
 export interface ChatMessage {
@@ -107,7 +109,9 @@ export function getOrCreatePlayerId(stellarPublicKey?: string): string {
 
 // ─── API pública ─────────────────────────────────────────────────────────────
 
-export async function upsertPlayer(playerId: string, player: Player): Promise<void> {
+import { encryptAES, decryptAES } from "../utils/cryptoUtils";
+
+export async function upsertPlayer(playerId: string, player: Player, gameState?: any): Promise<void> {
   if (!MULTIPLAYER_ENABLED || !supabase) return;
   currentPlayerId = playerId;
 
@@ -153,6 +157,10 @@ export async function upsertPlayer(playerId: string, player: Player): Promise<vo
         active_title: player.activeTitle || null,
         unlocked_titles: player.unlockedTitles || [],
         name_style: player.nameStyle || "plain",
+        xp_current: gameState?.xp_current || 0,
+        level: gameState?.level || 1,
+        // Anti-cheat básico: Cria uma assinatura obfuscada do XP usando a chave do jogador
+        xp_signature: encryptAES(String(gameState?.xp_current || 0), playerId.substring(0, 10)),
       },
       { onConflict: "id" }
     );
@@ -359,4 +367,34 @@ export async function updatePlayerAppearance(playerId: string, player: Player): 
 export async function getOnlineCount(mapId?: string): Promise<number> {
   // Com websockets puros precisaríamos pegar do servidor, mas podemos retornar a aproximação pelo map local.
   return mapLivePlayers.size + 1; // Eu + Outros
+}
+
+export async function fetchTopPlayers(limit = 5): Promise<OnlinePlayer[]> {
+  if (!authSupabase) return [];
+  try {
+    const { data, error } = await authSupabase
+      .from("players")
+      .select("*")
+      .order("xp_current", { ascending: false, nullsFirst: false })
+      .limit(limit);
+
+    if (error) {
+      console.warn("[Multiplayer] Erro ao buscar leaderboard:", error);
+      return [];
+    }
+
+    // Filtrar cheaters óbvios validando a assinatura de XP
+    const validPlayers = (data as any[]).filter(p => {
+      if (!p.xp_current) return true; // players without XP are valid
+      if (!p.xp_signature) return true; // old players without signature
+      
+      const expectedSignature = encryptAES(String(p.xp_current), String(p.id).substring(0, 10));
+      return p.xp_signature === expectedSignature;
+    });
+
+    return validPlayers as OnlinePlayer[];
+  } catch (err) {
+    console.error("[Multiplayer] Falha ao buscar top players:", err);
+    return [];
+  }
 }

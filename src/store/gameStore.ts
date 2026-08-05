@@ -26,7 +26,7 @@ interface GameStore extends GameState {
 
 const getInitialGameState = (): GameState => {
   try {
-    const saved = localStorage.getItem("stellar_island_game_state_v1");
+    const saved = localStorage.getItem("stellar_island_game_state_v3");
     if (saved) {
       const parsed = JSON.parse(saved);
       if (parsed && parsed.quests && parsed.wallet) {
@@ -62,6 +62,9 @@ const getInitialGameState = (): GameState => {
         };
       }
     }
+
+    
+
   } catch (err) {
     console.warn("Could not load gameState from localStorage", err);
   }
@@ -103,7 +106,7 @@ const getInitialGameState = (): GameState => {
 
 const getInitialPlayerPos = (): Player => {
   try {
-    const saved = localStorage.getItem("stellar_island_player_pos_v1");
+    const saved = localStorage.getItem("stellar_island_player_pos_v3");
     if (saved) {
       const parsed = JSON.parse(saved);
       if (parsed && typeof parsed.x === "number") {
@@ -116,6 +119,9 @@ const getInitialPlayerPos = (): Player => {
         };
       }
     }
+
+    
+
   } catch (err) {
     console.warn("Could not load playerPos from localStorage", err);
   }
@@ -169,7 +175,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       gameStateToSave.wallet = safeWallet;
     }
     
-    localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
+    localStorage.setItem("stellar_island_game_state_v3", JSON.stringify(gameStateToSave));
     
     return nextState;
   }),
@@ -179,7 +185,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const newPlayer = { ...state.playerPos, ...nextPlayer };
     // Otimização de I/O: Não faz stringify+setItem a 60 FPS. Só salva se o jogador não estiver em animação de movimento entre tiles ou mudando de mapa.
     if (!newPlayer.isMoving || newPlayer.mapId !== state.playerPos.mapId) {
-      localStorage.setItem("stellar_island_player_pos_v1", JSON.stringify(newPlayer));
+      localStorage.setItem("stellar_island_player_pos_v3", JSON.stringify(newPlayer));
     }
     return { playerPos: newPlayer };
   }),
@@ -197,7 +203,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       gameStateToSave.wallet = safeWallet;
     }
     
-    localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
+    localStorage.setItem("stellar_island_game_state_v3", JSON.stringify(gameStateToSave));
     
     return { wallet: newWallet };
   }),
@@ -215,7 +221,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       gameStateToSave.wallet = safeWallet;
     }
     
-    localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
+    localStorage.setItem("stellar_island_game_state_v3", JSON.stringify(gameStateToSave));
     
     return { transactions: newTxList, currentLedger: newState.currentLedger };
   }),
@@ -270,7 +276,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       nextPlayerPos.hp = nextPlayerPos.maxHp;
       nextPlayerPos.maxMp = 50 + ((nextLevel - 1) * 10);
       nextPlayerPos.mp = nextPlayerPos.maxMp;
-      localStorage.setItem("stellar_island_player_pos_v1", JSON.stringify(nextPlayerPos));
+      localStorage.setItem("stellar_island_player_pos_v3", JSON.stringify(nextPlayerPos));
     }
 
     const newState = { ...state, quests: newQuests, xp_current: nextXP, level: nextLevel, playerPos: nextPlayerPos, pendingLevelUp: state.pendingLevelUp || isLevelingUp };
@@ -284,7 +290,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       gameStateToSave.wallet = safeWallet;
     }
     
-    localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
+    localStorage.setItem("stellar_island_game_state_v3", JSON.stringify(gameStateToSave));
     
     return { quests: newQuests, xp_current: nextXP, level: nextLevel, playerPos: nextPlayerPos, pendingLevelUp: newState.pendingLevelUp };
   }),
@@ -353,7 +359,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         nextPlayerPos.hp = nextPlayerPos.maxHp;
         nextPlayerPos.maxMp = 50 + ((newLevel - 1) * 10);
         nextPlayerPos.mp = nextPlayerPos.maxMp;
-        localStorage.setItem("stellar_island_player_pos_v1", JSON.stringify(nextPlayerPos));
+        localStorage.setItem("stellar_island_player_pos_v3", JSON.stringify(nextPlayerPos));
       }
 
       // Adiciona drop ao inventário
@@ -388,11 +394,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     // Persiste no localStorage
     try {
-      const saved = localStorage.getItem("stellar_island_game_state_v1");
+      const saved = localStorage.getItem("stellar_island_game_state_v3");
       if (saved) {
         const parsed = JSON.parse(saved);
         parsed.quests = { ...(parsed.quests || {}), [matchingQuestId]: updatedQuest };
-        localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(parsed));
+        localStorage.setItem("stellar_island_game_state_v3", JSON.stringify(parsed));
       }
     } catch { /* silently ignore */ }
 
@@ -412,7 +418,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       nextPlayerPos.hp = nextPlayerPos.maxHp;
       nextPlayerPos.maxMp = 50 + ((newLevel - 1) * 10);
       nextPlayerPos.mp = nextPlayerPos.maxMp;
-      localStorage.setItem("stellar_island_player_pos_v1", JSON.stringify(nextPlayerPos));
+      localStorage.setItem("stellar_island_player_pos_v3", JSON.stringify(nextPlayerPos));
     }
 
     const newState = { ...state, xp_current: currentXP, level: newLevel, playerPos: nextPlayerPos, pendingLevelUp: state.pendingLevelUp || isLevelingUp };
@@ -426,7 +432,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       gameStateToSave.wallet = safeWallet;
     }
     
-    localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
+    localStorage.setItem("stellar_island_game_state_v3", JSON.stringify(gameStateToSave));
     
     return { xp_current: currentXP, level: newLevel, playerPos: nextPlayerPos, pendingLevelUp: newState.pendingLevelUp };
   }),
@@ -478,7 +484,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       duration: type === "heal" ? 1000 : 600
     };
 
-    localStorage.setItem("stellar_island_player_pos_v1", JSON.stringify(nextPlayerPos));
+    localStorage.setItem("stellar_island_player_pos_v3", JSON.stringify(nextPlayerPos));
     return { playerPos: nextPlayerPos, activeAnimations: [...(state.activeAnimations || []), newAnim] };
   }),
 
@@ -517,7 +523,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       gameStateToSave.wallet = safeWallet;
     }
     
-    localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
+    localStorage.setItem("stellar_island_game_state_v3", JSON.stringify(gameStateToSave));
     
     return { inventory: currentInventory };
   }),
@@ -553,7 +559,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       nextPlayerPos.mp = Math.min(maxMp, (state.playerPos.mp ?? 0) + Math.floor(maxMp * 0.5));
     }
 
-    localStorage.setItem("stellar_island_player_pos_v1", JSON.stringify(nextPlayerPos));
+    localStorage.setItem("stellar_island_player_pos_v3", JSON.stringify(nextPlayerPos));
     
     const newState = { ...state, inventory: currentInventory, playerPos: nextPlayerPos };
     const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, castMagic, buyPotions, usePotion, addItemToInventory, addActiveAnimation, removeActiveAnimation, ...gameStateToSave } = newState;
@@ -564,7 +570,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       gameStateToSave.wallet = safeWallet;
     }
     
-    localStorage.setItem("stellar_island_game_state_v1", JSON.stringify(gameStateToSave));
+    localStorage.setItem("stellar_island_game_state_v3", JSON.stringify(gameStateToSave));
     
     if (newAnim) {
       return { inventory: currentInventory, playerPos: nextPlayerPos, activeAnimations: [...(state.activeAnimations || []), newAnim] };

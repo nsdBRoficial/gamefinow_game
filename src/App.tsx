@@ -141,6 +141,7 @@ export default function App() {
     playerId,
     playerPos,
     setPlayerPos,
+    gameState,
   });
 
   const [showLevel5IntroDelayed, setShowLevel5IntroDelayed] = useState(false);
@@ -160,7 +161,25 @@ export default function App() {
   // Handle active retro floating window overlays: "customizer" | "backpack" | "ledger" | "guide" | null
   const [activeWindow, setActiveWindow] = useState<"customizer" | "backpack" | "ledger" | "guide" | null>(null);
   const [showActiveQuest, setShowActiveQuest] = useState(true);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [leaderboardData, setLeaderboardData] = useState<any[]>([]);
   const [showLegendaryRibbon, setShowLegendaryRibbon] = useState(false);
+
+  // Buscar dados do Leaderboard (Top 5 XP)
+  useEffect(() => {
+    if (showLeaderboard) {
+      import("./services/multiplayerService").then((m) => {
+        m.fetchTopPlayers(5).then(setLeaderboardData);
+      });
+      // Atualizar a cada 1 minuto se estiver aberto
+      const interval = setInterval(() => {
+        import("./services/multiplayerService").then((m) => {
+          m.fetchTopPlayers(5).then(setLeaderboardData);
+        });
+      }, 60000);
+      return () => clearInterval(interval);
+    }
+  }, [showLeaderboard]);
 
   // Compute hasStar for Battle Mode — only checks the 4 blockchain quests, NOT kill quests
   const hasCompletedAllQuests = ["wallet", "onramp", "soroban", "hold"].every(
@@ -1304,6 +1323,20 @@ export default function App() {
             <span className="text-xl md:text-lg">📝</span>
           </button>
 
+          {/* Scoreboard / Leaderboard Toggle Scroll */}
+          <button
+            onClick={() => {
+              setShowLeaderboard(!showLeaderboard);
+              playSynthSound("beep");
+            }}
+            className={`w-11 h-11 md:w-9 md:h-9 border-2 border-black rounded-lg flex items-center justify-center shadow-[2px_2.5px_0px_#000] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer transition ${
+              showLeaderboard ? "bg-amber-400" : "bg-[#ebd9c0] hover:bg-[#f3e6d3]"
+            }`}
+            title="Scoreboard Global (XP)"
+          >
+            <span className="text-xl md:text-lg">👑</span>
+          </button>
+
           {/* Quick Town Square Teleport Rune Portal */}
           <button
             onClick={handleTeleportToCenter}
@@ -1523,6 +1556,42 @@ export default function App() {
               <span className="text-slate-600 text-[10px] md:text-[9px] block leading-snug sm:border-l sm:border-black/15 sm:pl-2">
                 {currentActiveQuest ? (((currentActiveQuest.id as string) === "all_done" || (currentActiveQuest.id as string) === "pending_kill") ? currentActiveQuest.instructions : t(`quests.${currentActiveQuest.id}.instructions`)) : "You have completed all current onboarding quests on the Stellar network. Stay tuned for upcoming adventures!"}
               </span>
+            </div>
+          </div>
+        )}
+
+        {/* 4.5 LEADERBOARD FLOATING CARD OVERLAY (Positioned slightly below Active Quest if both are open, or at top if alone) */}
+        {!isGmMode && showLeaderboard && (
+          <div className={`absolute left-[62px] md:left-[54px] z-10 bg-[#fbf5eb]/95 border-2 border-black rounded-lg p-2.5 w-[260px] sm:w-[380px] md:w-[480px] shadow-[2.5px_2.5px_0px_rgba(0,0,0,1)] text-[10px] md:text-[9.5px] leading-snug font-mono select-none pointer-events-none text-left animate-in slide-in-from-left-2 fade-in duration-300 ${showActiveQuest ? 'top-52 md:top-40' : 'top-26 md:top-20'}`}>
+            <div className="flex items-center gap-1.5 mb-1.5 border-b border-black/10 pb-1.5">
+              <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-ping" />
+              <span className="text-[8px] md:text-[7.5px] text-amber-800 font-extrabold uppercase tracking-wider flex items-center gap-1">
+                <span className="text-sm">👑</span> SCOREBOARD GLOBAL (TOP 5 XP)
+              </span>
+            </div>
+            <div className="flex flex-col gap-1.5 mt-1">
+              {leaderboardData.length === 0 ? (
+                <span className="text-slate-600 animate-pulse">Carregando heróis...</span>
+              ) : (
+                leaderboardData.map((p, index) => {
+                  const isTop1 = index === 0;
+                  const isMe = p.player_id === playerId;
+                  return (
+                    <div key={p.player_id} className={`flex items-center justify-between rounded px-1.5 py-1 ${isTop1 ? 'bg-gradient-to-r from-amber-200 to-amber-100 border border-amber-400/50' : ''} ${isMe ? 'bg-emerald-100 border border-emerald-400/50' : ''}`}>
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        <span className={`font-black w-3 ${isTop1 ? 'text-amber-600' : 'text-slate-500'}`}>#{index + 1}</span>
+                        <span className={`font-black truncate max-w-[120px] sm:max-w-[200px] ${isMe ? 'text-emerald-700' : 'text-black'}`}>
+                          {p.name || 'Herói Anônimo'} {isMe && '(Você)'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-[9px] text-slate-500">Lv.{p.level || 1}</span>
+                        <span className="font-bold text-amber-600 w-16 text-right">{p.xp_current || 0} XP</span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
         )}

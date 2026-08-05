@@ -40,6 +40,7 @@ interface UseMultiplayerOptions {
   playerId: string;
   playerPos: Player;
   setPlayerPos: (updater: Partial<Player> | ((prev: Player) => Partial<Player>)) => void;
+  gameState?: any;
 }
 
 interface UseMultiplayerResult {
@@ -50,11 +51,11 @@ interface UseMultiplayerResult {
   isConnected: boolean;
   isMultiplayerEnabled: boolean;
 }
-
 export function useMultiplayer({
   playerId,
   playerPos,
   setPlayerPos,
+  gameState,
 }: UseMultiplayerOptions): UseMultiplayerResult {
   const [onlinePlayers, setOnlinePlayers] = useState<OnlinePlayer[]>([]);
   const [onlineCount, setOnlineCount] = useState(0);
@@ -71,7 +72,7 @@ export function useMultiplayer({
   useEffect(() => {
     if (!MULTIPLAYER_ENABLED || !playerId) return;
 
-    upsertPlayer(playerId, playerPos).then(() => {
+    upsertPlayer(playerId, playerPos, gameState).then(() => {
       setIsConnected(true);
     });
 
