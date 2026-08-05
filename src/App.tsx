@@ -168,18 +168,20 @@ export default function App() {
   // Buscar dados do Leaderboard (Top 5 XP)
   useEffect(() => {
     if (showLeaderboard) {
-      import("./services/multiplayerService").then((m) => {
-        m.fetchTopPlayers(5).then(setLeaderboardData);
-      });
-      // Atualizar a cada 1 minuto se estiver aberto
-      const interval = setInterval(() => {
+      const fetchLeaderboard = () => {
         import("./services/multiplayerService").then((m) => {
           m.fetchTopPlayers(5).then(setLeaderboardData);
         });
-      }, 60000);
+      };
+
+      fetchLeaderboard(); // Busca imediata ao abrir ou ao ganhar XP local
+      
+      // Atualiza a cada 5 segundos para ver o XP de outros jogadores em tempo real
+      const interval = setInterval(fetchLeaderboard, 5000);
+      
       return () => clearInterval(interval);
     }
-  }, [showLeaderboard]);
+  }, [showLeaderboard, gameState.xp_current]);
 
   // Compute hasStar for Battle Mode — only checks the 4 blockchain quests, NOT kill quests
   const hasCompletedAllQuests = ["wallet", "onramp", "soroban", "hold"].every(
