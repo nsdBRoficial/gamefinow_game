@@ -745,12 +745,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     }
 
     // Interact with notebook on the MUTAV stand
-    if (playerPos.mapId === "center" && checkX === 32 && checkY === 42) {
+    if (playerPos.mapId === "center" && checkX === 12 && checkY === 28) {
       onTalkToNPC({
         id: "mutav_info",
         name: "MUTAV INFO",
-        x: 32,
-        y: 42,
+        x: 12,
+        y: 28,
         dir: "down",
         dialogs: [
           "Access the $10B Brazilian Rental Guarantee Market.",
@@ -760,6 +760,54 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       });
       return;
     }
+
+    // Interact with notebook on the WEB3EDU stand
+    if (playerPos.mapId === "center" && checkX === 32 && checkY === 42) {
+      onTalkToNPC({
+        id: "web3edu_info",
+        name: "WEB3EDU INFO",
+        x: 32,
+        y: 42,
+        dir: "down",
+        dialogs: [
+          "Transforming people through education in Web3, blockchain, and emerging technologies.",
+          "Building a more decentralized, inclusive, and sustainable future through education."
+        ]
+      });
+      return;
+    }
+
+    // Interact with notebook on the PARADEVS stand
+    if (playerPos.mapId === "center" && checkX === 32 && checkY === 48) {
+      onTalkToNPC({
+        id: "paradevs_info",
+        name: "PARADEVS INFO",
+        x: 32,
+        y: 48,
+        dir: "down",
+        dialogs: [
+          "Beyond providing educational opportunities for developers, ParaDevs aims to connect our developer ecosystem with the blockchains with which we are establishing partnerships."
+        ]
+      });
+      return;
+    }
+
+    // Interact with notebook on the ENERGYPAY stand
+    if (playerPos.mapId === "center" && checkX === 53 && checkY === 32) {
+      onTalkToNPC({
+        id: "energypay_info",
+        name: "ENERGYPAY INFO",
+        x: 53,
+        y: 32,
+        dir: "down",
+        dialogs: [
+          "One programmable rail from obligation to on-chain finality.",
+          "EnergyPay turns bilateral energy obligations into programmable settlement instructions, executes them on Stellar Mainnet, and reconciles automatically against the resulting on-chain receipts — giving every counterparty the same verifiable truth."
+        ]
+      });
+      return;
+    }
+
 
 
     checkTerminalProximity(targetX, targetY, playerPos.mapId || "center");

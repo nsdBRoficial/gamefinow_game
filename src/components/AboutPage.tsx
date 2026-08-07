@@ -243,6 +243,9 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
     { name: "TROQPAY",   color: "#3b82f6", emoji: "🌍", desc: "Where you start doesn't define your market. Sell locally. Get paid globally. Turn global demand into sales.", url: "https://troqpay.com/en" },
     { name: "VELLORA",   color: "#f97316", emoji: "📱", desc: "The crypto market in the palm of your hand. Buy and sell Bitcoin, Ethereum, Solana and most cryptocurrencies.", url: "https://appvellora.net/" },
     { name: "MUTAV",     color: "#eab308", emoji: "🏠", desc: "Access the $10B Brazilian Rental Guarantee Market. The on-chain rental guarantee fund.", url: "https://www.mutav.finance/en" },
+    { name: "WEB3EDU",   color: "#8b5cf6", emoji: "🎓", desc: "Transforming people through education in Web3, blockchain, and emerging technologies.", url: "" },
+    { name: "PARADEVS",  color: "#10b981", emoji: "💻", desc: "Beyond providing educational opportunities for developers, ParaDevs aims to connect our developer ecosystem with the blockchains with which we are establishing partnerships.", url: "" },
+    { name: "ENERGYPAY", color: "#22c55e", emoji: "⚡", desc: "EnergyPay turns bilateral energy obligations into programmable settlement instructions, executes them on Stellar Mainnet, and reconciles automatically against the resulting on-chain receipts.", url: "" },
   ];
 
   const ZONES = [

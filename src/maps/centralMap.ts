@@ -242,7 +242,10 @@ export function generateCentralMap(): number[][] {
   grid[32][42] = TileType.BLOCK; grid[32][43] = TileType.BLOCK; grid[32][44] = TileType.BLOCK; // AUTOFIN (x=42,43,44 y=32)
   grid[21][26] = TileType.BLOCK; grid[21][27] = TileType.BLOCK; grid[21][28] = TileType.BLOCK; // TROQPAY
   grid[15][26] = TileType.BLOCK; grid[15][27] = TileType.BLOCK; grid[15][28] = TileType.BLOCK; // VELLORA
-  grid[42][31] = TileType.BLOCK; grid[42][32] = TileType.BLOCK; grid[42][33] = TileType.BLOCK; // MUTAV
+  grid[28][11] = TileType.BLOCK; grid[28][12] = TileType.BLOCK; grid[28][13] = TileType.BLOCK; // MUTAV
+  grid[42][31] = TileType.BLOCK; grid[42][32] = TileType.BLOCK; grid[42][33] = TileType.BLOCK; // WEB3EDU
+  grid[48][31] = TileType.BLOCK; grid[48][32] = TileType.BLOCK; grid[48][33] = TileType.BLOCK; // PARADEVS
+  grid[32][52] = TileType.BLOCK; grid[32][53] = TileType.BLOCK; grid[32][54] = TileType.BLOCK; // ENERGYPAY
   grid[32][47] = TileType.BLOCK; grid[32][48] = TileType.BLOCK; grid[32][49] = TileType.BLOCK; // NIDO (x=47,48,49 y=32)
   grid[27][46] = TileType.BLOCK; grid[27][47] = TileType.BLOCK; grid[27][48] = TileType.BLOCK; // LOJA OUTFIT STORE
   grid[28][46] = TileType.BLOCK; grid[28][47] = TileType.BLOCK; grid[28][48] = TileType.BLOCK; // LOJA OUTFIT STORE
@@ -343,7 +346,16 @@ export const CENTRAL_DECORATIONS: GameDecoration[] = [
   { x: 26, y: 15, type: "stand", text: "VELLORA", width: 3, color: "#f97316" },
 
   // MUTAV Stand
-  { x: 31, y: 42, type: "stand", text: "MUTAV", width: 3, color: "#eab308" },
+  { x: 11, y: 28, type: "stand", text: "MUTAV", width: 3, color: "#eab308" },
+
+  // WEB3EDU Stand
+  { x: 31, y: 42, type: "stand", text: "WEB3EDU", width: 3, color: "#8b5cf6" },
+
+  // PARADEVS Stand
+  { x: 31, y: 48, type: "stand", text: "PARADEVS", width: 3, color: "#10b981" },
+
+  // ENERGYPAY Stand
+  { x: 52, y: 32, type: "stand", text: "ENERGYPAY", width: 3, color: "#22c55e" },
 
   // ALTAR DE QUEIMA ETERNA (4 sqms: x=41..42, y=27..28, sem texto na tela)
   { x: 41, y: 27, type: "pixel_burn_brazier", width: 2, height: 2, color: "#f97316" },
