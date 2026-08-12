@@ -195,4 +195,15 @@ export interface GameState {
   isWaveActive?: boolean;
   stellarNucleusHp?: number;
   waveMonstersKilled?: number;
+  // ── Battle Cooldown System ─────────────────────────────────────────────────
+  // Timestamp (ms) até quando o Global Cooldown (GCD) de magias está ativo.
+  // Enquanto Date.now() < globalCooldownEnd, nenhuma magia ou poção pode ser usada.
+  // Duração varia por habilidade: Heal=800ms | Fire=1500ms | Lightning=2500ms | Poção GCD=1000ms
+  globalCooldownEnd?: number;
+  // Timestamp (ms) até quando a poção específica está em cooldown (5s após uso).
+  // Independente do GCD, as poções têm seu próprio cooldown de recarga.
+  potionCooldownEnd?: number;
+  // Timestamp (ms) da última tentativa de lançar magia bloqueada pelo GCD.
+  // Usado pelo GameCanvas para exibir o efeito visual de "Exhausted!" (fumaça).
+  lastBlockedCastTime?: number;
 }
