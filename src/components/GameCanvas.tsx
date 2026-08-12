@@ -15,7 +15,7 @@ import { drawNPCs, drawOtherPlayers, cleanupRenderStates } from "./canvas/NPCMan
 import { OnlinePlayer } from "../services/multiplayerService";
 import { getCurrentQuestTarget, drawQuestArrow } from "./canvas/QuestArrowRenderer";
 import { playSynthSound } from "../utils/audioUtils";
-import { useGameStore, SPELL_MAX_RANGE } from "../store/gameStore";
+import { useGameStore, SPELL_MAX_RANGE, getEquipmentBonuses } from "../store/gameStore";
 
 interface GameCanvasProps {
   gameState: GameState;
@@ -1536,20 +1536,25 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             return;
           }
 
+          const { atkMultiplier, critChanceMultiplier } = getEquipmentBonuses(player);
           const pLevel = latestGameState.current.level || 1;
-          let baseDmg = 10 + (pLevel * 2);
-          if (anim.type === "fire") baseDmg = 25 + (pLevel * 3);
-          if (anim.type === "lightning") baseDmg = 45 + (pLevel * 4);
+          let baseDmg = 10 + (pLevel * 2); // Heal e base spells normais
+          if (anim.type === "fire") baseDmg = (25 + pLevel * 3) * atkMultiplier;
+          if (anim.type === "lightning") baseDmg = (45 + pLevel * 4) * atkMultiplier;
           
-          const finalDmg = Math.floor(baseDmg * (0.85 + Math.random() * 0.3));
+          let finalDmg = Math.floor(baseDmg * (0.85 + Math.random() * 0.3));
+          
+          const isCrit = (anim.type === "fire" || anim.type === "lightning") && Math.random() < critChanceMultiplier;
+          if (isCrit) finalDmg *= 2;
+          
           spellTarget.hp -= finalDmg;
 
           combatTextsRef.current.push({
             id: Math.random().toString(),
-            text: `-${finalDmg}`,
+            text: isCrit ? `CRIT -${finalDmg}!` : `-${finalDmg}`,
             x: spellTarget.x,
             y: spellTarget.y - 0.5,
-            color: anim.type === "fire" ? "#f97316" : "#a855f7",
+            color: isCrit ? "#fbbf24" : (anim.type === "fire" ? "#f97316" : "#a855f7"),
             timestamp: time
           });
 
@@ -1595,19 +1600,23 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
               timestamp: time
             });
           } else {
-            // Damage Formula: 10 + (Level * 2)
+            // Damage Formula: (10 + (Level * 2)) * atkMultiplier
+            const { atkMultiplier, critChanceMultiplier } = getEquipmentBonuses(player);
             const pLevel = latestGameState.current.level || 1;
-            const baseDmg = 10 + (pLevel * 2);
-            const finalDmg = Math.floor(baseDmg * (0.85 + Math.random() * 0.3));
+            const baseDmg = (10 + (pLevel * 2)) * atkMultiplier;
+            let finalDmg = Math.floor(baseDmg * (0.85 + Math.random() * 0.3));
+
+            const isCrit = Math.random() < critChanceMultiplier;
+            if (isCrit) finalDmg *= 2;
 
             targetCreature.hp -= finalDmg;
 
             combatTextsRef.current.push({
               id: Math.random().toString(),
-              text: `-${finalDmg}`,
+              text: isCrit ? `CRIT -${finalDmg}!` : `-${finalDmg}`,
               x: targetCreature.x,
               y: targetCreature.y - 0.5,
-              color: "#ef4444",
+              color: isCrit ? "#fbbf24" : "#ef4444",
               timestamp: time
             });
 
@@ -1639,9 +1648,24 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
               timestamp: time
             });
           } else {
-            // Dano do monstro
-            const mBaseDmg = (targetCreature.level || 1) * 4;
-            const mFinalDmg = Math.max(1, Math.floor(mBaseDmg * (0.85 + Math.random() * 0.3)));
+            const { defMultiplier, blockChanceMultiplier } = getEquipmentBonuses(player);
+            
+            // Check Block Chance
+            if (Math.random() < blockChanceMultiplier) {
+              combatTextsRef.current.push({
+                id: Math.random().toString(),
+                text: "BLOCKED!",
+                x: player.x,
+                y: player.y - 0.5,
+                color: "#60a5fa", // Azul claro pra indicar block
+                timestamp: time
+              });
+              return; // Bloqueou todo o dano, sai daqui
+            }
+
+            // Dano do monstro (aumentado em +10%)
+            const mBaseDmg = ((targetCreature.level || 1) * 4) * 1.10;
+            const mFinalDmg = Math.max(1, Math.floor(mBaseDmg * defMultiplier * (0.85 + Math.random() * 0.3)));
             
             // Subtrai do HP do player!
             const currentHp = latestPlayerPos.current.hp ?? 100;

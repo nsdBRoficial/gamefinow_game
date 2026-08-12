@@ -106,6 +106,8 @@ export interface Player {
   // Chat bubble (balão de mensagem no canvas)
   bubbleText?: string;   // Texto a ser exibido no balão acima do personagem
   bubbleTimer?: number;  // Timestamp (ms) de quando o balão deve desaparecer
+  // Equipamentos ativos do jogador (armas/escudos)
+  equippedItems?: import("./types").EquipmentSlots;
 }
 
 export interface NPC {
@@ -145,6 +147,28 @@ export interface AnimationEvent {
   duration: number;
 }
 
+// Tipo de um item de equipamento (arma/escudo/cajado)
+export interface EquipmentItem {
+  id: string;               // Ex: "sword_1h_1"
+  name: string;             // Ex: "Espada Curta"
+  category: "sword" | "shield" | "staff";
+  hands: 1 | 2;             // 1 mão ou 2 mãos
+  levelRequired: number;    // Nível mínimo
+  price: number;            // Preço em XLM
+  atkBonus: number;         // Multiplicador de ATK: 0.3 = +30%
+  defBonus: number;         // Multiplicador de DEF: 0.3 = +30%
+  blockChance?: number;     // Chance de bloqueio: 0.1 = 10%
+  critChance?: number;      // Chance de Acerto Crítico: 0.15 = 15%
+  icon: string;             // Emoji
+  description: string;
+}
+
+// Slots de equipamento equipados no jogador
+export interface EquipmentSlots {
+  rightHand?: string;       // ID do item na mão direita (arma/cajado)
+  leftHand?: string;        // ID do item na mão esquerda (escudo)
+}
+
 export interface InventorySlot {
   id: string; // "health_potion", "mana_potion", "ruby_gem", "gamefi_token", "pickaxe"
   type: "consumable" | "material" | "currency" | "tool";
@@ -155,6 +179,7 @@ export interface GameState {
   wallet: WalletState;
   quests: Record<QuestId, Quest>;
   transactions: Transaction[];
+  ownedEquipment?: string[]; // Lista de IDs de equipamentos comprados
   activeDialog: {
     npcName: string;
     text: string[];

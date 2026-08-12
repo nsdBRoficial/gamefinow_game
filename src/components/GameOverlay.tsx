@@ -7,6 +7,7 @@ import React, { useState, useEffect } from "react";
 import { WalletNowClient } from "@walletnow/sdk";
 import { WalletState, Transaction } from "../types";
 import { useGameStore } from "../store/gameStore";
+import { EQUIPMENT_CATALOG } from "../equipmentData";
 import { onboardUser, StellarAnchorService, TestnetKitService, transferXLM } from "../services/stellarServices";
 import { Keypair } from "@stellar/stellar-sdk";
 
@@ -2044,7 +2045,7 @@ interface P2PStoreProps {
 }
 
 const P2PStoreModal: React.FC<P2PStoreProps> = ({ wallet, onClose, onUpdateWallet }) => {
-  const [activeTab, setActiveTab] = useState<"buy" | "sell">("buy");
+  const [activeTab, setActiveTab] = useState<"buy" | "sell" | "equip">("buy");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<{ message: string; txHash: string } | null>(null);
@@ -2248,7 +2249,7 @@ const P2PStoreModal: React.FC<P2PStoreProps> = ({ wallet, onClose, onUpdateWalle
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
+      <div className="grid grid-cols-3 gap-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
         <button
           type="button"
           onClick={() => { setActiveTab("buy"); setError(null); setSuccess(null); }}
@@ -2256,7 +2257,16 @@ const P2PStoreModal: React.FC<P2PStoreProps> = ({ wallet, onClose, onUpdateWalle
             activeTab === "buy" ? "bg-rose-600 text-white" : "text-slate-400 hover:text-white"
           }`}
         >
-          🛒 Comprar Itens P2P
+          🛒 Consumíveis
+        </button>
+        <button
+          type="button"
+          onClick={() => { setActiveTab("equip"); setError(null); setSuccess(null); }}
+          className={`py-2 rounded-lg text-xs font-black uppercase transition cursor-pointer font-mono ${
+            activeTab === "equip" ? "bg-rose-600 text-white" : "text-slate-400 hover:text-white"
+          }`}
+        >
+          ⚔️ Equipamentos
         </button>
         <button
           type="button"
@@ -2332,6 +2342,123 @@ const P2PStoreModal: React.FC<P2PStoreProps> = ({ wallet, onClose, onUpdateWalle
                 </div>
               );
             })}
+          </div>
+        </div>
+      ) : activeTab === "equip" ? (
+        <div className="space-y-4">
+          <div className="bg-slate-950 p-3 rounded-xl border border-slate-800">
+            <h3 className="text-xs font-black text-rose-400 mb-2 uppercase tracking-wider font-mono">Meus Equipamentos</h3>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Mão Direita */}
+              <div className="bg-slate-900 border border-slate-700 p-2 rounded-lg flex flex-col items-center justify-center min-h-[80px]">
+                <span className="text-[10px] text-slate-400 uppercase font-black mb-1">Mão Direita (Arma)</span>
+                {(() => {
+                  const eq = useGameStore.getState().playerPos.equippedItems?.rightHand;
+                  const item = EQUIPMENT_CATALOG.find(i => i.id === eq);
+                  if (!item) return <span className="text-slate-600 text-xs mt-2">Vazio</span>;
+                  return (
+                    <div className="flex flex-col items-center">
+                      <span className="text-2xl">{item.icon}</span>
+                      <span className="text-[10px] font-bold text-emerald-400">{item.name}</span>
+                      <button onClick={() => useGameStore.getState().unequipSlot("rightHand")} className="mt-1 text-[9px] text-rose-400 hover:text-rose-300 underline cursor-pointer">Desequipar</button>
+                    </div>
+                  );
+                })()}
+              </div>
+              {/* Mão Esquerda */}
+              <div className="bg-slate-900 border border-slate-700 p-2 rounded-lg flex flex-col items-center justify-center min-h-[80px]">
+                <span className="text-[10px] text-slate-400 uppercase font-black mb-1">Mão Esquerda (Escudo)</span>
+                {(() => {
+                  const eq = useGameStore.getState().playerPos.equippedItems?.leftHand;
+                  const item = EQUIPMENT_CATALOG.find(i => i.id === eq);
+                  if (!item) return <span className="text-slate-600 text-xs mt-2">Vazio</span>;
+                  return (
+                    <div className="flex flex-col items-center">
+                      <span className="text-2xl">{item.icon}</span>
+                      <span className="text-[10px] font-bold text-emerald-400">{item.name}</span>
+                      <button onClick={() => useGameStore.getState().unequipSlot("leftHand")} className="mt-1 text-[9px] text-rose-400 hover:text-rose-300 underline cursor-pointer">Desequipar</button>
+                    </div>
+                  );
+                })()}
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 max-h-[300px] overflow-y-auto pr-1 space-y-2">
+            <h3 className="text-xs font-black text-rose-400 mb-2 uppercase tracking-wider font-mono sticky top-0 bg-slate-950 py-1">Loja de Armas e Escudos</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {EQUIPMENT_CATALOG.map(item => {
+                const isOwned = (useGameStore.getState().ownedEquipment || []).includes(item.id);
+                const playerLevel = useGameStore.getState().level || 1;
+                const levelReqMet = playerLevel >= item.levelRequired;
+                const isEquipped = useGameStore.getState().playerPos.equippedItems?.rightHand === item.id || useGameStore.getState().playerPos.equippedItems?.leftHand === item.id;
+                
+                return (
+                  <div key={item.id} className="bg-slate-900 border border-slate-800 p-3 rounded-lg flex flex-col justify-between">
+                    <div>
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">{item.icon}</span>
+                          <div>
+                            <p className="font-bold text-xs text-slate-200">{item.name}</p>
+                            <p className="text-[9px] text-slate-400">Nível Req: {item.levelRequired}</p>
+                          </div>
+                        </div>
+                        {item.hands === 2 && <span className="text-[8px] bg-amber-900/50 text-amber-400 border border-amber-800 px-1 rounded uppercase font-black">2 Mãos</span>}
+                      </div>
+                      <p className="text-[10px] text-emerald-400 mt-2 font-mono bg-emerald-950/30 p-1 rounded">{item.description}</p>
+                    </div>
+                    
+                    <div className="mt-3 pt-2 border-t border-slate-800 flex justify-between items-center">
+                      {!isOwned ? (
+                        <>
+                          <span className="text-xs font-black text-amber-400">{item.price} XLM</span>
+                          <button 
+                            disabled={loading || wallet.xlmBalance! < item.price}
+                            onClick={async () => {
+                              try {
+                                if (wallet.xlmBalance! < item.price) {
+                                  setError("Saldo XLM insuficiente.");
+                                  return;
+                                }
+                                setLoading(true);
+                                // Simula tx onchain pra simplificar (ou faz real call se necessário, mas vou só debitar estado)
+                                // Pra simplificar no prototipo, vou usar onUpdateWallet simulando tx interna
+                                const txHash = generateTxHash();
+                                const tx: Transaction = {
+                                  id: txHash, type: "P2P_BUY", timestamp: new Date().toLocaleTimeString(),
+                                  amount: item.price.toString(), asset: "XLM", fee: "0", memo: `Compra Equipamento: ${item.name}`, ledgerSequence: 6184293
+                                };
+                                onUpdateWallet({ xlmBalance: wallet.xlmBalance! - item.price }, tx);
+                                useGameStore.getState().buyEquipment(item.id, item.price);
+                                setSuccess({ message: `Equipamento '${item.name}' comprado!`, txHash });
+                              } catch(e:any) { setError(e.message); } finally { setLoading(false); }
+                            }}
+                            className="bg-amber-600 hover:bg-amber-500 text-white text-[10px] font-black uppercase px-3 py-1 rounded cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            Comprar
+                          </button>
+                        </>
+                      ) : (
+                        <div className="w-full flex justify-between items-center">
+                          <span className="text-[10px] text-slate-500 font-black uppercase">Adquirido ✓</span>
+                          <button 
+                            disabled={!levelReqMet || isEquipped}
+                            onClick={() => {
+                              const slot = item.category === "shield" ? "leftHand" : "rightHand";
+                              useGameStore.getState().equipItem(item.id, slot);
+                            }}
+                            className={`text-[10px] font-black uppercase px-3 py-1 rounded cursor-pointer transition ${isEquipped ? 'bg-slate-700 text-slate-400' : !levelReqMet ? 'bg-red-900/50 text-red-400 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500 text-white'}`}
+                          >
+                            {isEquipped ? "Equipado" : !levelReqMet ? "Nível Insuficiente" : "Equipar"}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       ) : (

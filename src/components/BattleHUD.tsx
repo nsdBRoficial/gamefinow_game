@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useGameStore } from "../store/gameStore";
 import { SPELL_GCD_MS, POTION_GCD_MS, POTION_SELF_CD_MS } from "../store/gameStore";
+import { EQUIPMENT_CATALOG } from "../equipmentData";
 
 // ── Hook utilitário: atualiza o componente a 30fps para exibir o timer regressivo ──
 const useAnimationFrame = (active: boolean) => {
@@ -110,7 +111,43 @@ export const BattleHUD: React.FC = () => {
       )}
 
       {/* Top Section — vazio (barras de HP/MP são desenhadas no Canvas) */}
-      <div className="relative w-full flex-grow" />
+      <div className="relative w-full flex-grow">
+        
+        {/* Widget de Equipamentos Ativos - Canto Inferior Esquerdo (acima do bottom bar) */}
+        <div className="absolute bottom-20 left-4 pointer-events-auto flex flex-col gap-2">
+          {/* Mão Direita (Arma) */}
+          {(() => {
+            const eq = playerPos?.equippedItems?.rightHand;
+            if (!eq) return null;
+            const item = EQUIPMENT_CATALOG.find(i => i.id === eq);
+            if (!item) return null;
+            return (
+              <div className="flex items-center gap-2 bg-slate-900/90 border-2 border-amber-500/50 p-1.5 rounded-lg shadow-[0_0_10px_rgba(245,158,11,0.2)] backdrop-blur">
+                <span className="text-xl">{item.icon}</span>
+                <div className="flex flex-col pr-1">
+                  <span className="text-[9px] font-black uppercase text-amber-400">{(item.atkBonus * 100).toFixed(0)}% ATK</span>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Mão Esquerda (Escudo) */}
+          {(() => {
+            const eq = playerPos?.equippedItems?.leftHand;
+            if (!eq) return null;
+            const item = EQUIPMENT_CATALOG.find(i => i.id === eq);
+            if (!item) return null;
+            return (
+              <div className="flex items-center gap-2 bg-slate-900/90 border-2 border-blue-500/50 p-1.5 rounded-lg shadow-[0_0_10px_rgba(59,130,246,0.2)] backdrop-blur">
+                <span className="text-xl">{item.icon}</span>
+                <div className="flex flex-col pr-1">
+                  <span className="text-[9px] font-black uppercase text-blue-400">{(item.defBonus * 100).toFixed(0)}% DEF</span>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      </div>
 
       {/* Bottom Section — Magic Action Bar */}
       <div className="w-full flex justify-center pb-2 pointer-events-auto">

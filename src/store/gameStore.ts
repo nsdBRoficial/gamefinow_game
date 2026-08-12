@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { GameState, Player, NPC, Quest, QuestId, WalletState, Transaction } from "../types";
 import { INITIAL_QUESTS } from "../gameData";
+import { EQUIPMENT_CATALOG } from "../equipmentData";
 import { encryptAES, decryptAES } from "../utils/cryptoUtils";
 
 // ── Battle Cooldown Constants ─────────────────────────────────────────────────
@@ -34,6 +35,9 @@ interface GameStore extends GameState {
   addItemToInventory: (itemId: string, type: "consumable" | "material" | "currency" | "tool", quantity: number) => void;
   addActiveAnimation: (anim: import("../types").AnimationEvent) => void;
   removeActiveAnimation: (id: string) => void;
+  buyEquipment: (itemId: string, price: number) => void;
+  equipItem: (itemId: string, slot: "rightHand" | "leftHand") => void;
+  unequipSlot: (slot: "rightHand" | "leftHand") => void;
 }
 
 const getInitialGameState = (): GameState => {
@@ -71,6 +75,7 @@ const getInitialGameState = (): GameState => {
           jamesDialogsDone: parsed.jamesDialogsDone || [],
           isBattleModeActive: parsed.isBattleModeActive || false,
           lockedTargetId: null,
+          ownedEquipment: parsed.ownedEquipment || [],
         };
       }
     }
@@ -103,6 +108,7 @@ const getInitialGameState = (): GameState => {
     },
     quests: INITIAL_QUESTS,
     transactions: [],
+    ownedEquipment: [],
     activeDialog: null,
     activeModal: null,
     currentLedger: 6184293,
@@ -633,5 +639,109 @@ export const useGameStore = create<GameStore>((set, get) => ({
     activeAnimations: (state.activeAnimations || []).filter(a => a.id !== id)
   })),
 
+  buyEquipment: (itemId, price) => set((state) => {
+    const currentOwned = state.ownedEquipment || [];
+    if (currentOwned.includes(itemId)) return state;
+    
+    // Assumindo que a validacao de fundos e debitos onchain foi feita antes de chamar isso
+    const newState = {
+      ...state,
+      ownedEquipment: [...currentOwned, itemId]
+    };
+    
+    // Save to localStorage
+    const { playerPos, setGameState, setPlayerPos, updateWallet, addTransaction, completeQuest, setActiveModal, setActiveDialog, setBattleMode, setLockedTarget, addExperience, castMagic, buyPotions, usePotion, addItemToInventory, addActiveAnimation, removeActiveAnimation, buyEquipment, equipItem, unequipSlot, ...gameStateToSave } = newState as any;
+    if (gameStateToSave.wallet && gameStateToSave.wallet.secretKey) {
+      const safeWallet = { ...gameStateToSave.wallet };
+      safeWallet.secretKey = encryptAES(safeWallet.secretKey, safeWallet.pin);
+      gameStateToSave.wallet = safeWallet;
+    }
+    localStorage.setItem("stellar_island_game_state_v3", JSON.stringify(gameStateToSave));
+    
+    return { ownedEquipment: newState.ownedEquipment };
+  }),
+
+  equipItem: (itemId, slot) => set((state) => {
+    const currentOwned = state.ownedEquipment || [];
+    if (!currentOwned.includes(itemId)) return state;
+
+    const item = EQUIPMENT_CATALOG.find((i: any) => i.id === itemId);
+    if (!item) return state;
+
+    const playerLvl = state.level || 1;
+    if (playerLvl < item.levelRequired) return state;
+
+      let newEquip = { ...state.playerPos.equippedItems };
+      
+      if (slot === "rightHand") {
+        newEquip.rightHand = itemId;
+        // Arma de 2 maos remove escudo
+        if (item.hands === 2) {
+          newEquip.leftHand = undefined;
+        }
+      } else if (slot === "leftHand") {
+        // Se tem arma de 2 maos na mao direita, bloqueia escudo
+        if (newEquip.rightHand) {
+          const rightItem = EQUIPMENT_CATALOG.find((i: any) => i.id === newEquip.rightHand);
+          if (rightItem && rightItem.hands === 2) {
+            return; // Bloqueado
+          }
+        }
+        newEquip.leftHand = itemId;
+      }
+
+    const nextPlayerPos = { ...state.playerPos, equippedItems: newEquip };
+    localStorage.setItem("stellar_island_player_pos_v3", JSON.stringify(nextPlayerPos));
+    
+    // Atualiza imediatamente o outro state da playerPos
+    setTimeout(() => {
+      useGameStore.getState().setPlayerPos({ equippedItems: newEquip });
+    }, 0);
+    
+    return { playerPos: nextPlayerPos };
+  }),
+
+  unequipSlot: (slot) => set((state) => {
+    let newEquip = { ...state.playerPos.equippedItems };
+    if (slot === "rightHand") newEquip.rightHand = undefined;
+    if (slot === "leftHand") newEquip.leftHand = undefined;
+
+    const nextPlayerPos = { ...state.playerPos, equippedItems: newEquip };
+    localStorage.setItem("stellar_island_player_pos_v3", JSON.stringify(nextPlayerPos));
+    return { playerPos: nextPlayerPos };
+  }),
+
 }));
+
+export const getEquipmentBonuses = (playerPos: import("../types").Player) => {
+  const equips = playerPos.equippedItems;
+  let atkMultiplier = 1;
+  let defMultiplier = 1;
+  let blockChanceMultiplier = 0;
+  let critChanceMultiplier = 0;
+  
+  if (!equips) return { atkMultiplier, defMultiplier, blockChanceMultiplier, critChanceMultiplier };
+  
+  if (equips.rightHand) {
+    const rItem = EQUIPMENT_CATALOG.find((i: any) => i.id === equips.rightHand);
+    if (rItem) {
+      atkMultiplier += rItem.atkBonus;
+      if (rItem.critChance) critChanceMultiplier += rItem.critChance;
+    }
+  }
+  
+  if (equips.leftHand) {
+    const lItem = EQUIPMENT_CATALOG.find((i: any) => i.id === equips.leftHand);
+    if (lItem) {
+      defMultiplier -= lItem.defBonus;
+      if (lItem.blockChance) blockChanceMultiplier += lItem.blockChance;
+    }
+  }
+  
+  // Nao deixa defesa ser < 0 (100% de reducao = 0 multiplier)
+  defMultiplier = Math.max(0, defMultiplier);
+
+  return { atkMultiplier, defMultiplier, blockChanceMultiplier, critChanceMultiplier };
+};
+
 
