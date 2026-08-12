@@ -684,7 +684,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         if (newEquip.rightHand) {
           const rightItem = EQUIPMENT_CATALOG.find((i: any) => i.id === newEquip.rightHand);
           if (rightItem && rightItem.hands === 2) {
-            return; // Bloqueado
+            return state; // Bloqueado
           }
         }
         newEquip.leftHand = itemId;
