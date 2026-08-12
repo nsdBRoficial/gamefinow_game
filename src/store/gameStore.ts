@@ -3,6 +3,18 @@ import { GameState, Player, NPC, Quest, QuestId, WalletState, Transaction } from
 import { INITIAL_QUESTS } from "../gameData";
 import { encryptAES, decryptAES } from "../utils/cryptoUtils";
 
+// ── Battle Cooldown Constants ─────────────────────────────────────────────────
+// GCD (Global Cooldown): bloqueia TODAS as habilidades durante a duração.
+// Após lançar qualquer magia, o GCD ativo impede uso de qualquer outra magia ou poção.
+export const SPELL_GCD_MS: Record<"heal" | "fire" | "lightning", number> = {
+  heal:      800,   // Heal: cooldown curto (recuperação rápida)
+  fire:     1500,   // Bola de Fogo: cooldown médio
+  lightning: 2500,  // Raio: cooldown longo (magia mais poderosa)
+};
+export const POTION_GCD_MS      = 1000; // GCD adicionado ao usar uma poção
+export const POTION_SELF_CD_MS  = 5000; // Cooldown próprio da poção (5s para reusar)
+export const SPELL_MAX_RANGE    = 4.0;  // Range máximo de magias (tiles); monstro retalia no mesmo range
+
 interface GameStore extends GameState {
   playerPos: Player;
   setGameState: (state: Partial<GameState> | ((prev: GameState) => Partial<GameState>)) => void;
@@ -438,6 +450,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
   }),
 
   castMagic: (type) => set((state) => {
+    const now = Date.now();
+
+    // ── Verificação de GCD (Global Cooldown) ─────────────────────────────────
+    // Se ainda estiver dentro do cooldown de qualquer habilidade, bloqueia o cast.
+    // Sinaliza lastBlockedCastTime para o GameCanvas exibir o efeito de Exhaustion.
+    if (now < (state.globalCooldownEnd ?? 0)) {
+      return { lastBlockedCastTime: now };
+    }
+
     const mp = state.playerPos.mp ?? 50;
     const maxMp = state.playerPos.maxMp ?? 50;
     const hp = state.playerPos.hp ?? 100;
@@ -447,9 +468,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
     if (type === "fire") mpCost = 15;
     if (type === "lightning") mpCost = 25;
 
+    // ── Verificação de MP ─────────────────────────────────────────────────────
     if (mp < mpCost) {
-      console.warn(`Not enough MP for ${type}`);
-      return state;
+      // Sem mana suficiente — também sinaliza Exhaustion (visualmente diferente)
+      return { lastBlockedCastTime: now };
     }
 
     let nextHp = hp;
@@ -463,29 +485,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
       hp: nextHp
     };
 
-    let startX = state.playerPos.x;
-    let startY = state.playerPos.y;
-
-    if (type !== "heal" && state.lockedTargetId) {
-      // Find target pos from DOM or we just use a generic target position logic if we had it in state
-      // Since creatures aren't in this Zustand store, we'll emit the player's position but with target flag
-      // Wait, let's just leave startX/startY as the player if we don't have the mob pos here.
-      // We can pass targetX/targetY if we knew them. We will need to look them up.
-      // Actually, we can just dispatch an event, or better, we can modify MapRenderer to draw at the lockedTarget position directly.
-    }
+    // ── Calcula o novo GCD com base no tipo de magia ──────────────────────────
+    const gcdDuration = SPELL_GCD_MS[type];
+    const nextGlobalCooldownEnd = now + gcdDuration;
 
     const newAnim: import("../types").AnimationEvent = {
       id: `anim_${Date.now()}_${Math.random()}`,
       type,
-      startX: startX,
-      startY: startY,
+      startX: state.playerPos.x,
+      startY: state.playerPos.y,
       targetId: type !== "heal" ? state.lockedTargetId : null,
-      timestamp: Date.now(),
+      timestamp: now,
       duration: type === "heal" ? 1000 : 600
     };
 
     localStorage.setItem("stellar_island_player_pos_v3", JSON.stringify(nextPlayerPos));
-    return { playerPos: nextPlayerPos, activeAnimations: [...(state.activeAnimations || []), newAnim] };
+    return {
+      playerPos: nextPlayerPos,
+      activeAnimations: [...(state.activeAnimations || []), newAnim],
+      globalCooldownEnd: nextGlobalCooldownEnd,
+    };
   }),
 
   addItemToInventory: (itemId, type, quantity) => set((state) => {
@@ -534,12 +553,25 @@ export const useGameStore = create<GameStore>((set, get) => ({
   }),
 
   usePotion: (type) => set((state) => {
+    const now = Date.now();
+
+    // ── Verificação de GCD Global ─────────────────────────────────────────────
+    // Não pode usar poção enquanto qualquer GCD estiver ativo.
+    if (now < (state.globalCooldownEnd ?? 0)) {
+      return { lastBlockedCastTime: now };
+    }
+
+    // ── Verificação de Cooldown Próprio da Poção (5s) ─────────────────────────
+    if (now < (state.potionCooldownEnd ?? 0)) {
+      return { lastBlockedCastTime: now };
+    }
+
     const currentInventory = [...(state.inventory || [])];
     const itemId = type === "health" ? "health_potion" : "mana_potion";
     
-    // Find slot with potions
+    // Verifica se tem poção no inventário
     const slotIndex = currentInventory.findIndex(s => s.id === itemId && s.quantity > 0);
-    if (slotIndex === -1) return state; // No potions
+    if (slotIndex === -1) return state; // Sem poções disponíveis
 
     currentInventory[slotIndex].quantity -= 1;
     if (currentInventory[slotIndex].quantity <= 0) {
@@ -553,11 +585,15 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     if (type === "health") {
       nextPlayerPos.hp = Math.min(maxHp, (state.playerPos.hp ?? 0) + Math.floor(maxHp * 0.4));
-      newAnim = { id: `anim_${Date.now()}_heal`, type: "heal", startX: state.playerPos.x, startY: state.playerPos.y, timestamp: Date.now(), duration: 1000 };
+      newAnim = { id: `anim_${Date.now()}_heal`, type: "heal", startX: state.playerPos.x, startY: state.playerPos.y, timestamp: now, duration: 1000 };
     }
     if (type === "mana") {
       nextPlayerPos.mp = Math.min(maxMp, (state.playerPos.mp ?? 0) + Math.floor(maxMp * 0.5));
     }
+
+    // ── Aplicar GCD de poção (1s) e cooldown próprio (5s) ────────────────────
+    const nextGlobalCooldownEnd = now + POTION_GCD_MS;
+    const nextPotionCooldownEnd = now + POTION_SELF_CD_MS;
 
     localStorage.setItem("stellar_island_player_pos_v3", JSON.stringify(nextPlayerPos));
     
@@ -573,9 +609,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
     localStorage.setItem("stellar_island_game_state_v3", JSON.stringify(gameStateToSave));
     
     if (newAnim) {
-      return { inventory: currentInventory, playerPos: nextPlayerPos, activeAnimations: [...(state.activeAnimations || []), newAnim] };
+      return {
+        inventory: currentInventory,
+        playerPos: nextPlayerPos,
+        activeAnimations: [...(state.activeAnimations || []), newAnim],
+        globalCooldownEnd: nextGlobalCooldownEnd,
+        potionCooldownEnd: nextPotionCooldownEnd,
+      };
     }
-    return { inventory: currentInventory, playerPos: nextPlayerPos };
+    return {
+      inventory: currentInventory,
+      playerPos: nextPlayerPos,
+      globalCooldownEnd: nextGlobalCooldownEnd,
+      potionCooldownEnd: nextPotionCooldownEnd,
+    };
   }),
 
   addActiveAnimation: (anim) => set((state) => ({

@@ -15,7 +15,7 @@ import { drawNPCs, drawOtherPlayers, cleanupRenderStates } from "./canvas/NPCMan
 import { OnlinePlayer } from "../services/multiplayerService";
 import { getCurrentQuestTarget, drawQuestArrow } from "./canvas/QuestArrowRenderer";
 import { playSynthSound } from "../utils/audioUtils";
-import { useGameStore } from "../store/gameStore";
+import { useGameStore, SPELL_MAX_RANGE } from "../store/gameStore";
 
 interface GameCanvasProps {
   gameState: GameState;
@@ -174,6 +174,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
   // Regen passiva de HP e MP (1/seg cada)
   const lastRegenTimeRef = useRef<number>(0);
   const processedAnimsRef = useRef<Set<string>>(new Set());
+  // Timestamp do último sinal de Exhaustion do store — usado para evitar push duplicado
+  const lastExhaustionShownRef = useRef<number>(0);
   // --------------------------
   // MMO Other Players walking around the 60x60 map in real time!
   const otherPlayersRef = useRef<any[]>([
@@ -1478,7 +1480,25 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
     if (!latestGameState.current.isBattleModeActive) return;
 
-    // Process spell damage
+    // ── Efeito visual de Exhaustion ──────────────────────────────────────────
+    // Quando castMagic/usePotion é bloqueado pelo GCD, o store sinaliza via
+    // lastBlockedCastTime. O canvas lê esse sinal e exibe a fumaça de exaustão.
+    const blockedCastTime = latestGameState.current.lastBlockedCastTime ?? 0;
+    if (blockedCastTime > 0 && blockedCastTime !== lastExhaustionShownRef.current) {
+      lastExhaustionShownRef.current = blockedCastTime;
+      const player = latestPlayerPos.current;
+      // Texto de fumaça — exibe por 1.2s
+      combatTextsRef.current.push({
+        id: `exhaust_${blockedCastTime}`,
+        text: "💨 Exausto!",
+        x: player.x,
+        y: player.y - 1.2,
+        color: "#9ca3af",
+        timestamp: time
+      });
+    }
+
+    // ── Processa dano de magia (animations) ─────────────────────────────────
     const activeAnims = latestGameState.current.activeAnimations || [];
     activeAnims.forEach(anim => {
       if (anim.targetId && anim.type !== "heal" && !processedAnimsRef.current.has(anim.id)) {
@@ -1488,7 +1508,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           return;
         }
         
-        // Find target
+        // Encontra o alvo
         let spellTarget: any = null;
         [creaturesRef.current, wormsRef.current, crabsRef.current, beesRef.current, snakesRef.current].forEach(list => {
           const found = list.find(c => c.id === anim.targetId);
@@ -1496,6 +1516,26 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         });
 
         if (spellTarget && spellTarget.hp > 0) {
+          const player = latestPlayerPos.current;
+
+          // ── RANGE CHECK DE MAGIA ────────────────────────────────────────────
+          // O jogador DEVE estar dentro do raio SPELL_MAX_RANGE (4.0 tiles) para
+          // que o dano seja aplicado. Se estiver fora, a animação é consumida mas
+          // sem dano e sem XP — eliminando o exploit de atacar de longe com segurança.
+          const spellDist = Math.hypot(player.x - spellTarget.x, player.y - spellTarget.y);
+          if (spellDist > SPELL_MAX_RANGE) {
+            // Fora de alcance: descarta animação sem causar efeito
+            combatTextsRef.current.push({
+              id: Math.random().toString(),
+              text: "Fora de alcance!",
+              x: player.x,
+              y: player.y - 0.8,
+              color: "#6b7280",
+              timestamp: time
+            });
+            return;
+          }
+
           const pLevel = latestGameState.current.level || 1;
           let baseDmg = 10 + (pLevel * 2);
           if (anim.type === "fire") baseDmg = 25 + (pLevel * 3);
@@ -1535,6 +1575,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     if (targetCreature) {
       if (targetCreature.hp <= 0) return;
       const dist = Math.hypot(player.x - targetCreature.x, player.y - targetCreature.y);
+
+      // ── Auto-attack físico: requer dist ≤ 2.0 (corpo-a-corpo) ────────────────────────
       if (dist <= 2.0) {
         
         // Cooldown do Jogador (Ataque mais lento: 1200ms)
@@ -1575,8 +1617,13 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
               return; // Termina o combate neste frame pois o monstro morreu
             }
           }
-        }
+        } // fim do if (time - lastAttackTimeRef > 1200)
+      } // fim do auto-attack físico (dist <= 2.0)
 
+      // ── Retaliação do monstro: range SPELL_MAX_RANGE (4.0 tiles) ──────────────────────
+      // O monstro retalia em todo o range de magia (4.0), não apenas corpo-a-corpo.
+      // Isso garante que usar magia no range de 4.0 tiles implica risco real de morte.
+      if (dist <= SPELL_MAX_RANGE) {
         // Cooldown do Monstro (O monstro ataca o jogador!)
         if (time - monsterLastAttackTimeRef.current > 1200) {
           monsterLastAttackTimeRef.current = time;
