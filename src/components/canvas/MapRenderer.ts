@@ -1108,21 +1108,10 @@ const drawGuildDoor = (ctx: CanvasRenderingContext2D, worldX: number, worldY: nu
   ctx.fillStyle = "#475569"; // slate-600
   // Inner stone layer
   ctx.fillRect(worldX + 8, worldY - tileSize + 8, tileSize * 3 - 16, tileSize * 2 - 8);
-
-  // Title "GUILDHOUSE"
-  ctx.font = "bold 10px 'JetBrains Mono', monospace";
-  ctx.fillStyle = "#fbbf24"; // amber-400
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.shadowColor = "#000000";
-  ctx.shadowBlur = 4;
-  ctx.fillText("GUILDHOUSE", worldX + tileSize * 1.5, worldY - 22);
-  ctx.shadowBlur = 0;
-
   // Wooden Door
   ctx.fillStyle = "#78350f"; // amber-900 (dark wood)
   ctx.beginPath();
-  ctx.ellipse(worldX + tileSize * 1.5, worldY - 8, tileSize - 4, tileSize - 8, 0, Math.PI, 0); // Arco da porta
+  ctx.ellipse(worldX + tileSize * 1.5, worldY - 8, tileSize - 4, tileSize - 16, 0, Math.PI, 0); // Arco da porta ajustado
   ctx.lineTo(worldX + tileSize * 2.5 - 4, worldY + tileSize);
   ctx.lineTo(worldX + tileSize * 0.5 + 4, worldY + tileSize);
   ctx.fill();
@@ -1152,6 +1141,16 @@ const drawGuildDoor = (ctx: CanvasRenderingContext2D, worldX: number, worldY: nu
   ctx.beginPath();
   ctx.arc(worldX + tileSize * 2 - 8, worldY + 12, 3, 0, Math.PI * 2);
   ctx.fill();
+
+  // Title "GUILDHOUSE"
+  ctx.font = "bold 10px 'JetBrains Mono', monospace";
+  ctx.fillStyle = "#fbbf24"; // amber-400
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.shadowColor = "#000000";
+  ctx.shadowBlur = 4;
+  ctx.fillText("GUILDHOUSE", worldX + tileSize * 1.5, worldY - 26);
+  ctx.shadowBlur = 0;
 
   ctx.restore();
 };
