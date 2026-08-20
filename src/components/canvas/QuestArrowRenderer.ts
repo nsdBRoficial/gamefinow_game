@@ -20,7 +20,7 @@ export interface QuestTarget {
   name: string;
   x: number; // Grid X
   y: number; // Grid Y
-  mapId: "center" | "east" | "north" | "west" | "south";
+  mapId: MapId;
   type: "npc" | "portal" | "terminal";
   color: string;
 }
@@ -427,6 +427,9 @@ function getReturnPortalCoord(mapId: MapId): { x: number; y: number } {
       return { x: 30, y: 58 };
     case "south":
       return { x: 30, y: 1 };
+    case "guildhouse":
+    case "amphitheater":
+      return { x: 30, y: 55 };
     default:
       return { x: 29, y: 29 };
   }

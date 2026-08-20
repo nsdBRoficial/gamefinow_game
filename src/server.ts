@@ -314,8 +314,30 @@ export const playersState = new Map<string, PlayerState>();
 app.locals.playersState = playersState;
 
 
+function broadcastGlobalPresence() {
+  const globalSummary: Array<{ playerId: string; name: string; mapId: string; level?: number; playerClass?: string; guildTag?: string }> = [];
+  playersState.forEach((state) => {
+    globalSummary.push({
+      playerId: state.playerId,
+      name: state.payload?.name || "Anônimo",
+      mapId: state.mapId,
+      level: state.payload?.level || 1,
+      playerClass: state.payload?.playerClass,
+      guildTag: state.payload?.guildTag,
+    });
+  });
+
+  io.emit("global_online_sync", {
+    totalOnline: playersState.size,
+    players: globalSummary,
+  });
+}
+
 io.on("connection", (socket) => {
   console.log(`[Socket] Conexão recebida: ${socket.id}`);
+
+  // Envia presença global inicial
+  broadcastGlobalPresence();
 
   // Quando o jogador entra em um mapa
   socket.on("join_map", (data: { mapId: string, playerId: string, playerPayload: any, adminToken?: string }) => {
@@ -325,7 +347,7 @@ io.on("connection", (socket) => {
         const decoded = jwt.verify(data.adminToken, SUPABASE_JWT_SECRET) as any;
         if (decoded.role === "admin") {
           isGM = true;
-          data.playerPayload.isGM = true; // Inject isGM into payload
+          data.playerPayload.isGM = true;
         }
       } catch(e) {}
     }
@@ -342,13 +364,9 @@ io.on("connection", (socket) => {
           .eq("id", data.playerId)
           .single();
           
-        console.log(`[DEBUG] Consulta Supabase para ${data.playerId}:`, userRow, "Error:", error);
-          
         if (userRow) {
           const isSuspended = userRow.is_banned || (userRow.suspended_until && new Date(userRow.suspended_until) > new Date());
-          console.log(`[DEBUG] isSuspended calculado:`, isSuspended);
           if (isSuspended) {
-            console.log(`[DEBUG] Emitindo kick_user para ${socket.id}`);
             socket.emit("kick_user", { reason: "Sua conta está suspensa." });
             setTimeout(() => {
               socket.disconnect();
@@ -359,13 +377,13 @@ io.on("connection", (socket) => {
 
       } catch (e) {
         console.error("Erro ao verificar suspensão:", e);
-        // Se houver erro no banco de dados, desconecta por segurança ou envia kick
         socket.emit("kick_user", { reason: "Erro interno ao verificar sua conta." });
         setTimeout(() => socket.disconnect(), 500);
-        return; // Impede de continuar e entrar no mapa
+        return;
       }
+
       socket.rooms.forEach(room => {
-        if (room !== socket.id) socket.leave(room);
+        if (room !== socket.id && !room.startsWith("guild:")) socket.leave(room);
       });
 
       socket.join(roomName);
@@ -391,6 +409,9 @@ io.on("connection", (socket) => {
 
       // Avisa aos outros que ele chegou com as infos completas
       socket.to(roomName).emit("player_move", data.playerPayload);
+
+      // Atualiza presença global para todos os clientes
+      broadcastGlobalPresence();
     })();
   });
 
@@ -412,9 +433,7 @@ io.on("connection", (socket) => {
 
       state.mapId = data.mapId;
       state.payload = data.payload;
-      // Injeta flag isSuspicious no payload para o admin poder ver
       data.payload.isSuspicious = state.isSuspicious;
-      // Garante que o isGM nunca seja perdido ou spoofado pelo client
       if (state.isGM) {
         data.payload.isGM = true;
       }
@@ -445,7 +464,6 @@ io.on("connection", (socket) => {
       }
       if (cmd === "/teleport") {
         const targetId = args[0];
-        // Encontra o player para ver qual mapa ele tá
         let targetMap = "";
         playersState.forEach((s) => {
           if (s.playerId === targetId) targetMap = s.mapId;
@@ -460,11 +478,30 @@ io.on("connection", (socket) => {
     socket.to(`map:${data.mapId}`).emit("chat_message", data.payload);
   });
 
+  // Chat Global (Todos os mapas)
+  socket.on("chat_global_message", (data: { payload: any }) => {
+    io.emit("chat_global_message", data.payload);
+  });
+
+  // Gerenciamento de sala de Guilda
+  socket.on("join_guild", (guildId: string) => {
+    if (guildId) {
+      socket.join(`guild:${guildId}`);
+    }
+  });
+
+  socket.on("guild_chat_message", (data: { guildId: string, payload: any }) => {
+    if (data.guildId) {
+      io.to(`guild:${data.guildId}`).emit("guild_chat_message", data.payload);
+    }
+  });
+
   socket.on("disconnect", () => {
     const state = playersState.get(socket.id);
     if (state) {
       socket.to(`map:${state.mapId}`).emit("player_leave", { playerId: state.playerId });
       playersState.delete(socket.id);
+      broadcastGlobalPresence();
     }
     console.log(`[Socket] Desconectado: ${socket.id}`);
   });

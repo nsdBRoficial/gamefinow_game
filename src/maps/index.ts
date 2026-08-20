@@ -8,9 +8,11 @@ import { generateWalletForgeMap, FORGE_DECORATIONS } from "./eastMap";
 import { generateAnchorPortMap, PORT_DECORATIONS } from "./northMap";
 import { generateSorobanSwapMap, BAZAAR_DECORATIONS } from "./westMap";
 import { generateHolderSanctuaryMap, SANCTUARY_DECORATIONS } from "./southMap";
+import { generateGuildHouseMap, GUILDHOUSE_DECORATIONS } from "./guildHouseMap";
+import { generateAmphitheaterMap, AMPHITHEATER_DECORATIONS } from "./amphitheaterMap";
 import { Quest } from "../types";
 
-export type MapId = "center" | "east" | "west" | "north" | "south";
+export type MapId = "center" | "east" | "west" | "north" | "south" | "guildhouse" | "amphitheater";
 
 export function isGateBlocked(mapId: string, c: number, r: number, quests: Record<string, Quest>): { blocked: boolean; message: string } {
   return { blocked: false, message: "" };
@@ -22,6 +24,8 @@ const mapGrids: Record<MapId, number[][]> = {
   north: generateAnchorPortMap(),
   west: generateSorobanSwapMap(),
   south: generateHolderSanctuaryMap(),
+  guildhouse: generateGuildHouseMap(),
+  amphitheater: generateAmphitheaterMap(),
 };
 
 const mapDecorations: Record<MapId, any[]> = {
@@ -69,6 +73,12 @@ const mapDecorations: Record<MapId, any[]> = {
     { x: 55, y: 50, type: "mine", mineRarity: "rare" },
     { x: 5, y: 52, type: "mine", mineRarity: "common" },
     { x: 30, y: 55, type: "mine", mineRarity: "epic" },
+  ],
+  guildhouse: [
+    ...GUILDHOUSE_DECORATIONS,
+  ],
+  amphitheater: [
+    ...AMPHITHEATER_DECORATIONS,
   ],
 };
 

@@ -4,6 +4,8 @@ import { INITIAL_QUESTS } from "../gameData";
 import { EQUIPMENT_CATALOG } from "../equipmentData";
 import { encryptAES, decryptAES } from "../utils/cryptoUtils";
 
+import { getSpellsForClass, ClassSpell } from "../spellsData";
+
 // ── Battle Cooldown Constants ─────────────────────────────────────────────────
 // GCD (Global Cooldown): bloqueia TODAS as habilidades durante a duração.
 // Após lançar qualquer magia, o GCD ativo impede uso de qualquer outra magia ou poção.
@@ -30,6 +32,8 @@ interface GameStore extends GameState {
   addExperience: (amount: number) => void;
   registerKill: (creatureName: string, mapId: string) => { questCompleted: boolean; questId?: QuestId; xpGained?: number; dropItemId?: string };
   castMagic: (type: "heal" | "fire" | "lightning") => void;
+  castSpell: (spell: ClassSpell) => void;
+  castSpellSlot: (slot: 1 | 2 | 3) => void;
   buyPotions: (type: "health" | "mana") => void;
   usePotion: (type: "health" | "mana") => void;
   addItemToInventory: (itemId: string, type: "consumable" | "material" | "currency" | "tool", quantity: number) => void;
@@ -38,6 +42,12 @@ interface GameStore extends GameState {
   buyEquipment: (itemId: string, price: number) => void;
   equipItem: (itemId: string, slot: "rightHand" | "leftHand") => void;
   unequipSlot: (slot: "rightHand" | "leftHand") => void;
+  addBuff: (buff: import("../types").ActiveBuff) => void;
+  removeBuff: (buffId: string) => void;
+  cleanExpiredBuffs: () => void;
+  setPlayerClass: (classId: import("../types").PlayerClassId) => void;
+  respawnPlayer: () => void;
+  killPlayer: (killerName?: string, damage?: number) => void;
 }
 
 const getInitialGameState = (): GameState => {
@@ -513,6 +523,78 @@ export const useGameStore = create<GameStore>((set, get) => ({
     };
   }),
 
+  castSpell: (spell) => set((state) => {
+    const now = Date.now();
+    if (now < (state.globalCooldownEnd ?? 0)) {
+      return { lastBlockedCastTime: now };
+    }
+
+    const mp = state.playerPos.mp ?? 50;
+    const hp = state.playerPos.hp ?? 100;
+    const maxHp = state.playerPos.maxHp ?? 100;
+
+    if (mp < spell.mpCost) {
+      return { lastBlockedCastTime: now };
+    }
+
+    let nextHp = hp;
+    if (spell.type === "heal") {
+      const healPercent = spell.basePower / 100;
+      nextHp = Math.min(maxHp, hp + Math.floor(maxHp * healPercent));
+    }
+
+    const nextPlayerPos = {
+      ...state.playerPos,
+      mp: mp - spell.mpCost,
+      hp: nextHp,
+    };
+
+    const nextGlobalCooldownEnd = now + spell.gcdMs;
+
+    const newAnim: import("../types").AnimationEvent = {
+      id: `anim_${Date.now()}_${Math.random()}`,
+      type: spell.animationType,
+      startX: state.playerPos.x,
+      startY: state.playerPos.y,
+      targetId: spell.type !== "heal" ? state.lockedTargetId : null,
+      timestamp: now,
+      duration: spell.type === "heal" ? 1000 : 600,
+    };
+
+    let updatedBuffs = state.activeBuffs || [];
+    if (spell.buffToApply) {
+      const bData = spell.buffToApply;
+      const newBuff: import("../types").ActiveBuff = {
+        id: bData.id,
+        name: bData.name,
+        icon: bData.icon,
+        durationMs: bData.durationMs,
+        startTime: now,
+        expiresAt: now + bData.durationMs,
+        statModifiers: bData.statModifiers,
+      };
+      updatedBuffs = [...updatedBuffs.filter((b) => b.id !== newBuff.id && b.expiresAt > now), newBuff];
+    }
+
+    localStorage.setItem("stellar_island_player_pos_v3", JSON.stringify(nextPlayerPos));
+    return {
+      playerPos: nextPlayerPos,
+      activeAnimations: [...(state.activeAnimations || []), newAnim],
+      activeBuffs: updatedBuffs,
+      globalCooldownEnd: nextGlobalCooldownEnd,
+    };
+  }),
+
+  castSpellSlot: (slot) => {
+    const state = useGameStore.getState();
+    const classId = state.playerPos.playerClass || state.playerClass;
+    const spells = getSpellsForClass(classId);
+    const spell = spells[slot - 1];
+    if (spell) {
+      state.castSpell(spell);
+    }
+  },
+
   addItemToInventory: (itemId, type, quantity) => set((state) => {
     const currentInventory = [...(state.inventory || [])];
     let remaining = quantity;
@@ -709,6 +791,84 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const nextPlayerPos = { ...state.playerPos, equippedItems: newEquip };
     localStorage.setItem("stellar_island_player_pos_v3", JSON.stringify(nextPlayerPos));
     return { playerPos: nextPlayerPos };
+  }),
+
+  addBuff: (buff) => set((state) => {
+    const existing = (state.activeBuffs || []).filter((b) => b.id !== buff.id && b.expiresAt > Date.now());
+    return { activeBuffs: [...existing, buff] };
+  }),
+
+  removeBuff: (buffId) => set((state) => ({
+    activeBuffs: (state.activeBuffs || []).filter((b) => b.id !== buffId),
+  })),
+
+  cleanExpiredBuffs: () => set((state) => {
+    const now = Date.now();
+    const valid = (state.activeBuffs || []).filter((b) => b.expiresAt > now);
+    if (valid.length !== (state.activeBuffs || []).length) {
+      return { activeBuffs: valid };
+    }
+    return state;
+  }),
+
+  setPlayerClass: (classId) => set((state) => {
+    const nextPlayerPos = { ...state.playerPos, playerClass: classId };
+    localStorage.setItem("stellar_island_player_pos_v3", JSON.stringify(nextPlayerPos));
+    return { playerClass: classId, playerPos: nextPlayerPos };
+  }),
+
+  killPlayer: (killerName, damage) => set((state) => {
+    return {
+      isDead: true,
+      isBattleModeActive: false,
+      lockedTargetId: null,
+      lastDeathInfo: {
+        killerName,
+        damage,
+        timestamp: Date.now(),
+      },
+    };
+  }),
+
+  respawnPlayer: () => set((state) => {
+    const maxHp = state.playerPos.maxHp || 100;
+    const maxMp = state.playerPos.maxMp || 50;
+    const nextPlayerPos = {
+      ...state.playerPos,
+      x: 30,
+      y: 30,
+      targetX: 30,
+      targetY: 30,
+      mapId: "center" as const,
+      hp: maxHp,
+      mp: maxMp,
+      isMoving: false,
+    };
+    localStorage.setItem("stellar_island_player_pos_v3", JSON.stringify(nextPlayerPos));
+
+    // Concede 3 segundos de escudo protetor de invulnerabilidade no respawn
+    const respawnBuff: import("../types").ActiveBuff = {
+      id: "buff_shield_respawn",
+      name: "Escudo de Renascimento",
+      icon: "🛡️",
+      statModifiers: {
+        invulnerable: true,
+        damageReduction: 1.0,
+      },
+      durationMs: 3000,
+      startTime: Date.now(),
+      expiresAt: Date.now() + 3000,
+    };
+
+    const existingBuffs = (state.activeBuffs || []).filter((b) => b.id !== "buff_shield_respawn" && b.expiresAt > Date.now());
+
+    return {
+      isDead: false,
+      isBattleModeActive: false,
+      lockedTargetId: null,
+      playerPos: nextPlayerPos,
+      activeBuffs: [...existingBuffs, respawnBuff],
+    };
   }),
 
 }));

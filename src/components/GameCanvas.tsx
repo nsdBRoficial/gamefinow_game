@@ -16,6 +16,7 @@ import { OnlinePlayer } from "../services/multiplayerService";
 import { getCurrentQuestTarget, drawQuestArrow } from "./canvas/QuestArrowRenderer";
 import { playSynthSound } from "../utils/audioUtils";
 import { useGameStore, SPELL_MAX_RANGE, getEquipmentBonuses } from "../store/gameStore";
+import { calculateEffectiveStats } from "../classesData";
 
 interface GameCanvasProps {
   gameState: GameState;
@@ -1444,17 +1445,24 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     // Remove textos expirados
     combatTextsRef.current = combatTextsRef.current.filter((t) => time - t.timestamp < 1500);
 
-    // --- Regen passiva de HP e MP: +1/seg cada ---
+    const player = latestPlayerPos.current;
+    const completedQuests = (Object.values(latestGameState.current.quests || {}) as Quest[]).filter((q) => q && q.status === "completed").length;
+    const effectiveStats = calculateEffectiveStats(
+      completedQuests,
+      player.playerClass || latestGameState.current.playerClass,
+      latestGameState.current.activeBuffs || []
+    );
+
+    // --- Regen passiva de HP e MP com bônus de status e buffs: +1/seg base + bônus ---
     if (time - lastRegenTimeRef.current >= 1000) {
       lastRegenTimeRef.current = time;
       if (!latestGameState.current.isBattleModeActive) {
-        const player = latestPlayerPos.current;
         const maxHp = player.maxHp ?? 100;
         const maxMp = player.maxMp ?? 50;
         const currentHp = player.hp ?? 100;
         const currentMp = player.mp ?? 50;
-        const newHp = Math.min(maxHp, currentHp + 1);
-        const newMp = Math.min(maxMp, currentMp + 1);
+        const newHp = Math.min(maxHp, currentHp + 1 + effectiveStats.hpRegenBonus);
+        const newMp = Math.min(maxMp, currentMp + 1 + effectiveStats.mpRegenBonus);
         if (newHp !== currentHp || newMp !== currentMp) {
           useGameStore.getState().setPlayerPos({ hp: newHp, mp: newMp });
         }
@@ -1565,32 +1573,26 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       }
     });
 
-    const targetId = latestGameState.current.lockedTargetId;
-    if (!targetId) return;
+    // Processamento de auto-ataque e engajamento
+    if (latestGameState.current.isBattleModeActive && latestGameState.current.lockedTargetId) {
+      const targetId = latestGameState.current.lockedTargetId;
+      const targetCreature = creaturesRef.current.find((c) => c.id === targetId);
 
-    const player = latestPlayerPos.current;
-    
-    // Procura o alvo nas listas (inclui mapas diferentes, mas só bate se dist <= 2)
-    let targetCreature: any = null;
-    [creaturesRef.current, wormsRef.current, crabsRef.current, beesRef.current, snakesRef.current].forEach(list => {
-      const found = list.find(c => c.id === targetId);
-      if (found) targetCreature = found;
-    });
+      if (!targetCreature || targetCreature.hp <= 0) {
+        useGameStore.getState().setBattleMode(false);
+        useGameStore.getState().setLockedTarget(null);
+        return;
+      }
 
-    if (targetCreature) {
-      if (targetCreature.hp <= 0) return;
       const dist = Math.hypot(player.x - targetCreature.x, player.y - targetCreature.y);
 
-      // ── Auto-attack físico: requer dist ≤ 2.0 (corpo-a-corpo) ────────────────────────
+      // Auto-attack físico corpo-a-corpo (distância <= 2.0)
       if (dist <= 2.0) {
-        
-        // Cooldown do Jogador (Ataque mais lento: 1200ms)
         if (time - lastAttackTimeRef.current > 1200) {
           lastAttackTimeRef.current = time;
-          
-          const isMiss = Math.random() < 0.15; // 15% miss
-          
-          if (isMiss) {
+
+          const pMiss = Math.random() < 0.05;
+          if (pMiss) {
             combatTextsRef.current.push({
               id: Math.random().toString(),
               text: "MISS",
@@ -1600,13 +1602,14 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
               timestamp: time
             });
           } else {
-            // Damage Formula: (10 + (Level * 2)) * atkMultiplier
+            // Damage Formula com STR e multiplicadores de armas/buffs
             const { atkMultiplier, critChanceMultiplier } = getEquipmentBonuses(player);
             const pLevel = latestGameState.current.level || 1;
-            const baseDmg = (10 + (pLevel * 2)) * atkMultiplier;
+            const baseDmg = (8 + (effectiveStats.str * 0.7) + (pLevel * 1.5)) * atkMultiplier;
             let finalDmg = Math.floor(baseDmg * (0.85 + Math.random() * 0.3));
 
-            const isCrit = Math.random() < critChanceMultiplier;
+            const totalCritChance = critChanceMultiplier + (effectiveStats.str * 0.002) + (effectiveStats.agi * 0.003);
+            const isCrit = Math.random() < totalCritChance;
             if (isCrit) finalDmg *= 2;
 
             targetCreature.hp -= finalDmg;
@@ -1620,24 +1623,23 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
               timestamp: time
             });
 
-            // Target Death
             if (targetCreature.hp <= 0) {
               handleTargetDeath(targetCreature, time);
-              return; // Termina o combate neste frame pois o monstro morreu
+              return;
             }
           }
-        } // fim do if (time - lastAttackTimeRef > 1200)
-      } // fim do auto-attack físico (dist <= 2.0)
+        }
+      }
 
-      // ── Retaliação do monstro: range SPELL_MAX_RANGE (4.0 tiles) ──────────────────────
-      // O monstro retalia em todo o range de magia (4.0), não apenas corpo-a-corpo.
-      // Isso garante que usar magia no range de 4.0 tiles implica risco real de morte.
+      // ── Retaliação do monstro (Range 4.0) ──
       if (dist <= SPELL_MAX_RANGE) {
-        // Cooldown do Monstro (O monstro ataca o jogador!)
         if (time - monsterLastAttackTimeRef.current > 1200) {
           monsterLastAttackTimeRef.current = time;
 
-          const mMiss = Math.random() < 0.20; // Monstros erram 20% das vezes
+          // Evasão baseada em AGI do jogador
+          const evasionChance = Math.min(0.40, 0.15 + (effectiveStats.agi * 0.003));
+          const mMiss = Math.random() < evasionChance;
+
           if (mMiss) {
             combatTextsRef.current.push({
               id: Math.random().toString(),
@@ -1647,27 +1649,36 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
               color: "#9ca3af",
               timestamp: time
             });
+          } else if (effectiveStats.isInvulnerable) {
+            // Jogador com escudo protetor de invulnerabilidade ativo!
+            combatTextsRef.current.push({
+              id: Math.random().toString(),
+              text: "IMUNE!",
+              x: player.x,
+              y: player.y - 0.5,
+              color: "#38bdf8",
+              timestamp: time
+            });
           } else {
             const { defMultiplier, blockChanceMultiplier } = getEquipmentBonuses(player);
             
-            // Check Block Chance
             if (Math.random() < blockChanceMultiplier) {
               combatTextsRef.current.push({
                 id: Math.random().toString(),
                 text: "BLOCKED!",
                 x: player.x,
                 y: player.y - 0.5,
-                color: "#60a5fa", // Azul claro pra indicar block
+                color: "#60a5fa",
                 timestamp: time
               });
-              return; // Bloqueou todo o dano, sai daqui
+              return;
             }
 
-            // Dano do monstro (aumentado em +10%)
             const mBaseDmg = ((targetCreature.level || 1) * 4) * 1.10;
-            const mFinalDmg = Math.max(1, Math.floor(mBaseDmg * defMultiplier * (0.85 + Math.random() * 0.3)));
+            const resReduction = Math.min(0.50, effectiveStats.res * 0.003);
+            const totalReduction = Math.min(0.90, (1 - defMultiplier) + resReduction + (effectiveStats.damageReduction || 0));
+            const mFinalDmg = Math.max(1, Math.floor(mBaseDmg * (1 - totalReduction) * (0.85 + Math.random() * 0.3)));
             
-            // Subtrai do HP do player!
             const currentHp = latestPlayerPos.current.hp ?? 100;
             const newHp = Math.max(0, currentHp - mFinalDmg);
             
@@ -1678,15 +1689,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
               text: `-${mFinalDmg}`,
               x: player.x,
               y: player.y - 0.5,
-              color: "#dc2626", // Vermelho
+              color: "#dc2626",
               timestamp: time
             });
 
             if (newHp <= 0) {
-              // Morte do jogador - Aciona overlay dramático e limpa estado de batalha
-              useGameStore.getState().setGameState({ isDead: true });
-              useGameStore.getState().setBattleMode(false);
-              useGameStore.getState().setLockedTarget(null);
+              useGameStore.getState().killPlayer(targetCreature.name, mFinalDmg);
             }
           }
         }
@@ -1702,10 +1710,16 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       let { x, y, targetX, targetY, dir, isMoving, frame } = prev;
 
       if (isMoving) {
-        // Fast, modern retro game movement speed (0.22)
-        // Se concluiu on-ramp, ganha +10% de velocidade
+        const completedQuests = (Object.values(latestGameState.current.quests || {}) as Quest[]).filter((q) => q && q.status === "completed").length;
+        const effectiveStats = calculateEffectiveStats(
+          completedQuests,
+          prev.playerClass || latestGameState.current.playerClass,
+          latestGameState.current.activeBuffs || []
+        );
+
         const hasSpeedBuff = latestGameState.current.quests.onramp.status === "completed";
-        const baseSpeed = hasSpeedBuff ? 0.22 * 1.10 : 0.22;
+        const speedBonusFactor = (effectiveStats.speedMultiplier || 1.0) * (1 + (effectiveStats.agi - 10) * 0.003);
+        const baseSpeed = (hasSpeedBuff ? 0.22 * 1.10 : 0.22) * speedBonusFactor;
         const speed = baseSpeed * (delta / 16.66);
         
         let newX = x;
@@ -2710,6 +2724,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       prefix = "⭐ ";
     }
     let namePart = playerPosVal.name || "Viajante";
+    if (playerPosVal.guildTag) {
+      namePart = `${playerPosVal.guildTag} ${namePart}`;
+    }
     let suffix = "";
     if (hasWallet && gameStateVal.wallet.publicKey) {
       const last4 = gameStateVal.wallet.publicKey.slice(-4);

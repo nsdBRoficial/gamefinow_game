@@ -239,6 +239,9 @@ export const drawOtherPlayers = (
     let prefix = isLegendary ? "⭐ " : "";
 
     let namePart = p.name || "Anonymo";
+    if ((p as any).guildTag) {
+      namePart = `${(p as any).guildTag} ${namePart}`;
+    }
 
     if (p.isGM) {
       prefix = "⭐ ";

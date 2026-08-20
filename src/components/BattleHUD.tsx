@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useGameStore } from "../store/gameStore";
 import { SPELL_GCD_MS, POTION_GCD_MS, POTION_SELF_CD_MS } from "../store/gameStore";
 import { EQUIPMENT_CATALOG } from "../equipmentData";
+import { getSpellsForClass } from "../spellsData";
 
 // ── Hook utilitário: atualiza o componente a 30fps para exibir o timer regressivo ──
 const useAnimationFrame = (active: boolean) => {
@@ -26,11 +27,13 @@ const useAnimationFrame = (active: boolean) => {
 export const BattleHUD: React.FC = () => {
   const isBattleModeActive = useGameStore((s) => s.isBattleModeActive);
   const playerPos = useGameStore((s) => s.playerPos);
-  const castMagic = useGameStore((s) => s.castMagic);
+  const castSpell = useGameStore((s) => s.castSpell);
   const usePotion = useGameStore((s) => s.usePotion);
   const inventory = useGameStore((s) => s.inventory);
   const globalCooldownEnd = useGameStore((s) => s.globalCooldownEnd ?? 0);
   const potionCooldownEnd = useGameStore((s) => s.potionCooldownEnd ?? 0);
+
+  const spells = getSpellsForClass(playerPos?.playerClass);
 
   // Ativa o loop de animação apenas quando há cooldown ativo
   const hasActiveCooldown = Date.now() < globalCooldownEnd || Date.now() < potionCooldownEnd;
@@ -42,15 +45,15 @@ export const BattleHUD: React.FC = () => {
       // Evita disparar atalhos se estiver digitando no chat
       if (e.target && (e.target as HTMLElement).tagName === "INPUT") return;
 
-      if (e.key === "1") castMagic("heal");
-      if (e.key === "2") castMagic("fire");
-      if (e.key === "3") castMagic("lightning");
+      if (e.key === "1" && spells[0]) castSpell(spells[0]);
+      if (e.key === "2" && spells[1]) castSpell(spells[1]);
+      if (e.key === "3" && spells[2]) castSpell(spells[2]);
       if (e.key === "4") usePotion("health");
       if (e.key === "5") usePotion("mana");
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [castMagic, usePotion]);
+  }, [castSpell, usePotion, spells]);
 
   if (!isBattleModeActive) return null;
 
@@ -153,44 +156,43 @@ export const BattleHUD: React.FC = () => {
       <div className="w-full flex justify-center pb-2 pointer-events-auto">
         <div className="flex gap-4 items-end bg-black/60 p-3 rounded-2xl border-2 border-slate-700 shadow-[0_4px_15px_rgba(0,0,0,0.5)] backdrop-blur-sm">
 
-          {/* Skill 1: Heal */}
-          <button
-            onClick={() => castMagic("heal")}
-            disabled={healCdRemaining > 0}
-            className="group relative w-14 h-14 bg-gradient-to-br from-green-600 to-green-900 border-2 border-green-400 rounded-xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-[0_0_15px_rgba(34,197,94,0.3)] hover:shadow-[0_0_20px_rgba(34,197,94,0.6)] cursor-pointer disabled:cursor-not-allowed"
-            title={`Curar (Recupera 20% HP | Custo: 10 MP | CD: ${SPELL_GCD_MS.heal / 1000}s)`}
-          >
-            <CooldownOverlay remaining={healCdRemaining} />
-            <span className={`text-2xl drop-shadow-md ${healCdRemaining > 0 ? "opacity-40" : ""}`}>💖</span>
-            <span className="absolute -top-3 -left-3 w-6 h-6 bg-slate-900 text-white text-xs font-black rounded-full border border-slate-600 flex items-center justify-center shadow-lg group-hover:bg-slate-800">1</span>
-            <span className="absolute -bottom-2 bg-black/80 text-green-300 text-[10px] font-mono px-1.5 rounded border border-green-800/50">10 MP</span>
-          </button>
+          {/* Habilidades Dinâmicas da Classe */}
+          {spells.slice(0, 3).map((sp, index) => {
+            const slotNum = index + 1;
+            const isHeal = sp.type === "heal";
+            const isHoly = sp.element === "holy";
+            const isFire = sp.element === "fire";
+            const isLightning = sp.element === "lightning";
 
-          {/* Skill 2: Fire */}
-          <button
-            onClick={() => castMagic("fire")}
-            disabled={fireCdRemaining > 0}
-            className="group relative w-14 h-14 bg-gradient-to-br from-red-600 to-red-900 border-2 border-red-400 rounded-xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-[0_0_15px_rgba(239,68,68,0.3)] hover:shadow-[0_0_20px_rgba(239,68,68,0.6)] cursor-pointer disabled:cursor-not-allowed"
-            title={`Bola de Fogo (Médio Alcance | Custo: 15 MP | CD: ${SPELL_GCD_MS.fire / 1000}s)`}
-          >
-            <CooldownOverlay remaining={fireCdRemaining} />
-            <span className={`text-2xl drop-shadow-md ${fireCdRemaining > 0 ? "opacity-40" : ""}`}>🔥</span>
-            <span className="absolute -top-3 -left-3 w-6 h-6 bg-slate-900 text-white text-xs font-black rounded-full border border-slate-600 flex items-center justify-center shadow-lg group-hover:bg-slate-800">2</span>
-            <span className="absolute -bottom-2 bg-black/80 text-red-300 text-[10px] font-mono px-1.5 rounded border border-red-800/50">15 MP</span>
-          </button>
+            const gradientClass = isHeal || isHoly
+              ? "from-emerald-600 to-teal-900 border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_20px_rgba(16,185,129,0.6)]"
+              : isFire
+              ? "from-red-600 to-amber-900 border-red-400 shadow-[0_0_15px_rgba(239,68,68,0.3)] hover:shadow-[0_0_20px_rgba(239,68,68,0.6)]"
+              : isLightning
+              ? "from-indigo-600 to-purple-900 border-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_20px_rgba(168,85,247,0.6)]"
+              : "from-amber-600 to-orange-900 border-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:shadow-[0_0_20px_rgba(245,158,11,0.6)]";
 
-          {/* Skill 3: Lightning */}
-          <button
-            onClick={() => castMagic("lightning")}
-            disabled={lightningCdRemaining > 0}
-            className="group relative w-14 h-14 bg-gradient-to-br from-indigo-600 to-purple-900 border-2 border-purple-400 rounded-xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_20px_rgba(168,85,247,0.6)] cursor-pointer disabled:cursor-not-allowed"
-            title={`Raio (Alcance Longo/Médio | Custo: 25 MP | CD: ${SPELL_GCD_MS.lightning / 1000}s)`}
-          >
-            <CooldownOverlay remaining={lightningCdRemaining} />
-            <span className={`text-2xl drop-shadow-md ${lightningCdRemaining > 0 ? "opacity-40" : ""}`}>⚡</span>
-            <span className="absolute -top-3 -left-3 w-6 h-6 bg-slate-900 text-white text-xs font-black rounded-full border border-slate-600 flex items-center justify-center shadow-lg group-hover:bg-slate-800">3</span>
-            <span className="absolute -bottom-2 bg-black/80 text-purple-300 text-[10px] font-mono px-1.5 rounded border border-purple-800/50">25 MP</span>
-          </button>
+            return (
+              <button
+                key={sp.id}
+                onClick={() => castSpell(sp)}
+                disabled={isGCDActive || mp < sp.mpCost}
+                className={`group relative w-14 h-14 bg-gradient-to-br ${gradientClass} border-2 rounded-xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer disabled:cursor-not-allowed ${
+                  mp < sp.mpCost ? "opacity-50 grayscale" : ""
+                }`}
+                title={`${sp.name} (${sp.description} | Custo: ${sp.mpCost} MP | CD: ${(sp.gcdMs / 1000).toFixed(1)}s)`}
+              >
+                <CooldownOverlay remaining={gcdRemaining} />
+                <span className={`text-2xl drop-shadow-md ${isGCDActive ? "opacity-40" : ""}`}>{sp.icon}</span>
+                <span className="absolute -top-3 -left-3 w-6 h-6 bg-slate-900 text-white text-xs font-black rounded-full border border-slate-600 flex items-center justify-center shadow-lg group-hover:bg-slate-800">
+                  {slotNum}
+                </span>
+                <span className="absolute -bottom-2 bg-black/80 text-cyan-300 text-[10px] font-mono px-1.5 rounded border border-cyan-800/50">
+                  {sp.mpCost} MP
+                </span>
+              </button>
+            );
+          })}
 
           {/* Divider */}
           <div className="w-px h-12 bg-slate-700 mx-1" />

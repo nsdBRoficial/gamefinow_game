@@ -41,6 +41,13 @@ import { OutfitShopModal } from "./components/OutfitShopModal";
 import { ChatBox, OnlineIndicator } from "./components/ChatBox";
 import { WelcomeTutorialModal } from "./components/WelcomeTutorialModal";
 import { Level5IntroModal } from "./components/Level5IntroModal";
+import { DeathScreenModal } from "./components/DeathScreenModal";
+import { ActiveBuffsHUD } from "./components/ActiveBuffsHUD";
+import { ClassSelectionModal } from "./components/ClassSelectionModal";
+import { GuildModal } from "./components/GuildModal";
+import { AccountRecoveryModal } from "./components/AccountRecoveryModal";
+import { audioStreamService } from "./services/audioStreamService";
+import { calculateEffectiveStats } from "./classesData";
 import { useMultiplayer } from "./hooks/useMultiplayer";
 import { getOrCreatePlayerId, subscribeToGlobalEvents, getSocket } from "./services/multiplayerService";
 import ReactNipple from "react-nipple";
@@ -302,6 +309,15 @@ export default function App() {
       }
     }
   }, [isMultiplayerEnabled, setGameState, setPlayerPos]);
+
+  // Trilha e Efeitos do Anfiteatro
+  useEffect(() => {
+    if (playerPos.mapId === "amphitheater") {
+      audioStreamService.startAmphitheaterBgm();
+    } else {
+      audioStreamService.stopAmphitheaterBgm();
+    }
+  }, [playerPos.mapId]);
 
   const handleResetAndNewCharacter = () => {
     try {
@@ -1087,12 +1103,18 @@ export default function App() {
 
   const playerTitle = playerPos.activeTitle || defaultTitle;
 
-  // RPG stats calculations
-  const attrStr = isGmMode ? 9999 : 12 + completedCount * 3;
-  const attrInt = isGmMode ? 9999 : 10 + completedCount * 6;
-  const attrAgi = isGmMode ? 9999 : 11 + completedCount * 2;
-  const attrRes = isGmMode ? 9999 : 10 + completedCount * 4;
-  const attrFaith = isGmMode ? 9999 : (gameState.wallet.hasWallet ? 20 + completedCount * 12 : 0);
+  // RPG stats calculations com classes e buffs
+  const effectiveStats = calculateEffectiveStats(
+    completedCount,
+    playerPos.playerClass || gameState.playerClass,
+    gameState.activeBuffs
+  );
+
+  const attrStr = isGmMode ? 9999 : effectiveStats.str;
+  const attrInt = isGmMode ? 9999 : effectiveStats.int;
+  const attrAgi = isGmMode ? 9999 : effectiveStats.agi;
+  const attrRes = isGmMode ? 9999 : effectiveStats.res;
+  const attrFaith = isGmMode ? 9999 : (gameState.wallet.hasWallet ? effectiveStats.faith : 0);
 
   const isMovementBlocked = !!gameState.activeModal || !!gameState.activeDialog || !!activeWindow || showPassport || showMapModal;
 
@@ -1536,6 +1558,30 @@ export default function App() {
             <span className="text-xl md:text-lg">📖</span>
           </button>
 
+          {/* Sistema de Guildas */}
+          <button
+            onClick={() => {
+              setGameState((prev) => ({ ...prev, activeModal: "guild" }));
+              playSynthSound("beep");
+            }}
+            className="w-11 h-11 md:w-9 md:h-9 border-2 border-black rounded-lg flex items-center justify-center shadow-[2px_2.5px_0px_#000] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer transition bg-amber-400 hover:bg-amber-300"
+            title="Sistema de Guildas & Sede"
+          >
+            <span className="text-xl md:text-lg">🛡️</span>
+          </button>
+
+          {/* Recuperação de Conta Web3 SEP-10 */}
+          <button
+            onClick={() => {
+              setGameState((prev) => ({ ...prev, activeModal: "account_recovery" }));
+              playSynthSound("beep");
+            }}
+            className="w-11 h-11 md:w-9 md:h-9 border-2 border-black rounded-lg flex items-center justify-center shadow-[2px_2.5px_0px_#000] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer transition bg-cyan-400 hover:bg-cyan-300"
+            title="Recuperação de Conta Web3 (SEP-10)"
+          >
+            <span className="text-xl md:text-lg">🔑</span>
+          </button>
+
         </div>
 
         {/* 4. CHRONICLES ACTIVE QUEST FLOATING CARD OVERLAY */}
@@ -1757,36 +1803,38 @@ export default function App() {
           />
         )}
 
+        {/* ─── MODAL DE CONSAGRAÇÃO DE CLASSES DA FONTE ─── */}
+        <ClassSelectionModal 
+          playSynthSound={playSynthSound} 
+          completedCount={completedCount} 
+        />
+
+        {/* ─── MODAL DE GUILDAS & SEDE ─── */}
+        <GuildModal
+          playSynthSound={playSynthSound}
+          onTeleportToGuildhouse={() => {
+            setPlayerPos((prev) => ({
+              ...prev,
+              mapId: "guildhouse",
+              x: 30,
+              y: 50,
+              targetX: 30,
+              targetY: 50,
+              isMoving: false,
+            }));
+          }}
+        />
+
+        {/* ─── MODAL DE RECUPERAÇÃO DE CONTA SEP-10 / EMAIL ─── */}
+        <AccountRecoveryModal
+          playSynthSound={playSynthSound}
+        />
+
+        {/* ─── HUD DE BUFFS ATIVOS COM TIMERS ─── */}
+        <ActiveBuffsHUD />
+
         {/* ─── OVERLAYS DE ANIMAÇÃO (DEATH & LEVEL UP) ─── */}
-        {gameState.isDead && (
-          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black transition-opacity duration-1000 animate-in fade-in">
-            <h1 className="text-red-600 font-serif text-6xl tracking-[0.2em] mb-4 drop-shadow-[0_0_15px_rgba(220,38,38,0.8)]">
-              VOCÊ MORREU
-            </h1>
-            <p className="text-gray-400 font-mono text-lg animate-pulse">
-              Os deuses estão restaurando sua alma...
-            </p>
-            {/* Respawn effect handled via effect hook or timeout below */}
-            <div className="hidden">
-              {setTimeout(() => {
-                const maxHp = playerPos.maxHp || 100;
-                const maxMp = playerPos.maxMp || 50;
-                setPlayerPos((prev) => ({
-                  ...prev,
-                  x: 30,
-                  y: 30,
-                  targetX: 30,
-                  targetY: 30,
-                  mapId: "center",
-                  hp: Math.floor(maxHp * 0.5),
-                  mp: Math.floor(maxMp * 0.5),
-                  isMoving: false,
-                }));
-                setGameState((prev) => ({ ...prev, isDead: false }));
-              }, 5000)}
-            </div>
-          </div>
-        )}
+        <DeathScreenModal playSynthSound={playSynthSound} />
 
         {gameState.pendingLevelUp && !gameState.isDead && (
           <div className="absolute inset-0 z-[100] pointer-events-none flex flex-col items-center justify-center bg-yellow-500/10 backdrop-blur-[1px]">

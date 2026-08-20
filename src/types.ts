@@ -86,7 +86,7 @@ export interface Player {
   faceType: "none" | "glasses" | "beard" | "elder_beard" | "mustache" | "eyepatch" | "smile" | "eyelashes" | "makeup" | "visor";
   accessoryType: "none" | "backpack" | "cape" | "sword" | "wings" | "katana" | "viking_axe" | "magic_wand";
   name: string;
-  mapId?: "center" | "east" | "west" | "north" | "south";
+  mapId?: "center" | "east" | "west" | "north" | "south" | "guildhouse" | "amphitheater";
   // Campos extras usados pelo CharacterCustomizer (estilo visual avançado)
   headStyle?: string;    // Ex: "default" | "mohawk" | "cap" | "long" | "afro" | "helmet" | "crown" | "bald"
   eyeStyle?: string;     // Ex: "dots" | "sunglasses" | "vr_headset" | "visor" | "cyborg" | "anime" | "wink" | "classic"
@@ -108,6 +108,11 @@ export interface Player {
   bubbleTimer?: number;  // Timestamp (ms) de quando o balão deve desaparecer
   // Equipamentos ativos do jogador (armas/escudos)
   equippedItems?: import("./types").EquipmentSlots;
+  // Classe RPG & Guilda
+  playerClass?: PlayerClassId;
+  guildId?: string;
+  guildTag?: string;
+  guildRole?: "leader" | "officer" | "member";
 }
 
 export interface NPC {
@@ -163,6 +168,44 @@ export interface EquipmentItem {
   description: string;
 }
 
+export type PlayerClassId = "warrior" | "soroban_mage" | "cosmic_ranger" | "network_guardian";
+
+export interface PlayerClass {
+  id: PlayerClassId;
+  name: string;
+  icon: string;
+  role: string;
+  description: string;
+  strMod: number;
+  intMod: number;
+  agiMod: number;
+  resMod: number;
+  faithMod: number;
+  passiveName: string;
+  passiveDesc: string;
+}
+
+export interface ActiveBuff {
+  id: string;               // Ex: "buff_shield_respawn", "buff_haste", "buff_might"
+  name: string;             // Ex: "Escudo Sagrado", "Velocidade Cósmica"
+  icon: string;             // Ex: "🛡️", "⚡", "💪"
+  statModifiers: {
+    strBonus?: number;
+    intBonus?: number;
+    agiBonus?: number;
+    resBonus?: number;
+    faithBonus?: number;
+    speedMultiplier?: number;
+    damageReduction?: number;
+    hpRegenPerSec?: number;
+    mpRegenPerSec?: number;
+    invulnerable?: boolean;
+  };
+  durationMs: number;
+  startTime: number;
+  expiresAt: number;
+}
+
 // Slots de equipamento equipados no jogador
 export interface EquipmentSlots {
   rightHand?: string;       // ID do item na mão direita (arma/cajado)
@@ -187,21 +230,28 @@ export interface GameState {
     npcId: string;
     onDialogComplete?: () => void;
   } | null;
-  activeModal: "wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | "outfit_shop" | "mining_node" | null;
+  activeModal: "wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | "outfit_shop" | "mining_node" | "class_selection" | "guild" | "account_recovery" | null;
   currentLedger: number;
   jamesDialogsDone?: string[];
   mapZoomLevel?: number;
   isBattleModeActive?: boolean;
   lockedTargetId?: string | null;
-  // Player Stats RPG
+  // Player Stats RPG & Classes
   xp_current?: number;
   level?: number;
+  playerClass?: PlayerClassId;
+  activeBuffs?: ActiveBuff[];
   hasSeenTutorial?: boolean;
   hasSeenLevel5Intro?: boolean;
   inventory?: InventorySlot[];
   activeAnimations?: AnimationEvent[];
-  // Animation Triggers
+  // Animation Triggers & Death Mechanics
   isDead?: boolean;
+  lastDeathInfo?: {
+    killerName?: string;
+    damage?: number;
+    timestamp: number;
+  };
   pendingLevelUp?: boolean;
   // Mining Progress
   miningEndTimestamp?: number;
