@@ -39,7 +39,7 @@ import {
 } from "lucide-react";
 
 interface GameOverlayProps {
-  activeModal: "wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | "outfit_shop" | null;
+  activeModal: import("../types").GameState["activeModal"];
   wallet: WalletState;
   onClose: () => void;
   onWalletCreated: (pubKey: string, secKey: string, name: string, email: string, pin: string) => void;
@@ -70,6 +70,18 @@ import { useTranslation } from "react-i18next";
 import i18n from "../i18n/i18n";
 
 
+const SUPPORTED_OVERLAY_MODALS = [
+  "wallet",
+  "onramp",
+  "soroban",
+  "hold",
+  "atf",
+  "p2p_store",
+  "burn_altar",
+  "gamefi_faucet",
+  "mining_node",
+];
+
 export const GameOverlay: React.FC<GameOverlayProps> = ({
   activeModal,
   wallet,
@@ -81,7 +93,7 @@ export const GameOverlay: React.FC<GameOverlayProps> = ({
   onUpdateWallet,
   playerName,
 }) => {
-  if (!activeModal) return null;
+  if (!activeModal || !SUPPORTED_OVERLAY_MODALS.includes(activeModal)) return null;
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
