@@ -1565,9 +1565,9 @@ export default function App() {
               playSynthSound("beep");
             }}
             className="w-11 h-11 md:w-9 md:h-9 border-2 border-black rounded-lg flex items-center justify-center shadow-[2px_2.5px_0px_#000] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer transition bg-purple-500 hover:bg-purple-400 text-white"
-            title="Consagração de Classes RPG (Fonte Sagrada)"
+            title="Consagração de Classes RPG (Igreja Central)"
           >
-            <span className="text-xl md:text-lg">⛲</span>
+            <span className="text-xl md:text-lg">⛪</span>
           </button>
 
           {/* Sistema de Guildas */}
@@ -1579,7 +1579,7 @@ export default function App() {
             className="w-11 h-11 md:w-9 md:h-9 border-2 border-black rounded-lg flex items-center justify-center shadow-[2px_2.5px_0px_#000] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer transition bg-amber-400 hover:bg-amber-300"
             title="Sistema de Guildas & Sede"
           >
-            <span className="text-xl md:text-lg">🛡️</span>
+            <span className="text-xl md:text-lg">🚪</span>
           </button>
 
           {/* Recuperação de Conta Web3 SEP-10 */}
