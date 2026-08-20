@@ -294,7 +294,10 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [confirmEmail, setConfirmEmail] = useState("");
   const [pin, setPin] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [savedSecret, setSavedSecret] = useState(false);
   const [sdkLogs, setSdkLogs] = useState<string[]>([]);
   const [logIndex, setLogIndex] = useState(0);
   const [generatedPub, setGeneratedPub] = useState("");
@@ -384,9 +387,17 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
   const startOnboarding = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!name || !email || !pin) return;
+    if (!name || !email || !confirmEmail || !pin) return;
+    if (email !== confirmEmail) {
+      setError("Os e-mails informados não conferem!");
+      return;
+    }
     if (pin.length < 6 || pin.length > 8) {
       setError("Sua senha PIN deve ter entre 6 e 8 dígitos numéricos!");
+      return;
+    }
+    if (!acceptedTerms) {
+      setError("Você deve aceitar os Termos de Uso e Política de Privacidade!");
       return;
     }
 
@@ -536,6 +547,21 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Ex: bernardo@stellar.com"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 px-4 text-xs font-semibold focus:outline-none focus:border-cyan-500 text-slate-100 placeholder:text-slate-600 mb-2"
+              />
+              <label className="block text-[10px] text-slate-400 font-extrabold uppercase tracking-wide mb-1 flex items-center gap-1.5">
+                <Mail className="h-3 w-3 text-cyan-400 opacity-50" /> Confirmar E-mail
+              </label>
+              <input 
+                type="email" 
+                required
+                value={confirmEmail}
+                onChange={(e) => setConfirmEmail(e.target.value)}
+                onPaste={(e) => {
+                  e.preventDefault();
+                  setError("Por segurança, digite seu e-mail novamente.");
+                }}
+                placeholder="Confirme seu e-mail"
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2.5 px-4 text-xs font-semibold focus:outline-none focus:border-cyan-500 text-slate-100 placeholder:text-slate-600"
               />
             </div>
@@ -569,9 +595,32 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
             <p>Ao se registrar, a WalletNow SDK criará suas credenciais criptográficas e as associará de forma permanente com seu perfil de rede local.</p>
           </div>
 
+          <label className="flex items-start gap-2 cursor-pointer mt-2 group">
+            <div className="relative flex items-center justify-center mt-0.5">
+              <input
+                type="checkbox"
+                required
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                className="peer sr-only"
+              />
+              <div className="w-4 h-4 border-2 border-slate-600 rounded bg-black peer-checked:bg-cyan-500 peer-checked:border-cyan-500 transition-all flex items-center justify-center">
+                {acceptedTerms && <Check className="w-3 h-3 text-black font-black" />}
+              </div>
+            </div>
+            <span className="text-[10px] text-slate-400 group-hover:text-slate-300 transition-colors leading-relaxed flex-1">
+              Eu li e aceito os <a href="/src/docs/TermsOfUse.md" target="_blank" className="text-cyan-400 hover:underline">Termos de Uso</a> e a <a href="/src/docs/PrivacyPolicy.md" target="_blank" className="text-cyan-400 hover:underline">Política de Privacidade</a> do GameFiNow MMO RPG.
+            </span>
+          </label>
+
           <button
             type="submit"
-            className="w-full py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider text-black bg-cyan-400 hover:bg-cyan-300 active:scale-[0.98] transition-all cursor-pointer font-mono"
+            disabled={!acceptedTerms}
+            className={`w-full py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider text-black transition-all font-mono ${
+              acceptedTerms 
+                ? "bg-cyan-400 hover:bg-cyan-300 active:scale-[0.98] cursor-pointer" 
+                : "bg-slate-700 text-slate-500 cursor-not-allowed"
+            }`}
           >
             Iniciar Onboarding pelo SDK
           </button>
@@ -676,13 +725,56 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
             ⚠️ <strong>SEGURANÇA:</strong> No testnet kit da WalletNow, os saldos são fictícios, mas no ambiente real, sua chave secreta controla totalmente o saldo. Nunca repasse sua chave secreta a terceiros!
           </div>
 
+          <label className="flex items-start gap-2 cursor-pointer group">
+            <div className="relative flex items-center justify-center mt-0.5">
+              <input
+                type="checkbox"
+                required
+                checked={savedSecret}
+                onChange={(e) => setSavedSecret(e.target.checked)}
+                className="peer sr-only"
+              />
+              <div className="w-4 h-4 border-2 border-slate-600 rounded bg-black peer-checked:bg-amber-500 peer-checked:border-amber-500 transition-all flex items-center justify-center">
+                {savedSecret && <Check className="w-3 h-3 text-black font-black" />}
+              </div>
+            </div>
+            <span className="text-[10px] text-slate-400 group-hover:text-slate-300 transition-colors leading-relaxed flex-1 font-bold">
+              Eu afirmo que anotei/salvei minha Secret Key em um local seguro. Entendo que se perdê-la, perco o acesso ao personagem e aos fundos associados.
+            </span>
+          </label>
+
           <button
             type="button"
-            onClick={() => {
+            disabled={!savedSecret}
+            onClick={async () => {
+              if (window.PublicKeyCredential) {
+                try {
+                  await navigator.credentials.create({
+                    publicKey: {
+                      challenge: new Uint8Array(32),
+                      rp: { name: "GameFiNow MMO RPG" },
+                      user: {
+                        id: new Uint8Array(16),
+                        name: email,
+                        displayName: name
+                      },
+                      pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+                      authenticatorSelection: { userVerification: "preferred" },
+                      timeout: 60000
+                    }
+                  });
+                } catch (e) {
+                  console.log("WebAuthn creation failed or cancelled:", e);
+                }
+              }
               onWalletCreated(generatedPub, generatedSec, name, email, pin);
               onClose();
             }}
-            className="w-full py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider text-black bg-cyan-400 hover:bg-cyan-300 active:scale-[0.98] transition-all cursor-pointer font-mono"
+            className={`w-full py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider text-black transition-all font-mono ${
+              savedSecret 
+                ? "bg-cyan-400 hover:bg-cyan-300 active:scale-[0.98] cursor-pointer" 
+                : "bg-slate-700 text-slate-500 cursor-not-allowed"
+            }`}
           >
             Registrar Carteira & Entrar na Ilha
           </button>

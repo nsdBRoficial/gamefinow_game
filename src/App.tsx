@@ -321,9 +321,10 @@ export default function App() {
 
   const handleResetAndNewCharacter = () => {
     try {
-      localStorage.removeItem("stellar_island_game_state_v1");
-      localStorage.removeItem("stellar_island_player_pos_v1");
+      localStorage.removeItem("stellar_island_game_state_v3");
+      localStorage.removeItem("stellar_island_player_pos_v3");
       localStorage.removeItem("walletnow_stellar_sk");
+      localStorage.removeItem("walletnow_stellar_pk");
     } catch (e) {
       console.warn("Could not clean localStorage", e);
     }
@@ -1133,21 +1134,26 @@ export default function App() {
         existingWallet={gameState.wallet}
         existingPlayerName={playerPos.name}
         existingGender={playerPos.gender || "male"}
-        onLogin={(name, gender) => {
+        onLogin={(name, gender, skipAppearanceOverride) => {
           const isFemale = gender === "female";
-          setPlayerPos((prev) => ({
-            ...prev,
-            name,
-            gender,
-            headType: isFemale ? "ribbon" : (prev.headType || "topete"),
-            headColor: isFemale ? "#ec4899" : (prev.headColor || "#3b82f6"),
-            torsoType: isFemale ? "dress" : (prev.torsoType || "classic"),
-            torsoColor: isFemale ? "#ec4899" : (prev.torsoColor || "#ef4444"),
-            legsColor: isFemale ? "#1e293b" : (prev.legsColor || "#2563eb"),
-            shoesColor: isFemale ? "#ec4899" : (prev.shoesColor || "#1e293b"),
-            faceType: isFemale ? "eyelashes" : (prev.faceType || "none"),
-            hairColor: isFemale ? "#ec4899" : (prev.hairColor || "#78350f"),
-          }));
+          setPlayerPos((prev) => {
+            if (skipAppearanceOverride) {
+              return { ...prev, name, ...(gender && { gender }) };
+            }
+            return {
+              ...prev,
+              name,
+              gender: gender || prev.gender,
+              headType: isFemale ? "ribbon" : (prev.headType || "topete"),
+              headColor: isFemale ? "#ec4899" : (prev.headColor || "#3b82f6"),
+              torsoType: isFemale ? "dress" : (prev.torsoType || "classic"),
+              torsoColor: isFemale ? "#ec4899" : (prev.torsoColor || "#ef4444"),
+              legsColor: isFemale ? "#1e293b" : (prev.legsColor || "#2563eb"),
+              shoesColor: isFemale ? "#ec4899" : (prev.shoesColor || "#1e293b"),
+              faceType: isFemale ? "eyelashes" : (prev.faceType || "none"),
+              hairColor: isFemale ? "#ec4899" : (prev.hairColor || "#78350f"),
+            };
+          });
           playSynthSound("success");
           setIsLoggedIn(true);
         }}

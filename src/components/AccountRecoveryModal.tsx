@@ -7,6 +7,8 @@ import React, { useState } from "react";
 import { KeyRound, Mail, CheckCircle2, ShieldCheck, RefreshCw, X, Sparkles, AlertTriangle } from "lucide-react";
 import { useGameStore } from "../store/gameStore";
 import { Keypair } from "@stellar/stellar-sdk";
+import { createClient } from "@supabase/supabase-js";
+import { supabase } from "../services/supabaseClient";
 
 interface AccountRecoveryModalProps {
   playSynthSound: (type: "beep" | "success" | "coin" | "unlock") => void;
@@ -25,6 +27,7 @@ export const AccountRecoveryModal: React.FC<AccountRecoveryModalProps> = ({
   const setActiveModal = useGameStore((s) => s.setActiveModal);
   const updateWallet = useGameStore((s) => s.updateWallet);
   const setPlayerPos = useGameStore((s) => s.setPlayerPos);
+  const setGameState = useGameStore((s) => s.setGameState);
 
   const isVisible = isOpen !== undefined ? isOpen : activeModal === "account_recovery";
 
@@ -37,7 +40,7 @@ export const AccountRecoveryModal: React.FC<AccountRecoveryModalProps> = ({
   };
 
   const [mode, setMode] = useState<"sep10" | "email">("sep10");
-  const [stellarPublicKey, setStellarPublicKey] = useState("");
+  const [stellarSecretKey, setStellarSecretKey] = useState("");
   const [secretKeyOrPin, setSecretKeyOrPin] = useState("");
   const [emailInput, setEmailInput] = useState("");
   const [otpCode, setOtpCode] = useState("");
@@ -47,10 +50,10 @@ export const AccountRecoveryModal: React.FC<AccountRecoveryModalProps> = ({
 
   if (!isVisible) return null;
 
-  const handleSep10Recover = async (e: React.FormEvent) => {
+  const handleSecretKeyRecover = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!stellarPublicKey.trim()) {
-      setStatusMsg({ text: "Insira seu endereço público Stellar (G...)!", type: "error" });
+    if (!stellarSecretKey.trim()) {
+      setStatusMsg({ text: "Insira sua Secret Key Stellar (S...)!", type: "error" });
       playSynthSound("beep");
       return;
     }
@@ -59,39 +62,101 @@ export const AccountRecoveryModal: React.FC<AccountRecoveryModalProps> = ({
     setStatusMsg(null);
 
     try {
-      // 1. Validação do formato Ed25519 Stellar
-      Keypair.fromPublicKey(stellarPublicKey.trim());
+      // 1. Validação do formato Ed25519 Stellar e derivação da chave pública
+      const keypair = Keypair.fromSecret(stellarSecretKey.trim());
+      const publicKey = keypair.publicKey();
 
-      // 2. Simulação de desafio SEP-10 (Challenge / Response)
-      await new Promise((res) => setTimeout(res, 1200));
+      setStatusMsg({ text: "Verificando dados on-chain e na base de dados...", type: "success" });
 
-      // 3. Restauração do perfil
+      // 2. Tenta restaurar do Supabase autenticando no backend primeiro
+      let profile: any = null;
+      try {
+        const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
+        console.log("[Recovery] Requesting token for publicKey:", publicKey);
+        const authRes = await fetch(`${backendUrl}/api/auth/token`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ publicKey })
+        });
+        if (!authRes.ok) {
+          console.error("[Recovery] /api/auth/token returned:", authRes.status, await authRes.text());
+        }
+
+        if (authRes.ok) {
+          const { token } = await authRes.json();
+          const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+          const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+          
+          if (supabaseUrl && supabaseAnonKey) {
+            const authSupabase = createClient(supabaseUrl, supabaseAnonKey, {
+              global: { headers: { Authorization: `Bearer ${token}` } },
+            });
+            const { data, error } = await authSupabase.from("players").select("*").eq("id", publicKey).maybeSingle();
+            if (data && !error) {
+              profile = data;
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Falha ao recuperar dados do Supabase:", err);
+      }
+
+      // Fallback para nome padrão caso não exista base
+      const recoveredName = profile?.name || "Herói Recuperado";
+
+      // 3. Restauração do perfil 
       updateWallet({
         hasWallet: true,
-        publicKey: stellarPublicKey.trim(),
-        name: "Herói Recuperado",
+        publicKey: publicKey,
+        secretKey: stellarSecretKey.trim(),
+        name: recoveredName,
         gamefiBalance: 50,
       });
 
       setPlayerPos({
-        name: "Herói Recuperado",
-        walletAddress: stellarPublicKey.trim(),
+        name: recoveredName,
+        walletAddress: publicKey,
+        ...(profile && {
+          gender: profile.gender,
+          headColor: profile.head_color,
+          torsoColor: profile.torso_color,
+          legsColor: profile.legs_color,
+          shoesColor: profile.shoes_color,
+          skinColor: profile.skin_color,
+          headType: profile.head_type,
+          torsoType: profile.torso_type,
+          shoesType: profile.shoes_type,
+          faceType: profile.face_type,
+          accessoryType: profile.accessory_type,
+          activeOutfit: profile.active_outfit,
+          ownedOutfits: profile.owned_outfits,
+          activeTitle: profile.active_title,
+          unlockedTitles: profile.unlocked_titles,
+          nameStyle: profile.name_style
+        })
       });
+
+      if (profile && profile.level) {
+        setGameState({
+          level: profile.level,
+          xp_current: profile.xp_current || 0,
+        });
+      }
 
       playSynthSound("unlock");
       setStatusMsg({
-        text: "✅ Identidade SEP-10 verificada com sucesso! Seu personagem e carteira foram restaurados.",
+        text: `✅ Carteira de ${recoveredName} restaurada com sucesso!`,
         type: "success",
       });
 
       setTimeout(() => {
         handleClose();
         if (onRecoverySuccess) {
-          onRecoverySuccess("Herói Recuperado", stellarPublicKey.trim());
+          onRecoverySuccess(recoveredName, publicKey);
         }
       }, 1500);
     } catch (err: any) {
-      setStatusMsg({ text: "Endereço Stellar inválido ou desafio não assinado!", type: "error" });
+      setStatusMsg({ text: "Secret Key inválida!", type: "error" });
       playSynthSound("beep");
     } finally {
       setIsLoading(false);
@@ -168,10 +233,10 @@ export const AccountRecoveryModal: React.FC<AccountRecoveryModalProps> = ({
           <button
             onClick={() => { setMode("sep10"); setStatusMsg(null); playSynthSound("beep"); }}
             className={`py-2 rounded-xl text-xs font-bold border-2 transition cursor-pointer flex items-center justify-center gap-1.5 ${
-              mode === "sep10" ? "bg-cyan-500 text-slate-950 border-black shadow-[2px_2px_0px_#000]" : "bg-slate-900 border-slate-800 text-slate-400"
+              mode === "sep10" ? "bg-amber-500 text-slate-950 border-black shadow-[2px_2px_0px_#000]" : "bg-slate-900 border-slate-800 text-slate-400"
             }`}
           >
-            <KeyRound className="w-4 h-4" /> Stellar SEP-10
+            <KeyRound className="w-4 h-4" /> Secret Key
           </button>
           <button
             onClick={() => { setMode("email"); setStatusMsg(null); playSynthSound("beep"); }}
@@ -192,32 +257,32 @@ export const AccountRecoveryModal: React.FC<AccountRecoveryModalProps> = ({
         )}
 
         {mode === "sep10" ? (
-          <form onSubmit={handleSep10Recover} className="space-y-3 text-xs">
+          <form onSubmit={handleSecretKeyRecover} className="space-y-3 text-xs">
             <div>
-              <label className="block text-slate-400 font-bold mb-1">Chave Pública Stellar (G...)</label>
+              <label className="block text-amber-400 font-bold mb-1">Chave Secreta Stellar (S...)</label>
               <input
-                type="text"
-                value={stellarPublicKey}
-                onChange={(e) => setStellarPublicKey(e.target.value)}
-                placeholder="GXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-                className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-white font-mono text-[11px] outline-none focus:border-cyan-400"
+                type="password"
+                value={stellarSecretKey}
+                onChange={(e) => setStellarSecretKey(e.target.value)}
+                placeholder="SXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+                className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-white font-mono text-[11px] outline-none focus:border-amber-400"
               />
             </div>
 
-            <div className="bg-slate-900/80 p-3 rounded-xl border border-slate-800 space-y-1 text-[11px] text-slate-400">
-              <p className="flex items-center gap-1.5 text-cyan-300 font-bold">
-                <ShieldCheck className="w-4 h-4 text-cyan-400" /> Autenticação Criptográfica SEP-10
+            <div className="bg-slate-900/80 p-3 rounded-xl border border-amber-900/40 space-y-1 text-[11px] text-slate-400">
+              <p className="flex items-center gap-1.5 text-amber-400 font-bold">
+                <ShieldCheck className="w-4 h-4 text-amber-400" /> Restauração via Secret Key
               </p>
-              <p>O servidor enviará uma transação de desafio para comprovar a posse da chave on-chain.</p>
+              <p>Sua Chave Secreta será usada localmente para derivar sua chave pública e recuperar sua conta com segurança. Não a compartilhe.</p>
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition cursor-pointer shadow-[2px_2px_0px_#000] border-2 border-black flex items-center justify-center gap-2"
+              className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition cursor-pointer shadow-[2px_2px_0px_#000] border-2 border-black flex items-center justify-center gap-2"
             >
               {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              {isLoading ? "Validando Assinatura..." : "Restaurar Personagem via SEP-10"}
+              {isLoading ? "Validando Chave..." : "Restaurar Personagem via Secret Key"}
             </button>
           </form>
         ) : (

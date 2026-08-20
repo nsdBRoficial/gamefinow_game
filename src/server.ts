@@ -93,8 +93,9 @@ app.post("/api/auth/token", (req, res) => {
     );
 
     return res.json({ token });
-  } catch (err) {
-    return res.status(400).json({ error: "Invalid public key" });
+  } catch (err: any) {
+    console.error("Auth token error for publicKey:", publicKey, "Error:", err);
+    return res.status(400).json({ error: "Invalid public key or server error", details: err?.message });
   }
 });
 

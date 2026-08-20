@@ -116,11 +116,15 @@ export async function upsertPlayer(playerId: string, player: Player, gameState?:
   currentPlayerId = playerId;
 
   try {
+    console.log("[Multiplayer] Requesting token for publicKey:", playerId);
     const authRes = await fetch(`${import.meta.env.VITE_BACKEND_URL || "http://localhost:3001"}/api/auth/token`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ publicKey: playerId })
     });
+    if (!authRes.ok) {
+      console.error("[Multiplayer] /api/auth/token returned:", authRes.status, await authRes.text());
+    }
     
     if (authRes.ok) {
       const { token } = await authRes.json();

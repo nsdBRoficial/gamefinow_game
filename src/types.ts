@@ -150,6 +150,10 @@ export interface AnimationEvent {
   targetId?: string | null;
   timestamp: number;
   duration: number;
+  // Spell metadata for damage calculation
+  spellBasePower?: number;  // basePower da spell (ex: 50 para Meteoro Soroban)
+  spellElement?: "physical" | "fire" | "lightning" | "ice" | "holy"; // Elemento da magia
+  spellClassId?: string;    // Classe que lançou (para passivas como Sobrecarga Arcana)
 }
 
 // Tipo de um item de equipamento (arma/escudo/cajado)

@@ -111,10 +111,16 @@ export function calculateEffectiveStats(
     }
   }
 
-  // Se classe for Guardião, bônus passivo de regeneração
+  // ── Passivas de Classe (fixas) ────────────────────────────────────────────────────────
+
+  // Guardião da Rede: +3 HP/s de regeneração contínua
   if (playerClassId === "network_guardian") {
     hpRegenBonus += 3;
   }
+
+  // Guerreiro Estelar — Pele de Aço: -15% de dano físico recebido
+  // FIX: Reduz o dano físico recebido em 15% permanentemente.
+  const warriorPhysicalReduction = playerClassId === "warrior" ? 0.15 : 0;
 
   return {
     str,
@@ -127,5 +133,6 @@ export function calculateEffectiveStats(
     hpRegenBonus,
     mpRegenBonus,
     isInvulnerable,
+    warriorPhysicalReduction, // Passiva Warrior: 15% redução de dano físico
   };
 }

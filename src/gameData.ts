@@ -441,7 +441,7 @@ export const INITIAL_QUESTS: Record<string, Quest> = {
     description: "A praça central está infestada de Blobs! Elimine 5 deles para proteger os viajantes.",
     instructions: "Derrote 5 Slimes na praça central. Use [Z] para atacar quando estiver próximo.",
     reward: "200 XP + 1x Núcleo de Slime",
-    status: "locked",
+    status: "active",
     killCount: 0,
     killGoal: 5,
     targetCreature: "Blob",

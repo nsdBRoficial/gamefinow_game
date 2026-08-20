@@ -561,6 +561,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       targetId: spell.type !== "heal" ? state.lockedTargetId : null,
       timestamp: now,
       duration: spell.type === "heal" ? 1000 : 600,
+      // Metadata da spell para cálculo de dano real no loop de combate
+      spellBasePower: spell.type !== "heal" ? spell.basePower : undefined,
+      spellElement: spell.element,
+      spellClassId: spell.classId,
     };
 
     let updatedBuffs = state.activeBuffs || [];

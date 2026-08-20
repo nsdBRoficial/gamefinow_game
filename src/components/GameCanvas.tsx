@@ -1473,8 +1473,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         const maxMp = player.maxMp ?? 50;
         const currentHp = player.hp ?? 100;
         const currentMp = player.mp ?? 50;
-        const newHp = Math.min(maxHp, currentHp + 1 + effectiveStats.hpRegenBonus);
-        const newMp = Math.min(maxMp, currentMp + 1 + effectiveStats.mpRegenBonus);
+        // FIX: mpRegenBonus dos buffs agora é aplicado corretamente junto ao +1/seg base
+        const newHp = Math.min(maxHp, currentHp + 1 + (effectiveStats.hpRegenBonus || 0));
+        const newMp = Math.min(maxMp, currentMp + 1 + (effectiveStats.mpRegenBonus || 0));
         if (newHp !== currentHp || newMp !== currentMp) {
           useGameStore.getState().setPlayerPos({ hp: newHp, mp: newMp });
         }
@@ -1539,12 +1540,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           const player = latestPlayerPos.current;
 
           // ── RANGE CHECK DE MAGIA ────────────────────────────────────────────
-          // O jogador DEVE estar dentro do raio SPELL_MAX_RANGE (4.0 tiles) para
-          // que o dano seja aplicado. Se estiver fora, a animação é consumida mas
-          // sem dano e sem XP — eliminando o exploit de atacar de longe com segurança.
           const spellDist = Math.hypot(player.x - spellTarget.x, player.y - spellTarget.y);
           if (spellDist > SPELL_MAX_RANGE) {
-            // Fora de alcance: descarta animação sem causar efeito
             combatTextsRef.current.push({
               id: Math.random().toString(),
               text: "Fora de alcance!",
@@ -1558,15 +1555,51 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
           const { atkMultiplier, critChanceMultiplier } = getEquipmentBonuses(player);
           const pLevel = latestGameState.current.level || 1;
-          let baseDmg = 10 + (pLevel * 2); // Heal e base spells normais
-          if (anim.type === "fire") baseDmg = (25 + pLevel * 3) * atkMultiplier;
-          if (anim.type === "lightning") baseDmg = (45 + pLevel * 4) * atkMultiplier;
-          
+          const playerClassId = player.playerClass || latestGameState.current.playerClass;
+
+          // ── CÁLCULO DE DANO REAL POR SPELL ──────────────────────────────────
+          // FIX: Agora usa spellBasePower + stats corretos por elemento.
+          // Spells físicas usam STR; spells mágicas usam INT.
+          let baseDmg: number;
+          if (anim.spellBasePower && anim.spellBasePower > 0) {
+            const isPhysical = anim.spellElement === "physical";
+            if (isPhysical) {
+              // Physical spells (Ranger Tiro Perfurante, Warrior Golpe Furioso...)
+              baseDmg = (anim.spellBasePower + effectiveStats.str * 1.2) * atkMultiplier;
+            } else {
+              // Magic spells (fire, lightning, holy, ice) — escalona com INT
+              baseDmg = (anim.spellBasePower + effectiveStats.int * 1.0) * atkMultiplier;
+            }
+          } else {
+            // Fallback legado para animações sem metadata de spell
+            if (anim.type === "fire") baseDmg = (25 + pLevel * 3) * atkMultiplier;
+            else if (anim.type === "lightning") baseDmg = (45 + pLevel * 4) * atkMultiplier;
+            else baseDmg = 10 + (pLevel * 2);
+          }
+
+          // Variância ±15%
           let finalDmg = Math.floor(baseDmg * (0.85 + Math.random() * 0.3));
-          
+
           const isCrit = (anim.type === "fire" || anim.type === "lightning") && Math.random() < critChanceMultiplier;
           if (isCrit) finalDmg *= 2;
-          
+
+          // ── PASSIVA MAGE: Sobrecarga Arcana ────────────────────────────────
+          // FIX: Crits de spell do Alquimista Soroban restauram 20% do MP.
+          if (isCrit && playerClassId === "soroban_mage") {
+            const currentMp = latestPlayerPos.current.mp ?? 0;
+            const maxMp = latestPlayerPos.current.maxMp ?? 50;
+            const mpRestore = Math.floor(maxMp * 0.20);
+            useGameStore.getState().setPlayerPos({ mp: Math.min(maxMp, currentMp + mpRestore) });
+            combatTextsRef.current.push({
+              id: Math.random().toString(),
+              text: `+${mpRestore} MP`,
+              x: player.x,
+              y: player.y - 1.5,
+              color: "#818cf8",
+              timestamp: time
+            });
+          }
+
           spellTarget.hp -= finalDmg;
 
           combatTextsRef.current.push({
@@ -1652,8 +1685,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         if (time - monsterLastAttackTimeRef.current > 1200) {
           monsterLastAttackTimeRef.current = time;
 
-          // Evasão baseada em AGI do jogador
-          const evasionChance = Math.min(0.40, 0.15 + (effectiveStats.agi * 0.003));
+          // ── PASSIVA RANGER: Passo Ligeiro — +12% de esquiva base ───────────
+          // FIX: Caçador Cósmico tem 12% extra de evasão permanente.
+          const playerClassId2 = player.playerClass || latestGameState.current.playerClass;
+          const rangerEvasionBonus = playerClassId2 === "cosmic_ranger" ? 0.12 : 0;
+          const evasionChance = Math.min(0.50, 0.15 + rangerEvasionBonus + (effectiveStats.agi * 0.003));
           const mMiss = Math.random() < evasionChance;
 
           if (mMiss) {
@@ -1692,7 +1728,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
             const mBaseDmg = ((targetCreature.level || 1) * 4) * 1.10;
             const resReduction = Math.min(0.50, effectiveStats.res * 0.003);
-            const totalReduction = Math.min(0.90, (1 - defMultiplier) + resReduction + (effectiveStats.damageReduction || 0));
+            // FIX: Passiva Warrior "Pele de Aço" incluída — -15% de dano físico recebido
+            const totalReduction = Math.min(0.90, (1 - defMultiplier) + resReduction + (effectiveStats.damageReduction || 0) + (effectiveStats.warriorPhysicalReduction || 0));
             const mFinalDmg = Math.max(1, Math.floor(mBaseDmg * (1 - totalReduction) * (0.85 + Math.random() * 0.3)));
             
             const currentHp = latestPlayerPos.current.hp ?? 100;
