@@ -10,13 +10,31 @@ import { Keypair } from "@stellar/stellar-sdk";
 
 interface AccountRecoveryModalProps {
   playSynthSound: (type: "beep" | "success" | "coin" | "unlock") => void;
+  isOpen?: boolean;
+  onClose?: () => void;
+  onRecoverySuccess?: (name: string, publicKey?: string) => void;
 }
 
-export const AccountRecoveryModal: React.FC<AccountRecoveryModalProps> = ({ playSynthSound }) => {
+export const AccountRecoveryModal: React.FC<AccountRecoveryModalProps> = ({
+  playSynthSound,
+  isOpen,
+  onClose,
+  onRecoverySuccess,
+}) => {
   const activeModal = useGameStore((s) => s.activeModal);
   const setActiveModal = useGameStore((s) => s.setActiveModal);
   const updateWallet = useGameStore((s) => s.updateWallet);
   const setPlayerPos = useGameStore((s) => s.setPlayerPos);
+
+  const isVisible = isOpen !== undefined ? isOpen : activeModal === "account_recovery";
+
+  const handleClose = () => {
+    if (onClose) {
+      onClose();
+    } else {
+      setActiveModal(null);
+    }
+  };
 
   const [mode, setMode] = useState<"sep10" | "email">("sep10");
   const [stellarPublicKey, setStellarPublicKey] = useState("");
@@ -27,7 +45,7 @@ export const AccountRecoveryModal: React.FC<AccountRecoveryModalProps> = ({ play
   const [isLoading, setIsLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
-  if (activeModal !== "account_recovery") return null;
+  if (!isVisible) return null;
 
   const handleSep10Recover = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +85,10 @@ export const AccountRecoveryModal: React.FC<AccountRecoveryModalProps> = ({ play
       });
 
       setTimeout(() => {
-        setActiveModal(null);
+        handleClose();
+        if (onRecoverySuccess) {
+          onRecoverySuccess("Herói Recuperado", stellarPublicKey.trim());
+        }
       }, 1500);
     } catch (err: any) {
       setStatusMsg({ text: "Endereço Stellar inválido ou desafio não assinado!", type: "error" });
@@ -108,7 +129,12 @@ export const AccountRecoveryModal: React.FC<AccountRecoveryModalProps> = ({ play
       updateWallet({ email: emailInput.trim(), hasWallet: true });
       playSynthSound("unlock");
       setStatusMsg({ text: "✅ E-mail confirmado e conta sincronizada com sucesso!", type: "success" });
-      setTimeout(() => setActiveModal(null), 1500);
+      setTimeout(() => {
+        handleClose();
+        if (onRecoverySuccess) {
+          onRecoverySuccess("Herói Recuperado");
+        }
+      }, 1500);
     }, 1000);
   };
 

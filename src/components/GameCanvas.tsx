@@ -1576,7 +1576,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     // Processamento de auto-ataque e engajamento
     if (latestGameState.current.isBattleModeActive && latestGameState.current.lockedTargetId) {
       const targetId = latestGameState.current.lockedTargetId;
-      const targetCreature = creaturesRef.current.find((c) => c.id === targetId);
+      let targetCreature: any = null;
+      [creaturesRef.current, wormsRef.current, crabsRef.current, beesRef.current, snakesRef.current].forEach(list => {
+        const found = list.find((c) => c.id === targetId);
+        if (found) targetCreature = found;
+      });
 
       if (!targetCreature || targetCreature.hp <= 0) {
         useGameStore.getState().setBattleMode(false);

@@ -16,6 +16,7 @@ import {
   Languages
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { AccountRecoveryModal } from "./AccountRecoveryModal";
 
 interface LoginScreenProps {
   existingWallet: {
@@ -109,6 +110,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   const [showPasskeyModal, setShowPasskeyModal] = useState(false);
   const [passkeyStep, setPasskeyStep] = useState<"idle" | "scanning" | "success">("idle");
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showRecoveryModal, setShowRecoveryModal] = useState(false);
 
   // Background images from 'imagens/'
   const backgrounds = [
@@ -405,6 +407,20 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 >
                   {t('ui.login.playNow')} <ChevronRight className="h-4 w-4" />
                 </button>
+
+                {/* BOTÃO DE RECUPERAÇÃO DE CONTA PARA NOVOS DISPOSITIVOS / USUÁRIOS */}
+                <div className="pt-2 border-t border-slate-900 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playSynthSound("beep");
+                      setShowRecoveryModal(true);
+                    }}
+                    className="w-full py-2.5 px-3 rounded-xl border border-cyan-500/30 hover:border-cyan-400 bg-cyan-950/40 hover:bg-cyan-900/40 text-cyan-300 font-bold text-[10.5px] uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer"
+                  >
+                    <span>🔑</span> Já possui conta? Restaurar Personagem (SEP-10 / E-mail)
+                  </button>
+                </div>
               </form>
             )}
 
@@ -551,6 +567,19 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
           </div>
         </div>
+      )}
+
+      {/* MODAL DE RECUPERAÇÃO DE CONTA NO LOGIN */}
+      {showRecoveryModal && (
+        <AccountRecoveryModal
+          isOpen={showRecoveryModal}
+          onClose={() => setShowRecoveryModal(false)}
+          playSynthSound={playSynthSound}
+          onRecoverySuccess={(recoveredName) => {
+            setShowRecoveryModal(false);
+            onLogin(recoveredName || "Herói Recuperado", "male");
+          }}
+        />
       )}
 
     </div>

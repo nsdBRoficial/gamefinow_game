@@ -2962,7 +2962,6 @@ const GameFiFaucetModal: React.FC<GameFiFaucetProps> = ({ wallet, onClose, onUpd
       <button
         type="button"
         onClick={() => {
-          onClose();
           useGameStore.getState().setActiveModal("class_selection");
         }}
         className="w-full py-3 bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition cursor-pointer font-mono shadow-[2px_2px_0px_#000] border-2 border-black flex items-center justify-center gap-2"

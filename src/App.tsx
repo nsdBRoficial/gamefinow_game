@@ -1558,6 +1558,18 @@ export default function App() {
             <span className="text-xl md:text-lg">📖</span>
           </button>
 
+          {/* Consagração de Classes RPG */}
+          <button
+            onClick={() => {
+              setGameState((prev) => ({ ...prev, activeModal: "class_selection" }));
+              playSynthSound("beep");
+            }}
+            className="w-11 h-11 md:w-9 md:h-9 border-2 border-black rounded-lg flex items-center justify-center shadow-[2px_2.5px_0px_#000] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none cursor-pointer transition bg-purple-500 hover:bg-purple-400 text-white"
+            title="Consagração de Classes RPG (Fonte Sagrada)"
+          >
+            <span className="text-xl md:text-lg">⛲</span>
+          </button>
+
           {/* Sistema de Guildas */}
           <button
             onClick={() => {

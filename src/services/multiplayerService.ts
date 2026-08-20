@@ -130,7 +130,11 @@ export async function upsertPlayer(playerId: string, player: Player, gameState?:
         const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
         authSupabase = createClient(supabaseUrl, supabaseAnonKey, {
           global: { headers: { Authorization: `Bearer ${token}` } },
-          auth: { persistSession: false } // Evita conflitos de GoTrue múltiplos
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+            detectSessionInUrl: false,
+          }
         });
       }
     }
