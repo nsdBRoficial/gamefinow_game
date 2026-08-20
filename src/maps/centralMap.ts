@@ -98,6 +98,11 @@ export function generateCentralMap(): number[][] {
   grid[18][32] = TileType.BLOCK;
   grid[18][33] = TileType.BLOCK;
 
+  // Guildhouse door blocking
+  grid[19][49] = TileType.BLOCK;
+  grid[19][50] = TileType.BLOCK;
+  grid[19][51] = TileType.BLOCK;
+
   // Caminho especifico sob e ao redor da Soroswap
   // y=19: x=31..39
   for (let c = 31; c <= 39; c++) {
@@ -276,6 +281,9 @@ export function generateCentralMap(): number[][] {
 export const CENTRAL_DECORATIONS: GameDecoration[] = [
   // Central Fountain/Statue near the ATF
   { x: 30, y: 31, type: "statue" },
+
+  // Guildhouse Entrance Door (x: 49..51, y: 19)
+  { x: 49, y: 19, type: "guild_door" },
 
   // Street lamps around center crossroads
   { x: 26, y: 26, type: "lamp" },

@@ -546,6 +546,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       return;
     }
 
+    // Interact with Guildhouse door
+    if (playerPos.mapId === "center" && checkY === 19 && (checkX >= 49 && checkX <= 51)) {
+      useGameStore.getState().setGameState({ activeModal: "guild" });
+      return;
+    }
+
     // Interact with notebook on the GAMEFINOW stand
     if (playerPos.mapId === "center" && checkX === 22 && checkY === 32) {
       onTalkToNPC({

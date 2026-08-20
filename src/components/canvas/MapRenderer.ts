@@ -1097,6 +1097,54 @@ export const drawSpecialTerminals = (ctx: CanvasRenderingContext2D, currentRegio
     drawInteractiveTerminal(ctx, 33, 24, "ALTAR DO VIP HOLD", "#eab308", tileSize, playerPos);
   }
 };
+const drawGuildDoor = (ctx: CanvasRenderingContext2D, worldX: number, worldY: number, tileSize: number) => {
+  // O usuário solicitou uma porta estilo arco com pedras em volta.
+  // Desenho ocupando 3 tiles (3 * 32 = 96px) de largura.
+  ctx.save();
+  // Frame de pedras (Arco)
+  ctx.fillStyle = "#64748b"; // slate-500
+  ctx.fillRect(worldX, worldY - tileSize, tileSize * 3, tileSize * 2);
+  
+  ctx.fillStyle = "#475569"; // slate-600
+  // Inner stone layer
+  ctx.fillRect(worldX + 8, worldY - tileSize + 8, tileSize * 3 - 16, tileSize * 2 - 8);
+
+  // Wooden Door
+  ctx.fillStyle = "#78350f"; // amber-900 (dark wood)
+  ctx.beginPath();
+  ctx.ellipse(worldX + tileSize * 1.5, worldY - 8, tileSize - 4, tileSize - 8, 0, Math.PI, 0); // Arco da porta
+  ctx.lineTo(worldX + tileSize * 2.5 - 4, worldY + tileSize);
+  ctx.lineTo(worldX + tileSize * 0.5 + 4, worldY + tileSize);
+  ctx.fill();
+  
+  ctx.fillRect(worldX + tileSize * 0.5 + 4, worldY - 8, tileSize * 2 - 8, tileSize + 8);
+
+  // Vertical wood planks lines
+  ctx.strokeStyle = "#451a03";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(worldX + tileSize + 6, worldY - 14); ctx.lineTo(worldX + tileSize + 6, worldY + tileSize);
+  ctx.moveTo(worldX + tileSize * 1.5, worldY - 20); ctx.lineTo(worldX + tileSize * 1.5, worldY + tileSize);
+  ctx.moveTo(worldX + tileSize * 2 - 6, worldY - 14); ctx.lineTo(worldX + tileSize * 2 - 6, worldY + tileSize);
+  ctx.stroke();
+
+  // Horizontal iron bars
+  ctx.fillStyle = "#94a3b8"; // slate-400
+  ctx.fillRect(worldX + tileSize * 0.5 + 4, worldY - 2, tileSize * 2 - 8, 6);
+  ctx.fillRect(worldX + tileSize * 0.5 + 4, worldY + tileSize - 16, tileSize * 2 - 8, 6);
+
+  // Golden Knob
+  ctx.fillStyle = "#fbbf24"; // amber-400
+  ctx.beginPath();
+  ctx.arc(worldX + tileSize * 2 - 8, worldY + 12, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#f59e0b"; // amber-500 shadow
+  ctx.beginPath();
+  ctx.arc(worldX + tileSize * 2 - 8, worldY + 12, 3, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+};
 
 
 export const drawMapDecorations = (
@@ -1549,6 +1597,26 @@ export const drawMapDecorations = (
 
       case "pixel_faucet":
         drawPixelFaucet(ctx, worldX, worldY, dec, tileSize);
+        break;
+
+      case "guild_door":
+        drawGuildDoor(ctx, worldX, worldY, tileSize);
+        // Indicador de ESPAÇO se estiver perto
+        const isNearDoor = Math.abs(_playerPos.x - (dec.x + 1)) <= 2 && Math.abs(_playerPos.y - dec.y) <= 2;
+        if (isNearDoor) {
+          ctx.font = "bold 8px 'JetBrains Mono', monospace";
+          const mText = "ESPAÇO";
+          const mW = ctx.measureText(mText).width + 8;
+          ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+          ctx.fillRect(worldX + 48 - mW / 2, worldY - 20, mW, 11);
+          ctx.strokeStyle = "#f59e0b"; // amber-500
+          ctx.lineWidth = 1;
+          ctx.strokeRect(worldX + 48 - mW / 2, worldY - 20, mW, 11);
+          ctx.fillStyle = "#ffffff";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(mText, worldX + 48, worldY - 15);
+        }
         break;
     }
   });
