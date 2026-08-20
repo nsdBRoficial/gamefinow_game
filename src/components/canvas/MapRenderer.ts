@@ -1152,9 +1152,133 @@ const drawGuildDoor = (ctx: CanvasRenderingContext2D, worldX: number, worldY: nu
   ctx.fillText("GUILDHOUSE", worldX + tileSize * 1.5, worldY - 26);
   ctx.shadowBlur = 0;
 
+  ctx.shadowBlur = 0;
+
   ctx.restore();
 };
 
+const drawChurch = (ctx: CanvasRenderingContext2D, worldX: number, worldY: number, tileSize: number) => {
+  ctx.save();
+  const w = tileSize * 3; // 96
+  const h = tileSize * 3; // 96
+  const cx = worldX + w / 2;
+
+  // Colors
+  const wallColor = "#d2b48c"; // tan/beige
+  const roofColor = "#5c3a21"; // dark brown
+  const windowColor = "#2f4f4f"; // dark slate gray
+  const doorColor = "#654321"; // saddle brown
+
+  // 1. Draw Side Walls (Aisles)
+  ctx.fillStyle = wallColor;
+  ctx.fillRect(worldX + 10, worldY + 44, 26, 44); // Left
+  ctx.fillRect(cx + 12, worldY + 44, 26, 44); // Right
+  
+  // Side roofs
+  ctx.fillStyle = roofColor;
+  ctx.beginPath();
+  ctx.moveTo(worldX + 6, worldY + 48);
+  ctx.lineTo(worldX + 36, worldY + 24);
+  ctx.lineTo(worldX + 36, worldY + 44);
+  ctx.lineTo(worldX + 6, worldY + 54);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(worldX + w - 6, worldY + 48);
+  ctx.lineTo(worldX + w - 36, worldY + 24);
+  ctx.lineTo(worldX + w - 36, worldY + 44);
+  ctx.lineTo(worldX + w - 6, worldY + 54);
+  ctx.fill();
+
+  // 2. Draw Main Wall (Center)
+  ctx.fillStyle = wallColor;
+  ctx.fillRect(cx - 18, worldY + 16, 36, 72);
+
+  // Main Roof
+  ctx.fillStyle = roofColor;
+  ctx.beginPath();
+  ctx.moveTo(cx, worldY - 8);
+  ctx.lineTo(cx - 24, worldY + 20);
+  ctx.lineTo(cx - 24, worldY + 28);
+  ctx.lineTo(cx, worldY + 2);
+  ctx.lineTo(cx + 24, worldY + 28);
+  ctx.lineTo(cx + 24, worldY + 20);
+  ctx.closePath();
+  ctx.fill();
+
+  // 3. The Cross
+  ctx.fillStyle = roofColor;
+  ctx.fillRect(cx - 2, worldY - 24, 4, 20); // vertical
+  ctx.fillRect(cx - 8, worldY - 18, 16, 4); // horizontal
+
+  // 4. Door (Arched)
+  ctx.fillStyle = doorColor;
+  ctx.beginPath();
+  ctx.ellipse(cx, worldY + 64, 14, 16, 0, Math.PI, 0);
+  ctx.lineTo(cx + 14, worldY + 88);
+  ctx.lineTo(cx - 14, worldY + 88);
+  ctx.fill();
+  
+  // Door details (split in middle)
+  ctx.strokeStyle = "#3e2723";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(cx, worldY + 48);
+  ctx.lineTo(cx, worldY + 88);
+  ctx.stroke();
+  
+  // Door Knobs
+  ctx.fillStyle = "#f59e0b"; // golden knobs
+  ctx.beginPath(); ctx.arc(cx - 4, worldY + 70, 1.5, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 4, worldY + 70, 1.5, 0, Math.PI * 2); ctx.fill();
+
+  // Door steps
+  ctx.fillStyle = "#8b7355"; // wood/stone steps
+  ctx.fillRect(cx - 18, worldY + 88, 36, 4);
+  ctx.fillRect(cx - 22, worldY + 92, 44, 4);
+
+  // 5. Windows (Arched)
+  // Left window
+  ctx.fillStyle = windowColor;
+  ctx.beginPath();
+  ctx.ellipse(worldX + 23, worldY + 60, 6, 8, 0, Math.PI, 0);
+  ctx.lineTo(worldX + 29, worldY + 74);
+  ctx.lineTo(worldX + 17, worldY + 74);
+  ctx.fill();
+  ctx.strokeStyle = wallColor;
+  ctx.beginPath();
+  ctx.moveTo(worldX + 23, worldY + 52); ctx.lineTo(worldX + 23, worldY + 74); // vertical line
+  ctx.moveTo(worldX + 17, worldY + 64); ctx.lineTo(worldX + 29, worldY + 64); // horizontal line
+  ctx.stroke();
+
+  // Right window
+  ctx.fillStyle = windowColor;
+  ctx.beginPath();
+  ctx.ellipse(worldX + w - 23, worldY + 60, 6, 8, 0, Math.PI, 0);
+  ctx.lineTo(worldX + w - 17, worldY + 74);
+  ctx.lineTo(worldX + w - 29, worldY + 74);
+  ctx.fill();
+  ctx.strokeStyle = wallColor;
+  ctx.beginPath();
+  ctx.moveTo(worldX + w - 23, worldY + 52); ctx.lineTo(worldX + w - 23, worldY + 74);
+  ctx.moveTo(worldX + w - 29, worldY + 64); ctx.lineTo(worldX + w - 17, worldY + 64);
+  ctx.stroke();
+
+  // Center window (Above door)
+  ctx.fillStyle = windowColor;
+  ctx.beginPath();
+  ctx.ellipse(cx, worldY + 32, 8, 10, 0, Math.PI, 0);
+  ctx.lineTo(cx + 8, worldY + 44);
+  ctx.lineTo(cx - 8, worldY + 44);
+  ctx.fill();
+  ctx.strokeStyle = wallColor;
+  ctx.beginPath();
+  ctx.moveTo(cx, worldY + 22); ctx.lineTo(cx, worldY + 44);
+  ctx.moveTo(cx - 8, worldY + 34); ctx.lineTo(cx + 8, worldY + 34);
+  ctx.stroke();
+
+  ctx.restore();
+};
 
 export const drawMapDecorations = (
   ctx: CanvasRenderingContext2D,
@@ -1625,6 +1749,27 @@ export const drawMapDecorations = (
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
           ctx.fillText(mText, worldX + 48, worldY - 15);
+        }
+        break;
+
+      case "church":
+        drawChurch(ctx, worldX, worldY, tileSize);
+        // Indicador de ESPAÇO se estiver perto da porta da igreja (centro, x + 1, embaixo y + 2)
+        // O door está no cx, que é o tile x+1. E a base é y+2.
+        const isNearChurch = Math.abs(_playerPos.x - (dec.x + 1)) <= 1 && Math.abs(_playerPos.y - (dec.y + 2)) <= 1;
+        if (isNearChurch) {
+          ctx.font = "bold 8px 'JetBrains Mono', monospace";
+          const mText = "ESPAÇO";
+          const mW = ctx.measureText(mText).width + 8;
+          ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+          ctx.fillRect(worldX + 48 - mW / 2, worldY + 64, mW, 11);
+          ctx.strokeStyle = "#f59e0b"; // amber-500
+          ctx.lineWidth = 1;
+          ctx.strokeRect(worldX + 48 - mW / 2, worldY + 64, mW, 11);
+          ctx.fillStyle = "#ffffff";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(mText, worldX + 48, worldY + 69);
         }
         break;
     }

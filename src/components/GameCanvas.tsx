@@ -546,6 +546,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       return;
     }
 
+    // Interact with Church door (Consagração)
+    if (playerPos.mapId === "center" && checkY === 19 && (checkX >= 17 && checkX <= 19)) {
+      useGameStore.getState().setGameState({ activeModal: "class_selection" });
+      return;
+    }
+
     // Interact with Guildhouse door
     if (playerPos.mapId === "center" && checkY === 19 && (checkX >= 49 && checkX <= 51)) {
       useGameStore.getState().setGameState({ activeModal: "guild" });
