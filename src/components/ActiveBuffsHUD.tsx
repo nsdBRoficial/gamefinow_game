@@ -5,35 +5,38 @@
 
 import React, { useEffect, useState } from "react";
 import { useGameStore } from "../store/gameStore";
-import { ActiveBuff } from "../types";
 
 export const ActiveBuffsHUD: React.FC = () => {
-  const activeBuffs = useGameStore((s) => s.activeBuffs || []);
+  const activeBuffs = useGameStore((s) => s.activeBuffs);
   const cleanExpiredBuffs = useGameStore((s) => s.cleanExpiredBuffs);
-  const [, setTick] = useState(0);
+  const [now, setNow] = useState(() => Date.now());
 
-  // Atualiza a cada segundo para recalcular os segundos restantes dos buffs e limpar expirados
+  const hasActiveBuffs = Array.isArray(activeBuffs) && activeBuffs.length > 0;
+
+  // Timer seguro: atualiza a cada 500ms apenas se houver buffs ativos
   useEffect(() => {
-    if (activeBuffs.length === 0) return;
+    if (!hasActiveBuffs) return;
+
     const interval = setInterval(() => {
+      setNow(Date.now());
+      // Limpa os buffs expirados na store de forma desacoplada
       cleanExpiredBuffs();
-      setTick((t) => t + 1);
     }, 500);
+
     return () => clearInterval(interval);
-  }, [activeBuffs.length, cleanExpiredBuffs]);
+  }, [hasActiveBuffs, cleanExpiredBuffs]);
 
-  if (activeBuffs.length === 0) return null;
+  if (!hasActiveBuffs) return null;
 
-  const now = Date.now();
+  const validBuffs = activeBuffs.filter((b) => b.expiresAt > now);
+  if (validBuffs.length === 0) return null;
 
   return (
     <div className="fixed top-16 right-4 z-30 flex flex-col gap-2 items-end pointer-events-auto font-mono select-none">
-      {activeBuffs.map((buff) => {
+      {validBuffs.map((buff) => {
         const remainingMs = Math.max(0, buff.expiresAt - now);
         const remainingSec = Math.ceil(remainingMs / 1000);
         const progress = Math.min(100, Math.max(0, (remainingMs / buff.durationMs) * 100));
-
-        if (remainingMs <= 0) return null;
 
         return (
           <div

@@ -86,6 +86,7 @@ const getInitialGameState = (): GameState => {
           isBattleModeActive: parsed.isBattleModeActive || false,
           lockedTargetId: null,
           ownedEquipment: parsed.ownedEquipment || [],
+          activeBuffs: parsed.activeBuffs || [],
         };
       }
     }
@@ -129,6 +130,7 @@ const getInitialGameState = (): GameState => {
     jamesDialogsDone: [],
     isBattleModeActive: false,
     lockedTargetId: null,
+    activeBuffs: [],
   };
 };
 
@@ -803,9 +805,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
   })),
 
   cleanExpiredBuffs: () => set((state) => {
+    const current = state.activeBuffs;
+    if (!current || current.length === 0) return state;
     const now = Date.now();
-    const valid = (state.activeBuffs || []).filter((b) => b.expiresAt > now);
-    if (valid.length !== (state.activeBuffs || []).length) {
+    const valid = current.filter((b) => b.expiresAt > now);
+    if (valid.length !== current.length) {
       return { activeBuffs: valid };
     }
     return state;
