@@ -1109,6 +1109,16 @@ const drawGuildDoor = (ctx: CanvasRenderingContext2D, worldX: number, worldY: nu
   // Inner stone layer
   ctx.fillRect(worldX + 8, worldY - tileSize + 8, tileSize * 3 - 16, tileSize * 2 - 8);
 
+  // Title "GUILDHOUSE"
+  ctx.font = "bold 10px 'JetBrains Mono', monospace";
+  ctx.fillStyle = "#fbbf24"; // amber-400
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.shadowColor = "#000000";
+  ctx.shadowBlur = 4;
+  ctx.fillText("GUILDHOUSE", worldX + tileSize * 1.5, worldY - 22);
+  ctx.shadowBlur = 0;
+
   // Wooden Door
   ctx.fillStyle = "#78350f"; // amber-900 (dark wood)
   ctx.beginPath();
