@@ -26,8 +26,9 @@ export const GUILDHOUSE_DECORATIONS: any[] = [
   { x: 10, y: 35, type: "lamp" },
   { x: 50, y: 35, type: "lamp" },
 
-  // Portal de Retorno à Ilha Central
-  { x: 30, y: 55, type: "stand" },
+  // Luminárias guardiãs do Portal de Retorno
+  { x: 28, y: 55, type: "lamp" },
+  { x: 32, y: 55, type: "lamp" },
 ];
 
 export function generateGuildHouseMap(): number[][] {
@@ -53,6 +54,11 @@ export function generateGuildHouseMap(): number[][] {
     }
     map.push(row);
   }
+
+  // ── Portal Mágico de Retorno à Praça Central (sqm x:30, y:55) ──
+  map[55][29] = TileType.PORTAL_CENTER;
+  map[55][30] = TileType.PORTAL_CENTER;
+  map[55][31] = TileType.PORTAL_CENTER;
 
   return map;
 }

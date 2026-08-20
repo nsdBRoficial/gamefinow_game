@@ -1793,9 +1793,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             } else if (prev.mapId === "south") {
               finalX = 29;
               finalY = 55;
+            } else if (prev.mapId === "guildhouse" || prev.mapId === "amphitheater") {
+              finalX = 30;
+              finalY = 32; // Em frente à Fonte Sagrada na praça central
             } else {
-              finalX = 29;
-              finalY = 29;
+              finalX = 30;
+              finalY = 30;
             }
           }
 

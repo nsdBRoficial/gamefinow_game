@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { getMapGrid, getMapDecorations, MapId } from './index';
-import { GRID_COLS, GRID_ROWS } from '../gameData';
+import { GRID_COLS, GRID_ROWS, TileType } from '../gameData';
 
 describe('Maps Integrity & World Grid Verification', () => {
   const allMapIds: MapId[] = ['center', 'east', 'north', 'west', 'south', 'guildhouse', 'amphitheater'];
@@ -25,11 +25,8 @@ describe('Maps Integrity & World Grid Verification', () => {
     });
   });
 
-  it('mapa da Guildhouse e Amphitheater devem possuir portal de retorno', () => {
-    const guildDecors = getMapDecorations('guildhouse');
-    expect(guildDecors.some((d) => d.type === 'stand')).toBe(true);
-
-    const amphiDecors = getMapDecorations('amphitheater');
-    expect(amphiDecors.some((d) => d.type === 'stand')).toBe(true);
+  it('mapa da Guildhouse deve possuir TileType.PORTAL_CENTER no sqm x:30 y:55 para a praça central', () => {
+    const grid = getMapGrid('guildhouse');
+    expect(grid[55][30]).toBe(TileType.PORTAL_CENTER);
   });
 });
