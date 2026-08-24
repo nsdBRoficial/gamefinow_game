@@ -1,12 +1,16 @@
 <div align="center">
-  <img src="https://stellar.org/images/stellar-logo.svg" alt="Stellar Logo" width="100"/>
-  <h1>GameFiNow — v0.8.2</h1>
-  <p><strong>A Gamified On-Boarding Experience for the Stellar Ecosystem</strong></p>
-  <p>
-    <img src="https://img.shields.io/badge/version-v0.8.2-cyan?style=flat-square" alt="version"/>
+  <a href="https://github.com/nsdBRoficial/gamefinow_game">
+    <img src="./public/imagens/logo%20gamefinow%20-%20transparente.png" alt="GameFiNow Logo" width="220"/>
+  </a>
+  <h1 align="center">GameFiNow — v0.8.8</h1>
+  <p align="center"><strong>A Gamified On-Boarding & DeFi MMO RPG Experience for the Stellar Ecosystem</strong></p>
+  <p align="center">
+    <img src="https://img.shields.io/badge/version-v0.8.8-cyan?style=flat-square" alt="version"/>
     <img src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square" alt="license"/>
     <img src="https://img.shields.io/badge/network-Stellar_Testnet-yellow?style=flat-square" alt="network"/>
     <img src="https://img.shields.io/badge/i18n-EN_|_PT_|_ES-green?style=flat-square" alt="languages"/>
+    <img src="https://img.shields.io/badge/classes-4_classes-purple?style=flat-square" alt="classes"/>
+    <img src="https://img.shields.io/badge/guilds-system_live-orange?style=flat-square" alt="guilds"/>
   </p>
 </div>
 
@@ -20,114 +24,160 @@ The game runs entirely in the browser, using a 60 FPS HTML5 Canvas engine, and c
 
 ---
 
-## 🛡️ What's New in v0.8.2 — Full Audit, GM Character System & Relayer Anti-Bypass
+## 🏰 What's New in v0.8.8 — Guild House System & Class Consecration
 
-### 📜 Documentação & Varredura de Auditoria Atualizada
-- **Audit Document v0.8.2**: Lançado o documento oficial [DOC_AUDITORIA_E_AVALIACAO.md](file:///c:/Users/Usu%C3%A1rio/Documents/GitHub/gamefinow_game/DOC_AUDITORIA_E_AVALIACAO.md) contendo a matriz completa das integrações **100% On-Chain**, **Híbridas/Simuladas**, **Backend Off-Chain** e **Painel Admin GM**.
+### ⚔️ Sistema de Consagração de Classes (Class Consecration)
+- **4 Classes Disponíveis** com atributos e passivas únicas:
+  | Classe | Ícone | Role | Passiva |
+  |--------|-------|------|---------|
+  | **Guerreiro Estelar** | ⚔️ | Melee / Tanker | Pele de Aço: -15% dano físico recebido, +25% HP base |
+  | **Alquimista Soroban** | 🧙 | Caster / AoE Magic | Sobrecarga Arcana: Crits restauram 20% MP e +20% dano mágico |
+  | **Caçador Cósmico** | 🏹 | Ranged / Crítico | Passo Ligeiro: +15% velocidade e +12% de esquiva |
+  | **Guardião da Rede** | 🛡️ | Paladino / Suporte | Aura Sagrada: +3 HP/s regeneração contínua |
+
+- **Desbloqueio**: Após concluir a **1ª Quest** (1 Estrela), a Fonte de Classes é ativada no mapa.
+- **Troca de Classe**: Custa **10 tokens GAMEFI** para mudar de classe após a escolha inicial.
+- **Modificadores de Stats** por classe: STR, INT, AGI, RES e FAITH individuais.
+- **Interface**: Modal `ClassSelectionModal` acessível via HUD mostrando magias por classe.
+
+### 🏰 Sistema de Guildas (Guild House System)
+- **Criação de Guilda**: Custa **50 tokens GAMEFI**. Cada guilda tem nome, tag (ex: `[STAR]`, `[XLM]`), ícone e cor personalizados.
+- **Hierarquia**: Roles `Leader`, `Officer` e `Member` com permissões diferenciadas.
+- **Tesouro da Guilda**: Saldo compartilhado em GAMEFI para despesas coletivas.
+- **Teleport para Guildhouse**: Botão dedicado que transporta o líder diretamente para a Guildhouse.
+- **Persistência Local**: Dados de guildas salvos em `localStorage` com estrutura `Guild` tipada.
+- **Tag no Personagem**: Membros exibem a tag da guilda acima do nome no mapa 2D.
+
+### 🌐 Documentação e About Page Atualizados
+- Seção **Economy** do About expandida com cards de **Guild System** e **Class Consecration**.
+- **Roadmap** atualizado com fases reais e planejadas (Genesis ✅ → Expansion 🔥 → Economy ⏳ → Multiverse 🌌).
+- Versão `v0.8.8` propagada em todas as interfaces: README, sidebar, Hero badge, footer.
+- Correção de **encoding quebrado** nos arquivos de tradução PT e ES (caracteres especiais restaurados).
+
+---
+
+## 🛡️ What's New in v0.8.2 — Full Audit, GM Character System & Relayer Anti-Bypass
 
 ### 🔴 Personagem GM (Game Master) Dedicado
 - **Isolamento de Acesso**: Entrada via `/admin` separada da autenticação de jogadores comuns.
-- **Visual GM Único**: Tag vermelha `⭐ [GM]`, contorno visual especial, LVL 99, status máximos (9999 HP/FOR/INT/AGI/RES), remoção de missões pendentes da interface e bypass automático de permissões.
+- **Visual GM Único**: Tag vermelha `⭐ [GM]`, contorno visual especial, LVL 99, status máximos (9999 HP/FOR/INT/AGI/RES).
 
 ### 🔒 Backend Fee Relayer (`/api/relayer/submit`)
-- **Validação Atômica da Taxa da Tesouraria**: Verificação obrigatoriamente executada no servidor Express antes da submissão para a Horizon Testnet, prevenindo o bypass da taxa de 0.5% em XLM por alteração maliciosa de XDR no frontend.
+- **Validação Atômica da Taxa**: Verificação executada no servidor Express antes da submissão à Horizon Testnet, prevenindo bypass da taxa de 0.5% XLM.
+
+### 📜 Auditoria Completa
+- Documento `DOC_AUDITORIA_E_AVALIACAO.md` com matriz completa de integrações **On-Chain**, **Híbridas/Simuladas**, **Backend Off-Chain** e **Painel Admin GM**.
 
 ---
 
 ## ✨ What's New in v0.7.9.5 — Game Master Command Center & Player Moderation
 
-### 🛡️ Centro de Comando GM (Game Master)
-- **Painel Administrativo Completo**: Uma dashboard estilo "Central de Comando" secreta acessível apenas por administradores em `/admin`.
-- **Autenticação Segura JWT**: Usa JWT + chave secreta para validar a entrada do moderador e assinar todas as ações punitivas.
-- **Relatórios de Jogadores ao Vivo**: Tabela listando todos os jogadores que estão online ou que já conectaram, exibindo ID da carteira, nome customizado, status e ações rápidas de moderação.
+### 🛡️ Centro de Comando GM
+- **Painel Administrativo** secreto em `/admin` com autenticação JWT.
+- **Relatórios de Jogadores ao Vivo**: Lista todos os jogadores online com ID da carteira e ações de moderação.
 
 ### 🔨 Sistema de Banimento & Suspensão em Tempo Real
-- **Moderação Instantânea via WebSockets**: Integração nativa entre o Supabase e o servidor `socket.io` em NodeJS (Express).
-- **Opções de Punição Escalonadas**: O GM pode aplicar advertências, suspensões temporárias (1 dia, 3 dias, 7 dias) ou Banimento Permanente.
-- **Enforcer RLS (Row Level Security)**: As políticas do banco de dados protegem contra edição não autorizada no painel, garantindo que o status de `is_banned` e `suspended_until` sejam imutáveis por jogadores.
-- **Bloqueio de Jogo (Kick Engine)**: Se um usuário suspenso tenta entrar na sala, o servidor recusa e injeta uma tela vermelha opaca impenetrável via manipulação do `document.body` e destrói os dados do Storage para prevenir By-Pass! Efeitos de "Fantasmas" no mapa causados por montagens assíncronas do React Strict Mode foram corrigidos!
+- **Moderação via WebSockets**: Integração Supabase + Socket.io.
+- **Punições Escalonadas**: Advertências, suspensões temporárias (1/3/7 dias) e banimento permanente.
+- **Enforcer RLS**: Row Level Security protege campos `is_banned` e `suspended_until`.
 
 ---
 
-## ✨ What's New in v0.7.7 — Real XLM Outfits, On-Chain Character Rename & Customization Engine
+## ✨ What's New in v0.7.7 — Real XLM Outfits & On-Chain Rename
 
-### 👗 Real Stellar On-Chain XLM Outfit Purchases
-- **On-Chain Outfit Shop**: Integrated real XLM transaction execution directly to the project treasury wallet (`GAMEFI_TREASURY_PUBLIC_KEY`: `GCDNJUBQSX7AJWLJACMJ7I4BC3Z47BQUTMHEICZLE6MU4KQBRYG5JY6B`).
-- **High-Fidelity Pixel Art Outfits**: Added 10 rich retro pixel outfits (Cyber Armor, Samurai, Valkyrie, Royal Suit, Golden Armor, Dress, etc.) and legendary weapons (Viking Axe, Magic Wand, Katana, Wings).
-- **Female Hourglass Waist Silhouette**: Female character sprites (`gender: "female"`) now render with a smooth 16px shoulder ➔ 14px waist ➔ 16px hips curve.
+### 👗 On-Chain XLM Outfit Purchases
+- **10 outfits pixel art** premium com transações reais em XLM para o treasury wallet.
+- **Silhueta feminina**: Sprites com curva 16px ombro → 14px cintura → 16px quadril.
 
 ### 💳 On-Chain Character Rename (5 XLM)
-- **Stellar Name Change Fee**: Replacing player names in the Outfit customizer now charges **5 XLM** sent directly to the GameFi treasury.
-- **Horizon & Explorer Validation**: Generates a 64-character transaction hash with a direct link to **Stellar Expert Explorer** upon successful payment confirmation.
+- **Nome custa 5 XLM** pagos diretamente ao treasury GameFi com hash de transação no Stellar Expert.
 
-### 🎨 5-Tier Quest Overhead Name Tag Colors & Matrix Green
-- **Automatic Quest Progress Colors**: Overhead name tags on the 2D map update automatically as quests are completed:
-  1. 🌊 **Náufrago Recém-Chegado** (0 Quests): White NPC (`#ffffff`)
-  2. 📜 **Iniciado de Stellar** (Quest 1 Wallet): Yellow (`#ffc600`)
-  3. 💳 **Operador On-Ramp** (Quest 2 On-Ramp): Noble Gold (`#fbbf24` with `#f59e0b` glow)
-  4. 🧪 **Alquimista do Soroban** (Quest 3 Soroban): Mystic Purple (`#e879f9` with `#d946ef` glow)
-  5. 👑 **Herói Lendário de Stellar** (Quest 4 Holder Vault): **Electric Matrix Green (`#00ff66` with `#00e676` neon glow)**
-- **Unlocked Color Selector**: Completing all 4 quests unlocks manual selection in the Customizer between the 3 advanced quest colors (Gold, Purple, Matrix Green).
-
----
-
-## ✨ What's New in v0.7.5 — Advanced Interactions & Tokenomics Expansion
-
-### 🌟 Guardian Star Mechanics
-- **End-Game Access Control**: The center of the map is now protected. Players must complete the 4 main quests (acquiring the 4 NFT Jewels) to forge their **Guardian Star**.
-- **Exclusive Structures**: Only Guardians can access the Faucet, Burn Altar, P2P Store, and Cyber ATM.
-
-### 🏛️ New Interactive Structures & Tokenomics
-- **Magic Faucet (Fonte)**: A daily blessing of 10 GAMEFI tokens for active Guardians.
-- **Burn Altar (Pira)**: A deflationary mechanic allowing players to burn tokens directly on-chain.
-- **P2P Store (Mercado)**: A vibrant marketplace for players to trade assets.
-- **Cyber ATM**: Enhanced terminal for advanced DeFi interactions.
-- **HUD Update**: The GAMEFI COIN balance now features its own prominent golden badge and dedicated chip separated from traditional assets.
-
-### 📚 New Educative NPCs
-- **PigFi [NPC]**: Focuses on micro-investments and family savings ("O cofrinho da infância evoluiu. Com o PigFi, sua família poderá começar a guardar dólar a partir de R$50 via Pix de um jeito simples, visual e divertido.").
-- **Wave [NPC]**: Educates on transparent condominium administration and governance via blockchain ("Administração e governança de condomínios com transparência e segurança").
-
----
-
-### 🌐 Full Internationalization (i18n)
-- **3 Languages supported natively:** English (default), Portuguese (PT-BR), Spanish (ES)
-- Powered by `react-i18next` with dedicated locale files in `src/i18n/locales/`
-- All UI labels, HUD elements, quest texts, NPC dialogues, and barrier messages are fully localized
-- Language can be switched at any time from the Landing Page or Login Screen — quest progress is preserved
-
-### 🏠 New Landing Page
-- Animated hero section before the login screen
-- Highlights the core value proposition: Learn → Play → Grow
-- CTA button: **"PLAY FOR FREE NOW"** leads directly to the Login Screen
-
-### 🎮 Redesigned Login Screen
-- Animated pixel art aesthetic with dynamic particle effects
-- Character selection, name input, and language switcher
-- Fully translated in all 3 languages
-
-### 🧙 Improved NPC Storyline & Dialogues
-- **James [NPC]** — Temple Master: Now delivers a complete, immersive introduction guiding the player through the entire journey from wallet creation to legendary status
-- **Kael [NPC]** — Keymaster: Clear cryptographic keypair explanation in RPG lore
-- **Captain HC [NPC]** — Anchor/On-Ramp: Financial bridging explained as a harbor port
-- **Alchemist [NPC]** — Soroban Market: Smart contract swaps explained as alchemical transmutation
-- **Elder Bobba [NPC]** — Hold Vault: Long-term holding as the final virtue of a legendary guardian
-
-### 🐛 Fixes & Cleanup
-- Fixed all hardcoded Portuguese strings remaining in the HUD
-- Fixed TypeScript type errors (`Quest` interface, `t()` hook scoping in sub-components)
-- QA pass: `tsc --noEmit` runs clean with zero errors
+### 🎨 5-Tier Quest Name Tag Colors
+- Tags de nome coloridas automaticamente com progresso das quests:
+  1. **Náufrago** (0 quests): Branco
+  2. **Iniciado** (Quest 1): Amarelo `#ffc600`
+  3. **Operador** (Quest 2): Noble Gold `#fbbf24`
+  4. **Alquimista** (Quest 3): Mystic Purple `#e879f9`
+  5. **Herói Lendário** (Quest 4): Matrix Green `#00ff66` ✨
 
 ---
 
 ## 🗺️ The 4-Quest Onboarding Journey
 
 | # | Quest | Zone | NPC | Blockchain Concept |
-|---|-------|------|-----|--------------------|
+|---|-------|------|-----|---------------------|
 | 1 | **Forge Your Identity** | East (Blue Bridge) | Kael [NPC] | Cryptographic Keypair |
 | 2 | **Acquire Realm Coins** | North (Green Portal) | Captain HC [NPC] | Anchor / On-Ramp |
 | 3 | **Trade on the Catalog** | West (Purple Portal) | Alchemist [NPC] | Soroban Smart Contracts |
 | 4 | **VIP Legend Vault** | South (Golden Portal) | Elder Bobba [NPC] | Escrow / Hold |
+
+---
+
+## ⚔️ Classes & Guild System
+
+### Classes (Consagração na Fonte — Quest 1 necessária)
+
+| ID | Nome | Role | STR | INT | AGI | RES | FAITH |
+|----|------|------|-----|-----|-----|-----|-------|
+| `warrior` | Guerreiro Estelar | Melee Tanker | +60% | -20% | +10% | +40% | Base |
+| `soroban_mage` | Alquimista Soroban | Caster AoE | -20% | +80% | +10% | -20% | +30% |
+| `cosmic_ranger` | Caçador Cósmico | Ranged DPS | +30% | Base | +70% | -10% | Base |
+| `network_guardian` | Guardião da Rede | Paladino Suporte | +20% | +10% | -10% | +50% | +60% |
+
+### Guildas
+
+| Recurso | Detalhes |
+|---------|----------|
+| **Custo de Criação** | 50 GAMEFI tokens |
+| **Tag** | 2–5 caracteres ex: `[XLM]`, `[STAR]` |
+| **Roles** | Leader / Officer / Member |
+| **Tesouro** | Saldo compartilhado em GAMEFI |
+| **Teleport** | Acesso direto à Guildhouse no mapa |
+
+---
+
+## 🗺️ World Map & Biomes Gallery
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="33%">
+        <img src="./public/imagens/mapa-central.png" width="100%" alt="Praça Central"/><br/>
+        <b>🏛️ Praça Central (Hub & Stands)</b>
+      </td>
+      <td align="center" width="33%">
+        <img src="./public/imagens/mapa-leste.png" width="100%" alt="Bioma Leste"/><br/>
+        <b>🌅 Bioma Leste (Arsenal & Wallet Forge)</b>
+      </td>
+      <td align="center" width="33%">
+        <img src="./public/imagens/mapa-oeste.png" width="100%" alt="Bioma Oeste"/><br/>
+        <b>🌊 Bioma Oeste (Mercado Soroban)</b>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" width="33%">
+        <img src="./public/imagens/mapa-norte.png" width="100%" alt="Bioma Norte"/><br/>
+        <b>🏔️ Bioma Norte (Porto Nearx & On-Ramp)</b>
+      </td>
+      <td align="center" width="33%">
+        <img src="./public/imagens/mapa-sul.png" width="100%" alt="Bioma Sul"/><br/>
+        <b>🌴 Bioma Sul (Santuário DefIndex & Hold)</b>
+      </td>
+      <td align="center" width="33%">
+        <img src="./public/imagens/capa-0.png" width="100%" alt="GameFiNow Cover"/><br/>
+        <b>🎮 GameFiNow Universe</b>
+      </td>
+    </tr>
+  </table>
+</div>
+
+---
+
+## 🌐 Full Internationalization (i18n)
+
+- **3 idiomas suportados**: English (EN), Português BR (PT), Español (ES)
+- Powered by `react-i18next` com arquivos de locale em `src/i18n/locales/`
+- Todos os textos de UI, HUD, NPCs, diálogos de quests, barreiras e novas seções (Guild + Classe) são totalmente localizados
 
 ---
 
@@ -139,11 +189,15 @@ The game runs entirely in the browser, using a 60 FPS HTML5 Canvas engine, and c
 | **Vite 6** | Fast bundler for dev & production |
 | **HTML5 Canvas API** | 60 FPS game engine with retro tilemaps |
 | **Tailwind CSS v4** | Styling, glassmorphism, animations |
-| **Zustand** | Global state management (inventory, quests, wallet) |
+| **Zustand** | Global state management (inventory, quests, wallet, guild) |
 | **react-i18next** | Multilingual support (EN / PT / ES) |
 | **WalletNow SDK** | On-Ramp, Vault, Swap integrations |
 | **Stellar Horizon API** | Testnet balance fetching & transactions |
 | **NippleJS** | Mobile joystick controls |
+| **Socket.io** | Real-time multiplayer & GM moderation |
+| **Supabase** | Player persistence, RLS, ban system |
+| **Express.js** | Backend relayer with fee validation |
+| **@google/genai** | Generative AI integration |
 
 ---
 
@@ -155,12 +209,19 @@ The game runs entirely in the browser, using a 60 FPS HTML5 Canvas engine, and c
 # Install dependencies
 npm install
 
-# Start development server
+# Start frontend dev server
 npm run dev
 # → http://localhost:3000
 
+# Start backend relayer (separate terminal)
+npm run backend
+# → http://localhost:3001
+
 # Type check (zero-error guarantee)
 npm run lint
+
+# Run tests
+npx vitest run
 
 # Production build
 npm run build
@@ -172,30 +233,48 @@ npm run build
 
 ```
 src/
-├── App.tsx                   # Main app router & game loop orchestrator
-├── gameData.ts               # Tile types, NPC definitions, quest config
-├── types.ts                  # TypeScript interfaces (Quest, NPC, WalletState...)
+├── App.tsx                     # Main app router & game loop orchestrator
+├── gameData.ts                 # Tile types, NPC definitions, quest config
+├── classesData.ts              # 4 RPG classes with stat modifiers & passives
+├── guildsData.ts               # Guild system: creation, join, persistence
+├── spellsData.ts               # Class spells with cooldowns and MP costs
+├── equipmentData.ts            # Equipment items and stats
+├── types.ts                    # TypeScript interfaces (Quest, NPC, WalletState, Guild...)
 ├── components/
-│   ├── LandingPage.tsx       # Marketing landing page (new in v0.7.0)
-│   ├── LoginScreen.tsx       # Animated login / character creation
-│   ├── GameCanvas.tsx        # 60 FPS canvas engine & player controller
-│   ├── GameOverlay.tsx       # Quest modals (Wallet, OnRamp, Soroban, Hold)
-│   ├── DialogSystem.tsx      # NPC dialogue pop-up system
-│   ├── FloatingWindows.tsx   # Inventory, wardrobe, ledger, rulebook
-│   ├── MapModal.tsx          # Full-screen world map viewer
-│   └── PassportModal.tsx     # Player passport / ID card
+│   ├── AboutPage.tsx           # Public about/docs page with Live Stellar stats
+│   ├── LandingPage.tsx         # Marketing landing page
+│   ├── LoginScreen.tsx         # Animated login / character creation
+│   ├── GameCanvas.tsx          # 60 FPS canvas engine & player controller
+│   ├── GameOverlay.tsx         # Quest modals (Wallet, OnRamp, Soroban, Hold)
+│   ├── DialogSystem.tsx        # NPC dialogue pop-up system
+│   ├── FloatingWindows.tsx     # Inventory, wardrobe, ledger, rulebook
+│   ├── ClassSelectionModal.tsx # Class consecration at the Fountain (4 classes)
+│   ├── GuildModal.tsx          # Guild creation, exploration and management
+│   ├── BattleHUD.tsx           # Real-time combat HUD with spells
+│   ├── AdminPanel.tsx          # GM Command Center at /admin
+│   ├── CharacterCustomizer.tsx # Pixel art outfit customizer
+│   ├── MapModal.tsx            # Full-screen world map viewer
+│   ├── PassportModal.tsx       # Player passport / ID card
+│   ├── DeathScreenModal.tsx    # Death screen with respawn
+│   ├── ChatBox.tsx             # Real-time multiplayer chat
+│   ├── Level5IntroModal.tsx    # Tutorial modal at Level 5 unlock
+│   ├── WelcomeTutorialModal.tsx# First-time onboarding tutorial
+│   └── canvas/                 # Canvas sub-components (sprites, rendering)
 ├── i18n/
-│   ├── i18n.ts               # i18next configuration
+│   ├── i18n.ts                 # i18next configuration
 │   └── locales/
-│       ├── en.json           # English strings (default)
-│       ├── pt.json           # Portuguese strings
-│       └── es.json           # Spanish strings
-├── maps/                     # Map tile definitions (center, east, west, north, south)
+│       ├── en.json             # English strings (default)
+│       ├── pt.json             # Portuguese strings (PT-BR)
+│       └── es.json             # Spanish strings (ES)
+├── maps/                       # Map tile definitions (center, east, west, north, south)
 ├── services/
-│   ├── stellarServices.ts    # WalletNow SDK & Horizon API integrations
-│   └── sep24Service.ts       # SEP-24 anchor deposit flow
-└── store/
-    └── gameStore.ts          # Zustand global state store
+│   ├── stellarServices.ts      # WalletNow SDK & Horizon API integrations
+│   ├── multiplayerService.ts   # Socket.io real-time multiplayer
+│   └── sep24Service.ts         # SEP-24 anchor deposit flow
+├── store/
+│   └── gameStore.ts            # Zustand global state store
+└── docs/
+    └── PrivacyPolicy.md        # Privacy policy document
 ```
 
 ---
@@ -211,7 +290,20 @@ Zero-config deployment. The Canvas engine is iframe-resistant (custom `tabIndex`
 
 ---
 
+## 📖 Additional Documentation
+
+| Document | Description |
+|----------|-------------|
+| [`ROADMAP.md`](./ROADMAP.md) | Feature roadmap by phase |
+| [`DOC_AUDITORIA_E_AVALIACAO.md`](./DOC_AUDITORIA_E_AVALIACAO.md) | On-chain integration audit matrix |
+| [`DOC_MULTIPLAYER_MMO.md`](./DOC_MULTIPLAYER_MMO.md) | Multiplayer architecture & Socket.io |
+| [`DOC_ECONOMIA_TOKENOMICS.md`](./DOC_ECONOMIA_TOKENOMICS.md) | GAMEFI tokenomics & fee model |
+| [`DOC_ESTRATEGIA_BATALHAS.md`](./DOC_ESTRATEGIA_BATALHAS.md) | Battle system strategy |
+| [`DOC_EVOLUCAO_E_DROPS.md`](./DOC_EVOLUCAO_E_DROPS.md) | XP scaling & monster drop tables |
+
+---
+
 <div align="center">
   <b>Built by nsdBR GameFiNow Team</b><br/>
-  <sub>v0.7.5 — Stellar Testnet — July 2026</sub>
+  <sub>v0.8.8 — Stellar Testnet — August 2026</sub>
 </div>

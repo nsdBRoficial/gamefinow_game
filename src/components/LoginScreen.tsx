@@ -266,11 +266,14 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           <div className="md:col-span-5 flex flex-col items-center md:items-start text-center md:text-left space-y-4 animate-[pulse_6s_ease-in-out_infinite]">
             
             {/* Pulsing floating game emblem */}
-            <div className="relative w-24 h-24 md:w-32 md:h-32 bg-black/50 backdrop-blur-md border-2 border-dashed border-cyan-800/60 rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.15)] group animate-bounce" style={{ animationDuration: "6s" }}>
-              <div className="absolute inset-2 bg-gradient-to-tr from-cyan-950 to-slate-950 rounded-full flex items-center justify-center border border-cyan-500/20">
-                <Globe className="h-10 w-10 md:h-14 md:w-14 text-cyan-400/80 animate-spin" style={{ animationDuration: "25s" }} />
-              </div>
-              <div className="absolute -top-1 -right-1 bg-amber-400 text-black text-[9px] font-black px-1.5 py-0.5 rounded shadow-lg flex items-center gap-0.5">
+            <div className="relative w-28 h-28 md:w-36 md:h-36 bg-black/60 backdrop-blur-md border-2 border-cyan-500/40 rounded-3xl p-3 flex items-center justify-center shadow-[0_0_30px_rgba(6,182,212,0.35)] group">
+              <div className="absolute inset-0 bg-gradient-to-tr from-cyan-950/80 via-transparent to-amber-950/40 rounded-3xl pointer-events-none" />
+              <img 
+                src="/imagens/logo gamefinow - transparente.png" 
+                alt="GameFiNow Emblem" 
+                className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(6,182,212,0.8)] filter transition-transform duration-500 group-hover:scale-110"
+              />
+              <div className="absolute -top-1.5 -right-1.5 bg-amber-400 text-black text-[9px] font-black px-2 py-0.5 rounded-full shadow-lg flex items-center gap-1 border border-black">
                 <Sparkles className="h-2.5 w-2.5 fill-black" /> RPG
               </div>
             </div>

@@ -2,324 +2,324 @@
   "quests": {
     "wallet": {
       "title": "1. Forjar sua Identidade (Carteira)",
-      "description": "Toda aventura começa com uma identidade única na Blockchain Stellar. Crie sua carteira para guardar seus ativos com segurança.",
-      "instructions": "Atravesse a ponte Leste (Azul) até o Arsenal e fale com Kael [NPC].",
-      "reward": "Par de Chaves Criptográficas 🔑"
+      "description": "Toda aventura comeÃ§a com uma identidade Ãºnica na Blockchain Stellar. Crie sua carteira para guardar seus ativos com seguranÃ§a.",
+      "instructions": "Atravesse a ponte Leste (Azul) atÃ© o Arsenal e fale com Kael [NPC].",
+      "reward": "Par de Chaves CriptogrÃ¡ficas ðŸ”‘"
     },
     "onramp": {
       "title": "2. Adquirir Moedas do Reino (On-Ramp)",
-      "description": "Você precisa de recursos (XLM) para negociar itens mágicos. Uma âncora troca seu ouro do mundo real por moedas da rede.",
-      "instructions": "Entre no Portal Norte (Verde) para ir ao Porto de Câmbio e fale com o Capitão HC [NPC].",
+      "description": "VocÃª precisa de recursos (XLM) para negociar itens mÃ¡gicos. Uma Ã¢ncora troca seu ouro do mundo real por moedas da rede.",
+      "instructions": "Entre no Portal Norte (Verde) para ir ao Porto de CÃ¢mbio e fale com o CapitÃ£o HC [NPC].",
       "reward": "150 XLM de Saldo"
     },
     "soroban": {
-      "title": "3. Negociar no Catálogo (Smart Swap)",
-      "description": "Use contratos inteligentes Soroban para trocar seus XLM por USDC (Ouro Estável) ou Runas de Batalha SORO.",
+      "title": "3. Negociar no CatÃ¡logo (Smart Swap)",
+      "description": "Use contratos inteligentes Soroban para trocar seus XLM por USDC (Ouro EstÃ¡vel) ou Runas de Batalha SORO.",
       "instructions": "Entre no Portal Oeste (Roxo) para ir ao Mercado do Templo e fale com a Alquimista [NPC].",
       "reward": "Runas de Batalha SORO + USDC de Platina"
     },
     "hold": {
       "title": "4. Cofre do VIP Legend Holder",
-      "description": "Mostre seu compromisso de longo prazo travando suas moedas em um cofre inteligente para se tornar um Guardião Lendário.",
-      "instructions": "Entre no Portal Sul (Dourado) para ir à Câmara Secreta e fale com Bobba [NPC], o Ancião.",
-      "reward": "Título de Guardião Lendário VIP Stellar Holder 🌟"
+      "description": "Mostre seu compromisso de longo prazo travando suas moedas em um cofre inteligente para se tornar um GuardiÃ£o LendÃ¡rio.",
+      "instructions": "Entre no Portal Sul (Dourado) para ir Ã  CÃ¢mara Secreta e fale com Bobba [NPC], o AnciÃ£o.",
+      "reward": "TÃ­tulo de GuardiÃ£o LendÃ¡rio VIP Stellar Holder ðŸŒŸ"
     },
     "kill_center": {
-      "title": "Ameaça na Praça Central",
-      "description": "Slimes invasores estão poluindo a sagrada Praça Central! Prove seu valor em combate protegendo o coração da cidade.",
-      "instructions": "Ative o Modo Batalha (⚔️), elimine 5 Slimes e reporte seu sucesso ao Mestre James.",
+      "title": "AmeaÃ§a na PraÃ§a Central",
+      "description": "Slimes invasores estÃ£o poluindo a sagrada PraÃ§a Central! Prove seu valor em combate protegendo o coraÃ§Ã£o da cidade.",
+      "instructions": "Ative o Modo Batalha (âš”ï¸), elimine 5 Slimes e reporte seu sucesso ao Mestre James.",
       "reward": "50 XP + Saque de Monstros"
     },
     "kill_east": {
       "title": "Guerreiros da Forja Leste",
-      "description": "Vermes das Cavernas estão atacando os suprimentos do Ferreiro Kael! Impeça que eles destruam a forja.",
+      "description": "Vermes das Cavernas estÃ£o atacando os suprimentos do Ferreiro Kael! ImpeÃ§a que eles destruam a forja.",
       "instructions": "Atravesse o Portal Leste (Azul), elimine 5 Cave Worms e retorne ao Mestre James.",
       "reward": "100 XP + Saque de Monstros"
     },
     "kill_north": {
-      "title": "Caçador das Docas do Norte",
-      "description": "As rotas marítimas do Capitão HC foram bloqueadas por Caranguejos Gigantes. Liberte o porto!",
+      "title": "CaÃ§ador das Docas do Norte",
+      "description": "As rotas marÃ­timas do CapitÃ£o HC foram bloqueadas por Caranguejos Gigantes. Liberte o porto!",
       "instructions": "Atravesse o Portal Norte (Verde), elimine 5 Crabs e retorne ao Mestre James.",
       "reward": "150 XP + Saque de Monstros"
     },
     "kill_west": {
       "title": "Desbravador do Bazar Oeste",
-      "description": "Abelhas mutantes estão espalhando o pânico no mercado alquímico. Restaure a paz para os mercadores!",
+      "description": "Abelhas mutantes estÃ£o espalhando o pÃ¢nico no mercado alquÃ­mico. Restaure a paz para os mercadores!",
       "instructions": "Atravesse o Portal Oeste (Roxo), elimine 5 Bees e retorne ao Mestre James.",
       "reward": "250 XP + Saque de Monstros"
     },
     "kill_south": {
-      "title": "Herói do Santuário Sul",
-      "description": "Serpentes sombrias corromperam o Santuário Sagrado. Esta é sua provação final como Guardião!",
+      "title": "HerÃ³i do SantuÃ¡rio Sul",
+      "description": "Serpentes sombrias corromperam o SantuÃ¡rio Sagrado. Esta Ã© sua provaÃ§Ã£o final como GuardiÃ£o!",
       "instructions": "Atravesse o Portal Sul (Dourado), elimine 5 Snakes e retorne ao Mestre James.",
       "reward": "500 XP + Saque de Monstros"
     },
     "all_done": {
-      "title": "O FIM É APENAS O COMEÇO",
-      "description": "Você provou ser o herói supremo da rede Stellar! Mas novas missões grandiosas estão sendo forjadas pelos deuses.",
-      "instructions": "Continue fortalecendo seus heróis, coletando tesouros e se preparando para as próximas expansões!",
-      "reward": "Glória Eterna 🌟"
+      "title": "O FIM Ã‰ APENAS O COMEÃ‡O",
+      "description": "VocÃª provou ser o herÃ³i supremo da rede Stellar! Mas novas missÃµes grandiosas estÃ£o sendo forjadas pelos deuses.",
+      "instructions": "Continue fortalecendo seus herÃ³is, coletando tesouros e se preparando para as prÃ³ximas expansÃµes!",
+      "reward": "GlÃ³ria Eterna ðŸŒŸ"
     }
   },
   "dialogs": {
     "guide": {
       "main": [
-        "Olá, jovem herói! Bem-vindo ao saguão principal do Templo Stellar!",
-        "Eu sou James [NPC], o Mestre do Templo. Estou aqui para guiar você pela rede Stellar!",
-        "Para começar a sua jornada e poder negociar Runas Raras, você precisa de uma conta/carteira Stellar para guardar seus ativos de batalha.",
-        "Siga para o Leste (direita) cruzando a ponte e fale com Kael [NPC], o Ferreiro de Raros, para forjar suas chaves mágicas!"
+        "OlÃ¡, jovem herÃ³i! Bem-vindo ao saguÃ£o principal do Templo Stellar!",
+        "Eu sou James [NPC], o Mestre do Templo. Estou aqui para guiar vocÃª pela rede Stellar!",
+        "Para comeÃ§ar a sua jornada e poder negociar Runas Raras, vocÃª precisa de uma conta/carteira Stellar para guardar seus ativos de batalha.",
+        "Siga para o Leste (direita) cruzando a ponte e fale com Kael [NPC], o Ferreiro de Raros, para forjar suas chaves mÃ¡gicas!"
       ],
       "q1_initial": [
-        "Olá, jovem herói! Bem-vindo ao saguão principal do Templo Stellar!",
-        "Eu sou James [NPC], o Mestre do Templo. Estou aqui para guiar você pela rede Stellar!",
-        "Para começar a sua jornada, você precisa forjar sua Carteira Stellar com Kael [NPC].",
-        "A seta amarela magnética na sua tela indicará exatamente o caminho. Siga para o Leste (Portal Ciano) e forje suas chaves mágicas!"
+        "OlÃ¡, jovem herÃ³i! Bem-vindo ao saguÃ£o principal do Templo Stellar!",
+        "Eu sou James [NPC], o Mestre do Templo. Estou aqui para guiar vocÃª pela rede Stellar!",
+        "Para comeÃ§ar a sua jornada, vocÃª precisa forjar sua Carteira Stellar com Kael [NPC].",
+        "A seta amarela magnÃ©tica na sua tela indicarÃ¡ exatamente o caminho. Siga para o Leste (Portal Ciano) e forje suas chaves mÃ¡gicas!"
       ],
       "q1_active": [
-        "Ainda sem uma carteira? Siga a seta magnética até o Portal Leste (Ciano) e fale com o Ferreiro Kael [NPC]!"
+        "Ainda sem uma carteira? Siga a seta magnÃ©tica atÃ© o Portal Leste (Ciano) e fale com o Ferreiro Kael [NPC]!"
       ],
       "q1_done_q2_start": [
-        "Sensacional, herói! Você forjou sua carteira Stellar com sucesso! Veja seu endereço no topo superior da tela.",
-        "Agora que possui uma identidade na rede, você precisa adquirir suas primeiras moedas XLM.",
-        "Sua próxima missão é a Missão 2: On-Ramp no Porto de Câmbio ao Norte com o Capitão HC [NPC].",
-        "Liberei o Portal Norte (Verde) para você! Siga a seta magnética até o norte e adquira suas moedas!"
+        "Sensacional, herÃ³i! VocÃª forjou sua carteira Stellar com sucesso! Veja seu endereÃ§o no topo superior da tela.",
+        "Agora que possui uma identidade na rede, vocÃª precisa adquirir suas primeiras moedas XLM.",
+        "Sua prÃ³xima missÃ£o Ã© a MissÃ£o 2: On-Ramp no Porto de CÃ¢mbio ao Norte com o CapitÃ£o HC [NPC].",
+        "Liberei o Portal Norte (Verde) para vocÃª! Siga a seta magnÃ©tica atÃ© o norte e adquira suas moedas!"
       ],
       "q2_active": [
-        "Siga a seta magnética até o Portal Norte (Verde) e converse com o Capitão HC [NPC] no Terminal de Câmbio!"
+        "Siga a seta magnÃ©tica atÃ© o Portal Norte (Verde) e converse com o CapitÃ£o HC [NPC] no Terminal de CÃ¢mbio!"
       ],
       "q2_done_q3_start": [
-        "Excelente trabalho! Suas moedas XLM foram creditadas com sucesso pela Âncora do Capitão HC!",
-        "Agora que tem saldo, é hora de aprender a usar Smart Contracts (Contratos Inteligentes) Soroban!",
-        "Sua próxima missão é a Missão 3: Mercado Soroban no Portal Oeste (Roxo) com a Alquimista [NPC].",
-        "Liberei o Portal Oeste! Siga a seta magnética e faça uma troca (Swap) por dólares estáveis USDC ou tokens SORO!"
+        "Excelente trabalho! Suas moedas XLM foram creditadas com sucesso pela Ã‚ncora do CapitÃ£o HC!",
+        "Agora que tem saldo, Ã© hora de aprender a usar Smart Contracts (Contratos Inteligentes) Soroban!",
+        "Sua prÃ³xima missÃ£o Ã© a MissÃ£o 3: Mercado Soroban no Portal Oeste (Roxo) com a Alquimista [NPC].",
+        "Liberei o Portal Oeste! Siga a seta magnÃ©tica e faÃ§a uma troca (Swap) por dÃ³lares estÃ¡veis USDC ou tokens SORO!"
       ],
       "q3_active": [
-        "Siga a seta magnética até o Portal Oeste (Roxo) e fale com a Alquimista [NPC] no terminal de troca!"
+        "Siga a seta magnÃ©tica atÃ© o Portal Oeste (Roxo) e fale com a Alquimista [NPC] no terminal de troca!"
       ],
       "q3_done_q4_start": [
-        "Magnífico! Você executou um contrato inteligente Soroban em segundos e com taxas insignificantes!",
-        "Você aprendeu a criar uma carteira, colocar recursos e negociar ativos. Falta apenas o teste final do Holder!",
-        "Sua última missão é a Missão 4: Cofre VIP no Portal Sul (Dourado) com o Ancião Bobba [NPC].",
-        "Liberei o Portal Sul! Siga a seta magnética até a câmara de Hold para travar uma quantia e conquistar o título de Guardião Lendário!"
+        "MagnÃ­fico! VocÃª executou um contrato inteligente Soroban em segundos e com taxas insignificantes!",
+        "VocÃª aprendeu a criar uma carteira, colocar recursos e negociar ativos. Falta apenas o teste final do Holder!",
+        "Sua Ãºltima missÃ£o Ã© a MissÃ£o 4: Cofre VIP no Portal Sul (Dourado) com o AnciÃ£o Bobba [NPC].",
+        "Liberei o Portal Sul! Siga a seta magnÃ©tica atÃ© a cÃ¢mara de Hold para travar uma quantia e conquistar o tÃ­tulo de GuardiÃ£o LendÃ¡rio!"
       ],
       "q4_active": [
-        "Siga a seta magnética até o Portal Sul (Dourado) e interaja com o Ancião Bobba [NPC] na Câmara de Hold!"
+        "Siga a seta magnÃ©tica atÃ© o Portal Sul (Dourado) e interaja com o AnciÃ£o Bobba [NPC] na CÃ¢mara de Hold!"
       ],
       "all_completed": [
-        "🌟 GLÓRIA E HONRA! Você completou todas as missões de Onboarding do Templo Stellar!",
-        "Você é oficialmente um Guardião Lendário Stellar Holder! Seu título e conquistas brilham em todo o reino.",
-        "Aproveite para explorar a ilha e interagir com outros jogadores heróis no multiplayer online!"
+        "ðŸŒŸ GLÃ“RIA E HONRA! VocÃª completou todas as missÃµes de Onboarding do Templo Stellar!",
+        "VocÃª Ã© oficialmente um GuardiÃ£o LendÃ¡rio Stellar Holder! Seu tÃ­tulo e conquistas brilham em todo o reino.",
+        "Aproveite para explorar a ilha e interagir com outros jogadores herÃ³is no multiplayer online!"
       ],
       "active": [
-        "Siga a seta magnética até o portal da missão ativa!"
+        "Siga a seta magnÃ©tica atÃ© o portal da missÃ£o ativa!"
       ],
       "completed": [
-        "Sensacional! Você já registrou sua carteira Stellar. Veja seu endereço seguro no HUD na barra superior!"
+        "Sensacional! VocÃª jÃ¡ registrou sua carteira Stellar. Veja seu endereÃ§o seguro no HUD na barra superior!"
       ]
     },
     "keymaster": {
       "main": [
-        "Saudações de batalha! Eu sou o Kael [NPC], o maior ferreiro de Magic Plate Armors e Elmos Raros deste templo.",
-        "Na Stellar, você não faz login com e-mail e senha tradicionais. Você cria sua conta através de Criptografia Assimétrica de herói!",
-        "A Chave Pública (começa com 'G') é o seu endereço ou ID do Templo. Todos no continente podem ver para te enviar moedas.",
-        "A Chave Secreta (começa com 'S') é a chave do seu baú pessoal de tesouros. Se algum orc conseguir ela, levará todos os seus raros! Nunca revele ela a ninguém!",
-        "Aproxime-se do Altar de Chaves logo atrás de mim para forjar a sua conta!"
+        "SaudaÃ§Ãµes de batalha! Eu sou o Kael [NPC], o maior ferreiro de Magic Plate Armors e Elmos Raros deste templo.",
+        "Na Stellar, vocÃª nÃ£o faz login com e-mail e senha tradicionais. VocÃª cria sua conta atravÃ©s de Criptografia AssimÃ©trica de herÃ³i!",
+        "A Chave PÃºblica (comeÃ§a com 'G') Ã© o seu endereÃ§o ou ID do Templo. Todos no continente podem ver para te enviar moedas.",
+        "A Chave Secreta (comeÃ§a com 'S') Ã© a chave do seu baÃº pessoal de tesouros. Se algum orc conseguir ela, levarÃ¡ todos os seus raros! Nunca revele ela a ninguÃ©m!",
+        "Aproxime-se do Altar de Chaves logo atrÃ¡s de mim para forjar a sua conta!"
       ],
       "active": [
-        "Use o terminal azul de chaves cybernéticas para gerar seu par de chaves e receber seu endereço de hotel!"
+        "Use o terminal azul de chaves cybernÃ©ticas para gerar seu par de chaves e receber seu endereÃ§o de hotel!"
       ],
       "completed": [
         "Sua conta foi criada e registrada com sucesso no Ledger da rede Stellar!",
-        "Agora que possui uma identidade, você está pronto para pegar moedas de catálogo. Siga para o Norte e fale com o Capitão HC [NPC]!"
+        "Agora que possui uma identidade, vocÃª estÃ¡ pronto para pegar moedas de catÃ¡logo. Siga para o Norte e fale com o CapitÃ£o HC [NPC]!"
       ]
     },
     "portmaster": {
       "main": [
-        "Ahoy, aventureiro! Eu sou o Capitão HC [NPC], encarregado das rotas navais e das pontes financeiras do continente.",
-        "Na rede Stellar, chamamos as rampas de depósito e saque de 'Anchors' (Âncoras). Elas convertem ouro fictício em moedas digitais de verdade (XLM).",
-        "Sem uma âncora, as moedas do mundo real não conseguiriam entrar na blockchain!",
-        "Aproxime-se do Altar de Câmbio ao meu lado para fazer um depósito de ouro simulado e ganhar suas primeiras Crystal Coins!"
+        "Ahoy, aventureiro! Eu sou o CapitÃ£o HC [NPC], encarregado das rotas navais e das pontes financeiras do continente.",
+        "Na rede Stellar, chamamos as rampas de depÃ³sito e saque de 'Anchors' (Ã‚ncoras). Elas convertem ouro fictÃ­cio em moedas digitais de verdade (XLM).",
+        "Sem uma Ã¢ncora, as moedas do mundo real nÃ£o conseguiriam entrar na blockchain!",
+        "Aproxime-se do Altar de CÃ¢mbio ao meu lado para fazer um depÃ³sito de ouro simulado e ganhar suas primeiras Crystal Coins!"
       ],
       "active": [
-        "Acesse o Terminal de Câmbio ao meu lado para depositar via PIX ou Cartão fictício e carregar seu saldo!"
+        "Acesse o Terminal de CÃ¢mbio ao meu lado para depositar via PIX ou CartÃ£o fictÃ­cio e carregar seu saldo!"
       ],
       "completed": [
-        "Transação de elite, aventureiro! A âncora identificou seu depósito e enviou 150 XLM de saldo para você.",
-        "Seu saldo atualizado já brilha no topo direito! Agora você pode negociar ativos no catálogo.",
-        "Siga para o Leste até o Mercado de Soroban para negociar via Smart Contracts!"
+        "TransaÃ§Ã£o de elite, aventureiro! A Ã¢ncora identificou seu depÃ³sito e enviou 150 XLM de saldo para vocÃª.",
+        "Seu saldo atualizado jÃ¡ brilha no topo direito! Agora vocÃª pode negociar ativos no catÃ¡logo.",
+        "Siga para o Leste atÃ© o Mercado de Soroban para negociar via Smart Contracts!"
       ]
     },
     "scholar": {
       "main": [
-        "Bem-vindo à Central de Negociação do Templo!",
-        "Soroban é o motor de contratos inteligentes (Smart Contracts) ultra-eficientes da Stellar.",
-        "Com eles, programamos regras financeiras inquebráveis. Podemos trocar (Swap) moedas instantaneamente sem intermediários ou bancos!",
-        "Para provar suas habilidades, aproxime-se do painel alquímico roxo ao meu lado.",
-        "Dispare o contrato inteligente para trocar 50 XLM por USDC (Dólar Digital) ou tokens de governança SORO!"
+        "Bem-vindo Ã  Central de NegociaÃ§Ã£o do Templo!",
+        "Soroban Ã© o motor de contratos inteligentes (Smart Contracts) ultra-eficientes da Stellar.",
+        "Com eles, programamos regras financeiras inquebrÃ¡veis. Podemos trocar (Swap) moedas instantaneamente sem intermediÃ¡rios ou bancos!",
+        "Para provar suas habilidades, aproxime-se do painel alquÃ­mico roxo ao meu lado.",
+        "Dispare o contrato inteligente para trocar 50 XLM por USDC (DÃ³lar Digital) ou tokens de governanÃ§a SORO!"
       ],
       "active": [
-        "Aproxime-se do terminal roxo de Soroban e execute o swap automático via Smart Contract!"
+        "Aproxime-se do terminal roxo de Soroban e execute o swap automÃ¡tico via Smart Contract!"
       ],
       "completed": [
-        "Magnífico! A troca foi liquidada em menos de 2 segundos com taxas de centésimos de centavo!",
-        "Seu inventário agora possui USDC e tokens SORO. Você é um mestre da negociação no catálogo!",
-        "O último teste te aguarda no Sul. Vá até a Câmara de Hold e fale com Bobba [NPC], o Ancião!"
+        "MagnÃ­fico! A troca foi liquidada em menos de 2 segundos com taxas de centÃ©simos de centavo!",
+        "Seu inventÃ¡rio agora possui USDC e tokens SORO. VocÃª Ã© um mestre da negociaÃ§Ã£o no catÃ¡logo!",
+        "O Ãºltimo teste te aguarda no Sul. VÃ¡ atÃ© a CÃ¢mara de Hold e fale com Bobba [NPC], o AnciÃ£o!"
       ]
     },
     "sage": {
       "main": [
-        "Bobba bobba bobba! Que jornada fantástica, jovem guerreiro!",
-        "Você forjou chaves, adquiriu moedas com o Anchor e negociou raros usando contratos inteligentes Soroban.",
-        "O teste final é a virtude máxima: a paciência e lealdade, isto é, fazer 'Hold'.",
-        "Travar suas moedas em um contrato de garantia (Escrow) descentralizado comprova que você é um holder fiel ao ecossistema.",
-        "Aproxime-se da Câmara Dourada de Hold à frente para travar um percentual de XLM e ganhar o título de Guardião Lendário!"
+        "Bobba bobba bobba! Que jornada fantÃ¡stica, jovem guerreiro!",
+        "VocÃª forjou chaves, adquiriu moedas com o Anchor e negociou raros usando contratos inteligentes Soroban.",
+        "O teste final Ã© a virtude mÃ¡xima: a paciÃªncia e lealdade, isto Ã©, fazer 'Hold'.",
+        "Travar suas moedas em um contrato de garantia (Escrow) descentralizado comprova que vocÃª Ã© um holder fiel ao ecossistema.",
+        "Aproxime-se da CÃ¢mara Dourada de Hold Ã  frente para travar um percentual de XLM e ganhar o tÃ­tulo de GuardiÃ£o LendÃ¡rio!"
       ],
       "active": [
-        "Interaja com a Câmara Sagrada dourada para selar seu hold de longo prazo e ganhar a insígnia definitiva!"
+        "Interaja com a CÃ¢mara Sagrada dourada para selar seu hold de longo prazo e ganhar a insÃ­gnia definitiva!"
       ],
       "completed": [
-        "🌟 O templo celebra em festa! Você concluiu todos os módulos do Onboarding Archipelago!",
-        "Suas moedas estão trancadas em segurança no cofre. Você é oficialmente um Guardião Lendário Stellar Holder!",
-        "Lembre-se: transações velozes, taxas ínfimas e finanças acessíveis de verdade. Agora relaxe na taverna com hidromel! Bobba!"
+        "ðŸŒŸ O templo celebra em festa! VocÃª concluiu todos os mÃ³dulos do Onboarding Archipelago!",
+        "Suas moedas estÃ£o trancadas em seguranÃ§a no cofre. VocÃª Ã© oficialmente um GuardiÃ£o LendÃ¡rio Stellar Holder!",
+        "Lembre-se: transaÃ§Ãµes velozes, taxas Ã­nfimas e finanÃ§as acessÃ­veis de verdade. Agora relaxe na taverna com hidromel! Bobba!"
       ]
     }
   },
   "barriers": {
-    "north": "O portão de energia Azul está trancado! Complete a missão 'Forja da Carteira' no Leste para liberá-lo.",
-    "west": "O portão de energia Roxo está trancado! Complete a missão 'Portal de Câmbio (On-Ramp)' no Norte para liberá-lo.",
-    "south": "O portão de energia Dourado está trancado! Complete a missão 'Mercado Soroban' no Oeste para liberá-lo."
+    "north": "O portÃ£o de energia Azul estÃ¡ trancado! Complete a missÃ£o 'Forja da Carteira' no Leste para liberÃ¡-lo.",
+    "west": "O portÃ£o de energia Roxo estÃ¡ trancado! Complete a missÃ£o 'Portal de CÃ¢mbio (On-Ramp)' no Norte para liberÃ¡-lo.",
+    "south": "O portÃ£o de energia Dourado estÃ¡ trancado! Complete a missÃ£o 'Mercado Soroban' no Oeste para liberÃ¡-lo."
   },
   "ui": {
-    "activeQuest": "Missão Ativa",
-    "pressSpace": "Pressione ESPAÇO para continuar",
-    "terminalAvailable": "Terminal Disponível",
+    "activeQuest": "MissÃ£o Ativa",
+    "pressSpace": "Pressione ESPAÃ‡O para continuar",
+    "terminalAvailable": "Terminal DisponÃ­vel",
     "connectTerminal": "Conectar Terminal",
     "connectWeb3Device": "Conectar Dispositivo Web3",
-    "legendaryRibbon": "🏆 CONQUISTA MÁXIMA: VIAJANTE LENDÁRIO STELLAR! 🌟",
+    "legendaryRibbon": "ðŸ† CONQUISTA MÃXIMA: VIAJANTE LENDÃRIO STELLAR! ðŸŒŸ",
     "keyboard": "Teclado",
-    "space": "ESPAÇO",
-    "action": "AÇÃO",
+    "space": "ESPAÃ‡O",
+    "action": "AÃ‡ÃƒO",
     "newCharacter": "Novo Personagem (Resetar Tudo)",
-    "resetConfirm": "Isso irá DELETAR SEU PROGRESSO. Você quer começar um novo jogo do zero?",
+    "resetConfirm": "Isso irÃ¡ DELETAR SEU PROGRESSO. VocÃª quer comeÃ§ar um novo jogo do zero?",
     "onlineServers": "SERVIDORES DE ESTRELAS ONLINE",
     "startJourney": "INICIAR JORNADA (JOGAR)",
     "resumeJourney": "RETOMAR JORNADA",
-    "loginNamePlaceholder": "Digite seu nome de herói...",
+    "loginNamePlaceholder": "Digite seu nome de herÃ³i...",
     "backpack": "Mochila de Runas",
-    "wardrobe": "Armário (Roupas)",
-    "ledger": "Histórico do Ledger",
+    "wardrobe": "ArmÃ¡rio (Roupas)",
+    "ledger": "HistÃ³rico do Ledger",
     "rulebook": "Regras do Continente",
     "day": "Dia",
     "login": {
-      "title": "Bem-vindo à Ilha Stellar",
+      "title": "Bem-vindo Ã  Ilha Stellar",
       "subtitle": "Uma aventura RPG interativa Web3 para aprender sobre o ecossistema Stellar, carteiras e contratos inteligentes.",
-      "security": "Segurança Biométrica",
+      "security": "SeguranÃ§a BiomÃ©trica",
       "securityDesc": "Use Passkeys para login Web3 sem senha",
       "fast": "Velocidade da Luz",
-      "fastDesc": "Transações confirmam em segundos na Stellar",
+      "fastDesc": "TransaÃ§Ãµes confirmam em segundos na Stellar",
       "playNow": "Jogar Agora",
       "selectLanguage": "Selecionar Idioma",
-      "playForFree": "JOGUE DE GRAÇA AGORA",
+      "playForFree": "JOGUE DE GRAÃ‡A AGORA",
       "network": "REDE",
       "testnet": "STELLAR TESTNET",
       "version": "V2.5.0-ALPHA",
       "connectivity": "CONECTIVIDADE:",
-      "walletModule": "MÓDULO DE WALLET:",
-      "persistence": "PERSISTÊNCIA:",
+      "walletModule": "MÃ“DULO DE WALLET:",
+      "persistence": "PERSISTÃŠNCIA:",
       "activeProfile": "Perfil Ativo Detectado",
       "noEmail": "Sem e-mail registrado",
       "loginPasskey": "Logar com Passkey",
-      "fastLogin": "Login Rápido ⚡",
+      "fastLogin": "Login RÃ¡pido âš¡",
       "fastLoginTitle": "Entrar sem precisar re-escanear biometria",
-      "frictionlessMode": "Modo Sem Fricção Ativo",
-      "frictionlessDesc": "Entre instantaneamente sem preencher formulários complicados. Você poderá forjar sua carteira com segurança criptográfica quando explorar a ilha.",
+      "frictionlessMode": "Modo Sem FricÃ§Ã£o Ativo",
+      "frictionlessDesc": "Entre instantaneamente sem preencher formulÃ¡rios complicados. VocÃª poderÃ¡ forjar sua carteira com seguranÃ§a criptogrÃ¡fica quando explorar a ilha.",
       "characterName": "Nome do Seu Personagem",
-      "editable": "EDITÁVEL",
+      "editable": "EDITÃVEL",
       "nameHint": "Deixe em branco ou digite qualquer apelido para entrar de forma 100% livre.",
-      "howItWorks": "ℹ️ Como Funciona",
-      "howItWorksDesc1": "Os dados de progresso e estatísticas são mantidos no seu navegador. Após criar a carteira na região leste (East Region), o game se integra à autenticação local de ",
+      "howItWorks": "â„¹ï¸ Como Funciona",
+      "howItWorksDesc1": "Os dados de progresso e estatÃ­sticas sÃ£o mantidos no seu navegador. ApÃ³s criar a carteira na regiÃ£o leste (East Region), o game se integra Ã  autenticaÃ§Ã£o local de ",
       "howItWorksDesc2": "Chaves de Acesso (Passkeys)",
-      "howItWorksDesc3": ", permitindo logar com um único toque sem necessitar de senhas convencionais.",
+      "howItWorksDesc3": ", permitindo logar com um Ãºnico toque sem necessitar de senhas convencionais.",
       "confirmResetTitle": "Confirmar Novo Personagem?",
-      "confirmResetDesc": "Isso removerá todo o progresso atual, histórico de transações e a carteira criptográfica gerada no seu navegador. Ótimo para testar o onboarding do zero!",
+      "confirmResetDesc": "Isso removerÃ¡ todo o progresso atual, histÃ³rico de transaÃ§Ãµes e a carteira criptogrÃ¡fica gerada no seu navegador. Ã“timo para testar o onboarding do zero!",
       "cancel": "Cancelar",
       "yesReset": "Sim, Resetar Tudo",
       "passkeyLocal": "Chave de Acesso Local",
-      "deviceAuth": "Autenticação de Dispositivo",
-      "deviceAuthDesc": "Por favor, escaneie sua impressão digital ou use a autenticação facial cadastrada para verificar sua carteira estelar.",
+      "deviceAuth": "AutenticaÃ§Ã£o de Dispositivo",
+      "deviceAuthDesc": "Por favor, escaneie sua impressÃ£o digital ou use a autenticaÃ§Ã£o facial cadastrada para verificar sua carteira estelar.",
       "scanningBio": "Escaneando Biometria...",
-      "authApproved": "AUTENTICAÇÃO APROVADA!",
-      "userLabel": "USUÁRIO:",
+      "authApproved": "AUTENTICAÃ‡ÃƒO APROVADA!",
+      "userLabel": "USUÃRIO:",
       "accountLabel": "CONTA:",
-      "landingSubtitle": "APRENDA. JOGUE. CRESÇA."
+      "landingSubtitle": "APRENDA. JOGUE. CRESÃ‡A."
     },
-    "quests": "Sinalizadores de Missões",
+    "quests": "Sinalizadores de MissÃµes",
     "teleportCenter": "Teletransporte ao Centro (Runa de Regresso)",
     "passport": "ID do Viajante (Passport)",
     "worldMap": "Mapa Mundi (Estelar)",
     "guide": "Guia",
-    "toggleAudio": "Alternar Áudio",
+    "toggleAudio": "Alternar Ãudio",
     "expLvl": "EXP LVL",
     "buffs": "BUFFS",
     "networkActive": "REDE ATIVA",
-    "noActiveQuestTitle": "NOVAS MISSÕES EM BREVE",
-    "noActiveQuestDesc": "Você concluiu todas as missões disponíveis! Fique ligado para mais aventuras na rede Stellar."
+    "noActiveQuestTitle": "NOVAS MISSÃ•ES EM BREVE",
+    "noActiveQuestDesc": "VocÃª concluiu todas as missÃµes disponÃ­veis! Fique ligado para mais aventuras na rede Stellar."
   },
   "huds": {
-    "customizer_title": "🎨 Guarda-Roupa do Viajante (Outfit)",
-    "backpack_title": "🎒 Inventário & Runas",
-    "ledger_title": "📜 Console de Registros Stellar",
-    "guide_title": "📖 Pergaminho de Instruções",
+    "customizer_title": "ðŸŽ¨ Guarda-Roupa do Viajante (Outfit)",
+    "backpack_title": "ðŸŽ’ InventÃ¡rio & Runas",
+    "ledger_title": "ðŸ“œ Console de Registros Stellar",
+    "guide_title": "ðŸ“– Pergaminho de InstruÃ§Ãµes",
     "decentralized_vault": "Cofre Descentralizado de Chaves",
     "active_keys": "Chaves Ativas",
-    "public_key": "CHAVE PÚBLICA (Endereço para Receber Moedas)",
-    "secret_key": "⚠ CHAVE SECRETA (Senha Administrativa - Guarde bem!)",
+    "public_key": "CHAVE PÃšBLICA (EndereÃ§o para Receber Moedas)",
+    "secret_key": "âš  CHAVE SECRETA (Senha Administrativa - Guarde bem!)",
     "no_identity": "Nenhuma identidade forjada ainda!",
     "no_identity_desc": "Fale com Kael [NPC] no Templo Stellar para criar sua carteira.",
-    "available_balances": "Saldos Disponíveis (WalletNow)",
+    "available_balances": "Saldos DisponÃ­veis (WalletNow)",
     "crystal_coins": "Moedas de Cristal (XLM)",
-    "stable_dollar": "Estável Dólar (USDW)",
-    "stable_real": "Estável Real (BRW)",
-    "yield_vaults": "🏦 COFRES DE RENDIMENTO (VAULTS)",
+    "stable_dollar": "EstÃ¡vel DÃ³lar (USDW)",
+    "stable_real": "EstÃ¡vel Real (BRW)",
+    "yield_vaults": "ðŸ¦ COFRES DE RENDIMENTO (VAULTS)",
     "vault_xlm": "Cofre XLM:",
     "vault_usdw": "Cofre USDW:",
     "vault_brw": "Cofre BRW:",
-    "liquidity_shares": "💧 COTAS DE LIQUIDEZ (AMM LP)",
+    "liquidity_shares": "ðŸ’§ COTAS DE LIQUIDEZ (AMM LP)",
     "pool_xlm_usdw": "Piscina XLM - USDW:",
     "pool_usdw_brw": "Piscina USDW - BRW:",
     "fee_rewards": "Recompensa de Taxas:",
     "accumulating": "Acumulando...",
-    "completed_quests": "Missões Educacionais Concluídas",
-    "completed": "✔ CONCLUÍDO",
-    "active": "● ATIVO",
-    "blocked": "🔒 BLOQUEADO",
-    "quest_reward": "★ Recompensa de Missão:",
+    "completed_quests": "MissÃµes Educacionais ConcluÃ­das",
+    "completed": "âœ” CONCLUÃDO",
+    "active": "â— ATIVO",
+    "blocked": "ðŸ”’ BLOQUEADO",
+    "quest_reward": "â˜… Recompensa de MissÃ£o:",
     "ledger_sequencer": "Blockchain Ledger Sequencer",
-    "ledger_sequencer_desc": "Stellar opera em lotes rápidos de consenso a cada 5 segundos. Nenhuma energia de mineração ou taxas pesadas são desperdiçadas.",
-    "consensus_sequence": "Sequência Consenso",
+    "ledger_sequencer_desc": "Stellar opera em lotes rÃ¡pidos de consenso a cada 5 segundos. Nenhuma energia de mineraÃ§Ã£o ou taxas pesadas sÃ£o desperdiÃ§adas.",
+    "consensus_sequence": "SequÃªncia Consenso",
     "ledger": "Ledger",
-    "awaiting_transactions": "Aguardando transações na rede...",
-    "interact_altars": "Interaja com os altares do templo para emitir transações live!",
+    "awaiting_transactions": "Aguardando transaÃ§Ãµes na rede...",
+    "interact_altars": "Interaja com os altares do templo para emitir transaÃ§Ãµes live!",
     "tx_hash": "HASH",
     "tx_fee": "TAXA",
-    "survival_instructions": "Instruções de Sobrevivência no Continente",
-    "survival_desc": "Bem-vindo ao templo educacional! O objetivo deste RPG é guiar você pelos conceitos práticos do Web3 através da rede <strong>Stellar</strong> de forma totalmente compreensível.",
-    "guide_q1": "1. Como funciona a Criptografia Assimétrica?",
-    "guide_a1": "No Web3, você não cria logins com e-mail e senha convencionais. Em vez disso, seu endereço é uma <strong>Chave Pública</strong> (que todos podem ver, como um PIX) gerada matematicamente a partir de uma <strong>Chave Secreta</strong> (sua senha privada, guardada em cofre). Se perder a secreta, perde tudo!",
-    "guide_q2": "2. O que são Anchors (Âncoras)?",
-    "guide_a2": "Uma das maiores inovações da Stellar são as <strong>Anchors</strong>. Elas funcionam como casas de câmbio digitais licenciadas integradas na blockchain, permitindo enviar moedas fiduciárias locais (como Reais ou Dólares) e transformá-las em ativos virtuais estáveis (como USDC) instantaneamente.",
-    "guide_q3": "3. O que são Smart Contracts Soroban?",
-    "guide_a3": "<strong>Soroban</strong> é a engine de contratos inteligentes da Stellar que executa código Rust seguro diretamente no consenso. Com eles, podemos programar transações automáticas sem intermediários, como fazer Swaps (trocas de moedas) em piscinas de liquidez descentralizadas de forma imediata.",
+    "survival_instructions": "InstruÃ§Ãµes de SobrevivÃªncia no Continente",
+    "survival_desc": "Bem-vindo ao templo educacional! O objetivo deste RPG Ã© guiar vocÃª pelos conceitos prÃ¡ticos do Web3 atravÃ©s da rede <strong>Stellar</strong> de forma totalmente compreensÃ­vel.",
+    "guide_q1": "1. Como funciona a Criptografia AssimÃ©trica?",
+    "guide_a1": "No Web3, vocÃª nÃ£o cria logins com e-mail e senha convencionais. Em vez disso, seu endereÃ§o Ã© uma <strong>Chave PÃºblica</strong> (que todos podem ver, como um PIX) gerada matematicamente a partir de uma <strong>Chave Secreta</strong> (sua senha privada, guardada em cofre). Se perder a secreta, perde tudo!",
+    "guide_q2": "2. O que sÃ£o Anchors (Ã‚ncoras)?",
+    "guide_a2": "Uma das maiores inovaÃ§Ãµes da Stellar sÃ£o as <strong>Anchors</strong>. Elas funcionam como casas de cÃ¢mbio digitais licenciadas integradas na blockchain, permitindo enviar moedas fiduciÃ¡rias locais (como Reais ou DÃ³lares) e transformÃ¡-las em ativos virtuais estÃ¡veis (como USDC) instantaneamente.",
+    "guide_q3": "3. O que sÃ£o Smart Contracts Soroban?",
+    "guide_a3": "<strong>Soroban</strong> Ã© a engine de contratos inteligentes da Stellar que executa cÃ³digo Rust seguro diretamente no consenso. Com eles, podemos programar transaÃ§Ãµes automÃ¡ticas sem intermediÃ¡rios, como fazer Swaps (trocas de moedas) em piscinas de liquidez descentralizadas de forma imediata.",
     "guide_q4": "4. O que significa fazer Hold / Escrow?",
-    "guide_a4": "Fazer \"Hold\" significa travar ativos financeiros em um cofre automatizado sem custódia de terceiros por um período pré-determinado. Isso garante fidelidade ao ecossistema, permitindo ganhar recompensas e consolidar sua presença como holder no ecossistema global.",
-    "guide_footer": "Stellar Temple • Todos os dados simulados localmente para fins de capacitação de guerreiros.",
+    "guide_a4": "Fazer \"Hold\" significa travar ativos financeiros em um cofre automatizado sem custÃ³dia de terceiros por um perÃ­odo prÃ©-determinado. Isso garante fidelidade ao ecossistema, permitindo ganhar recompensas e consolidar sua presenÃ§a como holder no ecossistema global.",
+    "guide_footer": "Stellar Temple â€¢ Todos os dados simulados localmente para fins de capacitaÃ§Ã£o de guerreiros.",
     "close_window": "Fechar Janela"
   },
   "wallet": {
     "detected": "WALLET DETECTADA",
-    "terminal_subtitle": "Wallet Forge — East Biome Terminal",
+    "terminal_subtitle": "Wallet Forge â€” East Biome Terminal",
     "active_account": "Conta Ativa na Stellar Testnet",
-    "public_key_label": "Chave Pública",
+    "public_key_label": "Chave PÃºblica",
     "copied": "Copiado!",
     "copy": "Copiar",
     "close_terminal": "Fechar Terminal",
@@ -327,122 +327,122 @@
   },
   "otherPlayers": {
     "bot1": {
-      "bubble": "Olá viajante! Procurando por runas?"
+      "bubble": "OlÃ¡ viajante! Procurando por runas?"
     }
   },
   "npcs": {
     "guide": {
       "name": "James",
       "dialogs": [
-        "Bem-vindo ao saguão principal do Templo Stellar, jovem viajante! Aqui é onde a magia da Web3 ganha vida.",
-        "Eu sou James, o Mestre do Templo, e serei o seu guia por esta ilha de inovações descentralizadas.",
-        "Nossa ilha é um arquipélago educacional projetado para ensinar tudo sobre finanças descentralizadas (DeFi) através de 4 missões cruciais.",
-        "Primeiro, você precisará de uma identidade digital segura. Atravesse a ponte azul ao Leste até a Caverna e forje sua Carteira com o Mestre das Chaves.",
-        "Com sua carteira pronta, a segunda missão o levará ao Porto Norte, onde você aprenderá a usar o 'On-Ramp' para transformar moedas locais em ativos digitais.",
-        "Em seguida, na terceira missão, a praça Oeste revelará os segredos dos Contratos Inteligentes, onde você fará trocas rápidas de tokens.",
-        "E por fim, a quarta missão no Santuário Sul testará sua lealdade ensinando o poder do 'Hold' a longo prazo.",
-        "Complete todas as missões para ganhar o título de Guardião Lendário! Vamos começar? Siga primeiro para o Leste e crie sua carteira!"
+        "Bem-vindo ao saguÃ£o principal do Templo Stellar, jovem viajante! Aqui Ã© onde a magia da Web3 ganha vida.",
+        "Eu sou James, o Mestre do Templo, e serei o seu guia por esta ilha de inovaÃ§Ãµes descentralizadas.",
+        "Nossa ilha Ã© um arquipÃ©lago educacional projetado para ensinar tudo sobre finanÃ§as descentralizadas (DeFi) atravÃ©s de 4 missÃµes cruciais.",
+        "Primeiro, vocÃª precisarÃ¡ de uma identidade digital segura. Atravesse a ponte azul ao Leste atÃ© a Caverna e forje sua Carteira com o Mestre das Chaves.",
+        "Com sua carteira pronta, a segunda missÃ£o o levarÃ¡ ao Porto Norte, onde vocÃª aprenderÃ¡ a usar o 'On-Ramp' para transformar moedas locais em ativos digitais.",
+        "Em seguida, na terceira missÃ£o, a praÃ§a Oeste revelarÃ¡ os segredos dos Contratos Inteligentes, onde vocÃª farÃ¡ trocas rÃ¡pidas de tokens.",
+        "E por fim, a quarta missÃ£o no SantuÃ¡rio Sul testarÃ¡ sua lealdade ensinando o poder do 'Hold' a longo prazo.",
+        "Complete todas as missÃµes para ganhar o tÃ­tulo de GuardiÃ£o LendÃ¡rio! Vamos comeÃ§ar? Siga primeiro para o Leste e crie sua carteira!"
       ],
       "activeQuestDialogs": [
-        "Você ainda não tem uma conta! Siga para o Leste e converse com Kael [NPC] para forjar seu par de chaves."
+        "VocÃª ainda nÃ£o tem uma conta! Siga para o Leste e converse com Kael [NPC] para forjar seu par de chaves."
       ],
       "completedDialogs": [
-        "Excelente! Vejo que você forjou sua carteira Stellar com sucesso.",
-        "Agora você precisa de moedas para negociar. O corredor Norte foi liberado!",
-        "Atravesse o Portal Norte e fale com o Capitão HC [NPC] para adquirir seus primeiros XLM."
+        "Excelente! Vejo que vocÃª forjou sua carteira Stellar com sucesso.",
+        "Agora vocÃª precisa de moedas para negociar. O corredor Norte foi liberado!",
+        "Atravesse o Portal Norte e fale com o CapitÃ£o HC [NPC] para adquirir seus primeiros XLM."
       ]
     },
     "keymaster": {
       "name": "Kael [NPC]",
       "dialogs": [
-        "Saudações! Eu sou Kael [NPC], o forjador de relíquias raras do templo.",
-        "Aqui, você não usa e-mails ou senhas. Você cria uma identidade usando criptografia!",
-        "Sua Chave Pública (começa com 'G') é seu endereço público. Todos podem vê-la e enviar moedas para você.",
-        "A Chave Secreta (começa com 'S') é a chave mestra do seu cofre. Nunca a revele, ou perderá tudo!",
-        "Acesse o Altar de Chaves atrás de mim para forjar sua conta agora."
+        "SaudaÃ§Ãµes! Eu sou Kael [NPC], o forjador de relÃ­quias raras do templo.",
+        "Aqui, vocÃª nÃ£o usa e-mails ou senhas. VocÃª cria uma identidade usando criptografia!",
+        "Sua Chave PÃºblica (comeÃ§a com 'G') Ã© seu endereÃ§o pÃºblico. Todos podem vÃª-la e enviar moedas para vocÃª.",
+        "A Chave Secreta (comeÃ§a com 'S') Ã© a chave mestra do seu cofre. Nunca a revele, ou perderÃ¡ tudo!",
+        "Acesse o Altar de Chaves atrÃ¡s de mim para forjar sua conta agora."
       ],
       "activeQuestDialogs": [
-        "Use o terminal azul para gerar seu par de chaves e receber seu endereço de rede!"
+        "Use o terminal azul para gerar seu par de chaves e receber seu endereÃ§o de rede!"
       ],
       "completedDialogs": [
-        "Aí está! Sua conta foi perfeitamente forjada na rede Stellar.",
-        "Volte ao Saguão Principal e procure seu próximo destino ao Norte!"
+        "AÃ­ estÃ¡! Sua conta foi perfeitamente forjada na rede Stellar.",
+        "Volte ao SaguÃ£o Principal e procure seu prÃ³ximo destino ao Norte!"
       ]
     },
     "portmaster": {
-      "name": "Capitão HC [NPC]",
+      "name": "CapitÃ£o HC [NPC]",
       "dialogs": [
-        "Ahoy, aventureiro! Sou o Capitão HC [NPC], o encarregado do porto financeiro.",
-        "Na Stellar, usamos Âncoras (Anchors) para converter dinheiro do mundo real em ativos digitais.",
-        "Sem uma Âncora, moedas reais nunca entrariam na blockchain!",
-        "Acesse o Terminal de Câmbio ao meu lado para fazer um depósito simulado e receber Crystal Coins (XLM)!"
+        "Ahoy, aventureiro! Sou o CapitÃ£o HC [NPC], o encarregado do porto financeiro.",
+        "Na Stellar, usamos Ã‚ncoras (Anchors) para converter dinheiro do mundo real em ativos digitais.",
+        "Sem uma Ã‚ncora, moedas reais nunca entrariam na blockchain!",
+        "Acesse o Terminal de CÃ¢mbio ao meu lado para fazer um depÃ³sito simulado e receber Crystal Coins (XLM)!"
       ],
       "activeQuestDialogs": [
-        "Interaja com o Terminal de Câmbio para depositar e carregar sua carteira com XLM!"
+        "Interaja com o Terminal de CÃ¢mbio para depositar e carregar sua carteira com XLM!"
       ],
       "completedDialogs": [
-        "Transação completa! A Âncora enviou 150 XLM brilhantes para sua carteira.",
-        "Agora você tem fundos para negociar. Siga para o Oeste e procure a Alquimista!"
+        "TransaÃ§Ã£o completa! A Ã‚ncora enviou 150 XLM brilhantes para sua carteira.",
+        "Agora vocÃª tem fundos para negociar. Siga para o Oeste e procure a Alquimista!"
       ]
     },
     "scholar": {
       "name": "Alquimista [NPC]",
       "dialogs": [
-        "Saudações, herói! Bem-vindo ao mercado arcano de Soroban.",
-        "Soroban é o sistema de contratos inteligentes da Stellar. Ele é rápido, barato e seguro.",
-        "Com contratos inteligentes, podemos fazer trocas instantâneas (Swaps) sem a necessidade de um banco.",
-        "Interaja com o painel roxo alquímico para executar um contrato e trocar alguns XLM por USDC e tokens SORO!"
+        "SaudaÃ§Ãµes, herÃ³i! Bem-vindo ao mercado arcano de Soroban.",
+        "Soroban Ã© o sistema de contratos inteligentes da Stellar. Ele Ã© rÃ¡pido, barato e seguro.",
+        "Com contratos inteligentes, podemos fazer trocas instantÃ¢neas (Swaps) sem a necessidade de um banco.",
+        "Interaja com o painel roxo alquÃ­mico para executar um contrato e trocar alguns XLM por USDC e tokens SORO!"
       ],
       "activeQuestDialogs": [
         "Acesse o terminal roxo para testar o poder de um contrato inteligente Soroban!"
       ],
       "completedDialogs": [
-        "Mágico! A troca foi liquidada em poucos segundos e por uma fração de centavo.",
-        "Seu inventário agora guarda USDC e SORO. Você dominou as negociações do catálogo!",
-        "Apenas um desafio resta. Siga para o Sul e encontre o Ancião Bobba."
+        "MÃ¡gico! A troca foi liquidada em poucos segundos e por uma fraÃ§Ã£o de centavo.",
+        "Seu inventÃ¡rio agora guarda USDC e SORO. VocÃª dominou as negociaÃ§Ãµes do catÃ¡logo!",
+        "Apenas um desafio resta. Siga para o Sul e encontre o AnciÃ£o Bobba."
       ]
     },
     "sage": {
       "name": "Bobba [NPC]",
       "dialogs": [
-        "Bobba bobba bobba! Que jornada magnífica, jovem guerreiro!",
-        "Você forjou suas chaves, fez on-ramp e usou a magia dos contratos inteligentes.",
-        "A virtude final de um aventureiro Stellar é a lealdade de longo prazo, o sagrado 'Hold'.",
-        "Aproxime-se da Câmara Dourada de Hold. Trave uma parte dos seus tesouros para receber o título supremo de Guardião Lendário!"
+        "Bobba bobba bobba! Que jornada magnÃ­fica, jovem guerreiro!",
+        "VocÃª forjou suas chaves, fez on-ramp e usou a magia dos contratos inteligentes.",
+        "A virtude final de um aventureiro Stellar Ã© a lealdade de longo prazo, o sagrado 'Hold'.",
+        "Aproxime-se da CÃ¢mara Dourada de Hold. Trave uma parte dos seus tesouros para receber o tÃ­tulo supremo de GuardiÃ£o LendÃ¡rio!"
       ],
       "activeQuestDialogs": [
-        "Interaja com a câmara dourada para travar seus fundos em um contrato de Escrow!"
+        "Interaja com a cÃ¢mara dourada para travar seus fundos em um contrato de Escrow!"
       ],
       "completedDialogs": [
-        "🌟 O templo exalta o seu nome! Você completou toda a jornada do Onboarding Archipelago!",
-        "Seus tesouros estão guardados em segurança. Você agora é oficialmente um Guardião Lendário Stellar Holder!",
-        "Aproveite as finanças rápidas e descentralizadas. Bobba!"
+        "ðŸŒŸ O templo exalta o seu nome! VocÃª completou toda a jornada do Onboarding Archipelago!",
+        "Seus tesouros estÃ£o guardados em seguranÃ§a. VocÃª agora Ã© oficialmente um GuardiÃ£o LendÃ¡rio Stellar Holder!",
+        "Aproveite as finanÃ§as rÃ¡pidas e descentralizadas. Bobba!"
       ]
     },
     "gamefinow_info": {
       "name": "GAMEFINOW INFO",
       "dialogs": [
         "Terminal Informativo Gamefinow.",
-        "O Gamefinow é o principal ecossistema que conecta finanças descentralizadas (DeFi) à diversão interativa (GameFi) na rede Stellar.",
-        "Aqui no Templo, você aprenderá as bases da Web3: forjar carteiras, usar on-ramp, realizar swaps e entender o poder do hold.",
-        "Interaja com as missões para liberar os caminhos e obter seu NFT Lendário!"
+        "O Gamefinow Ã© o principal ecossistema que conecta finanÃ§as descentralizadas (DeFi) Ã  diversÃ£o interativa (GameFi) na rede Stellar.",
+        "Aqui no Templo, vocÃª aprenderÃ¡ as bases da Web3: forjar carteiras, usar on-ramp, realizar swaps e entender o poder do hold.",
+        "Interaja com as missÃµes para liberar os caminhos e obter seu NFT LendÃ¡rio!"
       ]
     },
     "walletnow_info": {
       "name": "WALLETNOW INFO",
       "dialogs": [
         "Terminal Informativo Walletnow.",
-        "A Walletnow é o seu painel definitivo de análise e rastreamento para o ecossistema DeFi.",
-        "Sua tecnologia garante que você tenha um portal seguro para a Web3, rastreando seus rendimentos e NFTs de forma otimizada.",
-        "Encontre o terminal oficial da Walletnow na caverna ao Leste para criar sua própria carteira."
+        "A Walletnow Ã© o seu painel definitivo de anÃ¡lise e rastreamento para o ecossistema DeFi.",
+        "Sua tecnologia garante que vocÃª tenha um portal seguro para a Web3, rastreando seus rendimentos e NFTs de forma otimizada.",
+        "Encontre o terminal oficial da Walletnow na caverna ao Leste para criar sua prÃ³pria carteira."
       ]
     },
     "nearx_info": {
       "name": "NEARX INFO",
       "dialogs": [
         "Terminal Informativo Nearx.",
-        "A Nearx é a principal infraestrutura de transações On-Ramp e Off-Ramp na blockchain Stellar.",
-        "Ela funciona como uma ponte confiável para que você possa comprar ativos digitais utilizando sua moeda local de forma 100% segura e regulada.",
+        "A Nearx Ã© a principal infraestrutura de transaÃ§Ãµes On-Ramp e Off-Ramp na blockchain Stellar.",
+        "Ela funciona como uma ponte confiÃ¡vel para que vocÃª possa comprar ativos digitais utilizando sua moeda local de forma 100% segura e regulada.",
         "O porto principal da Nearx pode ser encontrado na praia ao Norte do mapa central."
       ]
     },
@@ -450,18 +450,18 @@
       "name": "DEFINDEX INFO",
       "dialogs": [
         "Terminal Informativo Defindex.",
-        "A Defindex é pioneira na construção de ferramentas para automatizar e otimizar rendimentos de forma descentralizada.",
-        "Com foco no ecossistema Soroban, eles desenvolvem cofres e índices inteligentes para facilitar seus investimentos em DeFi.",
-        "Encontre os simuladores dos contratos da Defindex integrados com Soroswap na praça ao Oeste."
+        "A Defindex Ã© pioneira na construÃ§Ã£o de ferramentas para automatizar e otimizar rendimentos de forma descentralizada.",
+        "Com foco no ecossistema Soroban, eles desenvolvem cofres e Ã­ndices inteligentes para facilitar seus investimentos em DeFi.",
+        "Encontre os simuladores dos contratos da Defindex integrados com Soroswap na praÃ§a ao Oeste."
       ]
     },
     "soroswap_info": {
       "name": "SOROSWAP INFO",
       "dialogs": [
         "Terminal Informativo Soroswap.",
-        "O Soroswap é a exchange descentralizada (DEX) líder e formador de mercado automatizado (AMM) no ecossistema Soroban.",
-        "A plataforma permite que qualquer usuário troque tokens da rede Stellar de forma incrivelmente rápida e com taxas próximas a zero.",
-        "Você poderá testar as poderosas liquidações de Swap no terminal localizado no lado Oeste."
+        "O Soroswap Ã© a exchange descentralizada (DEX) lÃ­der e formador de mercado automatizado (AMM) no ecossistema Soroban.",
+        "A plataforma permite que qualquer usuÃ¡rio troque tokens da rede Stellar de forma incrivelmente rÃ¡pida e com taxas prÃ³ximas a zero.",
+        "VocÃª poderÃ¡ testar as poderosas liquidaÃ§Ãµes de Swap no terminal localizado no lado Oeste."
       ]
     },
     "pigfi_info": {
@@ -482,23 +482,23 @@
   "mmo": {
     "phrases": [
       "Partiu fazer Pix On-Ramp!",
-      "Adorei o visual das costas do herói!",
-      "Este terminal ATM DEFI é massa demais!",
+      "Adorei o visual das costas do herÃ³i!",
+      "Este terminal ATM DEFI Ã© massa demais!",
       "Conectando ao terminal Stellar...",
       "Consenso em 5 segundos!",
-      "A taxa de rede da Stellar é quase zero!",
+      "A taxa de rede da Stellar Ã© quase zero!",
       "Olha meu elmo de guerreiro!",
       "Que massa, o jogo carrega instantaneamente!",
-      "Stellar é muito rápida e barata de verdade!",
-      "Este MMO está fantástico!",
+      "Stellar Ã© muito rÃ¡pida e barata de verdade!",
+      "Este MMO estÃ¡ fantÃ¡stico!",
       "A Chave Secreta nunca deve ser compartilhada!",
-      "Olá! Alguém quer fazer trade de moedas?"
+      "OlÃ¡! AlguÃ©m quer fazer trade de moedas?"
     ]
   },
   "about": {
     "hero": {
-      "subtitle": "✦ Aprenda. Jogue. Cresça. ✦",
-      "description": "O primeiro MMO onde cada ação é uma transação real on-chain. Carteiras reais, tokens reais, DeFi real — disfarçado de diversão.",
+      "subtitle": "âœ¦ Aprenda. Jogue. CresÃ§a. âœ¦",
+      "description": "O primeiro MMO onde cada aÃ§Ã£o Ã© uma transaÃ§Ã£o real on-chain. Carteiras reais, tokens reais, DeFi real â€” disfarÃ§ado de diversÃ£o.",
       "explore": "Explorar",
       "districts": "Distritos",
       "partners": "Parceiros",
@@ -506,9 +506,9 @@
       "finality": "Finalidade"
     },
     "nav": {
-      "home": "Início",
+      "home": "InÃ­cio",
       "startup": "Sobre a Startup",
-      "what": "O que é",
+      "what": "O que Ã©",
       "howtoplay": "Como Jogar",
       "tokenomics": "Tokenomics",
       "onchain": "On-Chain",
@@ -518,51 +518,51 @@
       "livestats": "Stats ao Vivo",
       "roadmap": "Roadmap",
       "language": "Idioma",
-      "live": "AO VIVO • Testnet",
+      "live": "AO VIVO â€¢ Testnet",
       "connecting": "Conectando...",
       "updated": "Atualizado"
     },
     "startup": {
       "title": "Sobre a Startup (Pitch Deck)",
-      "subtitle": "Gamificando a adoção de cripto e DeFi na blockchain Stellar para a próxima geração de usuários.",
-      "problem_title": "Problema e Solução",
-      "problem_desc": "O onboarding em Web3 e DeFi continua sendo complexo, assustador e cheio de fricção para 99% dos usuários comuns. O GameFiNow resolve isso transformando primitivos financeiros reais (carteiras, swaps, cofres de rendimento, pagamentos via Pix) em um jogo retro MMO 2D imersivo. Cada interação no jogo é uma transação transparente na Stellar, tornando a educação financeira e o uso de DeFi naturais, visuais e divertidos.",
-      "product_title": "Produto ou Serviço",
-      "product_desc": "Um universo RPG 2D multiplayer alimentado pela Stellar e contratos inteligentes Soroban. Nosso produto oferece:\n\n• Onboarding sem custódia em 1 clique via WalletNow.\n• Rampa Pix/Cartão integrada para stablecoins (USDW/BRW).\n• Mercado P2P on-chain de itens e cosméticos (NFTs).\n• Cofres de Rendimento Deflacionário com sistema de Staking.\n• Hub gamificado conectando mais de 12 protocolos do ecossistema Stellar.",
-      "market_title": "Mercado e Público-Alvo",
-      "market_desc": "Atuamos na convergência perfeita entre os mercados de Web3 Gaming ($30B+) e Finanças Descentralizadas ($100B+ TVL). Nosso público-alvo central inclui:\n\n• Gamers casuais e nostálgicos buscando estética retro (estilo Tibia/Pokemon).\n• Entusiastas de criptomoedas na América Latina e países emergentes que buscam pagamentos rápidos e de baixo custo.\n• Novatos no mundo DeFi que desejam renda passiva e auto-custódia sem as tradicionais barreiras de entrada e jargões complexos.",
-      "business_title": "Modelo de Negócio",
-      "business_desc": "Nossa monetização é sustentável, deflacionária e diretamente ligada ao uso do protocolo:\n\n• Taxa de 0,5% aplicada em todas as negociações P2P e Swaps na DEX (compartilhada entre o Tesouro e a queima de tokens GAMEFI).\n• Comercialização de Outfits Premium e Skins exclusivas (NFTs de edição limitada).\n• Taxa de performance/gestão aplicada sobre os Cofres de Rendimento via Soroban.\n• Pacotes B2B (Business to Business) de integração e stands personalizados no mapa para outros parceiros do ecossistema.",
-      "future_title": "Plano Futuro & Estratégia",
-      "future_desc": "Nosso roteiro para escalar globalmente e nos tornarmos o maior hub de integração DeFi gamificada:\n\n• Lançamento oficial na Stellar Mainnet e listagens em grandes DEXs/CEXs.\n• Desenvolvimento e integração de um aplicativo Mobile nativo (iOS/Android) com Passkeys.\n• Sistema de Governança Descentralizada (DAO) implementado no Distrito Norte.\n• Organização de Torneios de Batalha com premiações expressivas (Prize Pools) em stablecoins.\n• Expansão Cross-Chain inteligente e suporte a novos pares de liquidez automatizados baseados na evolução do Soroban."
+      "subtitle": "Gamificando a adoÃ§Ã£o de cripto e DeFi na blockchain Stellar para a prÃ³xima geraÃ§Ã£o de usuÃ¡rios.",
+      "problem_title": "Problema e SoluÃ§Ã£o",
+      "problem_desc": "O onboarding em Web3 e DeFi continua sendo complexo, assustador e cheio de fricÃ§Ã£o para 99% dos usuÃ¡rios comuns. O GameFiNow resolve isso transformando primitivos financeiros reais (carteiras, swaps, cofres de rendimento, pagamentos via Pix) em um jogo retro MMO 2D imersivo. Cada interaÃ§Ã£o no jogo Ã© uma transaÃ§Ã£o transparente na Stellar, tornando a educaÃ§Ã£o financeira e o uso de DeFi naturais, visuais e divertidos.",
+      "product_title": "Produto ou ServiÃ§o",
+      "product_desc": "Um universo RPG 2D multiplayer alimentado pela Stellar e contratos inteligentes Soroban. Nosso produto oferece:\n\nâ€¢ Onboarding sem custÃ³dia em 1 clique via WalletNow.\nâ€¢ Rampa Pix/CartÃ£o integrada para stablecoins (USDW/BRW).\nâ€¢ Mercado P2P on-chain de itens e cosmÃ©ticos (NFTs).\nâ€¢ Cofres de Rendimento DeflacionÃ¡rio com sistema de Staking.\nâ€¢ Hub gamificado conectando mais de 12 protocolos do ecossistema Stellar.",
+      "market_title": "Mercado e PÃºblico-Alvo",
+      "market_desc": "Atuamos na convergÃªncia perfeita entre os mercados de Web3 Gaming ($30B+) e FinanÃ§as Descentralizadas ($100B+ TVL). Nosso pÃºblico-alvo central inclui:\n\nâ€¢ Gamers casuais e nostÃ¡lgicos buscando estÃ©tica retro (estilo Tibia/Pokemon).\nâ€¢ Entusiastas de criptomoedas na AmÃ©rica Latina e paÃ­ses emergentes que buscam pagamentos rÃ¡pidos e de baixo custo.\nâ€¢ Novatos no mundo DeFi que desejam renda passiva e auto-custÃ³dia sem as tradicionais barreiras de entrada e jargÃµes complexos.",
+      "business_title": "Modelo de NegÃ³cio",
+      "business_desc": "Nossa monetizaÃ§Ã£o Ã© sustentÃ¡vel, deflacionÃ¡ria e diretamente ligada ao uso do protocolo:\n\nâ€¢ Taxa de 0,5% aplicada em todas as negociaÃ§Ãµes P2P e Swaps na DEX (compartilhada entre o Tesouro e a queima de tokens GAMEFI).\nâ€¢ ComercializaÃ§Ã£o de Outfits Premium e Skins exclusivas (NFTs de ediÃ§Ã£o limitada).\nâ€¢ Taxa de performance/gestÃ£o aplicada sobre os Cofres de Rendimento via Soroban.\nâ€¢ Pacotes B2B (Business to Business) de integraÃ§Ã£o e stands personalizados no mapa para outros parceiros do ecossistema.",
+      "future_title": "Plano Futuro & EstratÃ©gia",
+      "future_desc": "Nosso roteiro para escalar globalmente e nos tornarmos o maior hub de integraÃ§Ã£o DeFi gamificada:\n\nâ€¢ LanÃ§amento oficial na Stellar Mainnet e listagens em grandes DEXs/CEXs.\nâ€¢ Desenvolvimento e integraÃ§Ã£o de um aplicativo Mobile nativo (iOS/Android) com Passkeys.\nâ€¢ Sistema de GovernanÃ§a Descentralizada (DAO) implementado no Distrito Norte.\nâ€¢ OrganizaÃ§Ã£o de Torneios de Batalha com premiaÃ§Ãµes expressivas (Prize Pools) em stablecoins.\nâ€¢ ExpansÃ£o Cross-Chain inteligente e suporte a novos pares de liquidez automatizados baseados na evoluÃ§Ã£o do Soroban."
     },
     "what": {
-      "title": "O que é GameFiNow?",
-      "subtitle": "Uma revolução na interseção entre jogos e finanças descentralizadas — construída na Stellar.",
-      "vision_title": "A Visão",
-      "vision_text": "GameFiNow é um jogo online massivamente multijogador onde toda a economia vive na blockchain Stellar. Cada ação do jogador — criar uma carteira, trocar tokens, negociar itens — é uma transação real on-chain.",
-      "stellar_title": "Construído na Stellar",
-      "stellar_text": "A Stellar oferece finalidade em 5 segundos, taxas de 0,00001 XLM por transação e suporte nativo a múltiplos ativos. Com contratos inteligentes Soroban, o GameFiNow oferece primitivos DeFi programáveis diretamente dentro do jogo.",
-      "defi_title": "DeFi Através do Gameplay",
-      "defi_text": "Quest 1 = criação de carteira. Quest 2 = on-ramp. Quest 3 = troca de tokens. Quest 4 = cofres de rendimento. Ao terminar o onboarding, os jogadores são usuários reais de DeFi — sem perceber a complexidade.",
+      "title": "O que Ã© GameFiNow?",
+      "subtitle": "Uma revoluÃ§Ã£o na interseÃ§Ã£o entre jogos e finanÃ§as descentralizadas â€” construÃ­da na Stellar.",
+      "vision_title": "A VisÃ£o",
+      "vision_text": "GameFiNow Ã© um jogo online massivamente multijogador onde toda a economia vive na blockchain Stellar. Cada aÃ§Ã£o do jogador â€” criar uma carteira, trocar tokens, negociar itens â€” Ã© uma transaÃ§Ã£o real on-chain.",
+      "stellar_title": "ConstruÃ­do na Stellar",
+      "stellar_text": "A Stellar oferece finalidade em 5 segundos, taxas de 0,00001 XLM por transaÃ§Ã£o e suporte nativo a mÃºltiplos ativos. Com contratos inteligentes Soroban, o GameFiNow oferece primitivos DeFi programÃ¡veis diretamente dentro do jogo.",
+      "defi_title": "DeFi AtravÃ©s do Gameplay",
+      "defi_text": "Quest 1 = criaÃ§Ã£o de carteira. Quest 2 = on-ramp. Quest 3 = troca de tokens. Quest 4 = cofres de rendimento. Ao terminar o onboarding, os jogadores sÃ£o usuÃ¡rios reais de DeFi â€” sem perceber a complexidade.",
       "ecosystem_title": "O Ecossistema",
-      "ecosystem_text": "GameFiNow é uma plataforma para o ecossistema DeFi da Stellar. 12 protocolos parceiros — Soroswap, WalletNow, DefIndex, PigFi, Dupply, NIDO, AutoFin, NEARX, WAVE, TroqPay, Vellora e MUTAV — têm stands dedicados dentro do mundo."
+      "ecosystem_text": "GameFiNow Ã© uma plataforma para o ecossistema DeFi da Stellar. 12 protocolos parceiros â€” Soroswap, WalletNow, DefIndex, PigFi, Dupply, NIDO, AutoFin, NEARX, WAVE, TroqPay, Vellora e MUTAV â€” tÃªm stands dedicados dentro do mundo."
     },
     "howtoplay": {
       "title": "Como Jogar",
-      "subtitle": "Guia completo de onboarding interativo, mecânicas de combate RPG e domínio da economia on-chain.",
-      "quest": "Missão",
+      "subtitle": "Guia completo de onboarding interativo, mecÃ¢nicas de combate RPG e domÃ­nio da economia on-chain.",
+      "quest": "MissÃ£o",
       "guide_title": "Manual Completo do Jogador",
       "step1_title": "1. Forjando sua Identidade",
-      "step1_desc": "A primeira etapa é criar sua própria carteira Stellar sem a necessidade de guardar senhas complexas, usando Passkeys seguras no seu dispositivo (como impressão digital ou FaceID). A integração com o SDK da WalletNow permite criar a carteira com 1 clique. Imediatamente após a criação, o protocolo financiará sua conta com recursos da Testnet para você não ficar travado.",
+      "step1_desc": "A primeira etapa Ã© criar sua prÃ³pria carteira Stellar sem a necessidade de guardar senhas complexas, usando Passkeys seguras no seu dispositivo (como impressÃ£o digital ou FaceID). A integraÃ§Ã£o com o SDK da WalletNow permite criar a carteira com 1 clique. Imediatamente apÃ³s a criaÃ§Ã£o, o protocolo financiarÃ¡ sua conta com recursos da Testnet para vocÃª nÃ£o ficar travado.",
       "step2_title": "2. Entrada de Recursos (On-Ramp)",
-      "step2_desc": "Após se familiarizar com sua carteira (inventário principal), você precisará de fundos reais ou stablecoins. Utilize o portal de depósito (On-Ramp) via Pix ou Cartão para converter a sua moeda local diretamente em stablecoins (como BRW ou USDW). Tudo é processado e liquidado em apenas 5 segundos, fornecendo o saldo necessário para transações e taxas mínimas.",
-      "step3_title": "3. Combate e Exploração (RPG)",
-      "step3_desc": "Explore vastos e ricos biomas: Cavernas Profundas, Praias Tropicais, Jardins Elementais e Santuários Anciões. Enfrente criaturas clássicas (Slimes, Cave Worms, Crabs, Bees e Snakes) de níveis 1 a 10 em combates em tempo real. Utilize as mecânicas de teclas de atalho para lançar magias ativas (Cura, Fogo, Raio) que gastam Mana (MP). Derrote monstros, colete experiência (XP) e evolua seu herói até o cobiçado nível 99. Nota: O ganho de XP escala matematicamente! Caçar monstros de nível superior concede bônus massivos, enquanto caçar feras muito fracas reduz drasticamente os seus ganhos.",
+      "step2_desc": "ApÃ³s se familiarizar com sua carteira (inventÃ¡rio principal), vocÃª precisarÃ¡ de fundos reais ou stablecoins. Utilize o portal de depÃ³sito (On-Ramp) via Pix ou CartÃ£o para converter a sua moeda local diretamente em stablecoins (como BRW ou USDW). Tudo Ã© processado e liquidado em apenas 5 segundos, fornecendo o saldo necessÃ¡rio para transaÃ§Ãµes e taxas mÃ­nimas.",
+      "step3_title": "3. Combate e ExploraÃ§Ã£o (RPG)",
+      "step3_desc": "Explore vastos e ricos biomas: Cavernas Profundas, Praias Tropicais, Jardins Elementais e SantuÃ¡rios AnciÃµes. Enfrente criaturas clÃ¡ssicas (Slimes, Cave Worms, Crabs, Bees e Snakes) de nÃ­veis 1 a 10 em combates em tempo real. Utilize as mecÃ¢nicas de teclas de atalho para lanÃ§ar magias ativas (Cura, Fogo, Raio) que gastam Mana (MP). Derrote monstros, colete experiÃªncia (XP) e evolua seu herÃ³i atÃ© o cobiÃ§ado nÃ­vel 99. Nota: O ganho de XP escala matematicamente! CaÃ§ar monstros de nÃ­vel superior concede bÃ´nus massivos, enquanto caÃ§ar feras muito fracas reduz drasticamente os seus ganhos.",
       "step4_title": "4. Coleta de Drops e Economia P2P",
-      "step4_desc": "Monstros derrotados deixarão preciosos tokens GAMEFI e Gemas valiosas. Esses itens vão direto para o seu inventário (empilháveis em até 99). Com seus drops garantidos na blockchain, você pode se dirigir à Loja P2P na Praça Central. Lá você comercializa livremente qualquer recurso, decidindo o preço, pagando apenas uma pequena taxa de rede de 0,5% para o tesouro.",
-      "step5_title": "5. Domínio DeFi e Cofres (Vaults)",
-      "step5_desc": "Como investidor do ecossistema, o ápice da jornada é fazer os fundos trabalharem por você. Bloqueie seus tokens GAMEFI nos Cofres de Rendimento garantidos por contratos Soroban inquebráveis. Em troca da liquidez fornecida, você ganha APY passivo, acumula Pontos de Glória Lendária e recebe potentes Buffs permanentes (Força/Inteligência) para o seu personagem, tornando-o invencível nas próximas explorações."
+      "step4_desc": "Monstros derrotados deixarÃ£o preciosos tokens GAMEFI e Gemas valiosas. Esses itens vÃ£o direto para o seu inventÃ¡rio (empilhÃ¡veis em atÃ© 99). Com seus drops garantidos na blockchain, vocÃª pode se dirigir Ã  Loja P2P na PraÃ§a Central. LÃ¡ vocÃª comercializa livremente qualquer recurso, decidindo o preÃ§o, pagando apenas uma pequena taxa de rede de 0,5% para o tesouro.",
+      "step5_title": "5. DomÃ­nio DeFi e Cofres (Vaults)",
+      "step5_desc": "Como investidor do ecossistema, o Ã¡pice da jornada Ã© fazer os fundos trabalharem por vocÃª. Bloqueie seus tokens GAMEFI nos Cofres de Rendimento garantidos por contratos Soroban inquebrÃ¡veis. Em troca da liquidez fornecida, vocÃª ganha APY passivo, acumula Pontos de GlÃ³ria LendÃ¡ria e recebe potentes Buffs permanentes (ForÃ§a/InteligÃªncia) para o seu personagem, tornando-o invencÃ­vel nas prÃ³ximas exploraÃ§Ãµes."
     },
     "tokenomics": {
       "title": "Tokenomics",
@@ -571,19 +571,19 @@
       "protocol_fee": "Taxa do Protocolo",
       "protocol_fee_sub": "Em P2P e swaps",
       "stellar_fee": "Taxa Base Stellar",
-      "stellar_fee_sub": "Por operação",
-      "vault_min": "Mínimo Cofre VIP",
+      "stellar_fee_sub": "Por operaÃ§Ã£o",
+      "vault_min": "MÃ­nimo Cofre VIP",
       "vault_min_sub": "Bloqueio 24h para rendimento",
       "view": "Ver"
     },
     "onchain": {
       "title": "Dados On-Chain",
-      "subtitle": "Todos os contratos e endereços são públicos. Verifique tudo diretamente na Stellar.",
+      "subtitle": "Todos os contratos e endereÃ§os sÃ£o pÃºblicos. Verifique tudo diretamente na Stellar.",
       "gamefi_issuer": "Emissor do Token GAMEFI",
       "treasury": "Tesouro GameFiNow",
-      "usdw_issuer": "Emissor USDW — WalletNow",
-      "brw_issuer": "Emissor BRW — WalletNow",
-      "usdc_issuer": "Emissor USDC — Circle",
+      "usdw_issuer": "Emissor USDW â€” WalletNow",
+      "brw_issuer": "Emissor BRW â€” WalletNow",
+      "usdc_issuer": "Emissor USDC â€” Circle",
       "testnet": "Testnet",
       "protocol_fees": "Taxas do protocolo",
       "usd_stable": "Stablecoin USD",
@@ -598,27 +598,31 @@
       "title": "Economia",
       "subtitle": "Uma economia DeFi totalmente funcional rodando dentro do mundo do jogo.",
       "p2p_title": "Loja P2P",
-      "p2p_text": "Liste e negocie itens do jogo por GAMEFI. Cada negociação é liquidada on-chain com 0,5% de taxa para o tesouro. Procedência completa de todos os itens.",
+      "p2p_text": "Liste e negocie itens do jogo por GAMEFI. Cada negociaÃ§Ã£o Ã© liquidada on-chain com 0,5% de taxa para o tesouro. ProcedÃªncia completa de todos os itens.",
       "faucet_title": "Torneira",
-      "faucet_text": "XLM gratuito via Friendbot da Stellar para novos jogadores. Cooldown de 24h — gamificado como uma fonte real no mundo do jogo.",
+      "faucet_text": "XLM gratuito via Friendbot da Stellar para novos jogadores. Cooldown de 24h â€” gamificado como uma fonte real no mundo do jogo.",
       "vault_title": "Cofre/Rendimento",
-      "vault_text": "Bloqueie 100+ GAMEFI por 24h. Aplicado via Soroban. Ganhe rendimento, desbloqueie cosméticos e poder de governança.",
+      "vault_text": "Bloqueie 100+ GAMEFI por 24h. Aplicado via Soroban. Ganhe rendimento, desbloqueie cosmÃ©ticos e poder de governanÃ§a.",
       "dex_title": "Swap DEX",
-      "dex_text": "Integração SoroSwap. Troque USDW ↔ GAMEFI ↔ XLM no jogo. Mesmo contrato Soroban usado em produção."
+      "dex_text": "IntegraÃ§Ã£o SoroSwap. Troque USDW â†” GAMEFI â†” XLM no jogo. Mesmo contrato Soroban usado em produÃ§Ã£o.",
+      "guild_title": "Casa da Guilda",
+      "guild_text": "Crie ou entre em uma Guilda por 50 GAMEFI. Cada guilda tem tag personalizada (ex: [STAR]), ícone, cor de banner, tesouraria compartilhada e roles (Líder, Ofício, Membro). Líderes podem se teletransportar diretamente para a Guildhouse no mapa.",
+      "class_title": "Consagração de Classe",
+      "class_text": "Na Fonte Sagrada (desbloqueada após a Quest 1), consagre seu herói como uma das 4 classes: Guerreiro Estelar ⚔️, Alquimista Soroban 🧙, Caçador Cósmico 🏹 ou Guardião da Rede 🛡️. Cada classe tem modificadores de atributos únicos e uma habilidade passiva exclusiva. Trocar de classe custa 10 GAMEFI."
     },
     "world": {
       "title": "Mapa do Mundo",
-      "subtitle": "5 distritos interconectados — cada um com experiências únicas, parceiros e mecânicas DeFi.",
-      "center_name": "Praça Central",
-      "center_desc": "O coração pulsante do GameFiNow. É aqui que toda jornada começa. A Praça Central abriga o terminal ATM DeFi on-chain, a loja P2P de negociação, a loja de cosméticos com roupas exclusivas, a Torneira de XLM gratuito e todos os stands dos parceiros: Soroswap, WalletNow, DefIndex, PigFi, Dupply, NIDO, AutoFin, NEARX, WAVE, TroqPay, Vellora e MUTAV. 12 protocolos ativos, 5 NPCs e inúmeras interações on-chain — tudo em um só lugar.",
+      "subtitle": "5 distritos interconectados â€” cada um com experiÃªncias Ãºnicas, parceiros e mecÃ¢nicas DeFi.",
+      "center_name": "PraÃ§a Central",
+      "center_desc": "O coraÃ§Ã£o pulsante do GameFiNow. Ã‰ aqui que toda jornada comeÃ§a. A PraÃ§a Central abriga o terminal ATM DeFi on-chain, a loja P2P de negociaÃ§Ã£o, a loja de cosmÃ©ticos com roupas exclusivas, a Torneira de XLM gratuito e todos os stands dos parceiros: Soroswap, WalletNow, DefIndex, PigFi, Dupply, NIDO, AutoFin, NEARX, WAVE, TroqPay, Vellora e MUTAV. 12 protocolos ativos, 5 NPCs e inÃºmeras interaÃ§Ãµes on-chain â€” tudo em um sÃ³ lugar.",
       "east_name": "Distrito Leste",
-      "east_desc": "Acessível pelo Portal Leste na Praça Central, o Distrito Leste é a zona avançada para jogadores experientes em DeFi. Aqui você encontrará mecânicas mais profundas de liquidez, acesso a cofres de rendimento e futuras quests nativas do Soroban, pensadas para quem já domina o mundo Web3.",
+      "east_desc": "AcessÃ­vel pelo Portal Leste na PraÃ§a Central, o Distrito Leste Ã© a zona avanÃ§ada para jogadores experientes em DeFi. Aqui vocÃª encontrarÃ¡ mecÃ¢nicas mais profundas de liquidez, acesso a cofres de rendimento e futuras quests nativas do Soroban, pensadas para quem jÃ¡ domina o mundo Web3.",
       "west_name": "Distrito Oeste",
-      "west_desc": "O hub social do universo GameFiNow. O Distrito Oeste conecta jogadores por meio de eventos comunitários, mecânicas de guilda e gameplay competitivo. Acessível pelo Portal Oeste e desenvolvido para quem quer mais do que DeFi — quer comunidade.",
+      "west_desc": "O hub social do universo GameFiNow. O Distrito Oeste conecta jogadores por meio de eventos comunitÃ¡rios, mecÃ¢nicas de guilda e gameplay competitivo. AcessÃ­vel pelo Portal Oeste e desenvolvido para quem quer mais do que DeFi â€” quer comunidade.",
       "north_name": "Distrito Norte",
-      "north_desc": "Reservado para a futura camada de governança DAO do GameFiNow. À medida que o protocolo amadurece, os detentores de tokens acessarão o Distrito Norte para votar em decisões-chave: ajustes de taxas, integração de novos parceiros, regras de emissão de tokens e expansões do mundo.",
+      "north_desc": "Reservado para a futura camada de governanÃ§a DAO do GameFiNow. Ã€ medida que o protocolo amadurece, os detentores de tokens acessarÃ£o o Distrito Norte para votar em decisÃµes-chave: ajustes de taxas, integraÃ§Ã£o de novos parceiros, regras de emissÃ£o de tokens e expansÃµes do mundo.",
       "south_name": "Distrito Sul",
-      "south_desc": "Um paraíso para colecionadores e hub sazonal. O Distrito Sul é voltado para jogadores que amam itens raros, drops limitados e quests cosméticas exclusivas. Futuro lar do gateway do app mobile e de eventos sazonais no jogo com recompensas on-chain."
+      "south_desc": "Um paraÃ­so para colecionadores e hub sazonal. O Distrito Sul Ã© voltado para jogadores que amam itens raros, drops limitados e quests cosmÃ©ticas exclusivas. Futuro lar do gateway do app mobile e de eventos sazonais no jogo com recompensas on-chain."
     },
     "partners": {
       "title": "Parceiros do Ecossistema",
@@ -629,15 +633,15 @@
       "subtitle": "Dados em tempo real da Stellar Horizon Testnet e CoinGecko.",
       "xlm_usd": "XLM / USD",
       "xlm_brl": "XLM / BRL",
-      "ledger": "Último Ledger",
-      "coingecko": "CoinGecko • Ao Vivo",
+      "ledger": "Ãšltimo Ledger",
+      "coingecko": "CoinGecko â€¢ Ao Vivo",
       "connecting": "Conectando...",
       "treasury": "Conta do Tesouro",
-      "address": "Endereço Público",
-      "sequence": "Sequência",
+      "address": "EndereÃ§o PÃºblico",
+      "sequence": "SequÃªncia",
       "subentries": "Sub-entradas",
       "balances": "Saldos On-Chain",
-      "live_txns": "Transações Ao Vivo",
+      "live_txns": "TransaÃ§Ãµes Ao Vivo",
       "all_txns": "Todas as txns",
       "fetching": "Buscando dados da Stellar Horizon...",
       "explorer": "Explorador",
@@ -650,51 +654,51 @@
       "title": "Roadmap",
       "subtitle": "Do genesis a uma economia de jogo totalmente descentralizada.",
       "phase": "Fase",
-      "done": "✓ Concluído",
-      "current": "🔥 Em Andamento",
-      "soon": "⏳ Em Breve",
-      "future": "🌌 Planejado"
+      "done": "âœ“ ConcluÃ­do",
+      "current": "ðŸ”¥ Em Andamento",
+      "soon": "â³ Em Breve",
+      "future": "ðŸŒŒ Planejado"
     }
   },
   "level5_intro": {
-    "title1": "Parab�ns!",
-    "subtitle1": "N�vel 5 Alcan�ado!",
-    "desc1": "Voc� provou o seu valor para a ilha e desbloqueou todo o ecossistema GameFi. O verdadeiro jogo come�a agora!",
-    "btn_next": "Pr�ximo",
+    "title1": "ParabÃ©ns!",
+    "subtitle1": "NÃ­vel 5 AlcanÃ§ado!",
+    "desc1": "VocÃª provou o seu valor para a ilha e desbloqueou todo o ecossistema GameFi. O verdadeiro jogo comeÃ§a agora!",
+    "btn_next": "PrÃ³ximo",
     "btn_see_news": "Ver Novidades",
     "title2": "Combate Liberado",
-    "desc2": "Para combater, clique no inimigo, aguarde a mira trav�-lo e aproxime-se! Voc� n�o perde moedas ao morrer, e derrotar inimigos concede tokens GAMEFI. Acompanhe pelo �cone de espadas no HUD direito.",
-    "warning2": "Aten��o: Cuidado com sua vida (HP)!",
-    "title3": "Minera��o",
+    "desc2": "Para combater, clique no inimigo, aguarde a mira travÃ¡-lo e aproxime-se! VocÃª nÃ£o perde moedas ao morrer, e derrotar inimigos concede tokens GAMEFI. Acompanhe pelo Ã­cone de espadas no HUD direito.",
+    "warning2": "AtenÃ§Ã£o: Cuidado com sua vida (HP)!",
+    "title3": "MineraÃ§Ã£o",
     "desc3": "Compre uma Picareta na Loja P2P no mapa Leste! Com ela, aproxime-se de pedras preciosas no mapa Sul para minerar gemas e potencialmente tokens GAMEFI.",
     "title4": "ATM DEFI",
-    "atm_desc": "O ATM DeFi vai concentrar todas as opera��es de dep�sito, swap e on-ramp em um s� lugar.",
+    "atm_desc": "O ATM DeFi vai concentrar todas as operaÃ§Ãµes de depÃ³sito, swap e on-ramp em um sÃ³ lugar.",
     "title5": "Tudo Pronto!",
-    "desc5": "A ilha inteira est� agora sob seu dom�nio. Explore, minere, lute e invista.",
+    "desc5": "A ilha inteira estÃ¡ agora sob seu domÃ­nio. Explore, minere, lute e invista.",
     "btn_finish": "Finalizar"
   },
   "overlay": {
-    "processing_stellar": "Aguarde, processando transa��o na rede Stellar...",
+    "processing_stellar": "Aguarde, processando transaÃ§Ã£o na rede Stellar...",
     "mining_text": "Minerando..."
   },
   "welcome_tutorial": {
     "title": "Bem-vindo(a) ao",
-    "desc1": "Voc� acabou de chegar na ilha. Prepare-se para uma aventura incr�vel integrando Web3 e GameFi.",
+    "desc1": "Você acabou de chegar na ilha. Prepare-se para uma aventura incrível integrando Web3 e GameFi.",
     "btn_continue": "Continuar",
-    "movement": "Movimenta��o",
+    "movement": "Movimentação",
     "desc2": "Use as teclas <strong className=\"text-emerald-400\">W, A, S, D</strong> ou as <strong className=\"text-emerald-400\">Setas Direcionais</strong> do teclado para se mover pela ilha.",
-    "btn_next": "Pr�ximo",
-    "first_mission": "Sua Primeira Miss�o",
-    "desc3": "V� at� o centro da ilha e <strong className=\"text-amber-400\">fale imediatamente com o James</strong>. Ele lhe dar� instru��es vitais para criar sua carteira Web3 e iniciar sua jornada.",
+    "btn_next": "Próximo",
+    "first_mission": "Sua Primeira Missão",
+    "desc3": "Vá até o centro da ilha e <strong className=\"text-amber-400\">fale imediatamente com o James</strong>. Ele lhe dará instruções vitais para criar sua carteira Web3 e iniciar sua jornada.",
     "hint": "Dica:",
     "hint_desc": "Para interagir com NPCs ou objetos, simplesmente aproxime-se deles!",
-    "btn_start": "Come�ar Aventura!"
+    "btn_start": "Começar Aventura!"
   },
   "canvas": {
     "welcome_center": "Bem-vindo ao GameFiNow!",
     "welcome_south": "Bem-vindo ao DEFINDEX!",
     "welcome_east": "Bem-vindo ao WALLETNOW!",
-    "welcome_west": "Bem-vindo � SOROSWAP!",
-    "welcome_north": "Bem-vindo � NEARX!"
+    "welcome_west": "Bem-vindo à SOROSWAP!",
+    "welcome_north": "Bem-vindo à NEARX!"
   }
 }

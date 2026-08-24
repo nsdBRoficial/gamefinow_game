@@ -110,11 +110,19 @@ export const AdminPanel: React.FC = () => {
     return (
       <div className="min-h-screen bg-[#05080f] flex items-center justify-center p-6" style={{ fontFamily: "'Inter', sans-serif", backgroundImage: "radial-gradient(circle at center, rgba(239,68,68,0.1) 0%, transparent 50%)" }}>
         <div className="max-w-md w-full mx-auto p-8 rounded-2xl shadow-2xl" style={{ background: "rgba(3,6,14,0.8)", border: "2px solid rgba(239,68,68,0.2)", backdropFilter: "blur(12px)" }}>
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-full flex items-center justify-center bg-red-500/20 text-red-500 border border-red-500/50">
-            <Lock className="w-6 h-6" />
+        <div className="flex flex-col items-center mb-6 text-center">
+          <img 
+            src="/imagens/logo gamefinow - transparente.png" 
+            alt="GameFiNow Logo" 
+            className="w-16 h-16 object-contain mb-3 drop-shadow-[0_0_20px_rgba(239,68,68,0.4)]"
+          />
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full flex items-center justify-center bg-red-500/20 text-red-500 border border-red-500/50">
+              <Lock className="w-4 h-4" />
+            </div>
+            <h2 className="text-2xl font-black text-white uppercase tracking-wider">Acesso Restrito GM</h2>
           </div>
-          <h2 className="text-2xl font-black text-white uppercase tracking-wider">Acesso Restrito</h2>
+          <p className="text-xs text-slate-400 mt-1">GameFiNow • Painel Administrativo</p>
         </div>
         
         {error && <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg text-sm">{error}</div>}

@@ -50,7 +50,14 @@ export function PassportModal({
       <div className="bg-[#fbf5eb] border-[3px] border-black p-4 rounded-xl shadow-[6px_6px_0px_#000] max-w-sm w-full font-mono text-black">
         {/* Header */}
         <div className="flex justify-between items-center border-b-2 border-black pb-2 mb-3">
-          <span className="text-[10px] sm:text-xs font-black uppercase text-[#8b5a2b] flex items-center gap-1">🛡️ ID DO VIAJANTE & FICHA RPG</span>
+          <div className="flex items-center gap-1.5">
+            <img 
+              src="/imagens/logo gamefinow - transparente.png" 
+              alt="GameFiNow" 
+              className="w-5 h-5 object-contain"
+            />
+            <span className="text-[10px] sm:text-xs font-black uppercase text-[#8b5a2b]">ID DO VIAJANTE & FICHA RPG</span>
+          </div>
           <button 
             onClick={() => setShowPassport(false)}
             className="w-5 h-5 bg-red-500 text-white text-[10px] font-black rounded border border-black flex items-center justify-center cursor-pointer shadow-[1.5px_1.5px_0px_#000] active:translate-y-0.5"

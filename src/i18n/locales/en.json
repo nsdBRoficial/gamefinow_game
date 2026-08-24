@@ -604,7 +604,11 @@
       "vault_title": "Vault/Yield",
       "vault_text": "Lock 100+ GAMEFI for 24h. Soroban-enforced. Earn yield, unlock cosmetics, gain governance power.",
       "dex_title": "DEX Swap",
-      "dex_text": "SoroSwap integration. Trade USDW ↔ GAMEFI ↔ XLM in-game. Same Soroban contract used on production."
+      "dex_text": "SoroSwap integration. Trade USDW ↔ GAMEFI ↔ XLM in-game. Same Soroban contract used on production.",
+      "guild_title": "Guild House",
+      "guild_text": "Create or join a Guild for 50 GAMEFI. Each guild has a custom tag (e.g. [STAR]), icon, banner color, shared treasury, and member roles (Leader, Officer, Member). Guild leaders can teleport directly to the Guildhouse on the map.",
+      "class_title": "Class Consecration",
+      "class_text": "At the Sacred Fountain (unlocked after Quest 1), consecrate your hero as one of 4 classes: Stellar Warrior ⚔️, Soroban Alchemist 🧙, Cosmic Hunter 🏹, or Network Guardian 🛡️. Each class has unique stat multipliers and a passive skill. Changing class costs 10 GAMEFI."
     },
     "world": {
       "title": "World Map",

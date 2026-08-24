@@ -102,8 +102,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onPlay, playSynthSound
       {/* MAIN CONTENT */}
       <div className="relative z-10 w-full h-full flex flex-col items-center justify-center p-6 text-center">
         {/* LOGO */}
-        <div className="animate-bounce" style={{ animationDuration: "3s" }}>
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-cyan-100 to-cyan-500 drop-shadow-[0_5px_15px_rgba(0,0,0,0.8)] leading-tight uppercase" style={{ WebkitTextStroke: "2px #000" }}>
+        <div className="flex flex-col items-center animate-bounce" style={{ animationDuration: "3s" }}>
+          <img 
+            src="/imagens/logo gamefinow - transparente.png" 
+            alt="GameFiNow Logo" 
+            className="w-28 md:w-40 h-auto mb-3 drop-shadow-[0_0_35px_rgba(6,182,212,0.6)] object-contain"
+          />
+          <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-cyan-100 to-cyan-500 drop-shadow-[0_5px_15px_rgba(0,0,0,0.8)] leading-tight uppercase" style={{ WebkitTextStroke: "2px #000" }}>
             GAMEFINOW
           </h1>
           <h2 className="text-xl md:text-2xl text-amber-400 font-black mt-2 drop-shadow-[0_2px_4px_rgba(0,0,0,1)] uppercase tracking-widest" style={{ WebkitTextStroke: "1px #000" }}>

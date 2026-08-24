@@ -249,18 +249,18 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
   ];
 
   const ZONES = [
-    { id: "center", icon: "🏛️", color: "#f59e0b", name: t("about.world.center_name"), desc: t("about.world.center_desc") },
-    { id: "east",   icon: "🌅", color: "#06b6d4", name: t("about.world.east_name"),   desc: t("about.world.east_desc") },
-    { id: "west",   icon: "🌊", color: "#3b82f6", name: t("about.world.west_name"),   desc: t("about.world.west_desc") },
-    { id: "north",  icon: "🏔️", color: "#8b5cf6", name: t("about.world.north_name"),  desc: t("about.world.north_desc") },
-    { id: "south",  icon: "🌴", color: "#22c55e", name: t("about.world.south_name"),  desc: t("about.world.south_desc") },
+    { id: "center", icon: "🏛️", color: "#f59e0b", name: t("about.world.center_name"), desc: t("about.world.center_desc"), mapImg: "/imagens/mapa-central.png" },
+    { id: "east",   icon: "🌅", color: "#06b6d4", name: t("about.world.east_name"),   desc: t("about.world.east_desc"),   mapImg: "/imagens/mapa-leste.png" },
+    { id: "west",   icon: "🌊", color: "#3b82f6", name: t("about.world.west_name"),   desc: t("about.world.west_desc"),   mapImg: "/imagens/mapa-oeste.png" },
+    { id: "north",  icon: "🏔️", color: "#8b5cf6", name: t("about.world.north_name"),  desc: t("about.world.north_desc"),  mapImg: "/imagens/mapa-norte.png" },
+    { id: "south",  icon: "🌴", color: "#22c55e", name: t("about.world.south_name"),  desc: t("about.world.south_desc"),  mapImg: "/imagens/mapa-sul.png" },
   ];
 
   const ROADMAP = [
-    { phase: "0", emoji: "✅", status: "done",    title: "Genesis",    items: ["Stellar testnet wallet", "GAMEFI token on-chain", "4-quest onboarding", "Pixel art MMO world (60×60)", "WalletNow SDK integration"] },
-    { phase: "1", emoji: "🔥", status: "current", title: "Expansion",  items: ["9+ partner stands live", "P2P marketplace 0.5%", "Outfit NFT system", "Real-time multiplayer", "About page & docs", "Mobile UI"] },
-    { phase: "2", emoji: "⏳", status: "soon",    title: "Economy",    items: ["On-chain vault yield", "In-game liquidity pools", "DAO governance", "Soroban contract audit", "GAMEFI staking"] },
-    { phase: "3", emoji: "🌌", status: "future",  title: "Multiverse", items: ["Mainnet token launch", "Cross-chain bridges", "Native mobile app", "Tournament prize pools", "Partner SDK"] },
+    { phase: "0", emoji: "✅", status: "done",    title: "Genesis",    items: ["Stellar testnet wallet", "GAMEFI token on-chain", "4-quest onboarding", "Pixel art MMO world", "WalletNow SDK integration", "Passkeys (WebAuthn)"] },
+    { phase: "1", emoji: "🔥", status: "current", title: "Expansion",  items: ["15+ partner stands live", "P2P marketplace 0.5%", "Outfit NFT system", "Real-time multiplayer", "Guild House System ⭐", "Class Consecration ⭐", "GM Admin Panel", "Mobile joystick UI"] },
+    { phase: "2", emoji: "⏳", status: "soon",    title: "Economy",    items: ["On-chain Yield Vaults", "In-game liquidity pools", "DAO governance (North)", "Soroban contract audit", "GAMEFI staking", "Anti-bot stamina system"] },
+    { phase: "3", emoji: "🌌", status: "future",  title: "Multiverse", items: ["Mainnet token launch", "Cross-chain bridges", "Native mobile app", "Tournament prize pools", "PvP Arena on-chain", "Partner SDK"] },
   ];
 
   const ROADMAP_STATUS: Record<string, string> = {
@@ -327,9 +327,16 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
 
       {/* ── SIDEBAR ─────────────────────────────────────────────────────────── */}
       <aside className="hidden lg:flex flex-col w-64 shrink-0 py-6 px-3" style={{ background: "rgba(3,6,14,0.96)", borderRight: "2px solid rgba(245,158,11,0.15)", backdropFilter: "blur(20px)" }}>
-        <div className="px-3 mb-6">
-          <div className="text-base font-black tracking-widest uppercase rainbow-text mb-0.5">GAMEFINOW</div>
-          <div className="font-mono text-[10px]" style={{ color: "#374151" }}>v0.8.2 • STELLAR TESTNET</div>
+        <div className="px-3 mb-6 flex items-center gap-3">
+          <img 
+            src="/imagens/logo gamefinow - transparente.png" 
+            alt="GameFiNow Logo" 
+            className="w-10 h-10 object-contain drop-shadow-[0_0_12px_rgba(245,158,11,0.5)]"
+          />
+          <div>
+            <div className="text-base font-black tracking-widest uppercase rainbow-text mb-0.5">GAMEFINOW</div>
+            <div className="font-mono text-[10px]" style={{ color: "#475569" }}>v0.8.8 • STELLAR TESTNET</div>
+          </div>
         </div>
         {/* Language selector */}
         <div className="px-3 mb-5">
@@ -406,14 +413,23 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
           <FloatingStars />
 
           <div className="relative z-10 text-center px-6 max-w-5xl" style={{ transform: `translateY(${scrollY * -0.06}px)` }}>
-            {/* Glitch title */}
-            <div className="relative inline-block float-anim mb-4">
-              <h1 className="text-7xl md:text-[9rem] font-black uppercase tracking-tighter leading-none text-white select-none"
-                style={{ WebkitTextStroke: "2px rgba(245,158,11,0.25)", textShadow: "0 0 60px rgba(245,158,11,0.3),0 0 120px rgba(6,182,212,0.2),0 4px 32px rgba(0,0,0,0.9)" }}>
-                GAMEFINOW
-              </h1>
-              <h1 className="glitch-1 absolute inset-0 text-7xl md:text-[9rem] font-black uppercase tracking-tighter leading-none select-none pointer-events-none" style={{ color: "#06b6d4" }} aria-hidden>GAMEFINOW</h1>
-              <h1 className="glitch-2 absolute inset-0 text-7xl md:text-[9rem] font-black uppercase tracking-tighter leading-none select-none pointer-events-none" style={{ color: "#f59e0b" }} aria-hidden>GAMEFINOW</h1>
+            {/* Logo and Glitch title */}
+            <div className="flex flex-col items-center mb-4">
+              <div className="relative inline-block mb-3 float-anim">
+                <img 
+                  src="/imagens/logo gamefinow - transparente.png" 
+                  alt="GameFiNow Logo" 
+                  className="w-24 md:w-36 h-auto drop-shadow-[0_0_40px_rgba(6,182,212,0.7)] object-contain"
+                />
+              </div>
+              <div className="relative inline-block float-anim">
+                <h1 className="text-7xl md:text-[9rem] font-black uppercase tracking-tighter leading-none text-white select-none"
+                  style={{ WebkitTextStroke: "2px rgba(245,158,11,0.25)", textShadow: "0 0 60px rgba(245,158,11,0.3),0 0 120px rgba(6,182,212,0.2),0 4px 32px rgba(0,0,0,0.9)" }}>
+                  GAMEFINOW
+                </h1>
+                <h1 className="glitch-1 absolute inset-0 text-7xl md:text-[9rem] font-black uppercase tracking-tighter leading-none select-none pointer-events-none" style={{ color: "#06b6d4" }} aria-hidden>GAMEFINOW</h1>
+                <h1 className="glitch-2 absolute inset-0 text-7xl md:text-[9rem] font-black uppercase tracking-tighter leading-none select-none pointer-events-none" style={{ color: "#f59e0b" }} aria-hidden>GAMEFINOW</h1>
+              </div>
             </div>
 
             {/* ── SUBTITLE with strong pill background ── */}
@@ -437,7 +453,7 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
                 { label: "🌐 Stellar Testnet",          color: "#06b6d4" },
                 { label: "⚡ Soroban Smart Contracts",  color: "#a855f7" },
                 { label: "👛 WalletNow SDK",            color: "#22c55e" },
-                { label: "🎮 GameFi v0.8.2",            color: "#f59e0b" },
+                { label: "🎮 GameFi v0.8.8",            color: "#f59e0b" },
               ].map(b => (
                 <span key={b.label} className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-black"
                   style={{ background: `${b.color}25`, border: `2px solid ${b.color}60`, color: b.color, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>
@@ -644,12 +660,14 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
         {/* ══ ECONOMY ══════════════════════════════════════════════════════════ */}
         <section id="economy" className="py-24 px-6 md:px-16 section-bg">
           <SectionTitle icon={<TrendingUp className="w-5 h-5" />} title={t("about.economy.title")} subtitle={t("about.economy.subtitle")} color="#f97316" />
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl">
             {[
               { emoji: "🏪", color: "#ef4444", title: t("about.economy.p2p_title"),   text: t("about.economy.p2p_text") },
               { emoji: "💧", color: "#3b82f6", title: t("about.economy.faucet_title"),text: t("about.economy.faucet_text") },
               { emoji: "🔒", color: "#8b5cf6", title: t("about.economy.vault_title"), text: t("about.economy.vault_text") },
               { emoji: "🔄", color: "#06b6d4", title: t("about.economy.dex_title"),   text: t("about.economy.dex_text") },
+              { emoji: "🏰", color: "#f59e0b", title: t("about.economy.guild_title"), text: t("about.economy.guild_text") },
+              { emoji: "⛲", color: "#a855f7", title: t("about.economy.class_title"), text: t("about.economy.class_text") },
             ].map((e, i) => (
               <FadeCard key={e.title} delay={i * 80} color={e.color}>
                 <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl mb-4" style={{ background: `${e.color}20`, border: `2px solid ${e.color}40` }}>{e.emoji}</div>
@@ -663,13 +681,31 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
         {/* ══ WORLD ════════════════════════════════════════════════════════════ */}
         <section id="world" className="py-24 px-6 md:px-16">
           <SectionTitle icon={<Map className="w-5 h-5" />} title={t("about.world.title")} subtitle={t("about.world.subtitle")} color="#14b8a6" />
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl">
             {ZONES.map((z, i) => (
-              <FadeCard key={z.id} delay={i * 70} color={z.color}>
-                <div className="text-4xl mb-3">{z.icon}</div>
-                <h3 className="text-lg font-black text-white mb-1.5">{z.name}</h3>
-                <p className="text-sm leading-relaxed mb-4" style={{ color: "#94a3b8" }}>{z.desc}</p>
-                <code className="text-xs font-mono px-2.5 py-1 rounded-lg" style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.06)", color: "#64748b" }}>mapId: "{z.id}"</code>
+              <FadeCard key={z.id} delay={i * 70} color={z.color} className="overflow-hidden flex flex-col group p-0">
+                {/* Map Preview Image */}
+                <div className="relative h-44 w-full bg-black/80 overflow-hidden border-b" style={{ borderColor: `${z.color}30` }}>
+                  <img 
+                    src={z.mapImg} 
+                    alt={z.name} 
+                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 group-hover:brightness-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none" />
+                  <div className="absolute top-3 right-3 text-2xl bg-black/60 backdrop-blur-md p-1.5 rounded-xl border border-white/10">{z.icon}</div>
+                  <div className="absolute bottom-3 left-3">
+                    <code className="text-[10px] font-mono px-2 py-0.5 rounded-md font-bold" style={{ background: `${z.color}25`, border: `1px solid ${z.color}50`, color: z.color }}>
+                      MAP ID: {z.id.toUpperCase()}
+                    </code>
+                  </div>
+                </div>
+                {/* Content */}
+                <div className="p-5 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-lg font-black text-white mb-2 group-hover:text-cyan-300 transition-colors">{z.name}</h3>
+                    <p className="text-xs leading-relaxed" style={{ color: "#94a3b8" }}>{z.desc}</p>
+                  </div>
+                </div>
               </FadeCard>
             ))}
           </div>
@@ -725,8 +761,13 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
             })}
           </div>
           <div className="mt-20 mb-8 h-1 w-full rounded-full" style={{ background: "linear-gradient(90deg,#f59e0b,#ec4899,#06b6d4,#22c55e,#a855f7)" }} />
-          <div className="text-center">
-            <p className="font-mono text-xs mb-1" style={{ color: "#1f2937" }}>GameFiNow v0.8.2 // Stellar Testnet // {t("about.hero.subtitle")}</p>
+          <div className="text-center flex flex-col items-center gap-2">
+            <img 
+              src="/imagens/logo gamefinow - transparente.png" 
+              alt="GameFiNow" 
+              className="w-14 h-14 object-contain drop-shadow-[0_0_15px_rgba(245,158,11,0.5)] mb-1 opacity-80 hover:opacity-100 transition-opacity"
+            />
+            <p className="font-mono text-xs mb-1" style={{ color: "#64748b" }}>GameFiNow v0.8.8 // Stellar Testnet // {t("about.hero.subtitle")}</p>
             <a href={`${EXPERT}/account/${ADDRS.treasury}`} target="_blank" rel="noreferrer" className="font-mono text-xs hover:underline" style={{ color: "#374151" }}>{EXPERT}</a>
           </div>
         </section>
