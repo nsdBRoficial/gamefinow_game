@@ -12,7 +12,7 @@ import { generateGuildHouseMap, GUILDHOUSE_DECORATIONS } from "./guildHouseMap";
 import { generateAmphitheaterMap, AMPHITHEATER_DECORATIONS } from "./amphitheaterMap";
 import { Quest } from "../types";
 
-export type MapId = "center" | "east" | "west" | "north" | "south" | "guildhouse" | "amphitheater";
+export type MapId = "center" | "east" | "west" | "north" | "south" | "guildhouse" | "amphitheater" | "arena";
 
 export function isGateBlocked(mapId: string, c: number, r: number, quests: Record<string, Quest>): { blocked: boolean; message: string } {
   return { blocked: false, message: "" };
@@ -26,6 +26,7 @@ const mapGrids: Record<MapId, number[][]> = {
   south: generateHolderSanctuaryMap(),
   guildhouse: generateGuildHouseMap(),
   amphitheater: generateAmphitheaterMap(),
+  arena: [[]],
 };
 
 const mapDecorations: Record<MapId, any[]> = {
@@ -80,6 +81,7 @@ const mapDecorations: Record<MapId, any[]> = {
   amphitheater: [
     ...AMPHITHEATER_DECORATIONS,
   ],
+  arena: [],
 };
 
 

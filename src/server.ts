@@ -334,6 +334,152 @@ function broadcastGlobalPresence() {
   });
 }
 
+// ─── Sistema PVP Arena (Server-Authoritative) ────────────────────────────────
+
+/** Mapa de sessões PVP ativas: sessionId → PvpSession */
+const pvpSessions = new Map<string, any>();
+
+/** Mapa de qual sessão cada player está: playerId → sessionId */
+const playerSessionMap = new Map<string, string>();
+
+/** Timestamps do último ataque por player (anti-spam) */
+const lastAttackTime = new Map<string, number>();
+
+/** Timestamps do último cast por player (GCD server-side) */
+const lastSpellTime = new Map<string, number>();
+
+/** GCDs das magias (ms) — espelhados do gameStore */
+const SERVER_SPELL_GCD: Record<string, number> = {
+  heal: 800, fire: 1500, lightning: 2500, default: 1000
+};
+
+/** Range máximo de ataque por tipo */
+const SERVER_ATTACK_RANGE: Record<string, number> = {
+  physical_melee: 2, physical_ranger: 3, magic_damage: 5, magic_heal: 6,
+};
+
+/** Classe → tipo de ataque físico */
+function getPhysicalRangeByClass(playerClass?: string): number {
+  if (playerClass === "cosmic_ranger") return SERVER_ATTACK_RANGE.physical_ranger;
+  return SERVER_ATTACK_RANGE.physical_melee;
+}
+
+/** Distância euclidiana entre dois jogadores na arena */
+function arenaDistance(a: any, b: any): number {
+  return Math.sqrt(Math.pow(a.arenaX - b.arenaX, 2) + Math.pow(a.arenaY - b.arenaY, 2));
+}
+
+/** Calcula dano físico PVP (server-authoritative) */
+function serverCalcPhysicalDmg(attacker: any, target: any): { damage: number; isCrit: boolean } {
+  const strBonus = (attacker.activeBuffs || [])
+    .filter((b: any) => b.expiresAt > Date.now())
+    .reduce((acc: number, b: any) => acc + (b.statModifiers?.strBonus ?? 0), 0);
+
+  const agiBonus = (attacker.activeBuffs || [])
+    .filter((b: any) => b.expiresAt > Date.now())
+    .reduce((acc: number, b: any) => acc + (b.statModifiers?.agiBonus ?? 0), 0);
+
+  const baseAtk = (attacker.attack || 10) * (1 + strBonus / 100);
+  const baseDefense = (target.defense || 5) / 2;
+  const baseDmg = Math.max(1, baseAtk - baseDefense);
+  const roll = 0.85 + Math.random() * 0.3;
+  const critChance = 0.05 + agiBonus / 100;
+  const isCrit = Math.random() < critChance;
+  const critMult = isCrit ? 2.0 : 1.0;
+
+  // Redução de dano dos buffs defensivos do alvo
+  const defReduction = (target.activeBuffs || [])
+    .filter((b: any) => b.expiresAt > Date.now())
+    .reduce((acc: number, b: any) => {
+      if (b.statModifiers?.invulnerable) return 1; // Flag para invulnerabilidade
+      return acc + (b.statModifiers?.damageReduction ?? 0);
+    }, 0);
+  const defFactor = Math.max(0.2, 1 - defReduction);
+
+  const finalDmg = Math.max(1, Math.floor(baseDmg * roll * critMult * defFactor));
+
+  // Anti-cheat: teto máximo por nível
+  const maxAllowed = (attacker.level || 1) * 80;
+  return { damage: Math.min(finalDmg, maxAllowed), isCrit };
+}
+
+/** Calcula dano mágico PVP (server-authoritative) */
+function serverCalcMagicDmg(attacker: any, spellPower: number, target: any): { damage: number; isCrit: boolean } {
+  const intBonus = (attacker.activeBuffs || [])
+    .filter((b: any) => b.expiresAt > Date.now())
+    .reduce((acc: number, b: any) => acc + (b.statModifiers?.intBonus ?? 0), 0);
+
+  const agiBonus = (attacker.activeBuffs || [])
+    .filter((b: any) => b.expiresAt > Date.now())
+    .reduce((acc: number, b: any) => acc + (b.statModifiers?.agiBonus ?? 0), 0);
+
+  const intValue = (attacker.attack || 10) + intBonus;
+  const baseDmg = (spellPower || 30) * (1 + intValue / 80);
+  const roll = 0.85 + Math.random() * 0.3;
+  const critChance = 0.05 + agiBonus / 100;
+  const isCrit = Math.random() < critChance;
+  const critMult = isCrit ? 2.0 : 1.0;
+
+  const defFactor = (target.activeBuffs || [])
+    .filter((b: any) => b.expiresAt > Date.now())
+    .reduce((acc: number, b: any) => {
+      if (b.statModifiers?.invulnerable) return 0;
+      return Math.max(0.2, acc - (b.statModifiers?.damageReduction ?? 0));
+    }, 1.0);
+
+  const finalDmg = Math.max(1, Math.floor(baseDmg * roll * critMult * defFactor));
+  const maxAllowed = (attacker.level || 1) * 80;
+  return { damage: Math.min(finalDmg, maxAllowed), isCrit };
+}
+
+/** Verifica se a partida acabou e emite o resultado */
+function checkArenaEnd(session: any, sessionId: string): void {
+  const alive = session.players.filter((p: any) => !p.isEliminated);
+  if (alive.length > 1) return; // Ainda há combate
+
+  session.status = "finished";
+  session.finishedAt = Date.now();
+
+  const winner = alive[0] || null;
+  if (winner) {
+    session.winnerId = winner.playerId;
+    session.winnerName = winner.name;
+  }
+
+  // Calcula recompensas
+  const rewards: Record<string, { xp: number; gamefi: number; result: string }> = {};
+  session.players.forEach((p: any, idx: number) => {
+    if (winner && p.playerId === winner.playerId) {
+      rewards[p.playerId] = { xp: 150, gamefi: 0.5, result: "victory" };
+    } else if (idx === 1) {
+      rewards[p.playerId] = { xp: 60, gamefi: 0, result: "runner_up" };
+    } else {
+      rewards[p.playerId] = { xp: 30, gamefi: 0, result: "eliminated" };
+    }
+  });
+
+  io.to(`arena:${sessionId}`).emit("arena_match_end", {
+    winnerId: winner?.playerId ?? null,
+    winnerName: winner?.name ?? null,
+    sessionId,
+    rewards,
+  });
+
+  console.log(`[Arena] Sessão ${sessionId} finalizada. Vencedor: ${winner?.name ?? "Nenhum"}`);
+
+  // Limpa a sessão após 10s
+  setTimeout(() => {
+    pvpSessions.delete(sessionId);
+    session.players.forEach((p: any) => playerSessionMap.delete(p.playerId));
+    // Limpa timestamps
+    session.players.forEach((p: any) => {
+      lastAttackTime.delete(p.playerId);
+      lastSpellTime.delete(p.playerId);
+    });
+    console.log(`[Arena] Sessão ${sessionId} removida da memória.`);
+  }, 10000);
+}
+
 io.on("connection", (socket) => {
   console.log(`[Socket] Conexão recebida: ${socket.id}`);
 
@@ -497,12 +643,224 @@ io.on("connection", (socket) => {
     }
   });
 
+  // ── Eventos PVP Arena ──
+
+  socket.on("arena_join_request", (data: { playerId: string, mode: string, sessionId?: string, playerPayload: any }) => {
+    let session: any;
+    let sessionId = data.sessionId;
+
+    if (sessionId && pvpSessions.has(sessionId)) {
+      session = pvpSessions.get(sessionId);
+    } else {
+      // Procura sessão waiting do mesmo modo (apenas FFA inicialmente)
+      for (const [id, s] of pvpSessions.entries()) {
+        if (s.status === "waiting" && s.mode === data.mode && s.players.length < 8) {
+          session = s;
+          sessionId = id;
+          break;
+        }
+      }
+      
+      if (!session) {
+        sessionId = `pvp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+        session = {
+          sessionId,
+          mode: data.mode,
+          status: "waiting",
+          players: [],
+        };
+        pvpSessions.set(sessionId, session);
+      }
+    }
+
+    socket.join(`arena:${sessionId}`);
+    playerSessionMap.set(data.playerId, sessionId!);
+
+    // Define spawn point
+    const USED_SPAWNS = [
+      { x: 2, y: 5 }, { x: 2, y: 6 },
+      { x: 9, y: 5 }, { x: 9, y: 6 },
+      { x: 5, y: 2 }, { x: 6, y: 2 },
+      { x: 5, y: 9 }, { x: 6, y: 9 },
+    ];
+    let spawn = USED_SPAWNS[session.players.length % USED_SPAWNS.length];
+
+    const p = data.playerPayload;
+    p.arenaX = spawn.x;
+    p.arenaY = spawn.y;
+    p.isEliminated = false;
+    
+    // Atualiza ou insere jogador na sessão
+    const existingIdx = session.players.findIndex((pl: any) => pl.playerId === data.playerId);
+    if (existingIdx >= 0) {
+      session.players[existingIdx] = p;
+    } else {
+      session.players.push(p);
+    }
+
+    // Inicia a partida se tiver 2+ jogadores no FFA
+    if (session.status === "waiting" && session.players.length >= 2) {
+      session.status = "in_progress";
+      session.startedAt = Date.now();
+      console.log(`[Arena] Sessão ${sessionId} INICIADA com ${session.players.length} jogadores.`);
+    }
+
+    socket.emit("arena_sync", session);
+    io.to(`arena:${sessionId}`).emit("arena_sync", session);
+  });
+
+  socket.on("arena_move", (data: { sessionId: string, playerId: string, arenaX: number, arenaY: number, dir: string }) => {
+    const session = pvpSessions.get(data.sessionId);
+    // Permite movimentação em "waiting" e "in_progress" — jogador pode explorar a arena enquanto aguarda oponente
+    if (!session || (session.status !== "in_progress" && session.status !== "waiting")) return;
+
+    const p = session.players.find((pl: any) => pl.playerId === data.playerId);
+    if (p && !p.isEliminated) {
+      p.arenaX = data.arenaX;
+      p.arenaY = data.arenaY;
+      p.dir = data.dir;
+      io.to(`arena:${data.sessionId}`).emit("arena_sync", session);
+    }
+  });
+
+  socket.on("arena_attack", (data: { sessionId: string, attackerId: string, targetId: string, playerClass?: string, timestamp: number }) => {
+    const session = pvpSessions.get(data.sessionId);
+    if (!session || session.status !== "in_progress") return;
+
+    const attacker = session.players.find((p: any) => p.playerId === data.attackerId);
+    const target = session.players.find((p: any) => p.playerId === data.targetId);
+    
+    if (!attacker || !target || attacker.isEliminated || target.isEliminated) return;
+
+    // Validação de intervalo de ataque (Anti-spam)
+    const now = Date.now();
+    const lastAtk = lastAttackTime.get(data.attackerId) || 0;
+    const interval = Math.max(400, 1500 - (attacker.speed || 5) * 10);
+    
+    if (now - lastAtk < interval - 100) return; // Margem de 100ms
+    lastAttackTime.set(data.attackerId, now);
+
+    // Validação de Range
+    const maxRange = getPhysicalRangeByClass(data.playerClass);
+    if (arenaDistance(attacker, target) > maxRange) {
+      socket.emit("arena_out_of_range");
+      return;
+    }
+
+    // Dano e HP
+    const { damage, isCrit } = serverCalcPhysicalDmg(attacker, target);
+    target.hp = Math.max(0, target.hp - damage);
+
+    io.to(`arena:${data.sessionId}`).emit("arena_player_hit", {
+      targetId: data.targetId,
+      damage,
+      isCrit,
+      element: "physical",
+    });
+
+    if (target.hp <= 0) {
+      target.isEliminated = true;
+      io.to(`arena:${data.sessionId}`).emit("arena_player_eliminated", { playerId: data.targetId });
+      checkArenaEnd(session, data.sessionId);
+    } else {
+      io.to(`arena:${data.sessionId}`).emit("arena_sync", session);
+    }
+  });
+
+  socket.on("arena_cast_spell", (data: { sessionId: string, attackerId: string, targetId: string | null, spellId: string, spellPower: number, element: string }) => {
+    const session = pvpSessions.get(data.sessionId);
+    if (!session || session.status !== "in_progress") return;
+
+    const attacker = session.players.find((p: any) => p.playerId === data.attackerId);
+    if (!attacker || attacker.isEliminated) return;
+
+    // Validação GCD
+    const now = Date.now();
+    const lastSpell = lastSpellTime.get(data.attackerId) || 0;
+    const gcd = SERVER_SPELL_GCD[data.element] || SERVER_SPELL_GCD.default;
+    
+    if (now - lastSpell < gcd - 100) return;
+    lastSpellTime.set(data.attackerId, now);
+
+    if (data.element === "heal") {
+      // Heal não tem range nem alvo específico (cura a si mesmo)
+      const { damage } = serverCalcMagicDmg(attacker, data.spellPower, attacker);
+      attacker.hp = Math.min(attacker.maxHp || 100, attacker.hp + damage);
+      
+      io.to(`arena:${data.sessionId}`).emit("arena_player_hit", {
+        targetId: data.attackerId,
+        damage: -damage, // Negativo pra indicar cura visualmente se necessário
+        isCrit: false,
+        element: "heal",
+      });
+      io.to(`arena:${data.sessionId}`).emit("arena_sync", session);
+    } else {
+      // Magia ofensiva
+      if (!data.targetId) return;
+      const target = session.players.find((p: any) => p.playerId === data.targetId);
+      if (!target || target.isEliminated) return;
+
+      // Validação de Range (Magia = range 5)
+      if (arenaDistance(attacker, target) > SERVER_ATTACK_RANGE.magic_damage) {
+        socket.emit("arena_out_of_range");
+        return;
+      }
+
+      const { damage, isCrit } = serverCalcMagicDmg(attacker, data.spellPower, target);
+      target.hp = Math.max(0, target.hp - damage);
+
+      io.to(`arena:${data.sessionId}`).emit("arena_player_hit", {
+        targetId: data.targetId,
+        damage,
+        isCrit,
+        element: data.element,
+      });
+
+      if (target.hp <= 0) {
+        target.isEliminated = true;
+        io.to(`arena:${data.sessionId}`).emit("arena_player_eliminated", { playerId: data.targetId });
+        checkArenaEnd(session, data.sessionId);
+      } else {
+        io.to(`arena:${data.sessionId}`).emit("arena_sync", session);
+      }
+    }
+  });
+
+  socket.on("arena_leave", (data: { sessionId: string, playerId: string }) => {
+    const session = pvpSessions.get(data.sessionId);
+    if (session) {
+      const p = session.players.find((pl: any) => pl.playerId === data.playerId);
+      if (p && !p.isEliminated) {
+        p.isEliminated = true;
+        io.to(`arena:${data.sessionId}`).emit("arena_player_eliminated", { playerId: data.playerId });
+        checkArenaEnd(session, data.sessionId);
+      }
+    }
+    socket.leave(`arena:${data.sessionId}`);
+    playerSessionMap.delete(data.playerId);
+  });
+
   socket.on("disconnect", () => {
     const state = playersState.get(socket.id);
     if (state) {
       socket.to(`map:${state.mapId}`).emit("player_leave", { playerId: state.playerId });
       playersState.delete(socket.id);
       broadcastGlobalPresence();
+
+      // ── Limpa a arena se o player estava em uma sessão PVP ──
+      const sessionId = playerSessionMap.get(state.playerId);
+      if (sessionId) {
+        const pvpSession = pvpSessions.get(sessionId);
+        if (pvpSession) {
+          const p = pvpSession.players.find((pl: any) => pl.playerId === state.playerId);
+          if (p && !p.isEliminated) {
+            p.isEliminated = true;
+            io.to(`arena:${sessionId}`).emit("arena_player_eliminated", { playerId: state.playerId });
+            checkArenaEnd(pvpSession, sessionId);
+          }
+        }
+        playerSessionMap.delete(state.playerId);
+      }
     }
     console.log(`[Socket] Desconectado: ${socket.id}`);
   });

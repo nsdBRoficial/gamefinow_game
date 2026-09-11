@@ -48,7 +48,7 @@ export enum TileType {
 export interface GameDecoration {
   x: number;
   y: number;
-  type: "tree" | "bench" | "lamp" | "barrel" | "box" | "statue" | "flower_pot" | "boat" | "stand" | "palm_tree" | "umbrella" | "towel" | "sandcastle" | "p2p_store" | "burn_altar" | "pixel_shop" | "pixel_burn_brazier" | "pixel_faucet" | "mine" | "stellar_nucleus" | "guild_door" | "church";
+  type: "tree" | "bench" | "lamp" | "barrel" | "box" | "statue" | "flower_pot" | "boat" | "stand" | "palm_tree" | "umbrella" | "towel" | "sandcastle" | "p2p_store" | "burn_altar" | "pixel_shop" | "pixel_burn_brazier" | "pixel_faucet" | "mine" | "stellar_nucleus" | "guild_door" | "church" | "arena_building";
   color?: string;
   text?: string;
   subText?: string;

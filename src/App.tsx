@@ -46,6 +46,9 @@ import { ActiveBuffsHUD } from "./components/ActiveBuffsHUD";
 import { ClassSelectionModal } from "./components/ClassSelectionModal";
 import { GuildModal } from "./components/GuildModal";
 import { AccountRecoveryModal } from "./components/AccountRecoveryModal";
+import { ArenaView } from "./components/ArenaView";
+import { ArenaLobbyModal } from "./components/ArenaLobbyModal";
+import { requestArenaJoin } from "./services/arenaService";
 import { audioStreamService } from "./services/audioStreamService";
 import { calculateEffectiveStats } from "./classesData";
 import { useMultiplayer } from "./hooks/useMultiplayer";
@@ -754,6 +757,14 @@ export default function App() {
         }
       }
 
+      if (isNearTerminal === "arena") {
+        setGameState((prev) => ({
+          ...prev,
+          activeModal: "arena_lobby",
+        }));
+        return;
+      }
+
       setGameState((prev) => ({
         ...prev,
         activeModal: isNearTerminal,
@@ -1176,6 +1187,15 @@ export default function App() {
           <p className="text-slate-300 font-medium">Os Game Masters ativaram o protocolo de emergência.</p>
           <p className="text-slate-400 mt-3 text-sm">O jogo voltará ao ar assim que as verificações de segurança forem concluídas. Por favor, aguarde.</p>
         </div>
+      </div>
+    );
+  }
+
+  // ── MODO ARENA PVP: tela exclusiva, sem UI do jogo principal ──
+  if (gameState.isInArena) {
+    return (
+      <div className="w-screen h-screen bg-black overflow-hidden select-none" style={{ fontFamily: "monospace" }}>
+        <ArenaView playerId={playerId} />
       </div>
     );
   }
@@ -1674,22 +1694,30 @@ export default function App() {
         )}
 
         {/* MAIN GAME ENGINE SCREEN CANVAS */}
-        <BattleHUD />
-        <div className="w-full h-full">
-          <GameCanvas
-            gameState={gameState}
-            playerPos={playerPos}
-            setPlayerPos={setPlayerPos}
-            npcs={getNpcsForMap(playerPos.mapId || "center")}
-            onTalkToNPC={handleTalkToNPC}
-            onNearTerminal={(type) => {
-              setIsNearTerminal(type);
-              playSynthSound("beep");
-            }}
-            isMovementBlocked={isMovementBlocked}
-            realOnlinePlayers={isMultiplayerEnabled ? onlinePlayers : undefined}
-          />
-        </div>
+        {!gameState.isInArena ? (
+          <>
+            <BattleHUD />
+            <div className="w-full h-full">
+              <GameCanvas
+                gameState={gameState}
+                playerPos={playerPos}
+                setPlayerPos={setPlayerPos}
+                npcs={getNpcsForMap(playerPos.mapId || "center")}
+                onTalkToNPC={handleTalkToNPC}
+                onNearTerminal={(type) => {
+                  setIsNearTerminal(type);
+                  playSynthSound("beep");
+                }}
+                isMovementBlocked={isMovementBlocked}
+                realOnlinePlayers={isMultiplayerEnabled ? onlinePlayers : undefined}
+              />
+            </div>
+          </>
+        ) : (
+          <div className="w-full h-full absolute inset-0 z-10 bg-black">
+            <ArenaView playerId={playerId} />
+          </div>
+        )}
 
         {/* MULTIPLAYER: Indicador de jogadores online */}
         {isMultiplayerEnabled && (
@@ -1842,6 +1870,17 @@ export default function App() {
             }));
           }}
         />
+
+        {/* ─── MODAL DA ARENA PVP ─── */}
+        {gameState.activeModal === "arena_lobby" && (
+          <ArenaLobbyModal
+            onClose={() => setGameState((prev) => ({ ...prev, activeModal: null }))}
+            onJoin={() => {
+              setGameState((prev) => ({ ...prev, activeModal: null, isInArena: true }));
+              requestArenaJoin(playerId, playerPos);
+            }}
+          />
+        )}
 
         {/* ─── MODAL DE RECUPERAÇÃO DE CONTA SEP-10 / EMAIL ─── */}
         <AccountRecoveryModal

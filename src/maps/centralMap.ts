@@ -266,6 +266,11 @@ export function generateCentralMap(): number[][] {
   grid[27][41] = TileType.BLOCK; grid[27][42] = TileType.BLOCK;
   grid[28][41] = TileType.BLOCK; grid[28][42] = TileType.BLOCK;
 
+  // ⛳ ARENA PVP (9 sqms: x=41,42,43 / y=17,18,19) — praça central norte
+  grid[17][41] = TileType.BLOCK; grid[17][42] = TileType.BLOCK; grid[17][43] = TileType.BLOCK;
+  grid[18][41] = TileType.BLOCK; grid[18][42] = TileType.BLOCK; grid[18][43] = TileType.BLOCK;
+  grid[19][41] = TileType.BLOCK; grid[19][42] = TileType.BLOCK; grid[19][43] = TileType.BLOCK;
+
   // Fonte Faucet (2 sqms: x=28 / y=24,25 -> pé no y=25)
   grid[24][28] = TileType.BLOCK;
   grid[25][28] = TileType.BLOCK;
@@ -383,4 +388,7 @@ export const CENTRAL_DECORATIONS: GameDecoration[] = [
 
   // NÚCLEO STELLAR (Centro do mapa para o evento de wave, ocupa 2x2)
   { x: 29, y: 29, type: "stellar_nucleus", width: 2, height: 2 },
+
+  // ⛳ ARENA PVP (3x3 sqms: x=41,42,43 / y=17,18,19)
+  { x: 41, y: 17, type: "arena_building", text: "ARENA", width: 3, height: 3, color: "#dc2626" },
 ];

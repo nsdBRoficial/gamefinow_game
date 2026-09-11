@@ -24,7 +24,7 @@ interface GameCanvasProps {
   setPlayerPos: React.Dispatch<React.SetStateAction<Player>>;
   npcs: NPC[];
   onTalkToNPC: (npc: NPC) => void;
-  onNearTerminal: (terminalType: "wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | "outfit_shop" | null) => void;
+  onNearTerminal: (terminalType: "wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | "outfit_shop" | "arena" | "mine" | null) => void;
   isMovementBlocked?: boolean;
   /** Jogadores reais do Supabase (substitui os bots quando presente) */
   realOnlinePlayers?: OnlinePlayer[];
@@ -558,6 +558,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       return;
     }
 
+    // Interact with Arena PVP building
+    if (playerPos.mapId === "center" && checkY >= 17 && checkY <= 19 && checkX >= 41 && checkX <= 43) {
+      useGameStore.getState().setGameState({ activeModal: "arena_lobby" });
+      return;
+    }
+
     // Interact with notebook on the GAMEFINOW stand
     if (playerPos.mapId === "center" && checkX === 22 && checkY === 32) {
       onTalkToNPC({
@@ -855,6 +861,11 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       // Fonte Faucet (2 sqms: x=28, y=24..25 -> pé no y=25)
       if (Math.abs(x - 28) <= 1 && y >= 23 && y <= 25) {
         onNearTerminal("gamefi_faucet");
+        return;
+      }
+      // Arena PVP (x=41..43, y=17..19)
+      if (x >= 40 && x <= 44 && y >= 16 && y <= 20) {
+        onNearTerminal("arena");
         return;
       }
     } else if (currentMapId === "east") {

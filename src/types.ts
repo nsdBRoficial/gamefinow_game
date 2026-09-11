@@ -86,7 +86,7 @@ export interface Player {
   faceType: "none" | "glasses" | "beard" | "elder_beard" | "mustache" | "eyepatch" | "smile" | "eyelashes" | "makeup" | "visor";
   accessoryType: "none" | "backpack" | "cape" | "sword" | "wings" | "katana" | "viking_axe" | "magic_wand";
   name: string;
-  mapId?: "center" | "east" | "west" | "north" | "south" | "guildhouse" | "amphitheater";
+  mapId?: "center" | "east" | "west" | "north" | "south" | "guildhouse" | "amphitheater" | "arena";
   // Campos extras usados pelo CharacterCustomizer (estilo visual avançado)
   headStyle?: string;    // Ex: "default" | "mohawk" | "cap" | "long" | "afro" | "helmet" | "crown" | "bald"
   eyeStyle?: string;     // Ex: "dots" | "sunglasses" | "vr_headset" | "visor" | "cyborg" | "anime" | "wink" | "classic"
@@ -234,7 +234,7 @@ export interface GameState {
     npcId: string;
     onDialogComplete?: () => void;
   } | null;
-  activeModal: "wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | "outfit_shop" | "mining_node" | "class_selection" | "guild" | "account_recovery" | null;
+  activeModal: "wallet" | "onramp" | "soroban" | "hold" | "atf" | "p2p_store" | "burn_altar" | "gamefi_faucet" | "outfit_shop" | "mining_node" | "class_selection" | "guild" | "account_recovery" | "arena_lobby" | null;
   currentLedger: number;
   jamesDialogsDone?: string[];
   mapZoomLevel?: number;
@@ -285,4 +285,7 @@ export interface GameState {
   // Timestamp (ms) da última tentativa de lançar magia bloqueada pelo GCD.
   // Usado pelo GameCanvas para exibir o efeito visual de "Exhausted!" (fumaça).
   lastBlockedCastTime?: number;
+  // ── PVP Arena ──────────────────────────────────────────────────────────────
+  isInArena?: boolean;          // true quando o jogador está dentro da arena de combate
+  pvpSessionId?: string | null; // ID da sessão PVP ativa
 }

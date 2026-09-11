@@ -1280,6 +1280,246 @@ const drawChurch = (ctx: CanvasRenderingContext2D, worldX: number, worldY: numbe
   ctx.restore();
 };
 
+const drawArenaBuilding = (
+  ctx: CanvasRenderingContext2D,
+  worldX: number,
+  worldY: number,
+  tileSize: number,
+  playerPos?: { x: number; y: number }
+) => {
+  ctx.save();
+  const w = tileSize * 3; // 96px
+  const h = tileSize * 3; // 96px
+  const cx = worldX + w / 2; // worldX + 48
+  const cy = worldY + h;     // worldX + 96
+  const now = Date.now();
+
+  // 1. Sombra projetada na base
+  ctx.fillStyle = "rgba(0, 0, 0, 0.45)";
+  ctx.beginPath();
+  ctx.ellipse(cx, cy - 2, w / 2 + 2, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 2. Base da muralha e paredes principais de pedra de coliseu (Ardósia / Granito escuro)
+  ctx.fillStyle = "#1e293b"; // slate-800
+  ctx.fillRect(worldX + 2, worldY + 8, w - 4, h - 14);
+
+  // Textura de blocos de pedra e relevo
+  ctx.fillStyle = "#334155"; // slate-700 (pedras iluminadas)
+  ctx.fillRect(worldX + 4, worldY + 10, w - 8, 12);
+  ctx.fillRect(worldX + 6, worldY + 28, 20, 16);
+  ctx.fillRect(worldX + w - 26, worldY + 28, 20, 16);
+  ctx.fillRect(worldX + 4, worldY + 50, 18, 20);
+  ctx.fillRect(worldX + w - 22, worldY + 50, 18, 20);
+
+  // Contorno reforçado de pedra
+  ctx.strokeStyle = "#090d16";
+  ctx.lineWidth = 2;
+  ctx.strokeRect(worldX + 2, worldY + 8, w - 4, h - 14);
+
+  // 3. Merlões / Ameias de Fortaleza (Topo estilo castelo/coliseu)
+  const merlonW = 12;
+  const merlonH = 10;
+  ctx.fillStyle = "#334155";
+  for (let i = 0; i < 6; i++) {
+    const mx = worldX + 4 + i * 15;
+    ctx.fillRect(mx, worldY - 2, merlonW, merlonH);
+    ctx.strokeStyle = "#090d16";
+    ctx.strokeRect(mx, worldY - 2, merlonW, merlonH);
+  }
+
+  // 4. Estandartes Carmesins de Batalha (Banners Vermelho + Dourado)
+  // Estandarte Esquerdo
+  ctx.fillStyle = "#991b1b"; // red-800
+  ctx.fillRect(worldX + 8, worldY + 18, 14, 38);
+  ctx.fillStyle = "#dc2626"; // red-600
+  ctx.fillRect(worldX + 10, worldY + 20, 10, 32);
+  // Ponta em V
+  ctx.beginPath();
+  ctx.moveTo(worldX + 8, worldY + 56);
+  ctx.lineTo(worldX + 15, worldY + 64);
+  ctx.lineTo(worldX + 22, worldY + 56);
+  ctx.fillStyle = "#991b1b";
+  ctx.fill();
+  // Brasão / Borda Dourada
+  ctx.fillStyle = "#fbbf24";
+  ctx.fillRect(worldX + 13, worldY + 28, 4, 12);
+  ctx.fillRect(worldX + 10, worldY + 32, 10, 4);
+
+  // Estandarte Direito
+  ctx.fillStyle = "#991b1b";
+  ctx.fillRect(worldX + w - 22, worldY + 18, 14, 38);
+  ctx.fillStyle = "#dc2626";
+  ctx.fillRect(worldX + w - 20, worldY + 20, 10, 32);
+  ctx.beginPath();
+  ctx.moveTo(worldX + w - 22, worldY + 56);
+  ctx.lineTo(worldX + w - 15, worldY + 64);
+  ctx.lineTo(worldX + w - 8, worldY + 56);
+  ctx.fillStyle = "#991b1b";
+  ctx.fill();
+  ctx.fillStyle = "#fbbf24";
+  ctx.fillRect(worldX + w - 17, worldY + 28, 4, 12);
+  ctx.fillRect(worldX + w - 20, worldY + 32, 10, 4);
+
+  // 5. Pilares de Pedra ladeando o portal
+  // Pilar Esquerdo
+  ctx.fillStyle = "#475569"; // slate-600
+  ctx.fillRect(cx - 24, worldY + 24, 8, 62);
+  ctx.strokeStyle = "#0f172a";
+  ctx.strokeRect(cx - 24, worldY + 24, 8, 62);
+  // Capitel do pilar
+  ctx.fillStyle = "#cbd5e1";
+  ctx.fillRect(cx - 26, worldY + 22, 12, 5);
+
+  // Pilar Direito
+  ctx.fillStyle = "#475569";
+  ctx.fillRect(cx + 16, worldY + 24, 8, 62);
+  ctx.strokeStyle = "#0f172a";
+  ctx.strokeRect(cx + 16, worldY + 24, 8, 62);
+  ctx.fillStyle = "#cbd5e1";
+  ctx.fillRect(cx + 14, worldY + 22, 12, 5);
+
+  // 6. Tochas Animadas nos Pilares (Fogo de Combate)
+  const flicker = Math.sin(now / 100) * 1.5;
+  const flicker2 = Math.cos(now / 120) * 1.5;
+
+  // Suporte e Tocha Esquerda
+  ctx.fillStyle = "#78350f"; // bronze escuro
+  ctx.fillRect(cx - 28, worldY + 36, 6, 8);
+  // Brilho quente
+  ctx.fillStyle = "rgba(249, 115, 22, 0.25)";
+  ctx.beginPath();
+  ctx.arc(cx - 25, worldY + 34, 12 + flicker, 0, Math.PI * 2);
+  ctx.fill();
+  // Chama exterior
+  ctx.fillStyle = "#ea580c";
+  ctx.beginPath();
+  ctx.arc(cx - 25, worldY + 34 + flicker, 5, 0, Math.PI * 2);
+  ctx.fill();
+  // Núcleo da chama
+  ctx.fillStyle = "#fef08a";
+  ctx.beginPath();
+  ctx.arc(cx - 25, worldY + 35, 2.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Suporte e Tocha Direita
+  ctx.fillStyle = "#78350f";
+  ctx.fillRect(cx + 22, worldY + 36, 6, 8);
+  ctx.fillStyle = "rgba(249, 115, 22, 0.25)";
+  ctx.beginPath();
+  ctx.arc(cx + 25, worldY + 34 + flicker2, 12 + flicker2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#ea580c";
+  ctx.beginPath();
+  ctx.arc(cx + 25, worldY + 34 + flicker2, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#fef08a";
+  ctx.beginPath();
+  ctx.arc(cx + 25, worldY + 35, 2.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  // 7. Portal de Entrada em Arco da Arena (Fundo escuro / Areia de Duelo)
+  const gateW = 32;
+  const gateH = 46;
+  const gateX = cx - gateW / 2;
+  const gateY = cy - gateH - 6;
+
+  // Arco exterior de pedra
+  ctx.fillStyle = "#64748b";
+  ctx.beginPath();
+  ctx.ellipse(cx, gateY + 8, gateW / 2 + 4, 16, 0, Math.PI, 0);
+  ctx.lineTo(gateX + gateW + 4, cy - 6);
+  ctx.lineTo(gateX - 4, cy - 6);
+  ctx.fill();
+
+  // Vão escuro da arena (Profundidade)
+  ctx.fillStyle = "#05070d";
+  ctx.beginPath();
+  ctx.ellipse(cx, gateY + 8, gateW / 2, 14, 0, Math.PI, 0);
+  ctx.lineTo(gateX + gateW, cy - 6);
+  ctx.lineTo(gateX, cy - 6);
+  ctx.fill();
+
+  // Brilho avermelhado de combate vindo do interior da arena
+  const glow = Math.sin(now / 300) * 0.15 + 0.35;
+  ctx.fillStyle = `rgba(220, 38, 38, ${glow})`;
+  ctx.fillRect(gateX + 2, cy - 24, gateW - 4, 18);
+
+  // Grade de ferro / Gradeado gladiatório
+  ctx.strokeStyle = "#334155";
+  ctx.lineWidth = 1.5;
+  for (let x = gateX + 6; x < gateX + gateW; x += 6) {
+    ctx.beginPath();
+    ctx.moveTo(x, gateY + 12);
+    ctx.lineTo(x, cy - 6);
+    ctx.stroke();
+  }
+  // Barras horizontais da grade
+  ctx.beginPath();
+  ctx.moveTo(gateX + 2, gateY + 22);
+  ctx.lineTo(gateX + gateW - 2, gateY + 22);
+  ctx.moveTo(gateX + 2, gateY + 34);
+  ctx.lineTo(gateX + gateW - 2, gateY + 34);
+  ctx.stroke();
+
+  // 8. Degraus de pedra em frente ao portal
+  ctx.fillStyle = "#475569";
+  ctx.fillRect(cx - 20, cy - 6, 40, 3);
+  ctx.fillStyle = "#334155";
+  ctx.fillRect(cx - 24, cy - 3, 48, 3);
+
+  // 9. Placa / Frontão Superior com Espadas Cruzadas e "ARENA PVP"
+  const signW = 74;
+  const signH = 18;
+  const signX = cx - signW / 2;
+  const signY = worldY - 14;
+
+  // Fundo da placa
+  ctx.fillStyle = "#0f172a"; // slate-900
+  ctx.fillRect(signX, signY, signW, signH);
+  // Borda dourada
+  ctx.strokeStyle = "#f59e0b"; // amber-500
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(signX, signY, signW, signH);
+
+  // Rebites dourados nos cantos da placa
+  ctx.fillStyle = "#fbbf24";
+  ctx.fillRect(signX + 2, signY + 2, 2, 2);
+  ctx.fillRect(signX + signW - 4, signY + 2, 2, 2);
+  ctx.fillRect(signX + 2, signY + signH - 4, 2, 2);
+  ctx.fillRect(signX + signW - 4, signY + signH - 4, 2, 2);
+
+  // Texto "⚔️ ARENA PVP"
+  ctx.font = "bold 9px 'JetBrains Mono', monospace";
+  ctx.fillStyle = "#fbbf24";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.shadowColor = "#f59e0b";
+  ctx.shadowBlur = 4;
+  ctx.fillText("⚔️ ARENA PVP", cx, signY + signH / 2);
+  ctx.shadowBlur = 0;
+
+  // 10. Indicador de interação ESPAÇO quando o jogador está em frente ao portal
+  const _playerPos = playerPos ?? { x: -9999, y: -9999 };
+  const isNearEntrance = Math.abs(_playerPos.x - 42) <= 1 && Math.abs(_playerPos.y - 19) <= 1;
+  if (isNearEntrance) {
+    ctx.font = "bold 8px 'JetBrains Mono', monospace";
+    const mText = "ESPAÇO - ENTRAR";
+    const mW = ctx.measureText(mText).width + 10;
+    ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+    ctx.fillRect(cx - mW / 2, cy + 2, mW, 13);
+    ctx.strokeStyle = "#ef4444"; // red-500
+    ctx.lineWidth = 1;
+    ctx.strokeRect(cx - mW / 2, cy + 2, mW, 13);
+    ctx.fillStyle = "#fef08a"; // yellow-100
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(mText, cx, cy + 8);
+  }
+
+  ctx.restore();
+};
+
 export const drawMapDecorations = (
   ctx: CanvasRenderingContext2D,
   currentRegion: MapId,
@@ -1771,6 +2011,10 @@ export const drawMapDecorations = (
           ctx.textBaseline = "middle";
           ctx.fillText(mText, worldX + 48, worldY + 69);
         }
+        break;
+
+      case "arena_building":
+        drawArenaBuilding(ctx, worldX, worldY, tileSize, _playerPos);
         break;
     }
   });
