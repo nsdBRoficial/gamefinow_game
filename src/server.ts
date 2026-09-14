@@ -695,14 +695,16 @@ io.on("connection", (socket) => {
     if (existingIdx >= 0) {
       session.players[existingIdx] = p;
     } else {
+      p.kills = 0;
+      p.deaths = 0;
       session.players.push(p);
     }
 
-    // Inicia a partida se tiver 2+ jogadores no FFA
+    // Inicia a pré-batalha se tiver 2+ jogadores no FFA
     if (session.status === "waiting" && session.players.length >= 2) {
-      session.status = "in_progress";
-      session.startedAt = Date.now();
-      console.log(`[Arena] Sessão ${sessionId} INICIADA com ${session.players.length} jogadores.`);
+      session.status = "pre_battle";
+      session.preBattleUntil = Date.now() + 30000; // 30s de espera
+      console.log(`[Arena] Sessão ${sessionId} PRÉ-BATALHA iniciada.`);
     }
 
     socket.emit("arena_sync", session);
@@ -711,21 +713,26 @@ io.on("connection", (socket) => {
 
   socket.on("arena_move", (data: { sessionId: string, playerId: string, arenaX: number, arenaY: number, dir: string }) => {
     const session = pvpSessions.get(data.sessionId);
-    // Permite movimentação em "waiting" e "in_progress" — jogador pode explorar a arena enquanto aguarda oponente
-    if (!session || (session.status !== "in_progress" && session.status !== "waiting")) return;
+    if (!session || (session.status !== "in_progress" && session.status !== "pre_battle" && session.status !== "waiting")) return;
 
     const p = session.players.find((pl: any) => pl.playerId === data.playerId);
     if (p && !p.isEliminated) {
       p.arenaX = data.arenaX;
       p.arenaY = data.arenaY;
       p.dir = data.dir;
-      io.to(`arena:${data.sessionId}`).emit("arena_sync", session);
+      // Emite apenas a movimentação para não travar o frontend com payload massivo
+      io.to(`arena:${data.sessionId}`).emit("arena_player_move", {
+        playerId: p.playerId,
+        arenaX: p.arenaX,
+        arenaY: p.arenaY,
+        dir: p.dir,
+      });
     }
   });
 
   socket.on("arena_attack", (data: { sessionId: string, attackerId: string, targetId: string, playerClass?: string, timestamp: number }) => {
     const session = pvpSessions.get(data.sessionId);
-    if (!session || session.status !== "in_progress") return;
+    if (!session || (session.status !== "in_progress" && session.status !== "pre_battle")) return;
 
     const attacker = session.players.find((p: any) => p.playerId === data.attackerId);
     const target = session.players.find((p: any) => p.playerId === data.targetId);
@@ -748,7 +755,13 @@ io.on("connection", (socket) => {
     }
 
     // Dano e HP
-    const { damage, isCrit } = serverCalcPhysicalDmg(attacker, target);
+    let { damage, isCrit } = serverCalcPhysicalDmg(attacker, target);
+    
+    // Bloqueia dano na pré-batalha, mas envia animação visual
+    if (session.status === "pre_battle") {
+      damage = 0;
+    }
+    
     target.hp = Math.max(0, target.hp - damage);
 
     io.to(`arena:${data.sessionId}`).emit("arena_player_hit", {
@@ -758,18 +771,20 @@ io.on("connection", (socket) => {
       element: "physical",
     });
 
-    if (target.hp <= 0) {
+    if (target.hp <= 0 && !target.isEliminated) {
       target.isEliminated = true;
+      target.deaths = (target.deaths || 0) + 1;
+      attacker.kills = (attacker.kills || 0) + 1;
+      target.respawnAt = Date.now() + 5000;
       io.to(`arena:${data.sessionId}`).emit("arena_player_eliminated", { playerId: data.targetId });
-      checkArenaEnd(session, data.sessionId);
-    } else {
-      io.to(`arena:${data.sessionId}`).emit("arena_sync", session);
     }
+    // Sempre envia o sync de HP 
+    io.to(`arena:${data.sessionId}`).emit("arena_sync", session);
   });
 
   socket.on("arena_cast_spell", (data: { sessionId: string, attackerId: string, targetId: string | null, spellId: string, spellPower: number, element: string }) => {
     const session = pvpSessions.get(data.sessionId);
-    if (!session || session.status !== "in_progress") return;
+    if (!session || (session.status !== "in_progress" && session.status !== "pre_battle")) return;
 
     const attacker = session.players.find((p: any) => p.playerId === data.attackerId);
     if (!attacker || attacker.isEliminated) return;
@@ -806,7 +821,12 @@ io.on("connection", (socket) => {
         return;
       }
 
-      const { damage, isCrit } = serverCalcMagicDmg(attacker, data.spellPower, target);
+      let { damage, isCrit } = serverCalcMagicDmg(attacker, data.spellPower, target);
+
+      if (session.status === "pre_battle") {
+        damage = 0;
+      }
+
       target.hp = Math.max(0, target.hp - damage);
 
       io.to(`arena:${data.sessionId}`).emit("arena_player_hit", {
@@ -816,13 +836,15 @@ io.on("connection", (socket) => {
         element: data.element,
       });
 
-      if (target.hp <= 0) {
+      if (target.hp <= 0 && !target.isEliminated) {
         target.isEliminated = true;
+        target.deaths = (target.deaths || 0) + 1;
+        attacker.kills = (attacker.kills || 0) + 1;
+        target.respawnAt = Date.now() + 5000;
         io.to(`arena:${data.sessionId}`).emit("arena_player_eliminated", { playerId: data.targetId });
-        checkArenaEnd(session, data.sessionId);
-      } else {
-        io.to(`arena:${data.sessionId}`).emit("arena_sync", session);
       }
+      
+      io.to(`arena:${data.sessionId}`).emit("arena_sync", session);
     }
   });
 
@@ -833,7 +855,6 @@ io.on("connection", (socket) => {
       if (p && !p.isEliminated) {
         p.isEliminated = true;
         io.to(`arena:${data.sessionId}`).emit("arena_player_eliminated", { playerId: data.playerId });
-        checkArenaEnd(session, data.sessionId);
       }
     }
     socket.leave(`arena:${data.sessionId}`);
@@ -856,7 +877,6 @@ io.on("connection", (socket) => {
           if (p && !p.isEliminated) {
             p.isEliminated = true;
             io.to(`arena:${sessionId}`).emit("arena_player_eliminated", { playerId: state.playerId });
-            checkArenaEnd(pvpSession, sessionId);
           }
         }
         playerSessionMap.delete(state.playerId);
@@ -864,6 +884,68 @@ io.on("connection", (socket) => {
     }
     console.log(`[Socket] Desconectado: ${socket.id}`);
   });
+
+  // ── TICK ENGINE GLOBAL DA ARENA (Timers e Respawn) ──
+  setInterval(() => {
+    const now = Date.now();
+    for (const [sessionId, session] of pvpSessions.entries()) {
+      let stateChanged = false;
+
+      // 1. Controle de Timers do Modo FFA
+      if (session.status === "pre_battle") {
+        if (session.preBattleUntil && now >= session.preBattleUntil) {
+          session.status = "in_progress";
+          session.startedAt = now;
+          session.endsAt = now + 120000; // 2 minutos de matança
+          stateChanged = true;
+          io.to(`arena:${sessionId}`).emit("arena_sync", session);
+        }
+      } else if (session.status === "in_progress") {
+        if (session.endsAt && now >= session.endsAt) {
+          session.status = "finished";
+          // Determina vencedor por saldo de Kills
+          let winner = session.players[0];
+          for (const p of session.players) {
+            if (p.kills > winner.kills || (p.kills === winner.kills && p.deaths < winner.deaths)) {
+              winner = p;
+            }
+          }
+          io.to(`arena:${sessionId}`).emit("arena_match_end", {
+            winnerId: winner?.playerId ?? null,
+            winnerName: winner?.name ?? null,
+          });
+          pvpSessions.delete(sessionId);
+          continue; // Partida acabou
+        }
+      }
+
+      // 2. Lógica de Respawn
+      const USED_SPAWNS = [
+        { x: 2, y: 5 }, { x: 2, y: 6 },
+        { x: 9, y: 5 }, { x: 9, y: 6 },
+        { x: 5, y: 2 }, { x: 6, y: 2 },
+        { x: 5, y: 9 }, { x: 6, y: 9 },
+      ];
+      for (const p of session.players) {
+        if (p.isEliminated && p.respawnAt && now >= p.respawnAt) {
+          p.isEliminated = false;
+          p.hp = p.maxHp;
+          p.respawnAt = undefined;
+          const spawn = USED_SPAWNS[Math.floor(Math.random() * USED_SPAWNS.length)];
+          p.arenaX = spawn.x;
+          p.arenaY = spawn.y;
+          stateChanged = true;
+          // Emite respawn visual isolado além do sync
+          io.to(`arena:${sessionId}`).emit("arena_player_respawn", { playerId: p.playerId });
+        }
+      }
+
+      // Emite sync constante para todos garantirem estado atual
+      if (stateChanged || session.status === "waiting" || session.status === "pre_battle" || session.status === "in_progress") {
+        io.to(`arena:${sessionId}`).emit("arena_sync", session);
+      }
+    }
+  }, 1000);
 });
 
 server.listen(PORT, () => {
