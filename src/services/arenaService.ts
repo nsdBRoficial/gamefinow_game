@@ -26,6 +26,8 @@ type ArenaCallbacks = {
   onMatchEnd?: (data: PvpMatchEndPayload) => void;
   onError?: (msg: string) => void;
   onOutOfRange?: () => void;
+  onPlayerMove?: (data: { playerId: string, arenaX: number, arenaY: number, dir: string }) => void;
+  onPlayerRespawn?: (data: { playerId: string }) => void;
 };
 
 let _callbacks: ArenaCallbacks = {};
@@ -48,6 +50,8 @@ export function subscribeToArena(callbacks: ArenaCallbacks): () => void {
   socket.on("arena_match_end",          (data: PvpMatchEndPayload) => _callbacks.onMatchEnd?.(data));
   socket.on("arena_out_of_range",       () => _callbacks.onOutOfRange?.());
   socket.on("arena_error",              (data: { message: string }) => _callbacks.onError?.(data.message));
+  socket.on("arena_player_move",        (data) => _callbacks.onPlayerMove?.(data));
+  socket.on("arena_player_respawn",     (data) => _callbacks.onPlayerRespawn?.(data));
 
   // Retorna função de limpeza
   return () => {
@@ -57,6 +61,8 @@ export function subscribeToArena(callbacks: ArenaCallbacks): () => void {
     socket.off("arena_match_end");
     socket.off("arena_out_of_range");
     socket.off("arena_error");
+    socket.off("arena_player_move");
+    socket.off("arena_player_respawn");
     _callbacks = {};
   };
 }
