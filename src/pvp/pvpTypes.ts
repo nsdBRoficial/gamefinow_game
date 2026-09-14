@@ -12,7 +12,7 @@ import { ActiveBuff, PlayerClassId } from "../types";
 export type PvpMode = "ffa" | "1v1" | "2v2" | "3v3" | "4v4";
 
 // ── Status de sessão ──────────────────────────────────────────────────────────
-export type PvpSessionStatus = "waiting" | "in_progress" | "finished";
+export type PvpSessionStatus = "waiting" | "pre_battle" | "in_progress" | "finished";
 
 // ── Jogador dentro da arena ───────────────────────────────────────────────────
 export interface PvpPlayer {
@@ -49,6 +49,9 @@ export interface PvpPlayer {
   // Timestamps de combate (server-side)
   lastAttackTime?: number;
   lastSpellTime?: number;
+  kills: number;
+  deaths: number;
+  respawnAt?: number;
 }
 
 // ── Sessão PVP ────────────────────────────────────────────────────────────────
@@ -57,7 +60,9 @@ export interface PvpSession {
   mode: PvpMode;
   status: PvpSessionStatus;
   players: PvpPlayer[];
-  startedAt?: number;
+  startedAt?: number;       // Timestamp in_progress
+  preBattleUntil?: number;  // Timestamp de termino do pre_battle
+  endsAt?: number;          // Timestamp do termino da partida
   finishedAt?: number;
   winnerId?: string;
   winnerName?: string;
