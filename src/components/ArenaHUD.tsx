@@ -32,18 +32,25 @@ interface ArenaHUDProps {
 }
 
 // ── Hook de timer de partida ──────────────────────────────────────────────────
-const useMatchTimer = (startedAt?: number) => {
-  const [elapsed, setElapsed] = useState(0);
+const useArenaTimers = (session: PvpSession) => {
+  const [now, setNow] = useState(Date.now());
   useEffect(() => {
-    if (!startedAt) return;
-    const interval = setInterval(() => {
-      setElapsed(Math.floor((Date.now() - startedAt) / 1000));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [startedAt]);
-  const minutes = Math.floor(elapsed / 60);
-  const seconds = elapsed % 60;
-  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    const int = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(int);
+  }, []);
+
+  if (session.status === "waiting") return "AGUARDANDO OPONENTES";
+  if (session.status === "pre_battle" && session.preBattleUntil) {
+    const s = Math.max(0, Math.ceil((session.preBattleUntil - now) / 1000));
+    return `COMEÇA EM 0:${String(s).padStart(2, "0")}`;
+  }
+  if (session.status === "in_progress" && session.endsAt) {
+    const s = Math.max(0, Math.ceil((session.endsAt - now) / 1000));
+    const min = Math.floor(s / 60);
+    const sec = s % 60;
+    return `MATANÇA ${String(min).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+  }
+  return "FINALIZADO";
 };
 
 // ── Hook cooldown (30fps) ─────────────────────────────────────────────────────
@@ -80,53 +87,25 @@ export const ArenaHUD: React.FC<ArenaHUDProps> = ({ session, playerId, onMatchEn
   const meInSession = session.players.find((p) => p.playerId === playerId);
   const opponents = session.players.filter((p) => p.playerId !== playerId && !p.isEliminated);
 
-  const matchTime = useMatchTimer(
-    session.status === "in_progress" ? session.startedAt : undefined
-  );
+  const matchTime = useArenaTimers(session);
 
   const now = Date.now();
   const hasActiveCooldown = now < globalCooldownEnd || now < potionCooldownEnd;
   useAnimationFrame(hasActiveCooldown || session.status === "in_progress");
 
-  // Escuta eventos de fim de partida
+  // Escuta eventos de fim de partida apenas pelo match_end (time over)
   useEffect(() => {
     const socket = getSocket();
     if (!socket) return;
     const handleMatchEnd = (data: PvpMatchEndPayload) => {
-      setMatchResult({ type: data.winnerId === playerId ? "victory" : "eliminated" });
+      setMatchResult({ type: data.winnerId === playerId ? "victory" : "eliminated", winnerName: data.winnerName });
       onMatchEnd(data);
     };
-    const handleEliminated = (data: { playerId: string }) => {
-      if (data.playerId === playerId) setMatchResult({ type: "eliminated" });
-    };
     socket.on("arena_match_end", handleMatchEnd);
-    socket.on("arena_player_eliminated", handleEliminated);
     return () => {
       socket.off("arena_match_end", handleMatchEnd);
-      socket.off("arena_player_eliminated", handleEliminated);
     };
   }, [playerId, onMatchEnd]);
-
-  // Detecta eliminação local via estado da sessão
-  useEffect(() => {
-    if (meInSession?.isEliminated && !matchResult) {
-      setMatchResult({ type: "eliminated" });
-    }
-  }, [meInSession, matchResult]);
-
-  // Hotkeys: 1,2,3 magias / 4,5 poções (exatamente como BattleHUD)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.target && (e.target as HTMLElement).tagName === "INPUT") return;
-      if (e.key === "1" && spells[0]) castSpell(spells[0]);
-      if (e.key === "2" && spells[1]) castSpell(spells[1]);
-      if (e.key === "3" && spells[2]) castSpell(spells[2]);
-      if (e.key === "4") usePotion("health");
-      if (e.key === "5") usePotion("mana");
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [castSpell, usePotion, spells]);
 
   // ── Stats ──────────────────────────────────────────────────────────────────
   const hp = meInSession?.hp ?? playerPos.hp ?? 100;
@@ -146,6 +125,89 @@ export const ArenaHUD: React.FC<ArenaHUDProps> = ({ session, playerId, onMatchEn
   const isPotionCDActive = potionCdRemaining > 0;
 
   const fmtCd = (ms: number) => ms > 0 ? `${(ms / 1000).toFixed(1)}s` : "";
+
+  // ── Arena Combat Actions ──
+  const getClosestTarget = () => {
+    let closest = null;
+    let minDist = Infinity;
+    opponents.forEach((op) => {
+      const dist = Math.sqrt(Math.pow(op.arenaX - (meInSession?.arenaX ?? 0), 2) + Math.pow(op.arenaY - (meInSession?.arenaY ?? 0), 2));
+      if (dist < minDist) {
+        minDist = dist;
+        closest = op;
+      }
+    });
+    return closest;
+  };
+
+  const doPhysicalAttack = () => {
+    if (isGCDActive) return;
+    const target = getClosestTarget();
+    if (!target) return;
+    const socket = getSocket();
+    if (socket) {
+      socket.emit("arena_attack", {
+        sessionId: session.sessionId,
+        attackerId: playerId,
+        targetId: target.playerId,
+        playerClass: meInSession?.playerClass,
+        timestamp: Date.now(),
+      });
+      useGameStore.setState({ globalCooldownEnd: Date.now() + 1000 });
+      // Executa animação local
+      if (spells[0]) castSpell(spells[0]);
+    }
+  };
+
+  const doArenaSpell = (spell: any) => {
+    if (isGCDActive || playerPos.mp! < spell.mpCost) return;
+    let targetId = null;
+    if (spell.type !== "heal") {
+      const t = getClosestTarget();
+      if (!t) return;
+      targetId = t.playerId;
+    }
+    const socket = getSocket();
+    if (socket) {
+      socket.emit("arena_cast_spell", {
+        sessionId: session.sessionId,
+        attackerId: playerId,
+        targetId,
+        spellId: spell.id,
+        spellPower: spell.basePower,
+        element: spell.element,
+      });
+      useGameStore.setState({ globalCooldownEnd: Date.now() + spell.gcdMs });
+      castSpell(spell);
+    }
+  };
+
+  const doArenaPotion = (type: "health" | "mana") => {
+    if (type === "health") {
+      const socket = getSocket();
+      socket?.emit("arena_cast_spell", {
+        sessionId: session.sessionId, attackerId: playerId, targetId: null,
+        spellId: "potion", spellPower: 40, element: "heal"
+      });
+    }
+    usePotion(type);
+  };
+
+  // Hotkeys: 1,2,3 magias / 4,5 poções (Arena mode)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target && (e.target as HTMLElement).tagName === "INPUT") return;
+      if (e.key === "1") doPhysicalAttack();
+      if (e.key === "2" && spells[1]) doArenaSpell(spells[1]);
+      if (e.key === "3" && spells[2]) doArenaSpell(spells[2]);
+      if (e.key === "4") doArenaPotion("health");
+      if (e.key === "5") doArenaPotion("mana");
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [spells, opponents, meInSession, session.sessionId, playerId, isGCDActive]);
+
+
 
   const CooldownOverlay = ({ remaining }: { remaining: number }) => {
     if (remaining <= 0) return null;
@@ -172,17 +234,28 @@ export const ArenaHUD: React.FC<ArenaHUDProps> = ({ session, playerId, onMatchEn
       {/* ── Top Section ── */}
       <div className="relative w-full flex-grow">
 
-        {/* Timer + vivos (topo-centro) */}
+        {/* Timer + Placar Central (topo-centro) */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 flex items-center gap-3 pointer-events-none">
-          <div className="flex items-center gap-1.5 bg-slate-950/90 border border-red-800/40 px-3 py-1.5 rounded-lg shadow-lg backdrop-blur-sm">
-            <Timer size={13} className="text-red-400" />
+          <div className="flex items-center gap-1.5 bg-slate-950/90 border border-amber-800/40 px-4 py-2 rounded-lg shadow-lg backdrop-blur-sm">
+            <Timer size={14} className="text-amber-400" />
             <span className="text-white font-mono font-bold text-sm tracking-widest">{matchTime}</span>
           </div>
-          <div className="flex items-center gap-1.5 bg-slate-950/90 border border-slate-700/40 px-3 py-1.5 rounded-lg shadow-lg backdrop-blur-sm">
-            <Swords size={13} className="text-amber-400" />
-            <span className="text-amber-300 font-bold text-sm">
-              {session.players.filter((p) => !p.isEliminated).length} vivos
-            </span>
+        </div>
+
+        {/* Placar de Kills/Deaths (Topo-esquerdo) */}
+        <div className="absolute top-0 left-0 pointer-events-none flex flex-col gap-1 w-48">
+          <div className="bg-slate-950/90 border border-slate-700/50 rounded-lg p-2 shadow-lg backdrop-blur-sm">
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 pb-1 border-b border-slate-800 flex items-center gap-1">
+              <Swords size={12} /> Placar
+            </div>
+            <div className="flex flex-col gap-1 max-h-32 overflow-hidden">
+              {[...session.players].sort((a, b) => b.kills - a.kills || a.deaths - b.deaths).slice(0, 5).map(p => (
+                <div key={p.playerId} className={`flex justify-between items-center text-[11px] font-mono ${p.playerId === playerId ? 'text-amber-300 font-bold' : 'text-slate-300'}`}>
+                  <span className="truncate max-w-[80px]">{p.name}</span>
+                  <span className="text-slate-500">{p.kills}K / {p.deaths}D</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -215,19 +288,32 @@ export const ArenaHUD: React.FC<ArenaHUDProps> = ({ session, playerId, onMatchEn
 
         {/* Status aguardando (dentro da batalha) */}
         {session.status === "waiting" && (
-          <div className="absolute top-12 left-1/2 -translate-x-1/2 z-30 pointer-events-auto flex flex-col items-center gap-2 bg-slate-950/95 border-2 border-amber-500/80 px-6 py-3 rounded-xl shadow-[0_0_30px_rgba(245,158,11,0.3)] text-center animate-pulse">
+          <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 pointer-events-auto flex flex-col items-center gap-2 bg-slate-950/95 border-2 border-amber-500/80 px-6 py-3 rounded-xl shadow-[0_0_30px_rgba(245,158,11,0.3)] text-center animate-pulse">
             <div className="flex items-center gap-2 text-amber-400 font-bold font-mono text-sm uppercase tracking-wider">
-              <span>⏳</span> Aguardando Combatentes ({session.players.length}/2)
+              <span>⏳</span> Free-For-All
             </div>
             <p className="text-slate-300 text-xs font-sans max-w-xs">
-              A batalha iniciará automaticamente assim que o 2º jogador entrar na Arena.
+              Aguardando ao menos mais um jogador. A partida iniciará quando houver oponentes! ({session.players.length}/8)
             </p>
             <button
               onClick={() => onLeave?.()}
               className="mt-1 px-3 py-1 bg-red-950/80 hover:bg-red-900 border border-red-700 text-red-200 rounded text-[11px] font-mono font-bold transition cursor-pointer"
             >
-              ✕ Sair da Fila
+              ✕ Sair da Arena
             </button>
+          </div>
+        )}
+
+        {/* Overlay Respawn (Quando morto no meio da partida) */}
+        {meInSession?.isEliminated && !matchResult && (
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm pointer-events-auto">
+            <Skull size={48} className="text-red-600 mb-4 animate-pulse" />
+            <h2 className="text-3xl font-black text-red-500 font-mono tracking-widest drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]">
+              ELIMINADO
+            </h2>
+            <p className="text-slate-400 font-mono mt-2 animate-pulse">
+              Ressuscitando na arena em breve...
+            </p>
           </div>
         )}
 
@@ -305,7 +391,7 @@ export const ArenaHUD: React.FC<ArenaHUDProps> = ({ session, playerId, onMatchEn
             return (
               <button
                 key={sp.id}
-                onClick={() => castSpell(sp)}
+                onClick={() => slotNum === 1 ? doPhysicalAttack() : doArenaSpell(sp)}
                 disabled={isGCDActive || mp < sp.mpCost}
                 className={`group relative w-14 h-14 bg-gradient-to-br ${gradientClass} border-2 rounded-xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all cursor-pointer disabled:cursor-not-allowed ${mp < sp.mpCost ? "opacity-50 grayscale" : ""}`}
                 title={`${sp.name} (${sp.description} | Custo: ${sp.mpCost} MP | CD: ${(sp.gcdMs / 1000).toFixed(1)}s)`}
@@ -323,7 +409,7 @@ export const ArenaHUD: React.FC<ArenaHUDProps> = ({ session, playerId, onMatchEn
 
           {/* Poção HP (slot 4) */}
           <button
-            onClick={() => usePotion("health")}
+            onClick={() => doArenaPotion("health")}
             disabled={isPotionCDActive || healthPotionsCount <= 0}
             className={`group relative w-12 h-12 bg-slate-900 border-2 ${
               healthPotionsCount > 0 && !isPotionCDActive
@@ -344,7 +430,7 @@ export const ArenaHUD: React.FC<ArenaHUDProps> = ({ session, playerId, onMatchEn
 
           {/* Poção MP (slot 5) */}
           <button
-            onClick={() => usePotion("mana")}
+            onClick={() => doArenaPotion("mana")}
             disabled={isPotionCDActive || manaPotionsCount <= 0}
             className={`group relative w-12 h-12 bg-slate-900 border-2 ${
               manaPotionsCount > 0 && !isPotionCDActive
