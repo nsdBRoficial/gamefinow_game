@@ -34,6 +34,7 @@ export const ArenaView: React.FC<{ playerId: string }> = ({ playerId }) => {
 
   // Controle de cooldown de movimento (throttle igual ao jogo principal)
   const lastMoveRef = useRef<number>(0);
+  const keysPressedRef = useRef<{ [key: string]: boolean }>({});
 
   // Sair da arena (usável em qualquer estado)
   const handleLeave = useCallback(() => {
@@ -73,22 +74,32 @@ export const ArenaView: React.FC<{ playerId: string }> = ({ playerId }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playerId]);
 
-  // Teclas de movimento + Escape para sair
+  // Loop principal de inputs e movimentação fluida
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target && (e.target as HTMLElement).tagName === "INPUT") return;
-
-      // Escape sempre disponível para sair da arena
       if (e.key === "Escape") {
         handleLeave();
         return;
       }
+      keysPressedRef.current[e.key.toLowerCase()] = true;
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      keysPressedRef.current[e.key.toLowerCase()] = false;
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    let rafId: number;
+    const gameLoop = () => {
+      rafId = requestAnimationFrame(gameLoop);
 
       if (!session) return;
       const me = session.players.find((p) => p.playerId === playerId);
       if (!me || me.isEliminated) return;
 
-      // Throttle de movimento: max 8 moves/s (igual ao jogo principal ~125ms)
       const now = Date.now();
       if (now - lastMoveRef.current < 120) return;
 
@@ -97,26 +108,35 @@ export const ArenaView: React.FC<{ playerId: string }> = ({ playerId }) => {
       let dir = me.dir;
       let moved = false;
 
-      const k = e.key.toLowerCase();
-      if (k === "w" || k === "arrowup")         { ay--; dir = "up";    moved = true; }
-      else if (k === "s" || k === "arrowdown")  { ay++; dir = "down";  moved = true; }
-      else if (k === "a" || k === "arrowleft")  { ax--; dir = "left";  moved = true; }
-      else if (k === "d" || k === "arrowright") { ax++; dir = "right"; moved = true; }
+      const keys = keysPressedRef.current;
+      if (keys["w"] || keys["arrowup"])         { ay--; dir = "up";    moved = true; }
+      else if (keys["s"] || keys["arrowdown"])  { ay++; dir = "down";  moved = true; }
+      else if (keys["a"] || keys["arrowleft"])  { ax--; dir = "left";  moved = true; }
+      else if (keys["d"] || keys["arrowright"]) { ax++; dir = "right"; moved = true; }
 
       if (moved) {
-        // Validacao de bounds do grid
         if (ax < 0 || ax >= ARENA_COLS || ay < 0 || ay >= ARENA_ROWS) return;
-        // Validacao de colisao com paredes e tochas (igual ao GameCanvas)
         const targetTile = ARENA_GRID_CLIENT[ay]?.[ax];
         if (targetTile === undefined || isArenaCollidable(targetTile)) return;
 
         lastMoveRef.current = now;
+        
+        // Optimistic UI update: permite que o Canvas desenhe no próximo frame antes do servidor responder
+        me.arenaX = ax;
+        me.arenaY = ay;
+        me.dir = dir;
+
         sendArenaMove(session.sessionId, playerId, ax, ay, dir);
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    rafId = requestAnimationFrame(gameLoop);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+      cancelAnimationFrame(rafId);
+    };
   }, [session, playerId, handleLeave]);
 
   // ── Tela de sincronização (aguardando sessão) ──
