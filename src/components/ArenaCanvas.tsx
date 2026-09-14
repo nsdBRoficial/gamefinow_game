@@ -98,6 +98,30 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({ session, playerId, onE
     []
   );
 
+  // Escuta os eventos PVP e cria os efeitos visuais de dano
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+
+    const handleHit = (data: { targetId: string, damage: number, isCrit: boolean, element: string }) => {
+      const target = sessionRef.current.players.find(p => p.playerId === data.targetId);
+      if (target) {
+        const worldX = target.arenaX * TILE_PX + TILE_PX / 2 + (Math.random() * 10 - 5);
+        const worldY = target.arenaY * TILE_PX - 10 + (Math.random() * 10 - 5);
+        const color = data.element === "heal" ? "#22c55e" : data.isCrit ? "#facc15" : "#ef4444";
+        const sign = data.element === "heal" ? "+" : "-";
+        const text = `${data.isCrit ? "CRIT " : ""}${sign}${Math.abs(data.damage)}`;
+        spawnFloatingText(text, worldX, worldY, color);
+      }
+    };
+
+    socket.on("arena_player_hit", handleHit);
+    
+    return () => {
+      socket.off("arena_player_hit", handleHit);
+    };
+  }, [spawnFloatingText]);
+
   // Socket: recebe hits
   useEffect(() => {
     const socket = getSocket();
@@ -114,7 +138,30 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({ session, playerId, onE
       }
     };
     socket.on("arena_player_hit", onHit);
-    return () => { socket.off("arena_player_hit", onHit); };
+
+    const onMove = (data: { playerId: string, arenaX: number, arenaY: number, dir: string }) => {
+      const p = sessionRef.current?.players.find((pl) => pl.playerId === data.playerId);
+      if (p) {
+        p.arenaX = data.arenaX;
+        p.arenaY = data.arenaY;
+        p.dir = data.dir as any;
+      }
+    };
+    socket.on("arena_player_move", onMove);
+
+    const onRespawn = (data: { playerId: string }) => {
+      const p = sessionRef.current?.players.find((pl) => pl.playerId === data.playerId);
+      if (p) {
+        spawnFloatingText("RENASCEU!", p.arenaX * 32 + 16, p.arenaY * 32, "#10b981");
+      }
+    };
+    socket.on("arena_player_respawn", onRespawn);
+
+    return () => { 
+      socket.off("arena_player_hit", onHit); 
+      socket.off("arena_player_move", onMove);
+      socket.off("arena_player_respawn", onRespawn);
+    };
   }, [playerPos, spawnFloatingText]);
 
   // Click no canvas seleciona alvo (convertendo coords de tela para mundo com zoom)
