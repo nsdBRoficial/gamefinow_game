@@ -769,13 +769,14 @@ io.on("connection", (socket) => {
     // Validação de intervalo de ataque (Anti-spam)
     const now = Date.now();
     const lastAtk = lastAttackTime.get(data.attackerId) || 0;
-    const interval = Math.max(400, 1500 - (attacker.speed || 5) * 10);
+    // Reduzimos o teto para evitar que o ataque seja bloqueado silenciosamente
+    const interval = 800; // 800ms de limite server-side (menor que o GCD do client)
     
-    if (now - lastAtk < interval - 100) return; // Margem de 100ms
+    if (now - lastAtk < interval) return;
     lastAttackTime.set(data.attackerId, now);
 
-    // Validação de Range
-    const maxRange = getPhysicalRangeByClass(data.playerClass);
+    // Validação de Range - Ampliada para evitar falhas visuais por desync do grid
+    const maxRange = getPhysicalRangeByClass(data.playerClass) + 1.5;
     if (arenaDistance(attacker, target) > maxRange) {
       socket.emit("arena_out_of_range");
       return;
@@ -904,27 +905,27 @@ io.on("connection", (socket) => {
       playersState.delete(socket.id);
       broadcastGlobalPresence();
 
-      // ── Grace period de 12s para reconexão antes de eliminar da arena ──
-      // Não elimina imediatamente para suportar reconexões rápidas (ex: troca de aba, reload)
+      // ── Limpa a arena IMEDIATAMENTE (corrige bug de oponentes fantasmas presos na busca) ──
       const sessionId = playerSessionMap.get(state.playerId);
       if (sessionId) {
-        setTimeout(() => {
-          // Se o player NÃO reconectou e ainda está no mapa (playerSessionMap ainda tem ele),
-          // aí sim eliminamos
-          const stillInSession = playerSessionMap.get(state.playerId) === sessionId;
-          if (stillInSession) {
-            const pvpSession = pvpSessions.get(sessionId);
-            if (pvpSession) {
-              const p = pvpSession.players.find((pl: any) => pl.playerId === state.playerId);
-              if (p && !p.isEliminated) {
-                p.isEliminated = true;
-                io.to(`arena:${sessionId}`).emit("arena_player_eliminated", { playerId: state.playerId });
-                io.to(`arena:${sessionId}`).emit("arena_sync", pvpSession);
-              }
+        const pvpSession = pvpSessions.get(sessionId);
+        if (pvpSession) {
+          const p = pvpSession.players.find((pl: any) => pl.playerId === state.playerId);
+          if (p && !p.isEliminated) {
+            p.isEliminated = true;
+            io.to(`arena:${sessionId}`).emit("arena_player_eliminated", { playerId: state.playerId });
+            io.to(`arena:${sessionId}`).emit("arena_sync", pvpSession);
+            
+            // Retorna a sala para waiting se ficar vazia
+            const alives = pvpSession.players.filter((pl: any) => !pl.isEliminated);
+            if (alives.length <= 1 && pvpSession.status !== "waiting") {
+              pvpSession.status = "waiting";
+              pvpSession.preBattleUntil = undefined;
+              io.to(`arena:${sessionId}`).emit("arena_sync", pvpSession);
             }
-            playerSessionMap.delete(state.playerId);
           }
-        }, 12000); // 12s de grace period para reconexão
+        }
+        playerSessionMap.delete(state.playerId);
       }
     }
     console.log(`[Socket] Desconectado: ${socket.id}`);
