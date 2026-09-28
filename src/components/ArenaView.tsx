@@ -50,6 +50,18 @@ export const ArenaView: React.FC<{ playerId: string }> = ({ playerId }) => {
         setSession(newSession);
         setGameState({ pvpSessionId: newSession.sessionId });
       },
+      onPlayerMove: (data) => {
+        // Atualiza posição dos outros players no state React (não apenas no ref do canvas)
+        setSession((prev) => {
+          if (!prev) return prev;
+          const updatedPlayers = prev.players.map((p) =>
+            p.playerId === data.playerId
+              ? { ...p, arenaX: data.arenaX, arenaY: data.arenaY, dir: data.dir as any, isMoving: true }
+              : p
+          );
+          return { ...prev, players: updatedPlayers };
+        });
+      },
       onEliminated: (_data) => {
         // ArenaHUD cuida da animação de eliminação
       },
@@ -121,10 +133,16 @@ export const ArenaView: React.FC<{ playerId: string }> = ({ playerId }) => {
 
         lastMoveRef.current = now;
         
-        // Optimistic UI update: permite que o Canvas desenhe no próximo frame antes do servidor responder
-        me.arenaX = ax;
-        me.arenaY = ay;
-        me.dir = dir;
+        // Optimistic UI update: atualiza o state React com cópia imutável para disparar re-render
+        setSession((prev) => {
+          if (!prev) return prev;
+          const updatedPlayers = prev.players.map((p) =>
+            p.playerId === playerId
+              ? { ...p, arenaX: ax, arenaY: ay, dir }
+              : p
+          );
+          return { ...prev, players: updatedPlayers };
+        });
 
         sendArenaMove(session.sessionId, playerId, ax, ay, dir);
       }
@@ -179,7 +197,10 @@ export const ArenaView: React.FC<{ playerId: string }> = ({ playerId }) => {
       <ArenaHUD
         session={session}
         playerId={playerId}
-        onMatchEnd={() => {}}
+        onMatchEnd={(result) => {
+          // Retorna ao mapa após 5s (já contado no subscribeToArena, mas garantimos aqui também)
+          setTimeout(() => handleLeave(), 5000);
+        }}
         onLeave={handleLeave}
       />
     </div>
