@@ -50,6 +50,8 @@ describe('pvpEngine tests', () => {
     shoesType: 'none',
     faceType: 'none',
     accessoryType: 'none',
+    kills: 0,
+    deaths: 0,
     ...overrides
   });
 
