@@ -76,8 +76,10 @@ app.post("/api/auth/token", (req, res) => {
   if (!publicKey) return res.status(400).json({ error: "Missing publicKey" });
 
   try {
-    // Valida se a chave é válida na curva Ed25519 do Stellar
-    Keypair.fromPublicKey(publicKey);
+    // Valida se a chave é válida na curva Ed25519 do Stellar, a menos que seja anônimo
+    if (!publicKey.startsWith("anon_")) {
+      Keypair.fromPublicKey(publicKey);
+    }
 
     // Emite um JWT para o Supabase com o payload exigido (papel: authenticated)
     const token = jwt.sign(
@@ -661,6 +663,12 @@ io.on("connection", (socket) => {
         if (oldP && !oldP.isEliminated) {
           oldP.isEliminated = true;
           io.to(`arena:${oldSessionId}`).emit("arena_player_eliminated", { playerId: data.playerId });
+          
+          const alives = oldSession.players.filter((pl: any) => !pl.isEliminated);
+          if (alives.length <= 1 && oldSession.status !== "waiting") {
+            oldSession.status = "waiting";
+            oldSession.preBattleUntil = undefined;
+          }
           io.to(`arena:${oldSessionId}`).emit("arena_sync", oldSession);
         }
       }
@@ -878,6 +886,8 @@ io.on("connection", (socket) => {
         // Verifica se a sala deve ser resetada
         const alives = session.players.filter((pl: any) => !pl.isEliminated);
         if (alives.length <= 1 && session.status !== "waiting") {
+          session.status = "waiting";
+          session.preBattleUntil = undefined;
           io.to(`arena:${data.sessionId}`).emit("arena_sync", session);
         }
       }
