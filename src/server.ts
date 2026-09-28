@@ -530,7 +530,10 @@ io.on("connection", (socket) => {
       }
 
       socket.rooms.forEach(room => {
-        if (room !== socket.id && !room.startsWith("guild:")) socket.leave(room);
+        // Preserva a room da guilda E a room da arena ativa — apenas sai das rooms de mapa
+        if (room !== socket.id && !room.startsWith("guild:") && !room.startsWith("arena:")) {
+          socket.leave(room);
+        }
       });
 
       socket.join(roomName);
@@ -649,6 +652,22 @@ io.on("connection", (socket) => {
     let session: any;
     let sessionId = data.sessionId;
 
+    // ── Previne fantasmas: remove da sessão antiga se estiver reentrando em outra ──
+    const oldSessionId = playerSessionMap.get(data.playerId);
+    if (oldSessionId && oldSessionId !== sessionId) {
+      const oldSession = pvpSessions.get(oldSessionId);
+      if (oldSession) {
+        const oldP = oldSession.players.find((pl: any) => pl.playerId === data.playerId);
+        if (oldP && !oldP.isEliminated) {
+          oldP.isEliminated = true;
+          io.to(`arena:${oldSessionId}`).emit("arena_player_eliminated", { playerId: data.playerId });
+          io.to(`arena:${oldSessionId}`).emit("arena_sync", oldSession);
+        }
+      }
+      socket.leave(`arena:${oldSessionId}`);
+      playerSessionMap.delete(data.playerId);
+    }
+
     if (sessionId && pvpSessions.has(sessionId)) {
       session = pvpSessions.get(sessionId);
     } else {
@@ -703,11 +722,11 @@ io.on("connection", (socket) => {
     // Inicia a pré-batalha se tiver 2+ jogadores no FFA
     if (session.status === "waiting" && session.players.length >= 2) {
       session.status = "pre_battle";
-      session.preBattleUntil = Date.now() + 30000; // 30s de espera
+      session.preBattleUntil = Date.now() + 10000; // 10s de contagem regressiva (reduzido de 30s)
       console.log(`[Arena] Sessão ${sessionId} PRÉ-BATALHA iniciada.`);
     }
 
-    socket.emit("arena_sync", session);
+    // Emite apenas para a room — o socket local está na room, então recebe tb
     io.to(`arena:${sessionId}`).emit("arena_sync", session);
   });
 
@@ -855,10 +874,17 @@ io.on("connection", (socket) => {
       if (p && !p.isEliminated) {
         p.isEliminated = true;
         io.to(`arena:${data.sessionId}`).emit("arena_player_eliminated", { playerId: data.playerId });
+        
+        // Verifica se a sala deve ser resetada
+        const alives = session.players.filter((pl: any) => !pl.isEliminated);
+        if (alives.length <= 1 && session.status !== "waiting") {
+          io.to(`arena:${data.sessionId}`).emit("arena_sync", session);
+        }
       }
     }
     socket.leave(`arena:${data.sessionId}`);
     playerSessionMap.delete(data.playerId);
+    console.log(`[Arena] Player ${data.playerId} saiu da sessão ${data.sessionId}`);
   });
 
   socket.on("disconnect", () => {
@@ -868,18 +894,27 @@ io.on("connection", (socket) => {
       playersState.delete(socket.id);
       broadcastGlobalPresence();
 
-      // ── Limpa a arena se o player estava em uma sessão PVP ──
+      // ── Grace period de 12s para reconexão antes de eliminar da arena ──
+      // Não elimina imediatamente para suportar reconexões rápidas (ex: troca de aba, reload)
       const sessionId = playerSessionMap.get(state.playerId);
       if (sessionId) {
-        const pvpSession = pvpSessions.get(sessionId);
-        if (pvpSession) {
-          const p = pvpSession.players.find((pl: any) => pl.playerId === state.playerId);
-          if (p && !p.isEliminated) {
-            p.isEliminated = true;
-            io.to(`arena:${sessionId}`).emit("arena_player_eliminated", { playerId: state.playerId });
+        setTimeout(() => {
+          // Se o player NÃO reconectou e ainda está no mapa (playerSessionMap ainda tem ele),
+          // aí sim eliminamos
+          const stillInSession = playerSessionMap.get(state.playerId) === sessionId;
+          if (stillInSession) {
+            const pvpSession = pvpSessions.get(sessionId);
+            if (pvpSession) {
+              const p = pvpSession.players.find((pl: any) => pl.playerId === state.playerId);
+              if (p && !p.isEliminated) {
+                p.isEliminated = true;
+                io.to(`arena:${sessionId}`).emit("arena_player_eliminated", { playerId: state.playerId });
+                io.to(`arena:${sessionId}`).emit("arena_sync", pvpSession);
+              }
+            }
+            playerSessionMap.delete(state.playerId);
           }
-        }
-        playerSessionMap.delete(state.playerId);
+        }, 12000); // 12s de grace period para reconexão
       }
     }
     console.log(`[Socket] Desconectado: ${socket.id}`);
