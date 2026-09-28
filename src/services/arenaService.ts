@@ -32,6 +32,28 @@ type ArenaCallbacks = {
 
 let _callbacks: ArenaCallbacks = {};
 
+// ── Dados do último join para re-envio após reconexão ──
+let _lastJoinPlayerId: string | null = null;
+let _lastJoinPlayer: Player | null = null;
+let _currentSessionId: string | null = sessionStorage.getItem("gfn_arena_session_id");
+
+// Escuta reconexão do socket para re-entrar na room da arena automaticamente
+function setupReconnectHandler() {
+  const socket = getSocket();
+  if (!socket) return;
+
+  socket.off("connect", _onSocketReconnect);
+  socket.on("connect", _onSocketReconnect);
+}
+
+function _onSocketReconnect() {
+  if (_lastJoinPlayerId && _lastJoinPlayer) {
+    console.log("[Arena] Reconectando à arena após reconexão do socket...", _currentSessionId);
+    // Re-envia o join com a sessionId atual para voltar à mesma sessão
+    requestArenaJoin(_lastJoinPlayerId, _lastJoinPlayer, _currentSessionId || undefined);
+  }
+}
+
 // ── Subscrição de eventos Arena ───────────────────────────────────────────────
 
 /**
@@ -44,26 +66,45 @@ export function subscribeToArena(callbacks: ArenaCallbacks): () => void {
 
   _callbacks = callbacks;
 
-  socket.on("arena_sync",               (data: PvpSession) => _callbacks.onSync?.(data));
-  socket.on("arena_player_hit",         (data: PvpHitPayload) => _callbacks.onHit?.(data));
-  socket.on("arena_player_eliminated",  (data: { playerId: string }) => _callbacks.onEliminated?.(data));
-  socket.on("arena_match_end",          (data: PvpMatchEndPayload) => _callbacks.onMatchEnd?.(data));
-  socket.on("arena_out_of_range",       () => _callbacks.onOutOfRange?.());
-  socket.on("arena_error",              (data: { message: string }) => _callbacks.onError?.(data.message));
-  socket.on("arena_player_move",        (data) => _callbacks.onPlayerMove?.(data));
-  socket.on("arena_player_respawn",     (data) => _callbacks.onPlayerRespawn?.(data));
+  // Configura o handler de reconexão
+  setupReconnectHandler();
 
-  // Retorna função de limpeza
+  // Handlers nomeados para poder removê-los individualmente no cleanup
+  const onSync         = (data: PvpSession) => {
+    _currentSessionId = data.sessionId;
+    sessionStorage.setItem("gfn_arena_session_id", data.sessionId);
+    _callbacks.onSync?.(data);
+  };
+  const onHit          = (data: PvpHitPayload) => _callbacks.onHit?.(data);
+  const onEliminated   = (data: { playerId: string }) => _callbacks.onEliminated?.(data);
+  const onMatchEnd     = (data: PvpMatchEndPayload) => _callbacks.onMatchEnd?.(data);
+  const onOutOfRange   = () => _callbacks.onOutOfRange?.();
+  const onError        = (data: { message: string }) => _callbacks.onError?.(data.message);
+  const onPlayerMove   = (data: any) => _callbacks.onPlayerMove?.(data);
+  const onPlayerRespawn = (data: any) => _callbacks.onPlayerRespawn?.(data);
+
+  socket.on("arena_sync",               onSync);
+  socket.on("arena_player_hit",         onHit);
+  socket.on("arena_player_eliminated",  onEliminated);
+  socket.on("arena_match_end",          onMatchEnd);
+  socket.on("arena_out_of_range",       onOutOfRange);
+  socket.on("arena_error",              onError);
+  socket.on("arena_player_move",        onPlayerMove);
+  socket.on("arena_player_respawn",     onPlayerRespawn);
+
+  // Retorna função de limpeza — remove apenas os handlers desta subscrição
   return () => {
-    socket.off("arena_sync");
-    socket.off("arena_player_hit");
-    socket.off("arena_player_eliminated");
-    socket.off("arena_match_end");
-    socket.off("arena_out_of_range");
-    socket.off("arena_error");
-    socket.off("arena_player_move");
-    socket.off("arena_player_respawn");
+    socket.off("arena_sync",              onSync);
+    socket.off("arena_player_hit",        onHit);
+    socket.off("arena_player_eliminated", onEliminated);
+    socket.off("arena_match_end",         onMatchEnd);
+    socket.off("arena_out_of_range",      onOutOfRange);
+    socket.off("arena_error",             onError);
+    socket.off("arena_player_move",       onPlayerMove);
+    socket.off("arena_player_respawn",    onPlayerRespawn);
+    socket.off("connect",                _onSocketReconnect);
     _callbacks = {};
+    // Não limpa _lastJoinPlayerId nem _currentSessionId pois podem ser necessários para reconexão
   };
 }
 
@@ -84,6 +125,14 @@ export function requestArenaJoin(
 ): void {
   const socket = getSocket();
   if (!socket) return;
+
+  // Salva para re-envio automático após reconexão
+  _lastJoinPlayerId = playerId;
+  _lastJoinPlayer = player;
+  if (sessionId) {
+    _currentSessionId = sessionId;
+    sessionStorage.setItem("gfn_arena_session_id", sessionId);
+  }
 
   socket.emit("arena_join_request", {
     playerId,
@@ -219,5 +268,7 @@ export function leaveArena(sessionId: string, playerId: string): void {
   const socket = getSocket();
   if (!socket) return;
 
+  _currentSessionId = null;
+  sessionStorage.removeItem("gfn_arena_session_id");
   socket.emit("arena_leave", { sessionId, playerId });
 }
