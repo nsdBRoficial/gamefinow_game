@@ -57,22 +57,18 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({ session, playerId, onE
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState({ w: window.innerWidth, h: window.innerHeight });
 
-  const playerPos = useGameStore((s) => s.playerPos);
   // Acessa quests diretamente — GameStore estende GameState (nao ha campo 'gameState')
   const quests = useGameStore((s) => s.quests);
 
   const floatingTextsRef = useRef<FloatingText[]>([]);
   const sessionRef = useRef<PvpSession>(session);
-  const localPlayerRef = useRef<PvpPlayer | null>(null);
   const selectedTargetIdRef = useRef<string | null>(null);
   const rafRef = useRef<number>(0);
 
-  // Sync session ref
+  // Sync session ref — mantém ref atualizado para o game loop (sem re-render)
   useEffect(() => {
     sessionRef.current = session;
-    const local = session.players.find((p) => p.playerId === playerId);
-    if (local) localPlayerRef.current = local;
-  }, [session, playerId]);
+  }, [session]);
 
   // Resize — usa a janela inteira
   useEffect(() => {
@@ -98,45 +94,29 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({ session, playerId, onE
     []
   );
 
-  // Escuta os eventos PVP e cria os efeitos visuais de dano
+  // Socket: recebe hits e eventos de arena com um único handler consolidado
   useEffect(() => {
     const socket = getSocket();
     if (!socket) return;
 
-    const handleHit = (data: { targetId: string, damage: number, isCrit: boolean, element: string }) => {
-      const target = sessionRef.current.players.find(p => p.playerId === data.targetId);
-      if (target) {
-        const worldX = target.arenaX * TILE_PX + TILE_PX / 2 + (Math.random() * 10 - 5);
-        const worldY = target.arenaY * TILE_PX - 10 + (Math.random() * 10 - 5);
-        const color = data.element === "heal" ? "#22c55e" : data.isCrit ? "#facc15" : "#ef4444";
-        const sign = data.element === "heal" ? "+" : "-";
-        const text = `${data.isCrit ? "CRIT " : ""}${sign}${Math.abs(data.damage)}`;
-        spawnFloatingText(text, worldX, worldY, color);
-      }
-    };
-
-    socket.on("arena_player_hit", handleHit);
-    
-    return () => {
-      socket.off("arena_player_hit", handleHit);
-    };
-  }, [spawnFloatingText]);
-
-  // Socket: recebe hits
-  useEffect(() => {
-    const socket = getSocket();
-    if (!socket) return;
     const onHit = (data: { targetId: string; damage: number; isCrit: boolean; element: string }) => {
       const target = sessionRef.current.players.find((p) => p.playerId === data.targetId);
       if (!target) return;
-      const color = data.isCrit ? "#fbbf24" : data.element === "physical" ? "#f87171" : "#a78bfa";
-      const text = data.isCrit ? `💥 ${data.damage}!` : `-${data.damage}`;
-      spawnFloatingText(text, target.arenaX * TILE_PX + TILE_PX / 2, target.arenaY * TILE_PX, color);
-      const myId = playerPos.walletAddress || playerPos.name;
-      if (data.targetId === myId) {
-        spawnFloatingText("ATINGIDO!", target.arenaX * TILE_PX + TILE_PX / 2, target.arenaY * TILE_PX - TILE_PX, "#ef4444");
+
+      const worldX = target.arenaX * TILE_PX + TILE_PX / 2 + (Math.random() * 10 - 5);
+      const worldY = target.arenaY * TILE_PX - 10 + (Math.random() * 10 - 5);
+      const isHeal = data.element === "heal";
+      const color = isHeal ? "#22c55e" : data.isCrit ? "#facc15" : "#ef4444";
+      const sign = isHeal ? "+" : "-";
+      const text = `${data.isCrit ? "CRIT " : ""}${sign}${Math.abs(data.damage)}`;
+      spawnFloatingText(text, worldX, worldY, color);
+
+      // Destaque extra se for o jogador local sendo atingido
+      if (data.targetId === playerId && !isHeal) {
+        spawnFloatingText("ATINGIDO!", worldX, worldY - TILE_PX, "#ef4444");
       }
     };
+
     socket.on("arena_player_hit", onHit);
 
     const onMove = (data: { playerId: string, arenaX: number, arenaY: number, dir: string }) => {
@@ -162,7 +142,7 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({ session, playerId, onE
       socket.off("arena_player_move", onMove);
       socket.off("arena_player_respawn", onRespawn);
     };
-  }, [playerPos, spawnFloatingText]);
+  }, [playerId, spawnFloatingText]);
 
   // Click no canvas seleciona alvo (convertendo coords de tela para mundo com zoom)
   const handleCanvasClick = useCallback(
@@ -173,8 +153,7 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({ session, playerId, onE
 
       const zoom = size.w < 768 ? 2.5 : 3.5;
 
-      const myId = playerPos.walletAddress || playerPos.name;
-      const me = sessionRef.current.players.find((p) => p.playerId === myId);
+      const me = sessionRef.current.players.find((p) => p.playerId === playerId);
 
       const playerWorldX = me ? me.arenaX * TILE_PX + TILE_PX / 2 : ARENA_WORLD_W / 2;
       const playerWorldY = me ? me.arenaY * TILE_PX + TILE_PX / 2 : ARENA_WORLD_H / 2;
@@ -195,13 +174,13 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({ session, playerId, onE
       const clicked = sessionRef.current.players.find(
         (p) =>
           !p.isEliminated &&
-          p.playerId !== myId &&
+          p.playerId !== playerId &&
           Math.abs(p.arenaX - cx) <= 1 &&
           Math.abs(p.arenaY - cy) <= 1
       );
       selectedTargetIdRef.current = clicked ? clicked.playerId : null;
     },
-    [playerPos, size]
+    [playerId, size]
   );
 
   // Game Loop
@@ -445,7 +424,6 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({ session, playerId, onE
     };
 
     const drawPlayers = (now: number, zoom: number) => {
-      const myId = playerPos.walletAddress || playerPos.name;
       const selectedId = selectedTargetIdRef.current;
 
       sessionRef.current.players.forEach((p) => {
@@ -453,7 +431,7 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({ session, playerId, onE
 
         const px = p.arenaX * TILE_PX;
         const py = p.arenaY * TILE_PX;
-        const isMe = p.playerId === myId;
+        const isMe = p.playerId === playerId;
         const isSelected = p.playerId === selectedId;
         const ts = TILE_PX;
 
@@ -480,8 +458,8 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({ session, playerId, onE
         ctx.ellipse(px + ts / 2, py + ts * 0.85, ts * 0.35, ts * 0.12, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // Sprite do personagem (identico ao GameCanvas e NPCManager)
-        const charData: any = isMe ? { ...playerPos } : { ...p };
+        // Sprite do personagem — usa dados do PvpPlayer que contém aparência do join
+        const charData: any = { ...p };
         try {
           drawPixelCharacter(
             ctx,
@@ -538,8 +516,7 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({ session, playerId, onE
     };
 
     const draw = (now: number) => {
-      const myId = playerPos.walletAddress || playerPos.name;
-      const me = sessionRef.current.players.find((p) => p.playerId === myId);
+      const me = sessionRef.current.players.find((p) => p.playerId === playerId);
 
       // Zoom dinamico - identico ao GameCanvas
       const zoom = size.w < 768 ? 2.5 : 3.5;
@@ -579,7 +556,7 @@ export const ArenaCanvas: React.FC<ArenaCanvasProps> = ({ session, playerId, onE
 
     rafRef.current = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [size, playerPos, session, quests]);
+  }, [size, playerId, session, quests]);
 
   return (
     <div
