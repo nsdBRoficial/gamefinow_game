@@ -79,6 +79,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
   // Ref para jogadores reais do Supabase (atualizada via prop)
   const realOnlinePlayersRef = useRef<OnlinePlayer[]>([]);
+  realOnlinePlayersRef.current = realOnlinePlayers || [];
   useEffect(() => {
     if (realOnlinePlayers) {
       realOnlinePlayersRef.current = realOnlinePlayers;
@@ -2722,8 +2723,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     if (realOnlinePlayers !== undefined) {
       const realPlayers = realOnlinePlayersRef.current;
       if (realPlayers.length > 0) {
+        const currentMap = currentRegion || "center";
         const mappedReal = realPlayers
-          .filter((rp) => rp.map_id === (currentRegion || "center"))
+          .filter((rp) => (rp.map_id || "center") === currentMap)
           .map((rp) => ({
             id: rp.player_id,
             // player_id explícito para o stateKey do lerp em NPCManager
@@ -2752,6 +2754,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             bubbleTimer: rp.bubbleTimer,
             isGM: rp.isGM,
             level: rp.level,
+            gender: rp.gender || "male",
+            activeOutfit: rp.active_outfit || null,
+            guildTag: (rp as any).guild_tag || null,
           }));
         // Limpa estados de interpolação de players que saíram do mapa
         cleanupRenderStates(mappedReal);
@@ -2764,8 +2769,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
     // 6.6. Render Target Lock nos jogadores adversários no PVP
     if (latestGameState.current.lockedTargetId) {
+      const currentMap = currentRegion || "center";
       const lockedRp = (realOnlinePlayersRef.current || []).find(
-        (rp) => rp.player_id === latestGameState.current.lockedTargetId && rp.map_id === (currentRegion || "center")
+        (rp) => rp.player_id === latestGameState.current.lockedTargetId && (rp.map_id || "center") === currentMap
       );
       if (lockedRp) {
         const targetWorldX = lockedRp.x * TILE_SIZE;

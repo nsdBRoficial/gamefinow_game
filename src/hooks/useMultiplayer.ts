@@ -84,8 +84,6 @@ export function useMultiplayer({
     window.addEventListener("beforeunload", handleUnload);
     return () => {
       window.removeEventListener("beforeunload", handleUnload);
-      removePlayerFromPresence(playerId);
-      unsubscribeFromCurrentMap();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playerId]);
@@ -166,6 +164,10 @@ export function useMultiplayer({
 
     // Envia imediatamente a posição atual no novo mapa aos outros jogadores
     publishPosition(playerPos, playerId, true);
+
+    return () => {
+      prevMapId.current = "";
+    };
   }, [playerId, playerPos.mapId]);
 
   // ─── Publicação de posição ────────────────────────────────────────────────
@@ -175,8 +177,15 @@ export function useMultiplayer({
     // Publish immediately on pos change
     publishPosition(playerPos, playerId);
 
+    // Heartbeat de rede via WebSocket a cada 2.5s:
+    // Garante que novos jogadores que entrarem no mapa recebam a presença mesmo se estiver parado
+    const wsHeartbeatTimer = setInterval(() => {
+      if (MULTIPLAYER_ENABLED && playerId && playerPos) {
+        publishPosition(playerPos, playerId, true);
+      }
+    }, 2500);
+
     // Heartbeat silencioso a cada 10s: atualiza apenas updated_at no banco
-    // SEM re-transmitir via Broadcast (não polui o canal com eventos falsos de movimento)
     const heartbeatTimer = setInterval(async () => {
       if (!MULTIPLAYER_ENABLED || !playerId || !playerPos.mapId) return;
       try {
@@ -192,7 +201,10 @@ export function useMultiplayer({
       }
     }, 10_000);
 
-    return () => clearInterval(heartbeatTimer);
+    return () => {
+      clearInterval(wsHeartbeatTimer);
+      clearInterval(heartbeatTimer);
+    };
   }, [playerPos, playerId]);
 
   // ─── Atualização de aparência (debounce 2s para não spam) ─────────────────

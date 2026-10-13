@@ -531,14 +531,27 @@ io.on("connection", (socket) => {
       }
 
       socket.rooms.forEach(room => {
-        // Preserva a room da guilda E a room da arena ativa — apenas sai das rooms de mapa
-        if (room !== socket.id && !room.startsWith("guild:") && !room.startsWith("arena:")) {
+        // Sai apenas de outras rooms de mapa e avisa o mapa anterior da saída
+        if (room !== socket.id && room.startsWith("map:") && room !== roomName) {
+          socket.to(room).emit("player_leave", { playerId: data.playerId });
           socket.leave(room);
         }
       });
 
       socket.join(roomName);
       console.log(`[Socket] ${data.playerId} entrou no mapa ${data.mapId}${isGM ? ' (GAME MASTER)' : ''}`);
+
+      if (data.playerPayload) {
+        data.playerPayload.map_id = data.mapId;
+        data.playerPayload.player_id = data.playerId;
+      }
+
+      // Remove sessões anteriores do mesmo playerId (evita duplicatas e fantasmas ao recarregar a página)
+      playersState.forEach((state, sId) => {
+        if (sId !== socket.id && state.playerId === data.playerId) {
+          playersState.delete(sId);
+        }
+      });
 
       // Guarda estado do jogador
       playersState.set(socket.id, {
@@ -552,14 +565,18 @@ io.on("connection", (socket) => {
       // Envia aos recém-chegados os jogadores que já estão no mapa
       const existingPlayers: any[] = [];
       playersState.forEach((state, sId) => {
-        if (sId !== socket.id && state.mapId === data.mapId) {
+        if (sId !== socket.id && state.mapId === data.mapId && state.payload) {
+          state.payload.map_id = state.mapId;
+          state.payload.player_id = state.playerId;
           existingPlayers.push(state.payload);
         }
       });
       socket.emit("sync_players", existingPlayers);
 
       // Avisa aos outros que ele chegou com as infos completas
-      socket.to(roomName).emit("player_move", data.playerPayload);
+      if (data.playerPayload) {
+        socket.to(roomName).emit("player_move", data.playerPayload);
+      }
 
       // Atualiza presença global para todos os clientes
       broadcastGlobalPresence();
@@ -583,10 +600,16 @@ io.on("connection", (socket) => {
       }
 
       state.mapId = data.mapId;
+      if (data.payload) {
+        data.payload.map_id = data.mapId;
+        data.payload.player_id = state.playerId;
+      }
       state.payload = data.payload;
-      data.payload.isSuspicious = state.isSuspicious;
-      if (state.isGM) {
-        data.payload.isGM = true;
+      if (data.payload) {
+        data.payload.isSuspicious = state.isSuspicious;
+        if (state.isGM) {
+          data.payload.isGM = true;
+        }
       }
     }
     

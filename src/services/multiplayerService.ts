@@ -83,6 +83,9 @@ if (MULTIPLAYER_ENABLED) {
   socket = io(backendUrl);
   socket.on("connect", () => {
     console.log("[Multiplayer] Conectado ao WebSocket:", socket?.id);
+    lastPublishedX = -1;
+    lastPublishedY = -1;
+    lastPublishedMapId = "";
     if (lastJoinMapData) {
       console.log("[Multiplayer] Reenviando join_map após reconexão...");
       socket?.emit("join_map", lastJoinMapData);
@@ -249,6 +252,9 @@ export function publishPosition(player: Player, playerId: string, forceUpdate: b
   lastPublishedMapId = currentMap;
 
   const payload = buildPlayerPayload(playerId, player);
+  if (lastJoinMapData) {
+    lastJoinMapData.playerPayload = payload;
+  }
   socket.emit("player_move", { mapId: currentMap, payload });
 }
 
@@ -280,26 +286,36 @@ export function subscribeToMap(
 
   socket.off("player_move");
   socket.on("player_move", (payload: OnlinePlayer) => {
-    if (payload.player_id !== playerId && payload.map_id === mapId) {
-      mapLivePlayers.set(payload.player_id, payload);
-      onPlayersUpdate(Array.from(mapLivePlayers.values()));
+    if (payload && payload.player_id && payload.player_id !== playerId) {
+      const pMapId = payload.map_id || mapId;
+      if (pMapId === mapId) {
+        mapLivePlayers.set(payload.player_id, { ...payload, map_id: pMapId });
+        onPlayersUpdate(Array.from(mapLivePlayers.values()));
+      }
     }
   });
 
   socket.off("sync_players");
   socket.on("sync_players", (players: OnlinePlayer[]) => {
-    players.forEach(p => {
-      if (p.player_id !== playerId && p.map_id === mapId) {
-        mapLivePlayers.set(p.player_id, p);
-      }
-    });
-    onPlayersUpdate(Array.from(mapLivePlayers.values()));
+    if (Array.isArray(players)) {
+      players.forEach((p) => {
+        if (p && p.player_id && p.player_id !== playerId) {
+          const pMapId = p.map_id || mapId;
+          if (pMapId === mapId) {
+            mapLivePlayers.set(p.player_id, { ...p, map_id: pMapId });
+          }
+        }
+      });
+      onPlayersUpdate(Array.from(mapLivePlayers.values()));
+    }
   });
 
   socket.off("player_leave");
   socket.on("player_leave", (data: { playerId: string }) => {
-    mapLivePlayers.delete(data.playerId);
-    onPlayersUpdate(Array.from(mapLivePlayers.values()));
+    if (data && data.playerId) {
+      mapLivePlayers.delete(data.playerId);
+      onPlayersUpdate(Array.from(mapLivePlayers.values()));
+    }
   });
 
   if (onChatMessage) {
