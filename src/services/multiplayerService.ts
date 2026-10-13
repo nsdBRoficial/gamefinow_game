@@ -70,6 +70,7 @@ let currentPlayerId: string | null = null;
 let currentMapId: string | null = null;
 let lastPublishedX = -1;
 let lastPublishedY = -1;
+let lastPublishedMapId = "";
 
 const mapLivePlayers = new Map<string, OnlinePlayer>();
 let socket: Socket | null = null;
@@ -96,15 +97,37 @@ if (MULTIPLAYER_ENABLED) {
 
 // ─── Helpers ────────────────────────────────────────────────────────
 
+let inMemoryPlayerId: string | null = null;
+
 export function getOrCreatePlayerId(stellarPublicKey?: string): string {
   if (stellarPublicKey && stellarPublicKey.length > 10) {
     return stellarPublicKey;
   }
-  let stored = sessionStorage.getItem("gfn_player_session_id");
-  if (stored) return stored;
-  const uuid = `anon_${Math.random().toString(36).substring(2, 9)}_${Date.now().toString(36)}`;
-  sessionStorage.setItem("gfn_player_session_id", uuid);
-  return uuid;
+  if (inMemoryPlayerId) return inMemoryPlayerId;
+
+  try {
+    if (typeof window !== "undefined") {
+      // Cada aba ou janela ganha seu próprio identificador isolado
+      if (!window.name || !window.name.startsWith("gfn_tab_")) {
+        window.name = `gfn_tab_${Math.random().toString(36).substring(2, 8)}_${Date.now().toString(36)}`;
+      }
+      const tabKey = `gfn_player_session_${window.name}`;
+      let stored = sessionStorage.getItem(tabKey);
+      if (stored) {
+        inMemoryPlayerId = stored;
+        return stored;
+      }
+      const uuid = `anon_${Math.random().toString(36).substring(2, 8)}_${Date.now().toString(36)}`;
+      sessionStorage.setItem(tabKey, uuid);
+      inMemoryPlayerId = uuid;
+      return uuid;
+    }
+  } catch {
+    // fallback caso window/sessionStorage não esteja disponível
+  }
+
+  inMemoryPlayerId = `anon_${Math.random().toString(36).substring(2, 8)}_${Date.now().toString(36)}`;
+  return inMemoryPlayerId;
 }
 
 // ─── API pública ─────────────────────────────────────────────────────────────
@@ -215,13 +238,18 @@ function buildPlayerPayload(playerId: string, player: Player): OnlinePlayer {
 export function publishPosition(player: Player, playerId: string, forceUpdate: boolean = false): void {
   if (!MULTIPLAYER_ENABLED || !socket || !playerId) return;
 
-  if (!forceUpdate && Math.round(player.x) === lastPublishedX && Math.round(player.y) === lastPublishedY) return;
+  const currentMap = player.mapId || "center";
+  const roundedX = Math.round(player.x);
+  const roundedY = Math.round(player.y);
 
-  lastPublishedX = Math.round(player.x);
-  lastPublishedY = Math.round(player.y);
+  if (!forceUpdate && currentMap === lastPublishedMapId && roundedX === lastPublishedX && roundedY === lastPublishedY) return;
+
+  lastPublishedX = roundedX;
+  lastPublishedY = roundedY;
+  lastPublishedMapId = currentMap;
 
   const payload = buildPlayerPayload(playerId, player);
-  socket.emit("player_move", { mapId: player.mapId || "center", payload });
+  socket.emit("player_move", { mapId: currentMap, payload });
 }
 
 export function subscribeToMap(
@@ -235,6 +263,9 @@ export function subscribeToMap(
 
   currentMapId = mapId;
   currentPlayerId = playerId;
+  lastPublishedMapId = ""; // força envio de nova coordenada no novo mapa
+  lastPublishedX = -1;
+  lastPublishedY = -1;
   mapLivePlayers.clear();
 
   let playerPayload = null;

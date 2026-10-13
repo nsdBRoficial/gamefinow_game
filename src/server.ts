@@ -507,28 +507,27 @@ io.on("connection", (socket) => {
     (async () => {
       try {
         console.log(`[DEBUG] join_map recebido para o player: ${data.playerId}`);
-        const { data: userRow, error } = await supabaseAdmin
-          .from("players")
-          .select("is_banned, suspended_until")
-          .eq("id", data.playerId)
-          .single();
-          
-        if (userRow) {
-          const isSuspended = userRow.is_banned || (userRow.suspended_until && new Date(userRow.suspended_until) > new Date());
-          if (isSuspended) {
-            socket.emit("kick_user", { reason: "Sua conta está suspensa." });
-            setTimeout(() => {
-              socket.disconnect();
-            }, 500);
-            return;
+        // Usuários convidados anônimos não existem na tabela de players do Supabase
+        if (data.playerId && !data.playerId.startsWith("anon_")) {
+          const { data: userRow } = await supabaseAdmin
+            .from("players")
+            .select("is_banned, suspended_until")
+            .eq("id", data.playerId)
+            .maybeSingle();
+            
+          if (userRow) {
+            const isSuspended = userRow.is_banned || (userRow.suspended_until && new Date(userRow.suspended_until) > new Date());
+            if (isSuspended) {
+              socket.emit("kick_user", { reason: "Sua conta está suspensa." });
+              setTimeout(() => {
+                socket.disconnect();
+              }, 500);
+              return;
+            }
           }
         }
-
       } catch (e) {
-        console.error("Erro ao verificar suspensão:", e);
-        socket.emit("kick_user", { reason: "Erro interno ao verificar sua conta." });
-        setTimeout(() => socket.disconnect(), 500);
-        return;
+        console.warn("[Socket] Aviso ao verificar suspensão (ignorado para não interromper conexão):", e);
       }
 
       socket.rooms.forEach(room => {
@@ -648,7 +647,178 @@ io.on("connection", (socket) => {
     }
   });
 
-  // ── Eventos PVP Arena ──
+  // ─── NOVO SISTEMA PVP UNIFICADO (OPEN-PVP NA ARENA) ──────────────────────
+  socket.on("pvp_attack", (data: {
+    attackerId: string;
+    attackerName?: string;
+    targetId: string;
+    mapId: string;
+    damage: number;
+    isCrit?: boolean;
+    timestamp?: number;
+  }) => {
+    let attackerState: PlayerState | null = null;
+    let targetState: PlayerState | null = null;
+
+    playersState.forEach((state) => {
+      if (state.playerId === data.attackerId) attackerState = state;
+      if (state.playerId === data.targetId) targetState = state;
+    });
+
+    if (!attackerState || !targetState) return;
+    if (attackerState.mapId !== targetState.mapId) return;
+    if (attackerState.mapId !== "arena" && !attackerState.isGM) return;
+
+    const now = Date.now();
+    const lastAtk = lastAttackTime.get(data.attackerId) || 0;
+    if (now - lastAtk < 800) return;
+    lastAttackTime.set(data.attackerId, now);
+
+    const dist = Math.hypot(
+      (attackerState.payload?.x ?? 0) - (targetState.payload?.x ?? 0),
+      (attackerState.payload?.y ?? 0) - (targetState.payload?.y ?? 0)
+    );
+    if (dist > 3.5 && !attackerState.isGM) return;
+
+    let { damage, isCrit } = serverCalcPhysicalDmg(attackerState.payload || {}, targetState.payload || {});
+    if (data.damage && data.damage > 0) {
+      damage = Math.min(data.damage, damage * 1.5);
+    }
+    if (data.isCrit !== undefined) {
+      isCrit = data.isCrit;
+    }
+
+    const currentTargetHp = targetState.payload?.hp ?? 100;
+    const maxTargetHp = targetState.payload?.maxHp ?? 100;
+    const newTargetHp = Math.max(0, currentTargetHp - damage);
+    targetState.payload.hp = newTargetHp;
+
+    console.log(`[PVP] ${attackerState.payload?.name || data.attackerId} causou ${damage} em ${targetState.payload?.name || data.targetId} (HP: ${newTargetHp}/${maxTargetHp})`);
+
+    io.to(`map:${attackerState.mapId}`).emit("pvp_player_hit", {
+      attackerId: data.attackerId,
+      attackerName: attackerState.payload?.name || "Guerreiro",
+      targetId: data.targetId,
+      damage,
+      isCrit,
+      currentHp: newTargetHp,
+      maxHp: maxTargetHp,
+      element: "physical",
+    });
+
+    if (newTargetHp <= 0) {
+      console.log(`[PVP] 💀 ${targetState.payload?.name || data.targetId} derrotado!`);
+      io.to(targetState.socketId).emit("player_killed", {
+        killerName: attackerState.payload?.name || "Adversário",
+        damage,
+      });
+
+      io.to(attackerState.socketId).emit("pvp_reward", {
+        xp: 150,
+        gamefi: 0.5,
+        targetName: targetState.payload?.name || "Adversário",
+      });
+
+      io.to(`map:${attackerState.mapId}`).emit("chat_message", {
+        id: Date.now().toString(),
+        player_id: "system",
+        player_name: "⚔️ ARENA",
+        map_id: attackerState.mapId,
+        message: `💀 ${targetState.payload?.name || "Um guerreiro"} foi derrotado por ${attackerState.payload?.name || "um adversário"}!`,
+        created_at: new Date().toISOString(),
+      });
+    }
+  });
+
+  socket.on("pvp_cast_spell", (data: {
+    attackerId: string;
+    attackerName?: string;
+    targetId: string;
+    mapId: string;
+    spellId: string;
+    damage: number;
+    isCrit?: boolean;
+    element?: string;
+    timestamp?: number;
+  }) => {
+    let attackerState: PlayerState | null = null;
+    let targetState: PlayerState | null = null;
+
+    playersState.forEach((state) => {
+      if (state.playerId === data.attackerId) attackerState = state;
+      if (state.playerId === data.targetId) targetState = state;
+    });
+
+    if (!attackerState) return;
+
+    if (data.element === "heal") {
+      const curHp = attackerState.payload?.hp ?? 100;
+      const maxHp = attackerState.payload?.maxHp ?? 100;
+      const healedHp = Math.min(maxHp, curHp + Math.max(15, Math.floor(maxHp * 0.25)));
+      attackerState.payload.hp = healedHp;
+      io.to(`map:${attackerState.mapId}`).emit("pvp_player_hit", {
+        attackerId: data.attackerId,
+        targetId: data.attackerId,
+        damage: -(healedHp - curHp),
+        isCrit: false,
+        currentHp: healedHp,
+        maxHp,
+        element: "heal",
+      });
+      return;
+    }
+
+    if (!targetState) return;
+    if (attackerState.mapId !== targetState.mapId) return;
+    if (attackerState.mapId !== "arena" && !attackerState.isGM) return;
+
+    const dist = Math.hypot(
+      (attackerState.payload?.x ?? 0) - (targetState.payload?.x ?? 0),
+      (attackerState.payload?.y ?? 0) - (targetState.payload?.y ?? 0)
+    );
+    if (dist > 5.5 && !attackerState.isGM) return;
+
+    let damage = Math.max(5, data.damage || 35);
+    const isCrit = data.isCrit || false;
+
+    const currentTargetHp = targetState.payload?.hp ?? 100;
+    const maxTargetHp = targetState.payload?.maxHp ?? 100;
+    const newTargetHp = Math.max(0, currentTargetHp - damage);
+    targetState.payload.hp = newTargetHp;
+
+    io.to(`map:${attackerState.mapId}`).emit("pvp_player_hit", {
+      attackerId: data.attackerId,
+      attackerName: attackerState.payload?.name || "Mago",
+      targetId: data.targetId,
+      damage,
+      isCrit,
+      currentHp: newTargetHp,
+      maxHp: maxTargetHp,
+      element: data.element || "magic",
+    });
+
+    if (newTargetHp <= 0) {
+      io.to(targetState.socketId).emit("player_killed", {
+        killerName: attackerState.payload?.name || "Mago",
+        damage,
+      });
+      io.to(attackerState.socketId).emit("pvp_reward", {
+        xp: 150,
+        gamefi: 0.5,
+        targetName: targetState.payload?.name || "Adversário",
+      });
+      io.to(`map:${attackerState.mapId}`).emit("chat_message", {
+        id: Date.now().toString(),
+        player_id: "system",
+        player_name: "⚔️ ARENA",
+        map_id: attackerState.mapId,
+        message: `⚡ ${targetState.payload?.name || "Um guerreiro"} foi obliterado por ${attackerState.payload?.name || "um mago"}!`,
+        created_at: new Date().toISOString(),
+      });
+    }
+  });
+
+  // ── Eventos PVP Arena Legados ──
 
   socket.on("arena_join_request", (data: { playerId: string, mode: string, sessionId?: string, playerPayload: any }) => {
     let session: any;

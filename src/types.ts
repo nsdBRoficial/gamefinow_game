@@ -222,6 +222,17 @@ export interface InventorySlot {
   quantity: number; // max 99, or durabilidade for tools
 }
 
+export interface TargetInfo {
+  id: string;
+  name: string;
+  level: number;
+  hp: number;
+  maxHp: number;
+  isPlayer?: boolean;
+  playerClass?: string;
+  guildTag?: string;
+}
+
 export interface GameState {
   wallet: WalletState;
   quests: Record<QuestId, Quest>;
@@ -240,6 +251,7 @@ export interface GameState {
   mapZoomLevel?: number;
   isBattleModeActive?: boolean;
   lockedTargetId?: string | null;
+  targetInfo?: TargetInfo | null;
   // Player Stats RPG & Classes
   xp_current?: number;
   level?: number;
@@ -255,6 +267,7 @@ export interface GameState {
     killerName?: string;
     damage?: number;
     timestamp: number;
+    mapId?: string;
   };
   pendingLevelUp?: boolean;
   // Mining Progress
@@ -288,4 +301,10 @@ export interface GameState {
   // ── PVP Arena ──────────────────────────────────────────────────────────────
   isInArena?: boolean;          // true quando o jogador está dentro da arena de combate
   pvpSessionId?: string | null; // ID da sessão PVP ativa
+  arenaScore?: {
+    kills: number;
+    deaths: number;
+    streak: number;
+    highestStreak: number;
+  };
 }

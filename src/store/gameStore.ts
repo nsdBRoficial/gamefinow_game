@@ -28,7 +28,7 @@ interface GameStore extends GameState {
   setActiveModal: (modal: GameState["activeModal"]) => void;
   setActiveDialog: (dialog: GameState["activeDialog"]) => void;
   setBattleMode: (active: boolean) => void;
-  setLockedTarget: (targetId: string | null) => void;
+  setLockedTarget: (targetId: string | null, targetInfo?: import("../types").TargetInfo | null) => void;
   addExperience: (amount: number) => void;
   registerKill: (creatureName: string, mapId: string) => { questCompleted: boolean; questId?: QuestId; xpGained?: number; dropItemId?: string };
   castMagic: (type: "heal" | "fire" | "lightning") => void;
@@ -48,11 +48,14 @@ interface GameStore extends GameState {
   setPlayerClass: (classId: import("../types").PlayerClassId) => void;
   respawnPlayer: () => void;
   killPlayer: (killerName?: string, damage?: number) => void;
+  recordArenaKill: () => void;
+  recordArenaDeath: () => void;
+  resetArenaScore: () => void;
 }
 
 const getInitialGameState = (): GameState => {
   try {
-    const saved = localStorage.getItem("stellar_island_game_state_v3");
+    const saved = typeof localStorage !== "undefined" ? localStorage.getItem("stellar_island_game_state_v3") : null;
     if (saved) {
       const parsed = JSON.parse(saved);
       if (parsed && parsed.quests && parsed.wallet) {
@@ -85,6 +88,7 @@ const getInitialGameState = (): GameState => {
           jamesDialogsDone: parsed.jamesDialogsDone || [],
           isBattleModeActive: parsed.isBattleModeActive || false,
           lockedTargetId: null,
+          targetInfo: null,
           ownedEquipment: parsed.ownedEquipment || [],
           activeBuffs: parsed.activeBuffs || [],
         };
@@ -130,28 +134,36 @@ const getInitialGameState = (): GameState => {
     jamesDialogsDone: [],
     isBattleModeActive: false,
     lockedTargetId: null,
+    targetInfo: null,
     activeBuffs: [],
+    arenaScore: { kills: 0, deaths: 0, streak: 0, highestStreak: 0 },
   };
 };
 
 const getInitialPlayerPos = (): Player => {
   try {
-    const saved = localStorage.getItem("stellar_island_player_pos_v3");
+    const saved = typeof localStorage !== "undefined" ? localStorage.getItem("stellar_island_player_pos_v3") : null;
     if (saved) {
       const parsed = JSON.parse(saved);
       if (parsed && typeof parsed.x === "number") {
+        // Regra de segurança da Arena: Ninguém deve nascer dentro da Arena ao entrar no jogo, logar ou cair
+        const isArena = parsed.mapId === "arena";
+        const mapId = isArena ? "center" : (parsed.mapId || "center");
+        const posX = isArena ? 30 : parsed.x;
+        const posY = isArena ? 30 : parsed.y;
+
         return {
           ...parsed,
-          targetX: parsed.x,
-          targetY: parsed.y,
+          mapId,
+          x: posX,
+          y: posY,
+          targetX: posX,
+          targetY: posY,
           isMoving: false,
           frame: 0,
         };
       }
     }
-
-    
-
   } catch (err) {
     console.warn("Could not load playerPos from localStorage", err);
   }
@@ -332,10 +344,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setBattleMode: (active) => set((state) => ({ 
     isBattleModeActive: active,
     // Reset target when disabling battle mode
-    lockedTargetId: active ? state.lockedTargetId : null
+    lockedTargetId: active ? state.lockedTargetId : null,
+    targetInfo: active ? state.targetInfo : null,
   })),
 
-  setLockedTarget: (targetId) => set({ lockedTargetId: targetId }),
+  setLockedTarget: (targetId, targetInfo = null) => set({ lockedTargetId: targetId, targetInfo }),
 
   // ─── Registro de Kill para Kill Quests ──────────────────────────────────────
   registerKill: (creatureName, mapId) => {
@@ -826,14 +839,29 @@ export const useGameStore = create<GameStore>((set, get) => ({
   }),
 
   killPlayer: (killerName, damage) => set((state) => {
+    const curMap = state.playerPos.mapId || "center";
+    const isArena = curMap === "arena";
+    let updatedArenaScore = state.arenaScore;
+    if (isArena) {
+      const cur = state.arenaScore || { kills: 0, deaths: 0, streak: 0, highestStreak: 0 };
+      updatedArenaScore = {
+        ...cur,
+        deaths: cur.deaths + 1,
+        streak: 0,
+      };
+    }
+
     return {
       isDead: true,
       isBattleModeActive: false,
       lockedTargetId: null,
+      targetInfo: null,
+      arenaScore: updatedArenaScore,
       lastDeathInfo: {
         killerName,
         damage,
         timestamp: Date.now(),
+        mapId: curMap,
       },
     };
   }),
@@ -841,18 +869,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
   respawnPlayer: () => set((state) => {
     const maxHp = state.playerPos.maxHp || 100;
     const maxMp = state.playerPos.maxMp || 50;
+    const isArena = state.playerPos.mapId === "arena" || state.lastDeathInfo?.mapId === "arena";
+
     const nextPlayerPos = {
       ...state.playerPos,
       x: 30,
-      y: 30,
+      y: isArena ? 53 : 30,
       targetX: 30,
-      targetY: 30,
-      mapId: "center" as const,
+      targetY: isArena ? 53 : 30,
+      mapId: isArena ? ("arena" as const) : ("center" as const),
       hp: maxHp,
       mp: maxMp,
       isMoving: false,
     };
-    localStorage.setItem("stellar_island_player_pos_v3", JSON.stringify(nextPlayerPos));
+    if (typeof localStorage !== "undefined") {
+      try {
+        localStorage.setItem("stellar_island_player_pos_v3", JSON.stringify(nextPlayerPos));
+      } catch (e) {
+        // Safe fallback
+      }
+    }
 
     // Concede 3 segundos de escudo protetor de invulnerabilidade no respawn
     const respawnBuff: import("../types").ActiveBuff = {
@@ -872,12 +908,41 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     return {
       isDead: false,
-      isBattleModeActive: false,
+      isBattleModeActive: isArena,
       lockedTargetId: null,
+      targetInfo: null,
       playerPos: nextPlayerPos,
       activeBuffs: [...existingBuffs, respawnBuff],
     };
   }),
+
+  recordArenaKill: () => set((state) => {
+    const cur = state.arenaScore || { kills: 0, deaths: 0, streak: 0, highestStreak: 0 };
+    const nextStreak = cur.streak + 1;
+    return {
+      arenaScore: {
+        kills: cur.kills + 1,
+        deaths: cur.deaths,
+        streak: nextStreak,
+        highestStreak: Math.max(cur.highestStreak, nextStreak),
+      },
+    };
+  }),
+
+  recordArenaDeath: () => set((state) => {
+    const cur = state.arenaScore || { kills: 0, deaths: 0, streak: 0, highestStreak: 0 };
+    return {
+      arenaScore: {
+        ...cur,
+        deaths: cur.deaths + 1,
+        streak: 0,
+      },
+    };
+  }),
+
+  resetArenaScore: () => set(() => ({
+    arenaScore: { kills: 0, deaths: 0, streak: 0, highestStreak: 0 },
+  })),
 
 }));
 

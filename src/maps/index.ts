@@ -10,6 +10,7 @@ import { generateSorobanSwapMap, BAZAAR_DECORATIONS } from "./westMap";
 import { generateHolderSanctuaryMap, SANCTUARY_DECORATIONS } from "./southMap";
 import { generateGuildHouseMap, GUILDHOUSE_DECORATIONS } from "./guildHouseMap";
 import { generateAmphitheaterMap, AMPHITHEATER_DECORATIONS } from "./amphitheaterMap";
+import { generateArenaMap, ARENA_DECORATIONS } from "./arenaMap";
 import { Quest } from "../types";
 
 export type MapId = "center" | "east" | "west" | "north" | "south" | "guildhouse" | "amphitheater" | "arena";
@@ -26,7 +27,7 @@ const mapGrids: Record<MapId, number[][]> = {
   south: generateHolderSanctuaryMap(),
   guildhouse: generateGuildHouseMap(),
   amphitheater: generateAmphitheaterMap(),
-  arena: [[]],
+  arena: generateArenaMap(),
 };
 
 const mapDecorations: Record<MapId, any[]> = {
@@ -81,7 +82,9 @@ const mapDecorations: Record<MapId, any[]> = {
   amphitheater: [
     ...AMPHITHEATER_DECORATIONS,
   ],
-  arena: [],
+  arena: [
+    ...ARENA_DECORATIONS,
+  ],
 };
 
 

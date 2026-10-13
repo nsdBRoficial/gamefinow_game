@@ -48,6 +48,7 @@ import { GuildModal } from "./components/GuildModal";
 import { AccountRecoveryModal } from "./components/AccountRecoveryModal";
 import { ArenaView } from "./components/ArenaView";
 import { ArenaLobbyModal } from "./components/ArenaLobbyModal";
+import { ArenaScoreHUD } from "./components/ArenaScoreHUD";
 import { requestArenaJoin } from "./services/arenaService";
 import { audioStreamService } from "./services/audioStreamService";
 import { calculateEffectiveStats } from "./classesData";
@@ -153,6 +154,42 @@ export default function App() {
     setPlayerPos,
     gameState,
   });
+
+  // ─── SEGURANÇA DE SPAWN: Nunca nascer na Arena ao iniciar, recarregar ou fechar a janela ───
+  useEffect(() => {
+    if (playerPos.mapId === "arena") {
+      setPlayerPos((prev) => ({
+        ...prev,
+        mapId: "center",
+        x: 30,
+        y: 30,
+        targetX: 30,
+        targetY: 30,
+        isMoving: false,
+      }));
+    }
+
+    const handleUnloadSafeSpawn = () => {
+      try {
+        const saved = localStorage.getItem("stellar_island_player_pos_v3");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.mapId === "arena") {
+            parsed.mapId = "center";
+            parsed.x = 30;
+            parsed.y = 30;
+            parsed.targetX = 30;
+            parsed.targetY = 30;
+            parsed.isMoving = false;
+            localStorage.setItem("stellar_island_player_pos_v3", JSON.stringify(parsed));
+          }
+        }
+      } catch {}
+    };
+
+    window.addEventListener("beforeunload", handleUnloadSafeSpawn);
+    return () => window.removeEventListener("beforeunload", handleUnloadSafeSpawn);
+  }, []);
 
   const [showLevel5IntroDelayed, setShowLevel5IntroDelayed] = useState(false);
 
@@ -1191,14 +1228,6 @@ export default function App() {
     );
   }
 
-  // ── MODO ARENA PVP: tela exclusiva, sem UI do jogo principal ──
-  if (gameState.isInArena) {
-    return (
-      <div className="w-screen h-screen bg-black overflow-hidden select-none" style={{ fontFamily: "monospace" }}>
-        <ArenaView playerId={playerId} />
-      </div>
-    );
-  }
 
   return (
     <div className="w-screen h-screen bg-[#0c0d0e] flex flex-col selection:bg-[#ffc600] selection:text-black font-sans relative overflow-hidden select-none outline-none" tabIndex={0}>
@@ -1439,6 +1468,11 @@ export default function App() {
               currentPlayerName={playerPos.name || "Anonymo"}
               isConnected={isConnected}
             />
+          )}
+
+          {/* PLACAR DE COMBATE PVP DA ARENA */}
+          {playerPos.mapId === "arena" && (
+            <ArenaScoreHUD />
           )}
 
         </div>
@@ -1694,30 +1728,22 @@ export default function App() {
         )}
 
         {/* MAIN GAME ENGINE SCREEN CANVAS */}
-        {!gameState.isInArena ? (
-          <>
-            <BattleHUD />
-            <div className="w-full h-full">
-              <GameCanvas
-                gameState={gameState}
-                playerPos={playerPos}
-                setPlayerPos={setPlayerPos}
-                npcs={getNpcsForMap(playerPos.mapId || "center")}
-                onTalkToNPC={handleTalkToNPC}
-                onNearTerminal={(type) => {
-                  setIsNearTerminal(type);
-                  playSynthSound("beep");
-                }}
-                isMovementBlocked={isMovementBlocked}
-                realOnlinePlayers={isMultiplayerEnabled ? onlinePlayers : undefined}
-              />
-            </div>
-          </>
-        ) : (
-          <div className="w-full h-full absolute inset-0 z-10 bg-black">
-            <ArenaView playerId={playerId} />
-          </div>
-        )}
+        <BattleHUD />
+        <div className="w-full h-full">
+          <GameCanvas
+            gameState={gameState}
+            playerPos={playerPos}
+            setPlayerPos={setPlayerPos}
+            npcs={getNpcsForMap(playerPos.mapId || "center")}
+            onTalkToNPC={handleTalkToNPC}
+            onNearTerminal={(type) => {
+              setIsNearTerminal(type);
+              playSynthSound("beep");
+            }}
+            isMovementBlocked={isMovementBlocked}
+            realOnlinePlayers={isMultiplayerEnabled ? onlinePlayers : undefined}
+          />
+        </div>
 
         {/* MULTIPLAYER: Indicador de jogadores online */}
         {isMultiplayerEnabled && (
@@ -1876,8 +1902,21 @@ export default function App() {
           <ArenaLobbyModal
             onClose={() => setGameState((prev) => ({ ...prev, activeModal: null }))}
             onJoin={() => {
-              setGameState((prev) => ({ ...prev, activeModal: null, isInArena: true }));
-              requestArenaJoin(playerId, playerPos);
+              setGameState((prev) => ({
+                ...prev,
+                activeModal: null,
+                isInArena: false,
+                isBattleModeActive: true,
+              }));
+              setPlayerPos((prev) => ({
+                ...prev,
+                mapId: "arena",
+                x: 30,
+                y: 46,
+                targetX: 30,
+                targetY: 46,
+                isMoving: false,
+              }));
             }}
           />
         )}

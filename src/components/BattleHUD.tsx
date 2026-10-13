@@ -32,6 +32,8 @@ export const BattleHUD: React.FC = () => {
   const inventory = useGameStore((s) => s.inventory);
   const globalCooldownEnd = useGameStore((s) => s.globalCooldownEnd ?? 0);
   const potionCooldownEnd = useGameStore((s) => s.potionCooldownEnd ?? 0);
+  const targetInfo = useGameStore((s) => s.targetInfo);
+  const setLockedTarget = useGameStore((s) => s.setLockedTarget);
 
   const spells = getSpellsForClass(playerPos?.playerClass);
 
@@ -50,10 +52,11 @@ export const BattleHUD: React.FC = () => {
       if (e.key === "3" && spells[2]) castSpell(spells[2]);
       if (e.key === "4") usePotion("health");
       if (e.key === "5") usePotion("mana");
+      if (e.key === "Escape") setLockedTarget(null);
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [castSpell, usePotion, spells]);
+  }, [castSpell, usePotion, spells, setLockedTarget]);
 
   if (!isBattleModeActive) return null;
 
@@ -113,9 +116,43 @@ export const BattleHUD: React.FC = () => {
         </div>
       )}
 
-      {/* Top Section — vazio (barras de HP/MP são desenhadas no Canvas) */}
+      {/* Top Section — TargetHUD com retrato, nome, level e barra de HP do alvo */}
       <div className="relative w-full flex-grow">
-        
+        {targetInfo && isBattleModeActive && (
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 pointer-events-auto flex items-center gap-3 bg-slate-950/95 border-2 border-red-500/80 rounded-2xl px-3.5 py-1.5 shadow-[0_0_20px_rgba(220,38,38,0.5)] backdrop-blur-md animate-in fade-in zoom-in-95 duration-200 z-40 select-none">
+            <div className="w-10 h-10 rounded-xl bg-red-950/90 border border-red-500/60 flex items-center justify-center text-xl shadow-inner flex-shrink-0">
+              {targetInfo.isPlayer ? "⚔️" : "👾"}
+            </div>
+            <div className="flex flex-col min-w-[130px] sm:min-w-[170px]">
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <span className="font-mono font-black text-xs text-white truncate max-w-[120px]">
+                  {targetInfo.guildTag ? `[${targetInfo.guildTag}] ` : ""}{targetInfo.name}
+                </span>
+                <span className="font-mono font-bold text-[9px] text-amber-300 bg-amber-950/80 px-1.5 py-0.5 rounded border border-amber-500/50">
+                  Lv.{targetInfo.level}
+                </span>
+              </div>
+              {/* HP Bar */}
+              <div className="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-700 relative">
+                <div
+                  className="h-full bg-gradient-to-r from-red-600 via-amber-500 to-emerald-500 rounded-full transition-all duration-150"
+                  style={{ width: `${Math.max(0, Math.min(100, (targetInfo.hp / Math.max(1, targetInfo.maxHp)) * 100))}%` }}
+                />
+                <span className="absolute inset-0 flex items-center justify-center text-[9px] font-mono font-black text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)]">
+                  {Math.max(0, targetInfo.hp)} / {targetInfo.maxHp}
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => setLockedTarget(null)}
+              className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer text-xs"
+              title="Cancelar Alvo (ESC)"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         {/* Widget de Equipamentos Ativos - Canto Inferior Esquerdo (acima do bottom bar) */}
         <div className="absolute bottom-20 left-4 pointer-events-auto flex flex-col gap-2">
           {/* Mão Direita (Arma) */}

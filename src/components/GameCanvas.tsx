@@ -12,7 +12,7 @@ import { Compass, MapPin, Sparkles } from "lucide-react";
 import { drawPixelCharacter, getNPCPixelChar } from "./canvas/PlayerSprite";
 import { drawMapTiles, drawSpecialTerminals, drawMapDecorations, drawActiveAnimations } from "./canvas/MapRenderer";
 import { drawNPCs, drawOtherPlayers, cleanupRenderStates } from "./canvas/NPCManager";
-import { OnlinePlayer } from "../services/multiplayerService";
+import { OnlinePlayer, getSocket, getOrCreatePlayerId } from "../services/multiplayerService";
 import { getCurrentQuestTarget, drawQuestArrow } from "./canvas/QuestArrowRenderer";
 import { playSynthSound } from "../utils/audioUtils";
 import { useGameStore, SPELL_MAX_RANGE, getEquipmentBonuses } from "../store/gameStore";
@@ -84,6 +84,91 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       realOnlinePlayersRef.current = realOnlinePlayers;
     }
   }, [realOnlinePlayers]);
+
+  // Sincronização de combate PvP via Socket.io
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+
+    const handlePvpHit = (data: {
+      attackerId: string;
+      attackerName?: string;
+      targetId: string;
+      damage: number;
+      isCrit?: boolean;
+      currentHp: number;
+      maxHp: number;
+      element?: string;
+    }) => {
+      const myId = getOrCreatePlayerId(latestGameState.current?.wallet?.publicKey || undefined);
+
+      if (data.targetId === myId) {
+        // Jogador local foi atingido
+        useGameStore.getState().setPlayerPos({ hp: data.currentHp });
+        combatTextsRef.current.push({
+          id: `pvp_hit_${Date.now()}_${Math.random()}`,
+          text: data.damage < 0 ? `+${-data.damage}` : (data.isCrit ? `CRIT -${data.damage}!` : `-${data.damage}`),
+          x: latestPlayerPos.current.x,
+          y: latestPlayerPos.current.y - 0.5,
+          color: data.damage < 0 ? "#22c55e" : (data.isCrit ? "#fbbf24" : "#ef4444"),
+          timestamp: performance.now(),
+        });
+        playSynthSound("hit");
+      } else {
+        // Outro jogador foi atingido no mapa
+        const targetPlayer = (realOnlinePlayersRef.current || []).find((p) => p.player_id === data.targetId);
+        if (targetPlayer) {
+          targetPlayer.hp = data.currentHp;
+          combatTextsRef.current.push({
+            id: `pvp_hit_${Date.now()}_${Math.random()}`,
+            text: data.damage < 0 ? `+${-data.damage}` : (data.isCrit ? `CRIT -${data.damage}!` : `-${data.damage}`),
+            x: targetPlayer.x,
+            y: targetPlayer.y - 0.5,
+            color: data.damage < 0 ? "#22c55e" : (data.isCrit ? "#fbbf24" : "#ef4444"),
+            timestamp: performance.now(),
+          });
+        }
+        // Se for o alvo selecionado no TargetHUD, atualiza barra de vida em tempo real
+        const currentTargetInfo = useGameStore.getState().targetInfo;
+        if (currentTargetInfo && currentTargetInfo.id === data.targetId) {
+          useGameStore.getState().setLockedTarget(data.targetId, {
+            ...currentTargetInfo,
+            hp: data.currentHp,
+            maxHp: data.maxHp,
+          });
+        }
+      }
+    };
+
+    const handlePlayerKilled = (data: { killerName?: string; damage?: number }) => {
+      useGameStore.getState().killPlayer(data.killerName || "Adversário", data.damage);
+      playSynthSound("game_over");
+    };
+
+    const handlePvPReward = (data: { xp: number; gamefi: number; targetName: string }) => {
+      useGameStore.getState().addExperience(data.xp);
+      useGameStore.getState().recordArenaKill();
+      combatTextsRef.current.push({
+        id: `pvp_reward_${Date.now()}`,
+        text: `🏆 +${data.xp} XP!`,
+        x: latestPlayerPos.current.x,
+        y: latestPlayerPos.current.y - 1.2,
+        color: "#fbbf24",
+        timestamp: performance.now(),
+      });
+      playSynthSound("level_up");
+    };
+
+    socket.on("pvp_player_hit", handlePvpHit);
+    socket.on("player_killed", handlePlayerKilled);
+    socket.on("pvp_reward", handlePvPReward);
+
+    return () => {
+      socket.off("pvp_player_hit", handlePvpHit);
+      socket.off("player_killed", handlePlayerKilled);
+      socket.off("pvp_reward", handlePvPReward);
+    };
+  }, []);
 
   useEffect(() => {
     latestNpcs.current = npcs;
@@ -445,10 +530,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     // Sempre tentar interagir normalmente primeiro
     triggerInteraction();
 
-    if (!latestGameState.current.isBattleModeActive) {
-      return;
-    }
-
     if (!canvasRef.current) return;
     const rect = canvasRef.current.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
@@ -468,7 +549,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const gridY = Math.floor(worldY / TILE_SIZE);
 
     const currentRegion = latestPlayerPos.current.mapId || "center";
-    let clickedCreature = null;
+    let clickedCreature: any = null;
 
     if (currentRegion === "center") {
       clickedCreature = creaturesRef.current.find(c => Math.abs(c.x - gridX) <= 1 && Math.abs(c.y - gridY) <= 1);
@@ -482,10 +563,42 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
       clickedCreature = snakesRef.current.find(c => Math.abs(c.x - gridX) <= 1 && Math.abs(c.y - gridY) <= 1);
     }
 
-    if (clickedCreature) {
-      useGameStore.getState().setLockedTarget(clickedCreature.id);
+    // Procura também por outros jogadores reais no mapa
+    const myId = (latestPlayerPos.current as any).player_id || latestPlayerPos.current.name;
+    const realPlayers = realOnlinePlayersRef.current || [];
+    const clickedPlayer = realPlayers.find(
+      (p) => p.player_id !== myId && p.map_id === currentRegion && Math.abs(p.x - gridX) <= 1.5 && Math.abs(p.y - gridY) <= 1.5
+    );
+
+    if (clickedPlayer) {
+      useGameStore.getState().setLockedTarget(clickedPlayer.player_id, {
+        id: clickedPlayer.player_id,
+        name: clickedPlayer.name || "Adversário",
+        level: clickedPlayer.level || 1,
+        hp: clickedPlayer.hp ?? 100,
+        maxHp: clickedPlayer.maxHp ?? 100,
+        isPlayer: true,
+        playerClass: clickedPlayer.playerClass,
+      });
+      if (!latestGameState.current.isBattleModeActive) {
+        useGameStore.getState().setBattleMode(true);
+      }
+    } else if (clickedCreature) {
+      useGameStore.getState().setLockedTarget(clickedCreature.id, {
+        id: clickedCreature.id,
+        name: clickedCreature.name,
+        level: clickedCreature.level,
+        hp: clickedCreature.hp,
+        maxHp: clickedCreature.maxHp,
+        isPlayer: false,
+      });
+      if (!latestGameState.current.isBattleModeActive) {
+        useGameStore.getState().setBattleMode(true);
+      }
     } else {
-      useGameStore.getState().setLockedTarget(null);
+      if (latestGameState.current.isBattleModeActive) {
+        useGameStore.getState().setLockedTarget(null, null);
+      }
     }
   };
 
@@ -1540,7 +1653,81 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
           return;
         }
         
-        // Encontra o alvo
+        // Encontra o alvo (jogadores reais no PVP ou criaturas no PVE)
+        const myId = getOrCreatePlayerId(latestGameState.current?.wallet?.publicKey || undefined);
+        const targetOnlinePlayer = (realOnlinePlayersRef.current || []).find((p) => p.player_id === anim.targetId && p.player_id !== myId);
+
+        if (targetOnlinePlayer && (targetOnlinePlayer.hp === undefined || targetOnlinePlayer.hp > 0)) {
+          const player = latestPlayerPos.current;
+
+          // ── RANGE CHECK DE MAGIA NO PVP ─────────────────────────────────────
+          const spellDist = Math.hypot(player.x - targetOnlinePlayer.x, player.y - targetOnlinePlayer.y);
+          if (spellDist > SPELL_MAX_RANGE) {
+            combatTextsRef.current.push({
+              id: Math.random().toString(),
+              text: "Fora de alcance!",
+              x: player.x,
+              y: player.y - 0.8,
+              color: "#6b7280",
+              timestamp: time
+            });
+            return;
+          }
+
+          const { atkMultiplier, critChanceMultiplier } = getEquipmentBonuses(player);
+          const pLevel = latestGameState.current.level || 1;
+          const playerClassId = player.playerClass || latestGameState.current.playerClass;
+
+          let baseDmg: number;
+          if (anim.spellBasePower && anim.spellBasePower > 0) {
+            const isPhysical = anim.spellElement === "physical";
+            if (isPhysical) {
+              baseDmg = (anim.spellBasePower + effectiveStats.str * 1.2) * atkMultiplier;
+            } else {
+              baseDmg = (anim.spellBasePower + effectiveStats.int * 1.0) * atkMultiplier;
+            }
+          } else {
+            if (anim.type === "fire") baseDmg = (25 + pLevel * 3) * atkMultiplier;
+            else if (anim.type === "lightning") baseDmg = (45 + pLevel * 4) * atkMultiplier;
+            else baseDmg = 10 + (pLevel * 2);
+          }
+
+          let finalDmg = Math.floor(baseDmg * (0.85 + Math.random() * 0.3));
+          const isCrit = (anim.type === "fire" || anim.type === "lightning") && Math.random() < critChanceMultiplier;
+          if (isCrit) finalDmg *= 2;
+
+          if (isCrit && playerClassId === "soroban_mage") {
+            const currentMp = latestPlayerPos.current.mp ?? 0;
+            const maxMp = latestPlayerPos.current.maxMp ?? 50;
+            const mpRestore = Math.floor(maxMp * 0.20);
+            useGameStore.getState().setPlayerPos({ mp: Math.min(maxMp, currentMp + mpRestore) });
+            combatTextsRef.current.push({
+              id: Math.random().toString(),
+              text: `+${mpRestore} MP`,
+              x: player.x,
+              y: player.y - 1.5,
+              color: "#818cf8",
+              timestamp: time
+            });
+          }
+
+          const socket = getSocket();
+          if (socket) {
+            socket.emit("pvp_cast_spell", {
+              attackerId: myId,
+              attackerName: latestPlayerPos.current.name || "Mago",
+              targetId: targetOnlinePlayer.player_id,
+              mapId: player.mapId || "arena",
+              spellId: anim.id,
+              damage: finalDmg,
+              isCrit,
+              element: anim.spellElement || anim.type,
+              timestamp: Date.now(),
+            });
+          }
+          return;
+        }
+
         let spellTarget: any = null;
         [creaturesRef.current, wormsRef.current, crabsRef.current, beesRef.current, snakesRef.current].forEach(list => {
           const found = list.find(c => c.id === anim.targetId);
@@ -1632,6 +1819,49 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     // Processamento de auto-ataque e engajamento
     if (latestGameState.current.isBattleModeActive && latestGameState.current.lockedTargetId) {
       const targetId = latestGameState.current.lockedTargetId;
+      const myId = getOrCreatePlayerId(latestGameState.current?.wallet?.publicKey || undefined);
+      const targetPlayer = (realOnlinePlayersRef.current || []).find((p) => p.player_id === targetId && p.player_id !== myId);
+
+      if (targetPlayer) {
+        if (targetPlayer.hp !== undefined && targetPlayer.hp <= 0) {
+          useGameStore.getState().setBattleMode(false);
+          useGameStore.getState().setLockedTarget(null, null);
+          return;
+        }
+
+        const dist = Math.hypot(player.x - targetPlayer.x, player.y - targetPlayer.y);
+
+        // Auto-attack corpo-a-corpo em jogador (distância <= 2.0)
+        if (dist <= 2.0) {
+          if (time - lastAttackTimeRef.current > 1200) {
+            lastAttackTimeRef.current = time;
+
+            const { atkMultiplier, critChanceMultiplier } = getEquipmentBonuses(player);
+            const pLevel = latestGameState.current.level || 1;
+            const baseDmg = (8 + (effectiveStats.str * 0.7) + (pLevel * 1.5)) * atkMultiplier;
+            let finalDmg = Math.floor(baseDmg * (0.85 + Math.random() * 0.3));
+
+            const totalCritChance = critChanceMultiplier + (effectiveStats.str * 0.002) + (effectiveStats.agi * 0.003);
+            const isCrit = Math.random() < totalCritChance;
+            if (isCrit) finalDmg *= 2;
+
+            const socket = getSocket();
+            if (socket) {
+              socket.emit("pvp_attack", {
+                attackerId: myId,
+                attackerName: latestPlayerPos.current.name || "Guerreiro",
+                targetId: targetPlayer.player_id,
+                mapId: player.mapId || "arena",
+                damage: finalDmg,
+                isCrit,
+                timestamp: Date.now(),
+              });
+            }
+          }
+        }
+        return;
+      }
+
       let targetCreature: any = null;
       [creaturesRef.current, wormsRef.current, crabsRef.current, beesRef.current, snakesRef.current].forEach(list => {
         const found = list.find((c) => c.id === targetId);
@@ -1640,7 +1870,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
       if (!targetCreature || targetCreature.hp <= 0) {
         useGameStore.getState().setBattleMode(false);
-        useGameStore.getState().setLockedTarget(null);
+        useGameStore.getState().setLockedTarget(null, null);
         return;
       }
 
@@ -1856,6 +2086,10 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             } else if (prev.mapId === "guildhouse" || prev.mapId === "amphitheater") {
               finalX = 30;
               finalY = 32; // Em frente à Fonte Sagrada na praça central
+            } else if (prev.mapId === "arena") {
+              finalX = 42;
+              finalY = 21; // Em frente à entrada do Coliseu de Batalhas
+              useGameStore.getState().resetArenaScore();
             } else {
               finalX = 30;
               finalY = 30;
@@ -2526,6 +2760,30 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     } else {
       // Fallback: bots demo apenas se o multiplayer estiver desativado por flag
       drawOtherPlayers(ctx, otherPlayersRef.current, currentRegion as MapId);
+    }
+
+    // 6.6. Render Target Lock nos jogadores adversários no PVP
+    if (latestGameState.current.lockedTargetId) {
+      const lockedRp = (realOnlinePlayersRef.current || []).find(
+        (rp) => rp.player_id === latestGameState.current.lockedTargetId && rp.map_id === (currentRegion || "center")
+      );
+      if (lockedRp) {
+        const targetWorldX = lockedRp.x * TILE_SIZE;
+        const targetWorldY = lockedRp.y * TILE_SIZE;
+        ctx.strokeStyle = "#ef4444";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(targetWorldX + 16, targetWorldY + 16, 20, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Crosshairs
+        ctx.beginPath();
+        ctx.moveTo(targetWorldX + 16, targetWorldY - 10);
+        ctx.lineTo(targetWorldX + 16, targetWorldY + 42);
+        ctx.moveTo(targetWorldX - 10, targetWorldY + 16);
+        ctx.lineTo(targetWorldX + 42, targetWorldY + 16);
+        ctx.stroke();
+      }
     }
 
     // 7. Render Player using the character engine

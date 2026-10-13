@@ -176,16 +176,18 @@ export const drawOtherPlayers = (
     const screenX = render.x * TILE_SIZE;
     const screenY = render.y * TILE_SIZE;
 
-    // ── Fase 4.2: Fade-out de Players Desconectando ──────────────────────────
-    // Players reais têm updated_at; bots não têm (sempre alpha 1)
+    // ── Fase 4.2: Visibilidade de Jogadores ─────────────────────────────────
+    // No Socket.io multiplayer, a saída da sala é autoritativa via evento 'player_leave'.
+    // Jogadores conectados mantêm alpha pleno e não desaparecem por estarem parados.
     let alpha = 1;
-    if (!isBot && p.updated_at) {
+    const isWebSocketLivePlayer = Boolean(p.player_id);
+    if (!isBot && !isWebSocketLivePlayer && p.updated_at) {
       const age = Date.now() - new Date(p.updated_at).getTime();
       if (age > FADE_START_MS) {
-        // Fade linear de 1 → 0 nos últimos 5s antes do timeout
+        // Fade linear de 1 → 0 nos últimos 5s antes do timeout (legado polling)
         alpha = Math.max(0, 1 - (age - FADE_START_MS) / (PLAYER_TIMEOUT_MS - FADE_START_MS));
       }
-      // Se já deu timeout, não renderiza
+      // Se já deu timeout de polling, não renderiza
       if (age >= PLAYER_TIMEOUT_MS) return;
     }
 

@@ -163,6 +163,9 @@ export function useMultiplayer({
       },
       playerPos
     );
+
+    // Envia imediatamente a posição atual no novo mapa aos outros jogadores
+    publishPosition(playerPos, playerId, true);
   }, [playerId, playerPos.mapId]);
 
   // ─── Publicação de posição ────────────────────────────────────────────────
