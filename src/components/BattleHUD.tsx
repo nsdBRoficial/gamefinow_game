@@ -1,3 +1,18 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * BattleHUD.tsx — Interface de Combate em Tempo Real & Target HUD (v1.5pvp)
+ *
+ * Responsabilidades:
+ * 1. TargetHUD: Renderiza o alvo travado no topo da tela (Player Rival ou Monstro PvE),
+ *    mostrando retrato contextual (⚔️ para players, 👾 para mobs), nível, guilda e HP em tempo real.
+ * 2. Action Bar: Slots de habilidades de classe (1, 2, 3) com custo de MP e timers de GCD.
+ * 3. Consumíveis Rápidos: Poções de Vida (4) e Mana (5) com rastreamento de estoque e cooldowns.
+ * 4. Barra de GCD: Indicador visual superior animado a 30fps para leitura imediata do barramento global.
+ * 5. Equipamentos Rápidos: Mostra armas e escudos equipados e seus respectivos bônus de ATK/DEF.
+ */
+
 import React, { useEffect, useState } from "react";
 import { useGameStore } from "../store/gameStore";
 import { SPELL_GCD_MS, POTION_GCD_MS, POTION_SELF_CD_MS } from "../store/gameStore";

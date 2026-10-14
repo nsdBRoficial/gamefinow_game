@@ -841,7 +841,16 @@ io.on("connection", (socket) => {
     }
   });
 
-  // ── Eventos PVP Arena Legados ──
+  // ─────────────────────────────────────────────────────────────────────────────
+  // ⚔️ EVENTOS DE COMBATE PVP ARENA & SINCRONIZAÇÃO EM TEMPO REAL (v1.5pvp)
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Gerencia o ciclo de vida completo dos duelos na Arena:
+  // 1. Entrada e Pareamento (arena_join_request): alocação em salas isoladas e prevenção de fantasmas.
+  // 2. Movimentação (arena_move): validação e difusão de coordenadas euclidianas.
+  // 3. Combate Físico & Mágico (arena_attack, arena_cast_spell): range check, rolls e aplicação de dano.
+  // 4. Eliminações & Placar (arena_player_hit, arena_player_eliminated): notificação broadcast.
+  // 5. Desconexão e Limpeza (arena_leave & disconnect): remoção segura de jogadores ausentes.
+  // ─────────────────────────────────────────────────────────────────────────────
 
   socket.on("arena_join_request", (data: { playerId: string, mode: string, sessionId?: string, playerPayload: any }) => {
     let session: any;

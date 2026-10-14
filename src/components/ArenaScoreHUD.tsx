@@ -2,9 +2,21 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * ArenaScoreHUD.tsx
- * Placar de combate PVP exibido abaixo do Chat enquanto o jogador está na Arena.
- * Monitora Abates (Kills), Mortes (Deaths), Razão K/D e Sequência Atual/Recorde.
+ * ArenaScoreHUD.tsx — Componente de Placar de Combate PvP em Tempo Real (v1.5pvp)
+ *
+ * Exibido contextualmente na interface enquanto o jogador permanece no mapa "arena".
+ * Fica posicionado logo abaixo da janela de chat/chatbox para visibilidade imediata.
+ *
+ * Métricas Monitoradas:
+ * - Abates (Kills): Contagem cumulativa de vitórias em duelos na sessão atual.
+ * - Mortes (Deaths): Quantidade de vezes em que o jogador foi derrotado na arena.
+ * - Razão K/D (Kills / Deaths): Eficiência calculada dinamicamente com 1 casa decimal.
+ * - Sequência Atual (Streak): Contador de eliminações consecutivas sem morrer.
+ * - Maior Sequência (Highest Streak): Recorde da sessão, preservado mesmo após morrer.
+ *
+ * Reatividade:
+ * - Conectado diretamente à store Zustand (`useGameStore`).
+ * - Ao sair da arena, `resetArenaScore()` reinicializa todos os valores a zero de forma limpa.
  */
 
 import React from "react";
@@ -12,6 +24,7 @@ import { useGameStore } from "../store/gameStore";
 import { Swords, Skull, Trophy, Flame } from "lucide-react";
 
 export const ArenaScoreHUD: React.FC = () => {
+  // Lê o placar da store com fallback seguro para evitar undefined em renderizações rápidas
   const arenaScore = useGameStore((s) => s.arenaScore) || {
     kills: 0,
     deaths: 0,
@@ -20,6 +33,8 @@ export const ArenaScoreHUD: React.FC = () => {
   };
 
   const { kills, deaths, streak, highestStreak } = arenaScore;
+  
+  // Cálculo de K/D com proteção contra divisão por zero
   const kdRatio = deaths === 0 ? kills.toFixed(1) : (kills / deaths).toFixed(1);
 
   return (

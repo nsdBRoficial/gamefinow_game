@@ -2,16 +2,16 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * arenaService.ts — Serviço cliente do sistema PVP Arena
+ * arenaService.ts — Serviço Cliente do Sistema de Arena PvP (v1.5pvp)
  *
- * Gerencia a comunicação Socket.io com o servidor para:
- *  - Solicitar entrada na arena
- *  - Enviar ações de combate (ataque, magia)
- *  - Enviar movimentação dentro da arena
- *  - Receber sync e eventos de combate
+ * Arquitetura de Comunicação:
+ * - Conecta-se diretamente ao canal Socket.io dedicado à sala da arena (`arena:<id>`).
+ * - Transmite intenções de combate do jogador: `arena_attack`, `arena_cast_spell`, `arena_move`, `arena_leave`.
+ * - Processa broadcasts de reconciliação de estado: `arena_sync`, `arena_player_hit`, `arena_player_eliminated`.
+ * - Resiliência e Reconexão: Preserva o ID da sessão ativa em `sessionStorage` (`gfn_arena_session_id`)
+ *   para reingressar automaticamente na mesma arena após oscilações de rede.
  *
- * Toda a AUTORIDADE de combate está no servidor.
- * O cliente apenas envia intenções e recebe resultados validados.
+ * Princípio Arquitetural: Autoridade total no Servidor; o cliente jamais aplica dano arbitrário localmente.
  */
 
 import { getSocket } from "./multiplayerService";

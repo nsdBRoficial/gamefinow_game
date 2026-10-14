@@ -2,11 +2,15 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * arenaMap.ts — Mapa do Coliseu de Batalhas PvP (60×60)
+ * arenaMap.ts — Mapa do Coliseu de Batalhas PvP em Mundo Aberto (60×60) [v1.5pvp]
  *
- * Oferece uma arena circular/octogonal com piso de areia para combate PvP aberto,
- * cercada por muralhas, tochas, arquibancadas e uma zona segura ao sul
- * com portal de retorno à Praça Central.
+ * Arquitetura Espacial:
+ * - Grade 60x60 azulejos desenhada matematicamente via equações euclidianas.
+ * - Ringue de Areia Central: Raio de 14 tiles centrado em (30, 30), reservado para combate ativo.
+ * - Mureta Octogonal de Contenção: Impede que monstros ou projéteis saiam para a área de observadores.
+ * - Ponto de Respawn Contextual: Coordenadas (30, 53) ao sul, com escudo protetor anti-spawn kill de 3s.
+ * - Corredor de Evacuação ao Sul: Passagem em (cols 28..32 / rows 44..56) que leva ao portal (30, 55).
+ * - Portal de Saída (30, 55): Teleporta instantaneamente o jogador de volta à Praça Central.
  */
 
 import { TileType } from "../gameData";

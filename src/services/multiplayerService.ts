@@ -98,10 +98,29 @@ if (MULTIPLAYER_ENABLED) {
   });
 }
 
-// ─── Helpers ────────────────────────────────────────────────────────
+// ─── Identificação e Isolamento de Sessão (Multiplayer & PvP v1.5pvp) ───────────────────────
 
+/**
+ * Cache em memória do ID do jogador local nesta instância de execução.
+ * Previne recalcular ou ler sessionStorage em todos os frames de renderização.
+ */
 let inMemoryPlayerId: string | null = null;
 
+/**
+ * Obtém ou gera o identificador persistente do jogador local.
+ *
+ * Regras de Identificação (Arquitetura v1.5pvp):
+ * 1. Carteira Stellar Conectada: Se fornecida uma chave pública válida (>10 caracteres),
+ *    ela possui precedência absoluta e é usada como ID oficial do jogador no MMO.
+ * 2. Isolamento de Aba/Janela (Multi-Tab Testing):
+ *    Se o jogador for anônimo (sem carteira), o sistema vincula um ID único por janela do
+ *    navegador através de `window.name` (`gfn_tab_<hash>`) e `sessionStorage`.
+ *    Isso viabiliza abrir 2 ou mais abas no mesmo computador para testar batalhas PvP,
+ *    placar, target lock e chat em tempo real sem colisão de estado ou clones de presença.
+ *
+ * @param stellarPublicKey - Chave pública opcional da carteira Stellar conectada
+ * @returns Identificador string do jogador (chave Stellar ou "anon_<hash>")
+ */
 export function getOrCreatePlayerId(stellarPublicKey?: string): string {
   if (stellarPublicKey && stellarPublicKey.length > 10) {
     return stellarPublicKey;
@@ -110,7 +129,7 @@ export function getOrCreatePlayerId(stellarPublicKey?: string): string {
 
   try {
     if (typeof window !== "undefined") {
-      // Cada aba ou janela ganha seu próprio identificador isolado
+      // Atribui nome único e persistente para a aba do navegador caso ainda não possua
       if (!window.name || !window.name.startsWith("gfn_tab_")) {
         window.name = `gfn_tab_${Math.random().toString(36).substring(2, 8)}_${Date.now().toString(36)}`;
       }
@@ -126,7 +145,7 @@ export function getOrCreatePlayerId(stellarPublicKey?: string): string {
       return uuid;
     }
   } catch {
-    // fallback caso window/sessionStorage não esteja disponível
+    // Fallback gracioso caso window ou sessionStorage estejam bloqueados por sandbox/iframes
   }
 
   inMemoryPlayerId = `anon_${Math.random().toString(36).substring(2, 8)}_${Date.now().toString(36)}`;

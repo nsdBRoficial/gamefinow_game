@@ -2,17 +2,18 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * pvpEngine.ts — Motor de cálculo de combate PVP
+ * pvpEngine.ts — Motor Matemático de Combate PVP (v1.5pvp)
  *
- * Módulo puro (sem React/Socket). Contém toda a lógica matemática de:
- *  - Cálculo de dano físico e mágico
- *  - Verificação de range (distância)
- *  - Crítico e RNG roll
- *  - Aplicação de buff modifiers
- *  - Intervalo de auto-ataque por agilidade
+ * Módulo determinístico puro (sem React/Socket/DOM).
+ * Contém toda a lógica e fórmulas matemáticas oficiais de:
+ *  - Distância euclidiana e checagem de alcance (Attack Ranges)
+ *  - Cálculo de dano físico e mágico balanceados por classe
+ *  - Aplicação de buffs ofensivos e defensivos (até 80% de redução / invulnerabilidade)
+ *  - RNG Roll (85%-115%) e Critical Hit Roll (5% base + AGI/100)
+ *  - Teto de dano anti-cheat no servidor (maxReasonableDamage = level * 80)
  *
- * Usado tanto no server (server.ts) quanto no client para feedback imediato.
- * A autoridade final é sempre o SERVER.
+ * Executado pelo Backend (server.ts) como fonte autoritativa de verdade
+ * e espelhado pelo Cliente para predição visual otimista e feedback imediato.
  */
 
 import { ActiveBuff, PlayerClassId } from "../types";
