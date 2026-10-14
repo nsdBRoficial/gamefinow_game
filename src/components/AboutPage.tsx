@@ -335,7 +335,7 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
           />
           <div>
             <div className="text-base font-black tracking-widest uppercase rainbow-text mb-0.5">GAMEFINOW</div>
-            <div className="font-mono text-[10px]" style={{ color: "#475569" }}>v0.8.8 • STELLAR TESTNET</div>
+            <div className="font-mono text-[10px]" style={{ color: "#475569" }}>v1.5pvp • STELLAR TESTNET</div>
           </div>
         </div>
         {/* Language selector */}
@@ -453,7 +453,7 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
                 { label: "🌐 Stellar Testnet",          color: "#06b6d4" },
                 { label: "⚡ Soroban Smart Contracts",  color: "#a855f7" },
                 { label: "👛 WalletNow SDK",            color: "#22c55e" },
-                { label: "🎮 GameFi v0.8.8",            color: "#f59e0b" },
+                { label: "⚔️ Arena PvP v1.5pvp",         color: "#ef4444" },
               ].map(b => (
                 <span key={b.label} className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-black"
                   style={{ background: `${b.color}25`, border: `2px solid ${b.color}60`, color: b.color, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>
@@ -767,7 +767,7 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
               alt="GameFiNow" 
               className="w-14 h-14 object-contain drop-shadow-[0_0_15px_rgba(245,158,11,0.5)] mb-1 opacity-80 hover:opacity-100 transition-opacity"
             />
-            <p className="font-mono text-xs mb-1" style={{ color: "#64748b" }}>GameFiNow v0.8.8 // Stellar Testnet // {t("about.hero.subtitle")}</p>
+            <p className="font-mono text-xs mb-1" style={{ color: "#64748b" }}>GameFiNow v1.5pvp // Stellar Testnet // {t("about.hero.subtitle")}</p>
             <a href={`${EXPERT}/account/${ADDRS.treasury}`} target="_blank" rel="noreferrer" className="font-mono text-xs hover:underline" style={{ color: "#374151" }}>{EXPERT}</a>
           </div>
         </section>

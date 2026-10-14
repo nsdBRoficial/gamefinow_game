@@ -2,27 +2,28 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * GameFiNow - v0.8.2
+ * GameFiNow - v1.5pvp (The Arena & Open-World PvP Definitive Release)
  * A Gamified On-Boarding Experience for the Stellar Ecosystem
  *
  * Main Application Component — orchestrates routing between:
  *   - LandingPage (welcome screen / marketing)
  *   - LoginScreen (character creation & authentication)
- *   - Main Game Loop (GameCanvas + HUD + Modals)
+ *   - Main Game Loop (GameCanvas + Arena Coliseum + HUD + Modals)
  *
  * Core Architecture:
  *   - State: Zustand (gameStore.ts) + local React state
  *   - i18n: react-i18next (EN/PT/ES via src/i18n/locales/*.json)
  *   - Rendering: HTML5 Canvas 60 FPS (GameCanvas.tsx)
+ *   - Realtime PvP: Socket.io + Supabase (Target Locking, Arena Scoreboard, Coliseum 60x60)
  *   - Blockchain: Stellar Testnet via WalletNow SDK & Horizon API
  *
- * Changelog v0.8.2:
- *   - Full i18n support: English (default), Portuguese, Spanish
- *   - Redesigned animated Login Screen with particle effects
- *   - New Landing Page with hero section and CTA button
- *   - All NPC dialogues and quest texts migrated to i18n JSON
- *   - Improved James NPC storyline and all NPC lore
- *   - Fixed all hardcoded Portuguese strings in UI/HUD
+ * Changelog v1.5pvp:
+ *   - Open-World Coliseum Arena (60x60 map with sand pit & torches)
+ *   - Target Locking & dynamic TargetHUD (rival portraits, guild tags, reative HP)
+ *   - Arena Scoreboard HUD with kills, deaths, K/D ratio and killstreak tracker
+ *   - Contextual Respawn (Arena base x=30, y=53) with 3s anti-spawn kill shield
+ *   - Safe Spawn anti-combat logging (returns to center 30,30 on disconnect)
+ *   - Multiplayer tab/window session isolation via getOrCreatePlayerId()
  *   - TypeScript errors resolved (Quest type, t() hook scoping)
  *   - QA pass: tsc --noEmit clean
  */

@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * GameFiNow - v0.8.2
+ * GameFiNow - v1.5pvp
  * gameData.ts — Static Game Data & World Configuration
  *
  * Contains:
