@@ -2,15 +2,20 @@
   <a href="https://github.com/nsdBRoficial/gamefinow_game">
     <img src="./public/imagens/logo%20gamefinow%20-%20transparente.png" alt="GameFiNow Logo" width="220"/>
   </a>
-  <h1 align="center">GameFiNow — v0.8.8</h1>
-  <p align="center"><strong>A Gamified On-Boarding & DeFi MMO RPG Experience for the Stellar Ecosystem</strong></p>
+<div align="center">
+  <a href="https://github.com/nsdBRoficial/gamefinow_game">
+    <img src="./public/imagens/logo%20gamefinow%20-%20transparente.png" alt="GameFiNow Logo" width="220"/>
+  </a>
+  <h1 align="center">GameFiNow — v1.5pvp</h1>
+  <p align="center"><strong>The Definitive Arena & Open-World PvP Update — A Gamified On-Boarding & DeFi MMO RPG for the Stellar Ecosystem</strong></p>
   <p align="center">
-    <img src="https://img.shields.io/badge/version-v0.8.8-cyan?style=flat-square" alt="version"/>
+    <img src="https://img.shields.io/badge/version-v1.5pvp-red?style=flat-square&logo=shield" alt="version"/>
+    <img src="https://img.shields.io/badge/pvp-open--world_coliseum-darkred?style=flat-square" alt="pvp"/>
     <img src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square" alt="license"/>
     <img src="https://img.shields.io/badge/network-Stellar_Testnet-yellow?style=flat-square" alt="network"/>
     <img src="https://img.shields.io/badge/i18n-EN_|_PT_|_ES-green?style=flat-square" alt="languages"/>
     <img src="https://img.shields.io/badge/classes-4_classes-purple?style=flat-square" alt="classes"/>
-    <img src="https://img.shields.io/badge/guilds-system_live-orange?style=flat-square" alt="guilds"/>
+    <img src="https://img.shields.io/badge/multiplayer-Socket.io_+_Supabase-orange?style=flat-square" alt="multiplayer"/>
   </p>
 </div>
 
@@ -21,6 +26,53 @@
 **GameFiNow** is a retro-style MMO RPG built on Web3, designed to educate and onboard new users into the Stellar network in an intuitive, fun, and engaging way. Players complete interactive quests that simulate real on-chain interactions — from generating a cryptographic keypair, to depositing funds via an Anchor (On-Ramp), to swapping tokens using Soroban smart contracts and locking assets in a hold vault.
 
 The game runs entirely in the browser, using a 60 FPS HTML5 Canvas engine, and communicates with the **Stellar Testnet** via **WalletNow SDK** and the **Horizon API**.
+
+---
+
+## ⚔️ What's New in v1.5pvp — Open-World Arena PvP & Realtime Combat Engine
+
+Esta versão histórica (**v1.5pvp**) introduz o ecossistema completo de combate entre jogadores em tempo real (PvP) no mapa aberto do Coliseu, unificando a infraestrutura de rede, HUDs de combate, equilíbrio de classes e protocolos anti-cheat.
+
+### 🏟️ 1. O Coliseu de Batalhas (Mapa Arena 60×60)
+- **Ringue Aberto de Combate**: Mapa dedicado com piso de areia central (raio de 14 tiles), tochas ornamentais, muralhas de pedra e arquibancadas de observação.
+- **Portais de Saída Estratégicos**: Zona de retirada protegida ao sul (x=30, y=55) para retorno imediato à cidade central.
+- **Entrada Direta via Cidade Central**: Edifício da Arena e portal interativo localizado na praça norte do mapa central (`x=41, y=17`).
+
+### 🎯 2. Target Locking & Target HUD
+- **Seleção Dinâmica de Alvo**: Clique direto em qualquer jogador ou monstro para travar a mira (`lockedTargetId`).
+- **Target HUD Completo**:
+  - Exibição de avatar/ícone de combate (`⚔️` para jogadores, `👾` para monstros).
+  - Nome completo e Tag de Guilda (ex: `[STAR] LordStellar`).
+  - Nível do adversário (`Lv. X`) com badge estilizada.
+  - Barra de Vida (HP) em gradiente reativo com valor numérico exato em tempo real.
+  - Tecla de atalho `ESC` para desengajar e limpar o alvo.
+
+### 🏆 3. Arena Scoreboard HUD (Placar em Tempo Real)
+- Painel flutuante de alta fidelidade visual (Cyberpunk Dark Mode) exibido enquanto o jogador estiver na Arena:
+  - **Abates (Kills)**: Contador cumulativo de vitórias no combate.
+  - **Mortes (Deaths)**: Monitoramento de derrotas.
+  - **K/D Ratio**: Cálculo dinâmico de eficiência de combate.
+  - **Streak & Recorde**: Indicador de sequências de abates (com animação de chamas `🔥` a partir de 3 kills seguidas) e maior sequência registrada.
+  - **Reset Contextual**: Limpeza limpa da sessão ao sair da Arena.
+
+### 🛡️ 4. Contextual Respawn & Safe Spawn Anti-Combat Logging
+- **Renascer Contextual na Arena**: Ao ser abatido no Coliseu, o jogador renasce na base sul da Arena (`x=30, y=53`), sem precisar retornar à cidade central.
+- **Escudo de Proteção Anti-Spawn Kill**: Concede 3 segundos de invulnerabilidade (`buff_shield_respawn`) logo após o respawn, impedindo mortes consecutivas.
+- **Safe Spawn Garantido**: Jogadores que desconectam, fecham a aba ou recarregam o jogo enquanto estão na Arena são posicionados de volta no centro pacífico (`x=30, y=30`), prevenindo *combat logging* e armadilhas de morte.
+
+### ⚡ 5. Sincronização Multiplayer Realtime (Socket.io + Supabase)
+- **Isolamento Multi-Aba**: Função `getOrCreatePlayerId()` isola identificadores anônimos por aba (`sessionStorage` e `window.name`), permitindo testar batalhas locais entre múltiplas abas no mesmo navegador sem colisões.
+- **Transmissão Contínua de Presença**: Sincronização mutua de sprites, skins, chapéus, cores, direções e heartbeats ativos.
+- **Reconciliação e Desconexão Limpa**: Remoção instantânea de fantasmas e eventos de limpeza ao fechar o navegador.
+
+### ⚖️ 6. Motor de Combate (PvP Engine) e Balanceamento
+- **Alcances por Classe (Attack Ranges)**:
+  - *Guerreiro Estelar & Guardião da Rede*: Melee (1.5 tiles).
+  - *Caçador Cósmico*: Ranged Físico (4.5 tiles).
+  - *Alquimista Soroban*: Ranged Mágico (4.5 tiles).
+- **Global Cooldown (GCD)**: Barramento de ações dinâmico com indicador regressivo na barra de magias (Heal 800ms, Fire 1500ms, Lightning 2500ms).
+- **Cooldown de Poções**: GCD compartilhado de 1.0s com cooldown próprio de 5.0s.
+- **Fórmulas de Dano & Anti-Cheat**: Teto máximo de dano por nível validado no servidor para neutralizar clientes adulterados.
 
 ---
 
@@ -294,6 +346,8 @@ Zero-config deployment. The Canvas engine is iframe-resistant (custom `tabIndex`
 
 | Document | Description |
 |----------|-------------|
+| [`DOC_SISTEMA_PVP_ARENA_V1_5.md`](./DOC_SISTEMA_PVP_ARENA_V1_5.md) | **Especificação Completa do Sistema PvP Arena v1.5pvp (Arquitetura, Rede & Combate)** |
+| [`GUIA_DEPLOY_VERCEL.md`](./GUIA_DEPLOY_VERCEL.md) | Guia e checklist de deploy na Vercel (Variáveis, SPA Rewrites e Webhook) |
 | [`ROADMAP.md`](./ROADMAP.md) | Feature roadmap by phase |
 | [`DOC_AUDITORIA_E_AVALIACAO.md`](./DOC_AUDITORIA_E_AVALIACAO.md) | On-chain integration audit matrix |
 | [`DOC_MULTIPLAYER_MMO.md`](./DOC_MULTIPLAYER_MMO.md) | Multiplayer architecture & Socket.io |
@@ -304,6 +358,6 @@ Zero-config deployment. The Canvas engine is iframe-resistant (custom `tabIndex`
 ---
 
 <div align="center">
-  <b>Built by nsdBR GameFiNow Team</b><br/>
-  <sub>v0.8.8 — Stellar Testnet — August 2026</sub>
+  <b>Built with passion by nsdBR GameFiNow Team</b><br/>
+  <sub>v1.5pvp — Stellar Testnet — October 2026</sub>
 </div>
