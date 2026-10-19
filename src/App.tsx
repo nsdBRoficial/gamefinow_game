@@ -109,6 +109,7 @@ export default function App() {
   const [isMaintenance, setIsMaintenance] = useState(false);
 
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [authLoadingMessage, setAuthLoadingMessage] = useState<string | null>(null);
   
   // Verificação de Modo GM via URL + Token
   const isGmMode = new URLSearchParams(window.location.search).get("mode") === "gm" && localStorage.getItem("admin_token") !== null;
@@ -148,7 +149,10 @@ export default function App() {
     const processSession = async (user: any) => {
       try {
         console.log("[App] Processando sessão Google para:", user.email);
-        const result = await authService.handleGoogleAuthSession();
+        setAuthLoadingMessage("Conectando ao ecossistema Stellar...");
+        const result = await authService.handleGoogleAuthSession((msg) => {
+          setAuthLoadingMessage(msg);
+        });
         if (result.success && result.profile && isMounted) {
           const p = result.profile;
           updateWallet({
@@ -189,10 +193,14 @@ export default function App() {
 
           setHasStarted(true);
           setIsLoggedIn(true);
+          setAuthLoadingMessage(null);
           playSynthSound("success");
+        } else {
+          setAuthLoadingMessage(null);
         }
       } catch (err) {
         console.error("[App] Erro ao sincronizar sessão Google:", err);
+        setAuthLoadingMessage(null);
       }
     };
 
@@ -1246,6 +1254,39 @@ export default function App() {
   const attrFaith = isGmMode ? 9999 : (gameState.wallet.hasWallet ? effectiveStats.faith : 0);
 
   const isMovementBlocked = !!gameState.activeModal || !!gameState.activeDialog || !!activeWindow || showPassport || showMapModal;
+
+  if (authLoadingMessage) {
+    return (
+      <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-white font-mono select-none">
+        <div className="relative flex flex-col items-center max-w-md w-full bg-slate-950/80 border-2 border-cyan-500/60 p-8 rounded-2xl shadow-[0_0_50px_rgba(6,182,212,0.3)] text-center space-y-6 animate-in fade-in zoom-in-95 duration-300">
+          <div className="relative">
+            <div className="w-20 h-20 rounded-2xl bg-cyan-950/80 border-2 border-cyan-400 flex items-center justify-center shadow-[0_0_25px_rgba(6,182,212,0.5)]">
+              <Sparkles className="w-10 h-10 text-cyan-300 animate-pulse" />
+            </div>
+            <div className="absolute -inset-1 rounded-2xl bg-cyan-500/20 blur-md animate-ping pointer-events-none" style={{ animationDuration: '3s' }} />
+          </div>
+
+          <div className="space-y-2">
+            <h2 className="text-xl font-black uppercase tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-sky-200 to-amber-300">
+              Forjando seu Herói
+            </h2>
+            <p className="text-xs text-cyan-400 font-bold animate-pulse">
+              {authLoadingMessage}
+            </p>
+          </div>
+
+          {/* Barra de progresso animada retrô */}
+          <div className="w-full bg-slate-900 border border-cyan-900/60 rounded-full h-3 overflow-hidden p-0.5">
+            <div className="h-full bg-gradient-to-r from-cyan-500 via-sky-400 to-amber-400 rounded-full w-full animate-pulse" />
+          </div>
+
+          <p className="text-[10px] text-slate-400 leading-relaxed font-mono">
+            Provisionando par de chaves Ed25519, chamando o Friendbot e registrando trustlines na rede Stellar Testnet...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (!hasStarted) {
     return (
