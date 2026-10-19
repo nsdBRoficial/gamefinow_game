@@ -5,7 +5,7 @@
 -- ============================================================
 
 TRUNCATE TABLE 
-  player_inventory,
+  player_wallets,
   player_quests,
   players_presence,
   chat_messages,
