@@ -2,14 +2,12 @@
   <a href="https://github.com/nsdBRoficial/gamefinow_game">
     <img src="./public/imagens/logo%20gamefinow%20-%20transparente.png" alt="GameFiNow Logo" width="220"/>
   </a>
-<div align="center">
-  <a href="https://github.com/nsdBRoficial/gamefinow_game">
-    <img src="./public/imagens/logo%20gamefinow%20-%20transparente.png" alt="GameFiNow Logo" width="220"/>
-  </a>
-  <h1 align="center">GameFiNow — v1.5pvp</h1>
-  <p align="center"><strong>The Definitive Arena & Open-World PvP Update — A Gamified On-Boarding & DeFi MMO RPG for the Stellar Ecosystem</strong></p>
+  <h1 align="center">GameFiNow — Season 0.8 (v1.6.0)</h1>
+  <p align="center"><strong>The Frictionless Google Auth & Open-World PvP Update — A Gamified On-Boarding & DeFi MMO RPG for the Stellar Ecosystem</strong></p>
   <p align="center">
-    <img src="https://img.shields.io/badge/version-v1.5pvp-red?style=flat-square&logo=shield" alt="version"/>
+    <img src="https://img.shields.io/badge/season-0.8-gold?style=flat-square&logo=shield" alt="season"/>
+    <img src="https://img.shields.io/badge/auth-Google_1--Click_OAuth-blue?style=flat-square&logo=google" alt="google-auth"/>
+    <img src="https://img.shields.io/badge/version-v1.6.0-red?style=flat-square" alt="version"/>
     <img src="https://img.shields.io/badge/pvp-open--world_coliseum-darkred?style=flat-square" alt="pvp"/>
     <img src="https://img.shields.io/badge/license-Apache--2.0-blue?style=flat-square" alt="license"/>
     <img src="https://img.shields.io/badge/network-Stellar_Testnet-yellow?style=flat-square" alt="network"/>
@@ -25,11 +23,22 @@
 
 **GameFiNow** is a retro-style MMO RPG built on Web3, designed to educate and onboard new users into the Stellar network in an intuitive, fun, and engaging way. Players complete interactive quests that simulate real on-chain interactions — from generating a cryptographic keypair, to depositing funds via an Anchor (On-Ramp), to swapping tokens using Soroban smart contracts and locking assets in a hold vault.
 
-The game runs entirely in the browser, using a 60 FPS HTML5 Canvas engine, and communicates with the **Stellar Testnet** via **WalletNow SDK** and the **Horizon API**.
+The game runs entirely in the browser, using a 60 FPS HTML5 Canvas engine, and communicates with the **Stellar Testnet** via **WalletNow SDK**, **Google 1-Click OAuth on-chain provisioning** and the **Horizon API**.
 
 ---
 
-## ⚔️ What's New in v1.5pvp — Open-World Arena PvP & Realtime Combat Engine
+## 🚀 What's New in Season 0.8 (v1.6.0) — Frictionless Google Auth & On-Chain Provisioning
+
+A **Season 0.8** marca o salto definitivo na eliminação de fricção de onboarding do ecossistema Stellar:
+1. **Google 1-Click Auth com Provisionamento On-Chain**:
+   - Autenticação instantânea via Supabase OAuth integrada ao ecossistema Stellar.
+   - Provisionamento automático de par de chaves Ed25519 nativo, financiamento via Friendbot na Testnet e criação imediata das 5 Trustlines (USDW, BRW, SRT, USDC, GAMEFI).
+   - Tela de Forja de Herói com animação retrô e feedback de transações on-chain em tempo real.
+2. **Recuperação de Contas Simplificada**:
+   - Restauração automática em 1 clique em qualquer dispositivo utilizando o login do Google vinculado ao `stellar_address`.
+   - Preservação da aba de contingência com Secret Key (SEP-10) para usuários puristas Web3.
+3. **Wipe Geral e Reset de Economia**:
+   - Inicialização limpa e balanceada para todos os jogadores na Season 0.8.
 
 Esta versão histórica (**v1.5pvp**) introduz o ecossistema completo de combate entre jogadores em tempo real (PvP) no mapa aberto do Coliseu, unificando a infraestrutura de rede, HUDs de combate, equilíbrio de classes e protocolos anti-cheat.
 

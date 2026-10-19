@@ -335,7 +335,7 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
           />
           <div>
             <div className="text-base font-black tracking-widest uppercase rainbow-text mb-0.5">GAMEFINOW</div>
-            <div className="font-mono text-[10px]" style={{ color: "#475569" }}>v1.5pvp • STELLAR TESTNET</div>
+            <div className="font-mono text-[10px]" style={{ color: "#475569" }}>v1.6.0 • SEASON 0.8 • STELLAR TESTNET</div>
           </div>
         </div>
         {/* Language selector */}
@@ -450,10 +450,12 @@ export const AboutPage: React.FC<Props> = ({ onClose }) => {
             {/* Badges */}
             <div className="flex flex-wrap justify-center gap-2 mb-10">
               {[
+                { label: "🌟 Season 0.8",               color: "#f59e0b" },
+                { label: "🚀 Google 1-Click Auth",     color: "#38bdf8" },
                 { label: "🌐 Stellar Testnet",          color: "#06b6d4" },
                 { label: "⚡ Soroban Smart Contracts",  color: "#a855f7" },
                 { label: "👛 WalletNow SDK",            color: "#22c55e" },
-                { label: "⚔️ Arena PvP v1.5pvp",         color: "#ef4444" },
+                { label: "⚔️ Arena PvP Coliseu",        color: "#ef4444" },
               ].map(b => (
                 <span key={b.label} className="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-black"
                   style={{ background: `${b.color}25`, border: `2px solid ${b.color}60`, color: b.color, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}>
