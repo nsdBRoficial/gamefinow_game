@@ -146,6 +146,93 @@ describe('Fase 1: Suíte de Autenticação Google e Recuperação Web3 (Persona 
     expect(result.secretKey).toBe('SNOVASECRETKEYSTELLAR88888888888888');
   });
 
+  it('AUTH-04: Jogador Convidado/Existente vincula carteira Stellar atual à conta Google (linkCurrentWalletToGoogle)', async () => {
+    const mockUser = {
+      id: 'google-uid-link-999',
+      email: 'jogador.linkado@stellar.org',
+    };
+
+    (supabase!.auth.getUser as any).mockResolvedValue({
+      data: { user: mockUser },
+      error: null,
+    });
+
+    const mockUpsertSingle = vi.fn().mockResolvedValue({
+      data: {
+        id: 'GCARTEIRAATUAL1111111111111111111111',
+        stellar_address: 'GCARTEIRAATUAL1111111111111111111111',
+        name: 'Herói Antigo',
+        google_uid: 'google-uid-link-999',
+        email: 'jogador.linkado@stellar.org',
+      },
+      error: null,
+    });
+
+    (supabase!.from as any).mockReturnValue({
+      upsert: () => ({
+        select: () => ({
+          single: mockUpsertSingle,
+        }),
+      }),
+    });
+
+    const result = await authService.linkCurrentWalletToGoogle(
+      'GCARTEIRAATUAL1111111111111111111111',
+      'Herói Antigo'
+    );
+
+    expect(result.success).toBe(true);
+    expect(result.profile?.google_uid).toBe('google-uid-link-999');
+    expect(result.profile?.email).toBe('jogador.linkado@stellar.org');
+    expect(result.profile?.stellar_address).toBe('GCARTEIRAATUAL1111111111111111111111');
+  });
+
+  it('AUTH-08: Migração de Conta Legada - busca por email atrela o google_uid sem duplicar ou resetar conta', async () => {
+    const mockUser = {
+      id: 'google-uid-migracao-777',
+      email: 'veterano@stellar.org',
+      user_metadata: { full_name: 'Veterano Do Game' },
+    };
+
+    // Jogador antigo que tinha apenas e-mail salvo na migration v1/v2, sem google_uid
+    const mockLegacyPlayer = {
+      id: 'GVETERANOSTELLARADDRESS99999999999999',
+      stellar_address: 'GVETERANOSTELLARADDRESS99999999999999',
+      name: 'Veterano Do Game',
+      google_uid: null,
+      email: 'veterano@stellar.org',
+      level: 10,
+      xp_current: 5000,
+    };
+
+    (supabase!.auth.getUser as any).mockResolvedValue({
+      data: { user: mockUser },
+      error: null,
+    });
+
+    const mockUpdateEq = vi.fn().mockResolvedValue({ error: null });
+    const mockUpdate = vi.fn().mockReturnValue({ eq: mockUpdateEq });
+
+    (supabase!.from as any).mockReturnValue({
+      select: () => ({
+        or: () => ({
+          maybeSingle: vi.fn().mockResolvedValue({ data: mockLegacyPlayer, error: null }),
+        }),
+      }),
+      update: mockUpdate,
+    });
+
+    const result = await authService.handleGoogleAuthSession();
+
+    expect(result.success).toBe(true);
+    expect(result.isNewUser).toBe(false);
+    expect(result.profile?.level).toBe(10);
+    expect(result.profile?.stellar_address).toBe('GVETERANOSTELLARADDRESS99999999999999');
+    // Deve disparar update vinculando o novo google_uid ao ID existente
+    expect(mockUpdate).toHaveBeenCalledWith({ google_uid: 'google-uid-migracao-777' });
+    expect(mockUpdateEq).toHaveBeenCalledWith('id', 'GVETERANOSTELLARADDRESS99999999999999');
+  });
+
   it('AUTH-07: Cancelamento ou erro do provedor Google OAuth é tratado graciosamente', async () => {
     (supabase!.auth.signInWithOAuth as any).mockResolvedValue({
       error: new Error('User closed popup'),
