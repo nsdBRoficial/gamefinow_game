@@ -55,6 +55,7 @@ import { audioStreamService } from "./services/audioStreamService";
 import { calculateEffectiveStats } from "./classesData";
 import { useMultiplayer } from "./hooks/useMultiplayer";
 import { getOrCreatePlayerId, subscribeToGlobalEvents, getSocket } from "./services/multiplayerService";
+import { authService } from "./services/authService";
 import ReactNipple from "react-nipple";
 import { useTranslation } from "react-i18next";
 import { GameState, Player, NPC, Transaction, QuestId, Quest, WalletState } from "./types";
@@ -87,6 +88,7 @@ export default function App() {
   const setGameState = useGameStore((s) => s.setGameState);
   const playerPos = useGameStore((s) => s.playerPos);
   const setPlayerPos = useGameStore((s) => s.setPlayerPos);
+  const updateWallet = useGameStore((s) => s.updateWallet);
   const setBattleMode = useGameStore((s) => s.setBattleMode);
 
   const [npcs] = useState<NPC[]>(INITIAL_NPCS);
@@ -137,6 +139,67 @@ export default function App() {
       setPlayerPos((prev) => ({ ...prev, isGM: false }));
     }
   }, [isGmMode, setPlayerPos, setGameState]);
+
+  // ─── GOOGLE OAUTH: Processar retorno automático de autenticação e restauração de perfil ───
+  useEffect(() => {
+    let isMounted = true;
+    const checkGoogleSession = async () => {
+      try {
+        const session = await authService.getCurrentSession();
+        if (session && session.user && !isLoggedIn) {
+          console.log("[App] Detectada sessão Google ativa:", session.user.email);
+          const result = await authService.handleGoogleAuthSession();
+          if (result.success && result.profile && isMounted) {
+            const p = result.profile;
+            updateWallet({
+              hasWallet: true,
+              publicKey: p.stellar_address || p.id,
+              ...(result.secretKey && { secretKey: result.secretKey }),
+              name: p.name || "Herói Solar",
+              email: p.email || session.user.email,
+            });
+
+            setPlayerPos({
+              name: p.name || "Herói Solar",
+              walletAddress: p.stellar_address || p.id,
+              ...(p.gender && { gender: p.gender }),
+              ...(p.head_color && { headColor: p.head_color }),
+              ...(p.torso_color && { torsoColor: p.torso_color }),
+              ...(p.legs_color && { legsColor: p.legs_color }),
+              ...(p.shoes_color && { shoesColor: p.shoes_color }),
+              ...(p.skin_color && { skinColor: p.skin_color }),
+              ...(p.head_type && { headType: p.head_type as any }),
+              ...(p.torso_type && { torsoType: p.torso_type as any }),
+              ...(p.shoes_type && { shoesType: p.shoes_type as any }),
+              ...(p.face_type && { faceType: p.face_type as any }),
+              ...(p.accessory_type && { accessoryType: p.accessory_type as any }),
+              ...(p.active_outfit && { activeOutfit: p.active_outfit }),
+              ...(p.owned_outfits && { ownedOutfits: p.owned_outfits }),
+              ...(p.active_title && { activeTitle: p.active_title }),
+              ...(p.unlocked_titles && { unlockedTitles: p.unlocked_titles }),
+              ...(p.name_style && { nameStyle: p.name_style as any }),
+            } as any);
+
+            if (p.level) {
+              setGameState({
+                level: p.level,
+                xp_current: p.xp_current || 0,
+              });
+            }
+
+            setIsLoggedIn(true);
+            setHasStarted(true);
+            playSynthSound("success");
+          }
+        }
+      } catch (err) {
+        console.error("[App] Erro ao sincronizar sessão Google:", err);
+      }
+    };
+
+    checkGoogleSession();
+    return () => { isMounted = false; };
+  }, [isLoggedIn, updateWallet, setPlayerPos, setGameState]);
 
   // ─── MULTIPLAYER: ID do jogador baseado na wallet Stellar (ou GM) ───
   const playerId = isGmMode ? "gm_admin" : getOrCreatePlayerId(gameState.wallet.publicKey || undefined);

@@ -4,11 +4,12 @@
  */
 
 import React, { useState } from "react";
-import { KeyRound, Mail, CheckCircle2, ShieldCheck, RefreshCw, X, Sparkles, AlertTriangle } from "lucide-react";
+import { KeyRound, Mail, CheckCircle2, ShieldCheck, RefreshCw, X, Sparkles, AlertTriangle, LogIn, Loader2 } from "lucide-react";
 import { useGameStore } from "../store/gameStore";
 import { Keypair } from "@stellar/stellar-sdk";
 import { createClient } from "@supabase/supabase-js";
 import { supabase } from "../services/supabaseClient";
+import { authService } from "../services/authService";
 
 interface AccountRecoveryModalProps {
   playSynthSound: (type: "beep" | "success" | "coin" | "unlock") => void;
@@ -39,12 +40,8 @@ export const AccountRecoveryModal: React.FC<AccountRecoveryModalProps> = ({
     }
   };
 
-  const [mode, setMode] = useState<"sep10" | "email">("sep10");
+  const [mode, setMode] = useState<"google" | "sep10">("google");
   const [stellarSecretKey, setStellarSecretKey] = useState("");
-  const [secretKeyOrPin, setSecretKeyOrPin] = useState("");
-  const [emailInput, setEmailInput] = useState("");
-  const [otpCode, setOtpCode] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
@@ -163,44 +160,26 @@ export const AccountRecoveryModal: React.FC<AccountRecoveryModalProps> = ({
     }
   };
 
-  const handleSendEmailOtp = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!emailInput.includes("@")) {
-      setStatusMsg({ text: "Insira um e-mail válido!", type: "error" });
-      playSynthSound("beep");
-      return;
-    }
-
+  const handleGoogleRecover = async () => {
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setOtpSent(true);
-      playSynthSound("coin");
-      setStatusMsg({ text: `Código de recuperação enviado para ${emailInput}! (Simulação: digite 123456)`, type: "success" });
-    }, 1000);
-  };
+    setStatusMsg({ text: "Conectando ao Google para localizar seu perfil...", type: "success" });
+    playSynthSound("coin");
 
-  const handleVerifyEmailOtp = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (otpCode.trim() !== "123456" && otpCode.trim().length !== 6) {
-      setStatusMsg({ text: "Código OTP inválido! Use o código de teste: 123456", type: "error" });
+    try {
+      const { error } = await authService.signInWithGoogle();
+      if (error) {
+        throw error;
+      }
+      // O redirect do OAuth levará de volta ao app, onde o App.tsx processará handleGoogleAuthSession()
+    } catch (err: any) {
+      console.error("[Recovery] Erro na recuperação Google:", err);
+      setStatusMsg({
+        text: err.message || "Falha ao conectar com Google. Tente novamente ou use sua Secret Key.",
+        type: "error",
+      });
       playSynthSound("beep");
-      return;
-    }
-
-    setIsLoading(true);
-    setTimeout(() => {
       setIsLoading(false);
-      updateWallet({ email: emailInput.trim(), hasWallet: true });
-      playSynthSound("unlock");
-      setStatusMsg({ text: "✅ E-mail confirmado e conta sincronizada com sucesso!", type: "success" });
-      setTimeout(() => {
-        handleClose();
-        if (onRecoverySuccess) {
-          onRecoverySuccess("Herói Recuperado");
-        }
-      }, 1500);
-    }, 1000);
+    }
   };
 
   return (
@@ -213,10 +192,10 @@ export const AccountRecoveryModal: React.FC<AccountRecoveryModalProps> = ({
             <KeyRound className="w-6 h-6 text-cyan-400" />
             <div>
               <h2 className="text-base sm:text-lg font-black uppercase text-cyan-300 tracking-wider">
-                Recuperação de Conta Web3
+                Recuperação de Conta
               </h2>
               <p className="text-[10px] text-slate-400">
-                Restaure seu herói e suas carteiras com segurança
+                Restaure seu herói e suas chaves Stellar com segurança
               </p>
             </div>
           </div>
@@ -231,20 +210,20 @@ export const AccountRecoveryModal: React.FC<AccountRecoveryModalProps> = ({
         {/* Abas */}
         <div className="grid grid-cols-2 gap-2 my-3">
           <button
+            onClick={() => { setMode("google"); setStatusMsg(null); playSynthSound("beep"); }}
+            className={`py-2 rounded-xl text-xs font-bold border-2 transition cursor-pointer flex items-center justify-center gap-1.5 ${
+              mode === "google" ? "bg-cyan-500 text-slate-950 border-black shadow-[2px_2px_0px_#000]" : "bg-slate-900 border-slate-800 text-slate-400"
+            }`}
+          >
+            <LogIn className="w-4 h-4" /> Google (1-Clique)
+          </button>
+          <button
             onClick={() => { setMode("sep10"); setStatusMsg(null); playSynthSound("beep"); }}
             className={`py-2 rounded-xl text-xs font-bold border-2 transition cursor-pointer flex items-center justify-center gap-1.5 ${
               mode === "sep10" ? "bg-amber-500 text-slate-950 border-black shadow-[2px_2px_0px_#000]" : "bg-slate-900 border-slate-800 text-slate-400"
             }`}
           >
-            <KeyRound className="w-4 h-4" /> Secret Key
-          </button>
-          <button
-            onClick={() => { setMode("email"); setStatusMsg(null); playSynthSound("beep"); }}
-            className={`py-2 rounded-xl text-xs font-bold border-2 transition cursor-pointer flex items-center justify-center gap-1.5 ${
-              mode === "email" ? "bg-amber-500 text-slate-950 border-black shadow-[2px_2px_0px_#000]" : "bg-slate-900 border-slate-800 text-slate-400"
-            }`}
-          >
-            <Mail className="w-4 h-4" /> E-mail OTP
+            <KeyRound className="w-4 h-4" /> Secret Key (SEP-10)
           </button>
         </div>
 
@@ -271,9 +250,9 @@ export const AccountRecoveryModal: React.FC<AccountRecoveryModalProps> = ({
 
             <div className="bg-slate-900/80 p-3 rounded-xl border border-amber-900/40 space-y-1 text-[11px] text-slate-400">
               <p className="flex items-center gap-1.5 text-amber-400 font-bold">
-                <ShieldCheck className="w-4 h-4 text-amber-400" /> Restauração via Secret Key
+                <ShieldCheck className="w-4 h-4 text-amber-400" /> Restauração Manual Criptográfica
               </p>
-              <p>Sua Chave Secreta será usada localmente para derivar sua chave pública e recuperar sua conta com segurança. Não a compartilhe.</p>
+              <p>Sua Chave Secreta Ed25519 será processada em memória para restaurar seu inventário, nível e carteira.</p>
             </div>
 
             <button
@@ -282,55 +261,55 @@ export const AccountRecoveryModal: React.FC<AccountRecoveryModalProps> = ({
               className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition cursor-pointer shadow-[2px_2px_0px_#000] border-2 border-black flex items-center justify-center gap-2"
             >
               {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              {isLoading ? "Validando Chave..." : "Restaurar Personagem via Secret Key"}
+              {isLoading ? "Validando Chave..." : "Restaurar via Secret Key"}
             </button>
           </form>
         ) : (
-          <div className="space-y-3 text-xs">
-            {!otpSent ? (
-              <form onSubmit={handleSendEmailOtp} className="space-y-3">
-                <div>
-                  <label className="block text-slate-400 font-bold mb-1">E-mail Cadastrado</label>
-                  <input
-                    type="email"
-                    value={emailInput}
-                    onChange={(e) => setEmailInput(e.target.value)}
-                    placeholder="seuemail@exemplo.com"
-                    className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-white outline-none focus:border-amber-400"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs uppercase rounded-xl border-2 border-black shadow-[2px_2px_0px_#000] cursor-pointer flex items-center justify-center gap-2"
-                >
-                  {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
-                  Enviar Código de Verificação
-                </button>
-              </form>
-            ) : (
-              <form onSubmit={handleVerifyEmailOtp} className="space-y-3">
-                <div>
-                  <label className="block text-slate-400 font-bold mb-1">Código de 6 Dígitos (OTP)</label>
-                  <input
-                    type="text"
-                    maxLength={6}
-                    value={otpCode}
-                    onChange={(e) => setOtpCode(e.target.value)}
-                    placeholder="123456"
-                    className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-center text-amber-400 font-black tracking-widest text-lg outline-none focus:border-amber-400"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs uppercase rounded-xl border-2 border-black shadow-[2px_2px_0px_#000] cursor-pointer flex items-center justify-center gap-2"
-                >
-                  {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                  Confirmar e Restaurar Conta
-                </button>
-              </form>
-            )}
+          <div className="space-y-4 text-xs py-2">
+            <div className="bg-slate-900/80 p-3.5 rounded-xl border border-cyan-500/30 space-y-2 text-[11.5px] text-slate-300">
+              <p className="flex items-center gap-2 text-cyan-400 font-bold">
+                <Sparkles className="w-4 h-4 text-cyan-400" /> Restauração Automática em 1 Clique
+              </p>
+              <p className="text-slate-400 leading-relaxed">
+                Ao autenticar com sua conta Google, identificamos seu herói vinculado e restauramos instantaneamente seu nível, inventário e endereço Stellar on-chain sem necessidade de digitar chaves manuais.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleGoogleRecover}
+              disabled={isLoading}
+              className="w-full py-3.5 bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-black text-xs uppercase tracking-wider rounded-xl transition cursor-pointer shadow-[0_4px_16px_rgba(6,182,212,0.3)] border-2 border-black flex items-center justify-center gap-2 font-mono"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Conectando ao Google...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24">
+                    <path
+                      fill="#4285F4"
+                      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                    />
+                    <path
+                      fill="#EA4335"
+                      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                    />
+                  </svg>
+                  Recuperar com Google
+                </>
+              )}
+            </button>
           </div>
         )}
 

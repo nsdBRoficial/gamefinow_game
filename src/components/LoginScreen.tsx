@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { AccountRecoveryModal } from "./AccountRecoveryModal";
+import { authService } from "../services/authService";
 
 interface LoginScreenProps {
   existingWallet: {
@@ -111,6 +112,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   const [passkeyStep, setPasskeyStep] = useState<"idle" | "scanning" | "success">("idle");
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showRecoveryModal, setShowRecoveryModal] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
   // Background images from 'imagens/'
   const backgrounds = [
@@ -133,6 +135,23 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   const handleFrictionlessPlay = (e: React.FormEvent) => {
     e.preventDefault();
     onLogin(name.trim() || "Anonymo", gender);
+  };
+
+  // Login via Google OAuth 1-Clique
+  const handleGoogleLogin = async () => {
+    playSynthSound("coin");
+    setIsGoogleLoading(true);
+    try {
+      const { error } = await authService.signInWithGoogle();
+      if (error) {
+        throw error;
+      }
+    } catch (err: any) {
+      console.error("[LoginScreen] Erro no login Google:", err);
+      alert(err.message || "Erro ao conectar com Google. Tente jogar no modo Convidado.");
+      setIsGoogleLoading(false);
+      playSynthSound("beep");
+    }
   };
 
   // Start Real Biometric Passkey Login via WebAuthn
@@ -355,14 +374,33 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                   </button>
                 </div>
 
-                <div className="mt-3 pt-3 border-t border-slate-900 flex justify-center">
+                <div className="mt-3 pt-3 border-t border-slate-900 flex flex-col gap-2">
+                  <button
+                    type="button"
+                    onClick={handleGoogleLogin}
+                    disabled={isGoogleLoading}
+                    className="w-full py-2.5 px-3 rounded-xl border border-cyan-500/40 hover:border-cyan-400 bg-cyan-950/40 hover:bg-cyan-900/40 text-cyan-300 font-bold text-[10.5px] uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer"
+                  >
+                    {isGoogleLoading ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                      </svg>
+                    )}
+                    <span>Sincronizar com Google</span>
+                  </button>
+
                   <button
                     type="button"
                     onClick={() => {
                       playSynthSound("beep");
                       setShowRecoveryModal(true);
                     }}
-                    className="w-full py-2.5 px-3 rounded-xl border border-cyan-500/30 hover:border-cyan-400 bg-cyan-950/40 hover:bg-cyan-900/40 text-cyan-300 font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer"
+                    className="w-full py-2.5 px-3 rounded-xl border border-slate-800 hover:border-slate-700 bg-black/40 hover:bg-slate-850 text-slate-400 hover:text-slate-200 font-bold text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer"
                   >
                     <span>🔑</span> Restaurar / Importar Outra Conta
                   </button>
@@ -440,11 +478,59 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                   </div>
                 </div>
 
+                {/* BOTÃO EM DESTAQUE: LOGIN / CADASTRO COM GOOGLE */}
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={handleGoogleLogin}
+                    disabled={isGoogleLoading}
+                    className="w-full py-3.5 px-4 rounded-xl font-black text-xs uppercase tracking-wider text-slate-950 bg-gradient-to-r from-cyan-400 via-sky-300 to-cyan-400 hover:from-cyan-300 hover:to-cyan-200 hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 font-mono shadow-[0_4px_20px_rgba(34,211,238,0.35)] border-2 border-cyan-200"
+                  >
+                    {isGoogleLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin text-black" />
+                        <span>Conectando com Google...</span>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24">
+                          <path
+                            fill="#4285F4"
+                            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                          />
+                          <path
+                            fill="#34A853"
+                            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                          />
+                          <path
+                            fill="#FBBC05"
+                            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                          />
+                          <path
+                            fill="#EA4335"
+                            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                          />
+                        </svg>
+                        <span>Entrar com Google (1-Clique)</span>
+                      </>
+                    )}
+                  </button>
+                  <p className="text-[9.5px] text-cyan-400/80 text-center mt-1.5 font-bold">
+                    ⚡ Cria e vincula sua carteira Stellar automaticamente!
+                  </p>
+                </div>
+
+                <div className="relative flex py-1 items-center">
+                  <div className="flex-grow border-t border-slate-800"></div>
+                  <span className="flex-shrink mx-2 text-[10px] text-slate-500 font-bold uppercase">ou jogue anônimo</span>
+                  <div className="flex-grow border-t border-slate-800"></div>
+                </div>
+
                 <button
                   type="submit"
-                  className="w-full py-3.5 px-4 rounded-xl font-black text-xs uppercase tracking-wider text-black bg-amber-400 hover:bg-amber-300 hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 font-mono shadow-[0_4px_12px_rgba(245,158,11,0.2)]"
+                  className="w-full py-3 px-4 rounded-xl font-black text-xs uppercase tracking-wider text-black bg-amber-400 hover:bg-amber-300 hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer flex items-center justify-center gap-2 font-mono shadow-[0_4px_12px_rgba(245,158,11,0.2)]"
                 >
-                  {t('ui.login.playNow')} <ChevronRight className="h-4 w-4" />
+                  {t('ui.login.playNow')} (Convidado) <ChevronRight className="h-4 w-4" />
                 </button>
 
                 {/* BOTÃO DE RECUPERAÇÃO DE CONTA PARA NOVOS DISPOSITIVOS / USUÁRIOS */}
@@ -457,7 +543,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                     }}
                     className="w-full py-2.5 px-3 rounded-xl border border-cyan-500/30 hover:border-cyan-400 bg-cyan-950/40 hover:bg-cyan-900/40 text-cyan-300 font-bold text-[10.5px] uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer"
                   >
-                    <span>🔑</span> Já possui conta? Restaurar Personagem (SEP-10 / E-mail)
+                    <span>🔑</span> Já possui conta? Recuperar Herói (Google / SEP-10)
                   </button>
                 </div>
               </form>
