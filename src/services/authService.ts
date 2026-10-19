@@ -58,7 +58,15 @@ class AuthService {
       };
     }
 
-    const redirectTo = typeof window !== "undefined" && window.location ? window.location.origin : "http://localhost:3000";
+    // Prioriza o domínio de produção oficial limpo se estiver na Vercel
+    let redirectTo = "http://localhost:3000";
+    if (typeof window !== "undefined" && window.location) {
+      if (window.location.hostname.includes("vercel.app")) {
+        redirectTo = "https://gamefinowgame.vercel.app/";
+      } else {
+        redirectTo = window.location.origin;
+      }
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {

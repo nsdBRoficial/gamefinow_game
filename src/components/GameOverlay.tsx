@@ -320,66 +320,152 @@ const WalletForgeModal: React.FC<WalletForgeProps> = ({ onClose, onWalletCreated
   if (wallet.hasWallet && wallet.publicKey) {
     const last8 = wallet.publicKey.slice(-8);
     const first6 = wallet.publicKey.slice(0, 6);
+    const quests = useGameStore.getState().quests;
+    const isWalletQuestActive = quests.wallet?.status === "active";
+    const isWalletQuestCompleted = quests.wallet?.status === "completed";
+
+    const handleClaimWalletQuest = () => {
+      useGameStore.getState().completeQuest("wallet");
+      // Forçar atualização reativa
+      onClose();
+    };
 
     return (
-      <div className="space-y-5">
+      <div className="space-y-4 max-h-[80vh] overflow-y-auto pr-1">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center shrink-0">
             <Check className="w-5 h-5 text-cyan-400" />
           </div>
           <div>
-            <h2 className="text-lg font-black text-white font-mono tracking-tight">{typeof t === 'function' ? t('overlay.wallet_detected', 'WALLET DETECTED') : 'WALLET DETECTED'}</h2>
-            <p className="text-xs text-cyan-400 font-mono">{typeof t === 'function' ? t('overlay.east_terminal', 'Wallet Forge - East Biome Terminal') : 'Wallet Forge - East Biome Terminal'}</p>
+            <h2 className="text-lg font-black text-white font-mono tracking-tight">
+              {typeof t === 'function' ? t('overlay.wallet_detected', 'FORJA DA CARTEIRA STELLAR') : 'FORJA DA CARTEIRA STELLAR'}
+            </h2>
+            <p className="text-xs text-cyan-400 font-mono">
+              Terminal Bioma Leste • Identidade On-Chain Detectada
+            </p>
           </div>
         </div>
 
-        <div className="bg-slate-800/70 border border-cyan-500/30 rounded-xl p-4 space-y-3">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-green-400 text-xs font-bold font-mono uppercase tracking-wider">{typeof t === 'function' ? t('overlay.active_account', 'Active Account on Stellar Testnet') : 'Active Account on Stellar Testnet'}</span>
+        {/* Status da Missão 1 */}
+        {isWalletQuestActive && (
+          <div className="bg-gradient-to-r from-amber-500/20 via-cyan-500/20 to-emerald-500/20 border-2 border-amber-400/80 rounded-xl p-3.5 flex flex-col gap-2 shadow-[0_0_15px_rgba(245,158,11,0.25)]">
+            <div className="flex items-center justify-between">
+              <span className="text-amber-300 text-xs font-black font-mono uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-amber-400 animate-spin" />
+                Missão 1: Registro no Templo
+              </span>
+              <span className="bg-amber-400 text-black text-[10px] font-black px-2 py-0.5 rounded font-mono">
+                PRONTA PARA CONCLUIR
+              </span>
+            </div>
+            <p className="text-xs text-slate-200 font-sans leading-relaxed">
+              Sua carteira Stellar já está ativa na blockchain! Valide seu registro com Kael para reivindicar <strong className="text-amber-300">+400 XP</strong> e liberar o <strong>Portal Norte (Porto On-Ramp)</strong>.
+            </p>
+            <button
+              onClick={handleClaimWalletQuest}
+              className="mt-1 w-full bg-gradient-to-r from-amber-500 hover:from-amber-400 to-yellow-500 text-slate-950 font-black py-2.5 px-4 rounded-xl font-mono text-xs uppercase tracking-wider shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 transition-all flex items-center justify-center gap-2 active:scale-95"
+            >
+              <Check className="w-4 h-4" />
+              Validar e Concluir Missão 1 (+400 XP)
+            </button>
+          </div>
+        )}
+
+        {/* Card de Informações da Conta Ativa */}
+        <div className="bg-slate-800/80 border border-cyan-500/30 rounded-xl p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse" />
+              <span className="text-green-400 text-xs font-bold font-mono uppercase tracking-wider">
+                Conta Conectada na Stellar Testnet
+              </span>
+            </div>
+            {isWalletQuestCompleted && (
+              <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-500/40 px-2 py-0.5 rounded">
+                ✓ Missão 1 Concluída
+              </span>
+            )}
           </div>
 
           <div className="space-y-1">
-            <p className="text-slate-400 text-[10px] font-mono uppercase tracking-wider">{typeof t === 'function' ? t('overlay.public_key', 'Public Key') : 'Public Key'}</p>
+            <p className="text-slate-400 text-[10px] font-mono uppercase tracking-wider">Chave Pública (Endereço Público G...)</p>
             <div className="flex items-center gap-2">
-              <code className="text-cyan-300 text-xs font-mono bg-slate-900/60 px-2 py-1 rounded-lg truncate flex-1">
-                {first6}...{last8}
+              <code className="text-cyan-300 text-xs font-mono bg-slate-900/80 px-2.5 py-1.5 rounded-lg truncate flex-1 border border-slate-700">
+                {wallet.publicKey}
               </code>
               <button
                 onClick={copyKey}
-                className="flex items-center gap-1 bg-cyan-600 hover:bg-cyan-500 text-white text-[10px] font-bold px-2 py-1 rounded-lg transition-all font-mono"
+                className="flex items-center gap-1 bg-cyan-600 hover:bg-cyan-500 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all font-mono shrink-0 shadow"
               >
-                {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                {copied ? t("wallet.copied") : t("wallet.copy")}
+                {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                {copied ? "Copiado!" : "Copiar"}
               </button>
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-2 pt-1">
-            <div className="bg-slate-900/60 rounded-lg p-2 text-center">
-              <p className="text-[9px] text-slate-500 font-mono uppercase">XLM</p>
+            <div className="bg-slate-900/80 border border-slate-700/60 rounded-lg p-2 text-center">
+              <p className="text-[9px] text-slate-400 font-mono uppercase">XLM (Lumens)</p>
               <p className="text-white font-black text-sm font-mono">{wallet.xlmBalance?.toFixed(2) ?? "0.00"}</p>
             </div>
-            <div className="bg-slate-900/60 rounded-lg p-2 text-center">
-              <p className="text-[9px] text-slate-500 font-mono uppercase">USDW</p>
+            <div className="bg-slate-900/80 border border-slate-700/60 rounded-lg p-2 text-center">
+              <p className="text-[9px] text-slate-400 font-mono uppercase">USDW (Dólar)</p>
               <p className="text-white font-black text-sm font-mono">{wallet.usdwBalance?.toFixed(2) ?? "0.00"}</p>
             </div>
-            <div className="bg-slate-900/60 rounded-lg p-2 text-center">
-              <p className="text-[9px] text-slate-500 font-mono uppercase">BRW</p>
+            <div className="bg-slate-900/80 border border-slate-700/60 rounded-lg p-2 text-center">
+              <p className="text-[9px] text-slate-400 font-mono uppercase">BRW (Real)</p>
               <p className="text-white font-black text-sm font-mono">{wallet.brwBalance?.toFixed(2) ?? "0.00"}</p>
             </div>
           </div>
         </div>
 
+        {/* 📚 SEÇÃO EDUCATIVA: O que é uma carteira Stellar, Como foi gerada e Como Recuperar */}
+        <div className="bg-slate-950/70 border border-cyan-500/20 rounded-xl p-4 space-y-3 text-xs font-sans text-slate-300">
+          <div className="flex items-center gap-2 text-cyan-400 font-bold font-mono uppercase tracking-wider text-[11px]">
+            <Info className="w-4 h-4" />
+            Guia Didático da Forja: Como sua Carteira Funciona
+          </div>
+
+          <div className="space-y-2.5 leading-relaxed text-[11px]">
+            <div className="p-2.5 bg-slate-900/60 rounded-lg border border-slate-800">
+              <p className="font-bold text-white mb-1 font-mono">🔑 1. O que é uma Carteira Stellar?</p>
+              <p className="text-slate-300">
+                Uma carteira na Stellar não armazena moedas fisicamente. Ela é um <strong>par de chaves criptográficas assimétricas (Ed25519)</strong>. A sua <strong>Chave Pública (G...)</strong> é sua conta pública no mundo e a sua <strong>Chave Secreta (S...)</strong> é a assinatura matemática inviolável que autoriza transações.
+              </p>
+            </div>
+
+            <div className="p-2.5 bg-slate-900/60 rounded-lg border border-slate-800">
+              <p className="font-bold text-white mb-1 font-mono">⚡ 2. Como sua carteira foi criada no GameFiNow?</p>
+              <p className="text-slate-300">
+                Ao entrar com sua conta Google com 1-clique (ou gerar manualmente na Forja), nós invocamos a biblioteca oficial <code>@stellar/stellar-sdk</code> para gerar um Keypair genuíno. Em seguida, a conta foi ativada na <strong>Testnet da Stellar</strong> através do Friendbot oficial e recebeu trustlines automáticas para tokens estáveis (USDW, BRW).
+              </p>
+            </div>
+
+            <div className="p-2.5 bg-slate-900/60 rounded-lg border border-slate-800">
+              <p className="font-bold text-white mb-1 font-mono">🛡️ 3. Como você pode recuperar sua carteira e herói?</p>
+              <p className="text-slate-300">
+                Se você fez login com o <strong>Google 1-Clique</strong>, seu endereço Stellar está associado ao seu perfil autenticado no Supabase. Basta conectar com a mesma conta Google em qualquer navegador para restaurar todo o seu progresso, itens e saldos! Para carteiras manuais, mantenha sua Chave Secreta (S...) ou PIN de contingência em local seguro.
+              </p>
+            </div>
+
+            <div className="p-2.5 bg-amber-500/10 rounded-lg border border-amber-500/30 text-amber-200">
+              <p className="font-bold text-amber-300 mb-0.5 font-mono">⚠️ Importância de estudar sobre Wallets na Stellar</p>
+              <p className="text-[10px] leading-normal text-amber-200/90">
+                Na Web3 e na Stellar, a custódia das chaves define a propriedade. Em mainnet (rede real), transações são irreversíveis. Nunca compartilhe sua Chave Secreta com ninguém e aprenda sobre contas multi-assinatura (multisig) e padrões SEP (como SEP-0010 e SEP-0024)!
+              </p>
+            </div>
+          </div>
+        </div>
+
         <p className="text-slate-400 text-[11px] font-mono text-center">
-          💎 {typeof t === 'function' ? t('overlay.go_north_text1', 'Go') : 'Go'} <span className="text-amber-400 font-bold">{typeof t === 'function' ? t('overlay.go_north_dir', 'North') : 'North'}</span> {typeof t === 'function' ? t('overlay.go_north_text2', 'to On-Ramp and acquire XLM.') : 'to On-Ramp and acquire XLM.'}
+          💎 Próximo passo: Vá para o <span className="text-emerald-400 font-bold">Norte (Porto de Câmbio)</span> para On-Ramp e adquirir mais XLM.
         </p>
 
         <button
           onClick={onClose}
           className="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-2.5 rounded-xl font-mono text-sm transition-all"
         >
-          {typeof t === 'function' ? t('overlay.close_terminal', 'Close Terminal') : 'Close Terminal'}
+          {typeof t === 'function' ? t('overlay.close_terminal', 'Fechar Terminal') : 'Fechar Terminal'}
         </button>
       </div>
     );

@@ -195,6 +195,12 @@ export default function App() {
           setIsLoggedIn(true);
           setAuthLoadingMessage(null);
           playSynthSound("success");
+
+          // Limpa hash residual feio (#access_token=... ou #) deixado pelo OAuth do Supabase/Google
+          if (typeof window !== "undefined" && window.history && window.history.replaceState) {
+            const cleanUrl = window.location.pathname && window.location.pathname !== "" ? window.location.pathname : "/";
+            window.history.replaceState(null, document.title, cleanUrl);
+          }
         } else {
           setAuthLoadingMessage(null);
         }
